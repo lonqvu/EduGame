@@ -6,6 +6,8 @@ const STAGE_HEIGHT = 720
 interface ProjectorStageProps {
   /** Background image of the stage, e.g. a projector SVG; omit when the screen draws its own. */
   background?: string
+  /** Backdrop class drawn by CSS instead of an image, e.g. `stage-paper`. */
+  backdrop?: string
   children: ReactNode
 }
 
@@ -17,7 +19,7 @@ function fitScale() {
  * Fixed 1280×720 canvas scaled to fit the window, so projector screens keep
  * the same layout on any classroom screen.
  */
-export function ProjectorStage({ background, children }: ProjectorStageProps) {
+export function ProjectorStage({ background, backdrop, children }: ProjectorStageProps) {
   const [scale, setScale] = useState(fitScale)
 
   useEffect(() => {
@@ -30,7 +32,7 @@ export function ProjectorStage({ background, children }: ProjectorStageProps) {
     <div className="flex h-dvh w-full items-center justify-center overflow-hidden bg-ink">
       <div style={{ width: STAGE_WIDTH * scale, height: STAGE_HEIGHT * scale }}>
         <div
-          className="relative origin-top-left overflow-hidden bg-cover bg-center text-ink"
+          className={`relative origin-top-left overflow-hidden bg-cover bg-center text-ink ${backdrop ?? ''}`}
           style={{
             width: STAGE_WIDTH,
             height: STAGE_HEIGHT,
@@ -39,6 +41,7 @@ export function ProjectorStage({ background, children }: ProjectorStageProps) {
           }}
         >
           {children}
+          <div className="stage-grain" aria-hidden />
         </div>
       </div>
     </div>
@@ -46,4 +49,3 @@ export function ProjectorStage({ background, children }: ProjectorStageProps) {
 }
 
 export const PROJECTOR_BOARD_BG = '/assets/backgrounds/projector-board.svg'
-export const PROJECTOR_RESULTS_BG = '/assets/backgrounds/projector-results.svg'

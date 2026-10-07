@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router'
+import { orbStyle } from '@/components/projector/materials'
 import { CheckIcon, ChevronLeftIcon, CloseIcon, EyeIcon } from '@/components/ui/icons'
 import { useGridBoardRound } from '@/game-engine/grid-board/useGridBoardRound'
 import { useGridBoardStore } from '@/store/gridBoardStore'
@@ -40,26 +41,26 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
       <div className="flex items-center justify-between">
         <Link
           to={boardPath}
-          className="flex h-12 items-center gap-2 rounded-full bg-white pr-5 pl-3.5 text-[17px] font-extrabold text-ink hover:text-primary-ink"
+          className="mat-btn flex h-12 items-center gap-2 rounded-full pr-5 pl-3.5 text-[17px] font-extrabold text-ink hover:text-primary-ink"
         >
           <ChevronLeftIcon size={20} strokeWidth={2.4} />
           Bảng ô
         </Link>
         <div className="flex items-center gap-3">
-          <span className="rounded-full bg-white px-[18px] py-2 text-lg font-extrabold">
+          <span className="mat-card rounded-full px-[18px] py-2 text-lg font-extrabold">
             Ô số {tileNo} · {question.points} điểm
           </span>
           <span
-            className="flex items-center gap-2.5 rounded-full border-[3px] bg-white py-1.5 pr-[18px] pl-2 text-lg font-extrabold"
+            className="mat-card flex items-center gap-2.5 rounded-full border-[3px] py-1.5 pr-[18px] pl-2 text-lg font-extrabold"
             style={{ borderColor: team.color }}
           >
-            <span className="size-7 rounded-full" style={{ background: team.color }} />
+            <span className="size-7 rounded-full" style={orbStyle(team.color)} />
             {team.name} trả lời
           </span>
         </div>
       </div>
 
-      <div className="flex flex-1 items-center gap-11 rounded-[36px] bg-white px-11 py-9">
+      <div className="mat-card flex flex-1 items-center gap-11 rounded-[36px] px-11 py-9">
         {question.imageUrl && (
           <img src={question.imageUrl} alt="" className="h-[300px] w-[360px] shrink-0 rounded-[28px] object-cover" />
         )}
@@ -98,7 +99,7 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
         <button
           type="button"
           onClick={() => setStealOffset((o) => (o + 1) % teams.length)}
-          className="h-14 cursor-pointer rounded-full border-0 bg-white px-[22px] font-[inherit] text-lg font-extrabold text-ink hover:text-primary-ink"
+          className="mat-btn h-14 cursor-pointer rounded-full border-0 px-[22px] font-[inherit] text-lg font-extrabold text-ink hover:text-primary-ink"
         >
           Đội khác giành quyền
         </button>
@@ -106,7 +107,7 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
           <button
             type="button"
             onClick={() => mark(false)}
-            className="box-border flex h-[76px] w-[220px] cursor-pointer items-center justify-center gap-2.5 rounded-3xl border-[3px] border-line-strong bg-white font-display text-[30px] font-extrabold text-ink hover:border-ink"
+            className="mat-btn flex h-[76px] w-[220px] cursor-pointer items-center justify-center gap-2.5 rounded-3xl border-0 font-display text-[30px] font-extrabold text-ink"
           >
             <CloseIcon size={30} />
             Sai
@@ -114,7 +115,7 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
           <button
             type="button"
             onClick={() => mark(true)}
-            className="flex h-[76px] w-[260px] cursor-pointer items-center justify-center gap-2.5 rounded-3xl border-0 bg-success font-display text-[30px] font-extrabold text-white hover:brightness-110"
+            className="mat-btn mat-btn-success flex h-[76px] w-[260px] cursor-pointer items-center justify-center gap-2.5 rounded-3xl border-0 font-display text-[30px] font-extrabold text-white"
           >
             <CheckIcon size={32} />
             Đúng

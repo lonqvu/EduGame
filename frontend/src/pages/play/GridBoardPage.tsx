@@ -1,5 +1,5 @@
 import { useParams } from 'react-router'
-import { PROJECTOR_BOARD_BG, PROJECTOR_RESULTS_BG, ProjectorStage } from '@/components/projector/ProjectorStage'
+import { ProjectorStage } from '@/components/projector/ProjectorStage'
 import { GridBoardScreen } from '@/game-engine/grid-board/GridBoardScreen'
 import { GridQuestionScreen } from '@/game-engine/grid-board/GridQuestionScreen'
 import { GridResultsScreen } from '@/game-engine/grid-board/GridResultsScreen'
@@ -19,7 +19,7 @@ export function GridBoardPage({ screen }: { screen: Screen }) {
   }
 
   return (
-    <ProjectorStage background={screen === 'results' ? PROJECTOR_RESULTS_BG : PROJECTOR_BOARD_BG}>
+    <ProjectorStage backdrop={screen === 'results' ? 'stage-spotlight' : 'stage-paper'}>
       {screen === 'board' && <GridBoardScreen gameId={gameId} />}
       {screen === 'question' && <GridQuestionScreen gameId={gameId} tileNo={Number(tileNo)} />}
       {screen === 'results' && <GridResultsScreen gameId={gameId} />}
