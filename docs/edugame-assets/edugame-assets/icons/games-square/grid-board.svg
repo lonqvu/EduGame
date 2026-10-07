@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+<rect width="128" height="128" rx="32" fill="#DCE7FF"/>
+<rect x="24" y="27" width="36" height="34" rx="9" fill="#AFC4F0"/><rect x="24" y="24" width="36" height="34" rx="9" fill="#FFFFFF"/>
+<text x="42" y="42" text-anchor="middle" dominant-baseline="middle" font-family="'Baloo 2', Nunito, 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="20" fill="#2449B8">1</text>
+<rect x="68" y="27" width="36" height="34" rx="9" fill="#E0A800"/><rect x="68" y="24" width="36" height="34" rx="9" fill="#FFD15C"/>
+<path transform="translate(76.4 31) scale(0.8)" d="M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 16.9 6.1 20l1.2-6.5L2.5 8.9l6.6-.9z" fill="#FFFFFF"/>
+<rect x="24" y="71" width="36" height="34" rx="9" fill="#F2A285"/><rect x="24" y="68" width="36" height="34" rx="9" fill="#FFC3A8"/>
+<circle cx="36" cy="83" r="2.6" fill="#1F2A44"/><circle cx="48" cy="83" r="2.6" fill="#1F2A44"/>
+<path d="M37 90 Q42 95 47 90" fill="none" stroke="#1F2A44" stroke-width="2.2" stroke-linecap="round"/>
+<rect x="68" y="71" width="36" height="34" rx="9" fill="#AFC4F0"/><rect x="68" y="68" width="36" height="34" rx="9" fill="#FFFFFF"/>
+<text x="86" y="86" text-anchor="middle" dominant-baseline="middle" font-family="'Baloo 2', Nunito, 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="20" fill="#2449B8">4</text>
+</svg>

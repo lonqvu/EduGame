@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" width="320" height="200">
+<defs>
+<pattern id="egChecker" width="16" height="16" patternUnits="userSpaceOnUse">
+<rect width="16" height="16" fill="#FFFFFF"></rect>
+<rect width="8" height="8" fill="#1F2A44"></rect>
+<rect x="8" y="8" width="8" height="8" fill="#1F2A44"></rect>
+</pattern>
+</defs>
+<rect width="320" height="200" fill="#D9F2F7"></rect>
+<circle cx="296" cy="22" r="46" fill="#C2E9F0"></circle>
+<circle cx="24" cy="190" r="50" fill="#C2E9F0"></circle>
+<rect x="20" y="36" width="280" height="38" rx="19" fill="#FFFFFF"></rect>
+<rect x="20" y="82" width="280" height="38" rx="19" fill="#FFFFFF"></rect>
+<rect x="20" y="128" width="280" height="38" rx="19" fill="#FFFFFF"></rect>
+<rect x="256" y="30" width="16" height="142" fill="url(#egChecker)"></rect>
+<path d="M150 47 H170 M144 55 H166 M150 63 H170" stroke="#8FCAD6" stroke-width="3" stroke-linecap="round"></path>
+<rect x="176" y="40" width="70" height="30" rx="15" fill="#FFD15C"></rect>
+<circle cx="230" cy="51" r="3" fill="#1F2A44"></circle>
+<circle cx="238" cy="51" r="3" fill="#1F2A44"></circle>
+<text x="205" y="56" text-anchor="middle" dominant-baseline="middle" font-weight="800" font-size="14" fill="#1F2A44" font-family="Nunito, \'Segoe UI\', Arial, sans-serif">An</text>
+<path d="M98 93 H118 M92 101 H114 M98 109 H118" stroke="#8FCAD6" stroke-width="3" stroke-linecap="round"></path>
+<rect x="124" y="86" width="70" height="30" rx="15" fill="#FF9C86"></rect>
+<circle cx="178" cy="97" r="3" fill="#1F2A44"></circle>
+<circle cx="186" cy="97" r="3" fill="#1F2A44"></circle>
+<text x="152" y="102" text-anchor="middle" dominant-baseline="middle" font-weight="800" font-size="14" fill="#1F2A44" font-family="Nunito, \'Segoe UI\', Arial, sans-serif">Bảo</text>
+<path d="M126 139 H146 M120 147 H142 M126 155 H146" stroke="#8FCAD6" stroke-width="3" stroke-linecap="round"></path>
+<rect x="152" y="132" width="70" height="30" rx="15" fill="#E3D5FF"></rect>
+<circle cx="206" cy="143" r="3" fill="#1F2A44"></circle>
+<circle cx="214" cy="143" r="3" fill="#1F2A44"></circle>
+<text x="180" y="148" text-anchor="middle" dominant-baseline="middle" font-weight="800" font-size="14" fill="#1F2A44" font-family="Nunito, \'Segoe UI\', Arial, sans-serif">Hà</text>
+</svg>

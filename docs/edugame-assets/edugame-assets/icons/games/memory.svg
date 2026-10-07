@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" width="320" height="200">
+<rect width="320" height="200" fill="#F0E8FF"></rect>
+<circle cx="296" cy="22" r="46" fill="#E3D5FF"></circle>
+<circle cx="24" cy="188" r="52" fill="#E3D5FF"></circle>
+<g transform="rotate(-10 84 102)">
+<rect x="46" y="50" width="76" height="104" rx="16" fill="#8B5CF6"></rect>
+<rect x="54" y="58" width="60" height="88" rx="10" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="4 5"></rect>
+<text x="84" y="104" text-anchor="middle" dominant-baseline="middle" font-family="'Baloo 2', Nunito, 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="40" fill="#FFFFFF">?</text>
+</g>
+<g transform="rotate(10 236 102)">
+<rect x="198" y="50" width="76" height="104" rx="16" fill="#8B5CF6"></rect>
+<rect x="206" y="58" width="60" height="88" rx="10" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="4 5"></rect>
+<text x="236" y="104" text-anchor="middle" dominant-baseline="middle" font-family="'Baloo 2', Nunito, 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="40" fill="#FFFFFF">?</text>
+</g>
+<rect x="120" y="36" width="80" height="112" rx="16" fill="#FFFFFF" stroke="#8B5CF6" stroke-width="3"></rect>
+<path d="M141 82 L145 60 L158 75Z" fill="#FFD15C"></path>
+<path d="M179 82 L175 60 L162 75Z" fill="#FFD15C"></path>
+<circle cx="160" cy="94" r="25" fill="#FFD15C"></circle>
+<circle cx="151" cy="91" r="3.5" fill="#1F2A44"></circle>
+<circle cx="169" cy="91" r="3.5" fill="#1F2A44"></circle>
+<path d="M156.5 98 L163.5 98 L160 102Z" fill="#FF8A7A"></path>
+<path d="M160 102 Q156 108 151 105 M160 102 Q164 108 169 105" fill="none" stroke="#1F2A44" stroke-width="2" stroke-linecap="round"></path>
+<path d="M132 96 L146 98 M132 103 L146 101 M188 96 L174 98 M188 103 L174 101" stroke="#1F2A44" stroke-width="1.6" stroke-linecap="round"></path>
+<path d="M300 150 L303 159 L312 162 L303 165 L300 174 L297 165 L288 162 L297 159Z" fill="#FFD15C"></path>
+</svg>

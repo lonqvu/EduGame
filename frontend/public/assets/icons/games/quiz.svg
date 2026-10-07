@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" width="320" height="200">
+<rect width="320" height="200" fill="#FFF1C7"></rect>
+<circle cx="296" cy="24" r="48" fill="#FFE59A"></circle>
+<circle cx="20" cy="190" r="50" fill="#FFE59A"></circle>
+<rect x="36" y="30" width="122" height="112" rx="28" fill="#FFFFFF"></rect>
+<path d="M66 138 L58 166 L96 138Z" fill="#FFFFFF"></path>
+<text x="97" y="90" text-anchor="middle" dominant-baseline="middle" font-family="'Baloo 2', Nunito, 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="84" fill="#E89B00">?</text>
+<rect x="176" y="36" width="114" height="36" rx="18" fill="#FFFFFF"></rect>
+<circle cx="196" cy="54" r="12" fill="#BFD3FF"></circle>
+<text x="196" y="55" text-anchor="middle" dominant-baseline="middle" font-weight="800" font-size="14" fill="#1F2A44" font-family="Nunito, \'Segoe UI\', Arial, sans-serif">A</text>
+<rect x="216" y="50" width="56" height="8" rx="4" fill="#E6E9F0"></rect>
+<rect x="176" y="82" width="114" height="36" rx="18" fill="#DDF4E7" stroke="#1B7A50" stroke-width="3"></rect>
+<circle cx="196" cy="100" r="12" fill="#1B7A50"></circle>
+<path d="M190 100.5 L194.5 105 L202 96.5" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+<rect x="216" y="96" width="56" height="8" rx="4" fill="#A9D9BF"></rect>
+<rect x="176" y="128" width="114" height="36" rx="18" fill="#FFFFFF"></rect>
+<circle cx="196" cy="146" r="12" fill="#FFC3A8"></circle>
+<text x="196" y="147" text-anchor="middle" dominant-baseline="middle" font-weight="800" font-size="14" fill="#1F2A44" font-family="Nunito, \'Segoe UI\', Arial, sans-serif">C</text>
+<rect x="216" y="142" width="56" height="8" rx="4" fill="#E6E9F0"></rect>
+<path d="M30 22 L33 31 L42 34 L33 37 L30 46 L27 37 L18 34 L27 31Z" fill="#FFFFFF"></path>
+</svg>

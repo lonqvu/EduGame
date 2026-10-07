@@ -1,0 +1,57 @@
+/*
+ * Layer order: Tailwind preflight (base) < Ant Design < Tailwind utilities.
+ * Antd styles are emitted into the `antd` layer by <StyleProvider layer> in main.tsx,
+ * so Tailwind utilities can override antd without !important, and preflight
+ * cannot break antd components.
+ */
+@layer theme, base, antd, components, utilities;
+
+@import 'tailwindcss';
+
+/* Design tokens — keep in sync with theme/antdTheme.ts and docs/edugame-assets/README.md */
+@theme {
+  --font-sans: 'Nunito', 'Segoe UI', sans-serif;
+  --font-display: 'Baloo 2', 'Segoe UI', sans-serif;
+
+  --color-ink: #1f2a44;
+  --color-ink-soft: #4a5470;
+  --color-ink-muted: #5a6788;
+  --color-page: #f3f7fc;
+  --color-surface-soft: #f6f8fc;
+  --color-chip: #f1f4fa;
+  --color-line: #d5deee;
+  --color-line-strong: #c9d4e8;
+  --color-line-soft: #eef2f8;
+
+  --color-primary: #3563e9;
+  --color-primary-ink: #2449b8;
+  --color-primary-soft: #e3ecff;
+  --color-sun: #ffd15c;
+  --color-sun-soft: #fff1c7;
+  --color-sun-pale: #fff6da;
+  --color-sun-ink: #6b4e00;
+  --color-success: #1b7a50;
+  --color-danger: #a3361a;
+
+  --color-projector: #eaf2ff;
+  --color-tile-done: #d6e2f5;
+  --color-tile-shadow: #c3d3ee;
+
+  --color-team-orange: #f28c28;
+  --color-team-blue: #3563e9;
+  --color-team-green: #2e9e6a;
+  --color-team-purple: #8b5cf6;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 18px;
+}

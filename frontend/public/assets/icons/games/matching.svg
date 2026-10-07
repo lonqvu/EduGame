@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" width="320" height="200">
+<rect width="320" height="200" fill="#DDF4E7"></rect>
+<circle cx="26" cy="24" r="46" fill="#C6EBD6"></circle>
+<circle cx="300" cy="186" r="54" fill="#C6EBD6"></circle>
+<path d="M128 60 C162 60 158 140 192 140" fill="none" stroke="#1B7A50" stroke-width="4" stroke-linecap="round"></path>
+<path d="M128 140 C162 140 158 60 192 60" fill="none" stroke="#1B7A50" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 10"></path>
+<rect x="34" y="28" width="94" height="64" rx="18" fill="#FFFFFF"></rect>
+<path d="M81 42 Q84 36 90 36" fill="none" stroke="#7A4A1E" stroke-width="3" stroke-linecap="round"></path>
+<path d="M84 40 Q94 32 100 40 Q92 46 84 40Z" fill="#2E9E6A"></path>
+<circle cx="81" cy="63" r="20" fill="#FF8A7A"></circle>
+<circle cx="74" cy="61" r="3" fill="#1F2A44"></circle>
+<circle cx="88" cy="61" r="3" fill="#1F2A44"></circle>
+<path d="M76 69 Q81 74 86 69" fill="none" stroke="#1F2A44" stroke-width="2.5" stroke-linecap="round"></path>
+<rect x="34" y="108" width="94" height="64" rx="18" fill="#FFFFFF"></rect>
+<path transform="translate(63 122) scale(1.5)" d="M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 16.9 6.1 20l1.2-6.5L2.5 8.9l6.6-.9z" fill="#FFD15C"></path>
+<rect x="192" y="28" width="94" height="64" rx="18" fill="#FFFFFF"></rect>
+<text x="239" y="61" text-anchor="middle" dominant-baseline="middle" font-weight="800" font-size="17" fill="#1F2A44" font-family="Nunito, \'Segoe UI\', Arial, sans-serif">Ngôi sao</text>
+<rect x="192" y="108" width="94" height="64" rx="18" fill="#FFFFFF"></rect>
+<text x="239" y="141" text-anchor="middle" dominant-baseline="middle" font-weight="800" font-size="17" fill="#1F2A44" font-family="Nunito, \'Segoe UI\', Arial, sans-serif">Quả táo</text>
+<circle cx="128" cy="60" r="6" fill="#1B7A50"></circle>
+<circle cx="192" cy="140" r="6" fill="#1B7A50"></circle>
+<circle cx="128" cy="140" r="6" fill="#1B7A50"></circle>
+</svg>

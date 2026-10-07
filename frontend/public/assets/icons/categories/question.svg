@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<rect width="64" height="64" rx="18" fill="#E3ECFF"/>
+<rect x="14" y="14" width="36" height="30" rx="10" fill="#FFFFFF"/><path d="M22 42 L19 52 L32 42Z" fill="#FFFFFF"/>
+<text x="32" y="30" text-anchor="middle" dominant-baseline="middle" font-family="'Baloo 2', Nunito, 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="24" fill="#2449B8">?</text>
+</svg>

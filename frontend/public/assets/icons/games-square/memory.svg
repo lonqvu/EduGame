@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+<rect width="128" height="128" rx="32" fill="#F0E8FF"/>
+<g transform="rotate(-12 44 66)"><rect x="22" y="36" width="44" height="60" rx="11" fill="#8B5CF6"/>
+<text x="44" y="68" text-anchor="middle" dominant-baseline="middle" font-family="'Baloo 2', Nunito, 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="28" fill="#FFFFFF">?</text></g>
+<rect x="56" y="30" width="50" height="68" rx="12" fill="#FFFFFF" stroke="#8B5CF6" stroke-width="3"/>
+<path d="M70 60 L72 46 L80 56Z" fill="#FFD15C"/><path d="M92 60 L90 46 L82 56Z" fill="#FFD15C"/>
+<circle cx="81" cy="67" r="15" fill="#FFD15C"/>
+<circle cx="76" cy="65" r="2.3" fill="#1F2A44"/><circle cx="86" cy="65" r="2.3" fill="#1F2A44"/>
+<path d="M79 70 L83 70 L81 72.5Z" fill="#FF8A7A"/>
+</svg>

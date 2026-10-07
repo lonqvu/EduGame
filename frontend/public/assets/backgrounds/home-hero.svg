@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" width="1440" height="320">
+<rect width="1440" height="320" fill="#EAF2FF"/>
+<circle cx="1260" cy="60" r="180" fill="#DCE7FF"/>
+<circle cx="1400" cy="290" r="120" fill="#FFF1C7"/>
+<circle cx="1080" cy="300" r="70" fill="#DDF4E7"/>
+<circle cx="60" cy="300" r="90" fill="#F0E8FF"/>
+<rect x="1150" y="110" width="70" height="70" rx="18" fill="#FFFFFF" transform="rotate(-10 1185 145)"/>
+<rect x="1240" y="150" width="70" height="70" rx="18" fill="#FFD15C" transform="rotate(8 1275 185)"/>
+<path transform="translate(1255 164) scale(1.7)" d="M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 16.9 6.1 20l1.2-6.5L2.5 8.9l6.6-.9z" fill="#FFFFFF"/>
+<circle cx="1176" cy="140" r="4" fill="#1F2A44"/><circle cx="1196" cy="137" r="4" fill="#1F2A44"/>
+<path d="M1178 154 Q1188 162 1198 152" fill="none" stroke="#1F2A44" stroke-width="3" stroke-linecap="round"/>
+<path d="M1350 76 L1354.2 85.8 L1364 90 L1354.2 94.2 L1350 104 L1345.8 94.2 L1336 90 L1345.8 85.8Z" fill="#FFD15C"/><path d="M1110 60 L1113.0 67.0 L1120 70 L1113.0 73.0 L1110 80 L1107.0 73.0 L1100 70 L1107.0 67.0Z" fill="#FFFFFF"/><path d="M980 231 L982.7 237.3 L989 240 L982.7 242.7 L980 249 L977.3 242.7 L971 240 L977.3 237.3Z" fill="#FFD15C"/><path d="M140 50 L143.0 57.0 L150 60 L143.0 63.0 L140 70 L137.0 63.0 L130 60 L137.0 57.0Z" fill="#FFFFFF"/>
+</svg>
