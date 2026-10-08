@@ -1,4 +1,5 @@
 import { Navigate, useParams } from 'react-router'
+import { ClassListGate } from '@/components/projector/ClassListGate'
 import { ProjectorStage } from '@/components/projector/ProjectorStage'
 import { isPickMode } from '@/game-engine/name-picker/modes'
 import { PickerScreen } from '@/game-engine/name-picker/PickerScreen'
@@ -10,7 +11,9 @@ export function NamePickerPage() {
 
   return (
     <ProjectorStage>
-      <PickerScreen key={mode} mode={mode} />
+      <ClassListGate>
+        <PickerScreen key={mode} mode={mode} />
+      </ClassListGate>
     </ProjectorStage>
   )
 }

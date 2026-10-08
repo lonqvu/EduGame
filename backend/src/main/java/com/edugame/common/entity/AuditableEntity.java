@@ -21,4 +21,9 @@ public abstract class AuditableEntity extends CreatedEntity {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    /** Marks the row as changed when only its children changed (e.g. a game whose items were edited). */
+    public void touch() {
+        updatedAt = Instant.now();
+    }
 }

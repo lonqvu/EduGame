@@ -57,9 +57,13 @@ export function SpinWheelScreen() {
 
   const giveStar = () => {
     if (!picked) return
-    awardStars(picked.id, 1)
+    const { name } = picked
     setStarred(true)
-    message.success(`Đã thưởng 1 sao cho ${picked.name}`)
+    message.success(`Đã thưởng 1 sao cho ${name}`)
+    awardStars(picked.id, 1).catch(() => {
+      setStarred(false)
+      message.error(`Chưa lưu được sao cho ${name}, cô thử lại nhé.`)
+    })
   }
 
   const resetCalls = () => {

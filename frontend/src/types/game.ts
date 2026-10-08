@@ -13,12 +13,14 @@ export interface GameTemplate {
 }
 
 export interface GameSummary {
+  /** `game.code` on the backend, e.g. "g-addition". */
   id: string
   type: GameType
   title: string
-  className: string
-  /** e.g. "24 câu", "8 cặp", "28 bạn" */
-  sizeLabel: string
+  /** Grade the game is for (1-5), shown as "Lớp 3". */
+  grade?: number
+  /** Items of the version being edited (questions, card sets...). */
+  itemCount: number
 }
 
 export interface Question {

@@ -1,0 +1,12 @@
+# Local development profile: run with SPRING_PROFILES_ACTIVE=dev
+# (or ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev).
+
+spring:
+  flyway:
+    # Adds the demo data (R__dev_seed.sql) on top of the real migrations.
+    locations: classpath:db/migration,classpath:db/dev-seed
+
+app:
+  auth:
+    # No login yet: every request acts as the seeded teacher "Cô Lan".
+    default-user-code: u-lan

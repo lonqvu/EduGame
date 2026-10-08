@@ -6,6 +6,8 @@ chỉnh sửa câu hỏi / đáp án / giao diện / cài đặt, sau đó publi
 - Tổng quan sản phẩm: [docs/PROJECT.md](docs/PROJECT.md)
 - Kiến trúc: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Quy ước code: [docs/CODING_CONVENTION.md](docs/CODING_CONVENTION.md)
+- Database: [docs/DATABASE.md](docs/DATABASE.md)
+- Danh sách API: [docs/API.md](docs/API.md)
 
 ## Tech stack
 
@@ -59,10 +61,18 @@ docker compose ps           # STATUS phải là (healthy)
 
 ```bash
 cd backend
-./mvnw spring-boot:run      # Windows: mvnw.cmd spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-Flyway tự chạy migration khi khởi động. Sau khi chạy:
+PowerShell tách tham số `-D...` tại dấu chấm, nên phải đặt trong dấu nháy:
+
+```powershell
+.\mvnw spring-boot:run "-Dspring-boot.run.profiles=dev"
+```
+
+Flyway tự chạy migration khi khởi động. Profile `dev` nạp thêm dữ liệu demo (`db/dev-seed/R__dev_seed.sql`:
+giáo viên Cô Lan, lớp 3A với 28 học sinh, 3 game) và cho mọi request đóng vai Cô Lan, vì chưa có đăng nhập.
+Thiếu profile `dev` thì các API của giáo viên trả `401`. Sau khi chạy:
 
 - API base: <http://localhost:8080/api>
 - Swagger UI: <http://localhost:8080/swagger-ui.html>

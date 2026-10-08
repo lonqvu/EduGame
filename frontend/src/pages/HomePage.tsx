@@ -1,27 +1,54 @@
-import { App } from 'antd'
+import { App, Spin } from 'antd'
 import { motion } from 'motion/react'
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Avatar } from '@/components/ui/Avatar'
 import { GameLogo } from '@/components/ui/GameLogo'
 import { FilledStarIcon, PlayIcon, PlusIcon, StarIcon, UsersIcon } from '@/components/ui/icons'
-import { playPath } from '@/game-engine/registry'
-import { DEMO_TEACHER, GAME_TEMPLATES } from '@/mocks/demoData'
+import { gameRegistry, playPath } from '@/game-engine/registry'
+import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
+import { useTeacherStore } from '@/store/teacherStore'
+import type { GameSummary } from '@/types/game'
+import { gradeLabel, itemCountLabel } from '@/utils/gameMapping'
 
 const RECENT_LIMIT = 3
 const TOP_STARS = 5
 
 export function HomePage() {
   const { message } = App.useApp()
+  const teacher = useTeacherStore((s) => s.teacher)
+  const loadTeacher = useTeacherStore((s) => s.load)
+  const templates = useCatalogStore((s) => s.templates)
+  const loadTemplates = useCatalogStore((s) => s.load)
   const games = useGameLibraryStore((s) => s.games)
+  const gamesStatus = useGameLibraryStore((s) => s.gamesStatus)
+  const loadGames = useGameLibraryStore((s) => s.loadGames)
   const className = useClassStore((s) => s.className)
   const students = useClassStore((s) => s.students)
+  const loadClass = useClassStore((s) => s.load)
+
+  useEffect(() => {
+    void loadTeacher()
+    void loadTemplates()
+    void loadGames()
+    void loadClass()
+  }, [loadTeacher, loadTemplates, loadGames, loadClass])
 
   const recent = games.slice(0, RECENT_LIMIT)
   const topStars = [...students].sort((a, b) => b.stars - a.stars).slice(0, TOP_STARS)
   const startTarget = recent[0] ? playPath(recent[0]) : '/games/new'
+
+  /** "Lật ô thi đua · Lớp 3 · 24 câu"; tools that use the class list show its size instead. */
+  const describe = (game: GameSummary) =>
+    [
+      templates.find((t) => t.type === game.type)?.name,
+      gradeLabel(game.grade),
+      gameRegistry[game.type].usesQuestions ? itemCountLabel(game) : `${students.length} bạn`,
+    ]
+      .filter(Boolean)
+      .join(' · ')
 
   return (
     <motion.div
@@ -37,15 +64,17 @@ export function HomePage() {
           </span>
           <span className="font-display text-[28px] font-extrabold">EduGame</span>
         </Link>
-        <div className="flex items-center gap-3 rounded-full bg-white py-1.5 pr-[18px] pl-1.5">
-          <Avatar name={DEMO_TEACHER.name.replace('Cô ', '')} tint="#FFC3A8" />
-          <span className="font-bold">{DEMO_TEACHER.name}</span>
-        </div>
+        {teacher && (
+          <div className="flex items-center gap-3 rounded-full bg-white py-1.5 pr-[18px] pl-1.5">
+            <Avatar name={teacher.shortName} tint="#FFC3A8" />
+            <span className="font-bold">{teacher.name}</span>
+          </div>
+        )}
       </header>
 
       <section className="flex flex-col gap-1.5">
         <h1 className="m-0 font-display text-[44px] leading-[1.1] font-extrabold">
-          Chào {DEMO_TEACHER.greetingName}!
+          Chào {teacher?.greetingName ?? 'cô'}!
         </h1>
         <p className="m-0 text-[22px] text-ink-soft">Hôm nay lớp mình chơi gì nhỉ?</p>
       </section>
@@ -77,6 +106,31 @@ export function HomePage() {
       <section className="flex flex-wrap items-start gap-6">
         <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-4 rounded-[28px] bg-white p-7">
           <h2 className="m-0 font-display text-[26px] font-extrabold">Trò chơi gần đây</h2>
+          {gamesStatus === 'loading' && (
+            <div className="flex justify-center py-6">
+              <Spin />
+            </div>
+          )}
+          {gamesStatus === 'error' && (
+            <p className="m-0 text-lg text-ink-soft">
+              Chưa tải được danh sách trò chơi.{' '}
+              <button
+                type="button"
+                onClick={() => void loadGames()}
+                className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] font-extrabold text-primary-ink underline"
+              >
+                Thử lại
+              </button>
+            </p>
+          )}
+          {gamesStatus === 'ready' && recent.length === 0 && (
+            <p className="m-0 text-lg text-ink-soft">
+              Cô chưa có trò chơi nào.{' '}
+              <Link to="/games/new" className="font-extrabold text-primary-ink underline">
+                Tạo trò chơi đầu tiên
+              </Link>
+            </p>
+          )}
           {recent.map((game) => (
             <div key={game.id} className="flex items-center gap-4 rounded-[20px] bg-surface-soft p-3.5">
               <div className="w-24 shrink-0">
@@ -84,9 +138,7 @@ export function HomePage() {
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="text-[19px] font-extrabold">{game.title}</span>
-                <span className="text-base text-ink-soft">
-                  {GAME_TEMPLATES.find((t) => t.type === game.type)?.name} · {game.className} · {game.sizeLabel}
-                </span>
+                <span className="text-base text-ink-soft">{describe(game)}</span>
               </div>
               <Link
                 to={playPath(game)}

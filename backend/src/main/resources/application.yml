@@ -31,6 +31,9 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: false
     validate-on-migrate: true
+    # The dev-only seed (R__dev_seed.sql) may be in the history of a local DB; do not fail
+    # when the app later starts without the "dev" profile.
+    ignore-migration-patterns: "repeatable:missing,*:future"
 
   jackson:
     default-property-inclusion: non_null
@@ -54,6 +57,12 @@ springdoc:
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  auth:
+    # Temporary until the auth module exists: code of the user every request acts as.
+    # Empty = no current user (all teacher endpoints answer 401).
+    default-user-code: ${APP_DEFAULT_USER_CODE:}
+  # Used for "this week" star totals.
+  time-zone: ${APP_TIME_ZONE:Asia/Ho_Chi_Minh}
 
 logging:
   level:

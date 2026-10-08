@@ -1,16 +1,25 @@
 import { App, Tooltip } from 'antd'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { BulbIcon, ChevronLeftIcon, ChevronRightIcon } from '@/components/ui/icons'
+import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { BulkPasteModal } from '@/editor/BulkPasteModal'
 import { QuestionForm } from '@/editor/QuestionForm'
 import { QuestionList } from '@/editor/QuestionList'
 import { gameRegistry } from '@/game-engine/registry'
-import { GAME_TEMPLATES } from '@/mocks/demoData'
-import { emptyQuestion, useGameLibraryStore } from '@/store/gameLibraryStore'
+import { useCatalogStore, useTemplateName } from '@/store/catalogStore'
+import { emptyQuestion, useGameLibraryStore, type SaveState } from '@/store/gameLibraryStore'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import type { Question } from '@/types/game'
+import { apiErrorMessage } from '@/utils/apiError'
 
 const EMPTY: never[] = []
+
+const SAVE_LABELS: Record<SaveState, string> = {
+  saved: 'Đã tự động lưu',
+  saving: 'Đang lưu…',
+  error: 'Chưa lưu được',
+}
 
 export function GameEditorPage() {
   const { gameId = '' } = useParams()
@@ -18,6 +27,9 @@ export function GameEditorPage() {
   const location = useLocation()
   const { modal, message } = App.useApp()
 
+  const loadState = useGameLibraryStore((s) => s.gameStatus[gameId])
+  const loadGame = useGameLibraryStore((s) => s.loadGame)
+  const saveState = useGameLibraryStore((s) => s.saveState)
   const game = useGameLibraryStore((s) => s.games.find((g) => g.id === gameId))
   const questions = useGameLibraryStore((s) => s.questions[gameId] ?? EMPTY)
   const renameGame = useGameLibraryStore((s) => s.renameGame)
@@ -25,11 +37,29 @@ export function GameEditorPage() {
   const updateQuestion = useGameLibraryStore((s) => s.updateQuestion)
   const removeQuestion = useGameLibraryStore((s) => s.removeQuestion)
   const reorderQuestions = useGameLibraryStore((s) => s.reorderQuestions)
+  const loadTemplates = useCatalogStore((s) => s.load)
+  const templateName = useTemplateName(game?.type)
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [pasteOpen, setPasteOpen] = useState(false)
 
-  if (!game) return <NotFoundPage />
+  useEffect(() => {
+    void loadGame(gameId, 'edit')
+    void loadTemplates()
+  }, [gameId, loadGame, loadTemplates])
+
+  // The store reloads the game right after a failed save, so the header label alone is easy to miss.
+  useEffect(() => {
+    if (saveState === 'error') message.error('Chưa lưu được thay đổi vừa rồi, đã tải lại bản trên máy chủ.')
+  }, [saveState, message])
+
+  // Edit only once the draft is open: before that, question ids may still change.
+  if (loadState === 'missing') return <NotFoundPage />
+  if (loadState === 'error') return <LoadError onRetry={() => void loadGame(gameId, 'edit')} />
+  if (loadState !== 'edit' || !game) return <PageLoading />
+  if (!gameRegistry[game.type].hasEditor) {
+    return <NotFoundPage message="Trình soạn câu hỏi cho trò này đang được hoàn thiện." />
+  }
 
   const selectedIndex = Math.max(
     0,
@@ -37,12 +67,19 @@ export function GameEditorPage() {
   )
   const selected = questions[selectedIndex]
   const playable = gameRegistry[game.type].playable
-  const templateName = GAME_TEMPLATES.find((t) => t.type === game.type)?.name
 
-  const addQuestion = () => {
-    const [created] = addQuestions(gameId, [emptyQuestion()])
-    setSelectedId(created.id)
+  const add = async (drafts: Omit<Question, 'id'>[]) => {
+    try {
+      const created = await addQuestions(gameId, drafts)
+      if (created[0]) setSelectedId(created[0].id)
+      return created
+    } catch (error) {
+      message.error(apiErrorMessage(error))
+      return []
+    }
   }
+
+  const addQuestion = () => void add([emptyQuestion()])
 
   const goNext = () => {
     const next = questions[selectedIndex + 1]
@@ -88,7 +125,9 @@ export function GameEditorPage() {
               onChange={(e) => renameGame(gameId, e.target.value)}
               className="w-full min-w-0 rounded-lg border-0 bg-transparent font-display text-[28px] leading-[1.15] font-extrabold text-ink outline-none focus:bg-white"
             />
-            <span className="text-base text-ink-soft">{templateName} · Đã tự động lưu</span>
+            <span className={`text-base ${saveState === 'error' ? 'text-danger' : 'text-ink-soft'}`}>
+              {[templateName, SAVE_LABELS[saveState]].filter(Boolean).join(' · ')}
+            </span>
           </div>
         </div>
         <Tooltip title={playable ? undefined : 'Màn chiếu cho trò này đang được hoàn thiện'}>
@@ -162,10 +201,9 @@ export function GameEditorPage() {
       <BulkPasteModal
         open={pasteOpen}
         onClose={() => setPasteOpen(false)}
-        onAdd={(drafts) => {
-          const created = addQuestions(gameId, drafts)
-          if (created[0]) setSelectedId(created[0].id)
-          message.success(`Đã thêm ${created.length} câu hỏi`)
+        onAdd={async (drafts) => {
+          const created = await add(drafts)
+          if (created.length) message.success(`Đã thêm ${created.length} câu hỏi`)
         }}
       />
     </div>

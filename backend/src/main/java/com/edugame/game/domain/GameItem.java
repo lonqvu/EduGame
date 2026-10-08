@@ -45,4 +45,22 @@ public class GameItem extends CreatedEntity {
 
     @Column(name = "explanation")
     private String explanation;
+
+    public static GameItem create(GameVersion version, String itemType, int position, JsonNode content,
+                                  JsonNode solution, String explanation) {
+        GameItem item = new GameItem();
+        item.gameVersion = version;
+        item.itemType = itemType;
+        item.position = position;
+        item.content = content;
+        item.solution = solution;
+        item.explanation = explanation;
+        return item;
+    }
+
+    /** Same item at the same position, in another version. */
+    public GameItem copyTo(GameVersion version) {
+        return create(version, itemType, position, content.deepCopy(),
+                solution == null ? null : solution.deepCopy(), explanation);
+    }
 }

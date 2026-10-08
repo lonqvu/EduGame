@@ -5,6 +5,8 @@ PostgreSQL 13+ · Flyway (`src/main/resources/db/migration`)
 | Migration | Nội dung |
 |---|---|
 | `V1__init_schema.sql` | Toàn bộ schema (14 bảng) + seed 3 nhóm game và 4 template: QUIZ, MATCHING, MEMORY, SPIN_WHEEL |
+| `V2__add_grid_board_and_name_race_templates.sql` | Thêm template GRID_BOARD (item `OPEN_QUESTION`: `{text, image, points}` / `{answer}`) và NAME_RACE |
+| `db/dev-seed/R__dev_seed.sql` | **Chỉ profile `dev`**: dữ liệu demo (Cô Lan, lớp 3A, 3 game). Idempotent, chạy lại khi file đổi |
 
 Các thay đổi sau này tạo migration mới `V2__...`, `V3__...`; **không sửa V1** khi đã chạy trên môi trường dùng chung.
 

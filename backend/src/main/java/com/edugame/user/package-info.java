@@ -1,8 +1,6 @@
 /**
  * Module: user.
  * <p>
- * User accounts and profiles (teachers, students, admins).
- * <p>
- * Not implemented yet. Follow the module layout described in docs/ARCHITECTURE.md.
+ * User accounts and profiles (teachers, admins) and the current user ({@code CurrentUserService}).
  */
 package com.edugame.user;

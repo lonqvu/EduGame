@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { DEMO_TEAMS } from '@/mocks/demoData'
+import { DEFAULT_TEAMS } from '@/game-engine/grid-board/teams'
 import type { Team } from '@/types/game'
 
 export interface TeamScore extends Team {
@@ -28,7 +28,7 @@ interface GridBoardState extends Snapshot {
 }
 
 const freshTeams = (): TeamScore[] =>
-  DEMO_TEAMS.map((t) => ({ ...t, score: 0, correct: 0, streak: 0, bestStreak: 0 }))
+  DEFAULT_TEAMS.map((t) => ({ ...t, score: 0, correct: 0, streak: 0, bestStreak: 0 }))
 
 export const useGridBoardStore = create<GridBoardState>()((set, get) => ({
   gameId: null,

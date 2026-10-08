@@ -42,4 +42,13 @@ public class StudentPoint extends CreatedEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    public static StudentPoint of(ClassroomStudent student, int points, String reason, User createdBy) {
+        StudentPoint point = new StudentPoint();
+        point.classroomStudent = student;
+        point.points = points;
+        point.reason = reason;
+        point.createdBy = createdBy;
+        return point;
+    }
 }

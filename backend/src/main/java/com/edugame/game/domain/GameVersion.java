@@ -48,4 +48,22 @@ public class GameVersion extends CreatedEntity {
 
     @Column(name = "published_at")
     private Instant publishedAt;
+
+    public static GameVersion draft(Game game, int version, int schemaVersion, JsonNode settings) {
+        GameVersion draft = new GameVersion();
+        draft.game = game;
+        draft.version = version;
+        draft.schemaVersion = schemaVersion;
+        draft.settings = settings;
+        return draft;
+    }
+
+    public boolean isDraft() {
+        return status == GameVersionStatus.DRAFT;
+    }
+
+    void publish(Instant at) {
+        status = GameVersionStatus.PUBLISHED;
+        publishedAt = at;
+    }
 }

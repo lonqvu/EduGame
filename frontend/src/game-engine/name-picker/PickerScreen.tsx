@@ -48,9 +48,13 @@ export function PickerScreen({ mode }: { mode: PickMode }) {
 
   const giveStar = () => {
     if (!round.winner || starred) return
-    awardStars(round.winner.id, 1)
+    const { name } = round.winner
     setStarred(true)
-    message.success(`Đã thưởng 1 sao cho ${round.winner.name}`)
+    message.success(`Đã thưởng 1 sao cho ${name}`)
+    awardStars(round.winner.id, 1).catch(() => {
+      setStarred(false)
+      message.error(`Chưa lưu được sao cho ${name}, cô thử lại nhé.`)
+    })
   }
 
   const goBack = () => (location.key === 'default' ? navigate('/') : navigate(-1))

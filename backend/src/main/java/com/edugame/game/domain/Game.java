@@ -1,5 +1,7 @@
 package com.edugame.game.domain;
 
+import java.time.Instant;
+
 import com.edugame.catalog.domain.GameTemplate;
 import com.edugame.common.entity.AuditableEntity;
 import com.edugame.user.domain.User;
@@ -66,4 +68,30 @@ public class Game extends AuditableEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_version_id")
     private GameVersion currentVersion;
+
+    public static Game create(String code, User owner, GameTemplate template, String title, Short grade) {
+        Game game = new Game();
+        game.code = code;
+        game.owner = owner;
+        game.template = template;
+        game.title = title;
+        game.grade = grade;
+        return game;
+    }
+
+    public boolean isOwnedBy(User user) {
+        return owner.getId().equals(user.getId());
+    }
+
+    /** Freezes {@code version} and makes it the one played from now on. */
+    public void publish(GameVersion version, Instant at) {
+        version.publish(at);
+        currentVersion = version;
+        status = GameStatus.PUBLISHED;
+    }
+
+    /** Soft delete: the game disappears from the library but its sessions keep their history. */
+    public void archive() {
+        status = GameStatus.ARCHIVED;
+    }
 }
