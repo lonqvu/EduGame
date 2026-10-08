@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
 import { useState } from 'react'
-import { Countdown, Twinkle } from '@/game-engine/name-picker/effects'
+import { BLEED, BLEED_W, BLEED_X, Countdown, SceneSvg, Twinkle } from '@/game-engine/name-picker/effects'
 import { EASE_IN, EASE_OUT, fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
 
@@ -193,14 +193,14 @@ function Parachute() {
 function SpaceBackground({ happy, names }: { happy: boolean; names: string[] }) {
   const center = { transformBox: 'fill-box' as const, originX: 0.5, originY: 0.5 }
   return (
-    <svg width="1280" height="720" viewBox="0 0 1280 720" className="absolute inset-0" aria-hidden="true">
+    <SceneSvg>
       <defs>
         <linearGradient id="rkSky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#1B2550" />
           <stop offset="1" stopColor="#3A4688" />
         </linearGradient>
       </defs>
-      <rect width="1280" height="720" fill="url(#rkSky)" />
+      <rect x={BLEED_X} width={BLEED_W} height="720" fill="url(#rkSky)" />
       {[0, 1, 2].map((g) => (
         <motion.g key={g} fill="#FFFFFF" animate={{ opacity: [1, 0.25] }} transition={{ duration: 1.1 + g * 0.4, delay: g * 0.7, ...LOOP }}>
           {STARS.filter((s) => s.group === g).map((s) => (
@@ -240,8 +240,8 @@ function SpaceBackground({ happy, names }: { happy: boolean; names: string[] }) 
           <ellipse rx="58" ry="14" fill="none" stroke="#FFD15C" strokeWidth="6" transform="rotate(-18)" />
         </g>
       </motion.g>
-      <path d="M0 600 Q 320 560 640 590 T 1280 580 V 720 H0Z" fill="#2B3566" />
-      <path d="M0 640 Q 320 610 640 636 T 1280 628 V 720 H0Z" fill="#232C57" />
+      <path d={`M${BLEED_X} 600 H0 Q 320 560 640 590 T 1280 580 H${1280 + BLEED} V 720 H${BLEED_X}Z`} fill="#2B3566" />
+      <path d={`M${BLEED_X} 640 H0 Q 320 610 640 636 T 1280 628 H${1280 + BLEED} V 720 H${BLEED_X}Z`} fill="#232C57" />
       {PADS.slice(0, names.length).map((x, i) => (
         <g key={x}>
           <rect x={x - 56} y="634" width="112" height="22" rx="8" fill="#8A94AD" />
@@ -253,6 +253,6 @@ function SpaceBackground({ happy, names }: { happy: boolean; names: string[] }) 
           </text>
         </g>
       ))}
-    </svg>
+    </SceneSvg>
   )
 }

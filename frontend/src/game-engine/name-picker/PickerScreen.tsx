@@ -81,7 +81,7 @@ export function PickerScreen({ mode }: { mode: PickMode }) {
   )
 
   return (
-    <div className="relative h-full overflow-hidden">
+    <div className="relative h-full">
       <div className="absolute inset-0">
         <Scene key={round.runId} slots={round.slots} winnerSlot={round.winnerSlot} phase={round.phase} onFinish={round.finish} />
       </div>

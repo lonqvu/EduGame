@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
 import { useState } from 'react'
-import { Cloud } from '@/game-engine/name-picker/effects'
+import { BLEED, BLEED_W, BLEED_X, Cloud, SceneSvg } from '@/game-engine/name-picker/effects'
 import { fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
 
@@ -21,6 +21,8 @@ const ROD_TIP_Y = 70
 const LINE_IDLE = 230
 const LINE_DEEP = 380
 const LINE_REELED = 100
+/** Plank seams of the dock, which runs from the left bleed out to x = 300. */
+const DOCK_PLANKS = Array.from({ length: (300 + BLEED) / 50 - 1 }, (_, i) => BLEED_X + 50 * (i + 1))
 
 type Step = 'cast' | 'approach' | 'bite' | 'reel'
 
@@ -228,11 +230,11 @@ function PondBackground({ happy }: { happy: boolean }) {
   const sway = { transformBox: 'fill-box' as const, originX: 0.5, originY: 1 }
   const trees = [60, 170, 1210]
   return (
-    <svg width="1280" height="720" viewBox="0 0 1280 720" className="absolute inset-0" aria-hidden="true">
-      <rect width="1280" height="720" fill="#D9F2F7" />
+    <SceneSvg>
+      <rect x={BLEED_X} width={BLEED_W} height="720" fill="#D9F2F7" />
       <Cloud x={380} y={70} scale={0.8} duration={22} />
       <Cloud x={760} y={40} scale={0.6} duration={26} drift={-40} />
-      <path d="M0 250 Q 160 200 330 240 T 700 230 T 1280 236 V 270 H0Z" fill="#9BD67A" />
+      <path d={`M${BLEED_X} 250 H0 Q 160 200 330 240 T 700 230 T 1280 236 H${1280 + BLEED} V 270 H${BLEED_X}Z`} fill="#9BD67A" />
       {trees.map((x, i) => (
         <motion.g key={x} style={sway} animate={{ rotate: [-2, 2] }} transition={{ duration: 3, delay: i * 0.4, ...LOOP }}>
           <rect x={x - 6} y="180" width="12" height="60" fill="#8A5A3B" />
@@ -241,7 +243,7 @@ function PondBackground({ happy }: { happy: boolean }) {
           <circle cx={x + 22} cy="188" r="22" fill="#5DAE49" />
         </motion.g>
       ))}
-      <rect x="0" y="262" width="1280" height="458" fill="#7FC8E8" />
+      <rect x={BLEED_X} y="262" width={BLEED_W} height="458" fill="#7FC8E8" />
       <motion.g fill="none" stroke="#B5E2F4" strokeWidth="4" strokeLinecap="round" animate={{ x: [-18, 18] }} transition={{ duration: 4, ...LOOP }}>
         {[320, 400, 480, 560, 640].flatMap((y, row) =>
           [0, 1, 2, 3, 4, 5, 6].map((col) => <path key={`${y}-${col}`} d={`M${(row % 2 ? 130 : 40) + col * 180} ${y} q15 -10 30 0 q15 10 30 0`} />),
@@ -263,9 +265,9 @@ function PondBackground({ happy }: { happy: boolean }) {
           />
         ))}
       </g>
-      <rect x="0" y="236" width="300" height="40" fill="#C98B5A" />
+      <rect x={BLEED_X} y="236" width={300 + BLEED} height="40" fill="#C98B5A" />
       <g stroke="#A86F45" strokeWidth="3">
-        {[50, 100, 150, 200, 250].map((x) => <line key={x} x1={x} y1="236" x2={x} y2="276" />)}
+        {DOCK_PLANKS.map((x) => <line key={x} x1={x} y1="236" x2={x} y2="276" />)}
       </g>
       <rect x="40" y="270" width="16" height="90" fill="#A86F45" />
       <rect x="140" y="270" width="16" height="90" fill="#A86F45" />
@@ -309,6 +311,6 @@ function PondBackground({ happy }: { happy: boolean }) {
         <circle cx="-6" cy="-2" r="10" fill="#FF8FB1" />
         <circle cx="-6" cy="-2" r="4" fill="#FFD15C" />
       </g>
-    </svg>
+    </SceneSvg>
   )
 }

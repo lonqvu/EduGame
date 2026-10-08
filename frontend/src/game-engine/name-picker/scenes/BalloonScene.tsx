@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
 import { useState } from 'react'
-import { Cloud, Countdown, Crown, Twinkle } from '@/game-engine/name-picker/effects'
+import { BLEED, BLEED_W, BLEED_X, Cloud, Countdown, Crown, SceneSvg, Twinkle } from '@/game-engine/name-picker/effects'
 import { EASE_IN_OUT, fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
 
@@ -149,14 +149,14 @@ function Bird({ y, delay }: { y: number; delay: number }) {
 
 function BalloonBackground() {
   return (
-    <svg width="1280" height="720" viewBox="0 0 1280 720" className="absolute inset-0" aria-hidden="true">
+    <SceneSvg>
       <defs>
         <linearGradient id="blSky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#DDEBFF" />
           <stop offset="1" stopColor="#FFEFF4" />
         </linearGradient>
       </defs>
-      <rect width="1280" height="720" fill="url(#blSky)" />
+      <rect x={BLEED_X} width={BLEED_W} height="720" fill="url(#blSky)" />
       <Cloud x={80} y={150} scale={1} duration={20} />
       <Cloud x={1080} y={120} scale={1.1} duration={26} drift={-40} />
       <Cloud x={820} y={300} scale={0.7} duration={22} />
@@ -167,12 +167,12 @@ function BalloonBackground() {
       <Twinkle x={770} y={120} size={28} fill="#FFD15C" delay={0.6} />
       <Twinkle x={960} y={240} size={20} fill="#FFFFFF" delay={1.1} />
       <Twinkle x={330} y={262} size={24} fill="#FFFFFF" delay={0.3} />
-      <path d="M0 640 Q 320 590 640 630 T 1280 610 V 720 H0Z" fill="#B9E4A8" />
+      <path d={`M${BLEED_X} 640 H0 Q 320 590 640 630 T 1280 610 H${1280 + BLEED} V 720 H${BLEED_X}Z`} fill="#B9E4A8" />
       <g fill="#8A5A3B">
         {COLUMNS.map((x, i) => (
           <rect key={x} x={x - 5} y={PEG_Y[i]} width="10" height="26" rx="3" />
         ))}
       </g>
-    </svg>
+    </SceneSvg>
   )
 }

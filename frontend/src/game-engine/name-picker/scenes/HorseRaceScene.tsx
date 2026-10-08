@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
 import { useState } from 'react'
-import { Cloud, Countdown, Crown } from '@/game-engine/name-picker/effects'
+import { BLEED, BLEED_W, BLEED_X, Cloud, Countdown, Crown, SceneSvg } from '@/game-engine/name-picker/effects'
 import { fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
 
@@ -22,6 +22,9 @@ const LOSER_EASES: [number, number, number, number][] = [
 ]
 
 const BUNTING = ['#F28C28', '#3563E9', '#2E9E6A', '#8B5CF6', '#E5484D', '#FFD15C']
+/** Bunting flags are 58 wide, strung across the stage and its side bleed. */
+const BUNTING_X = -58 * Math.ceil(BLEED / 58)
+const BUNTING_FLAGS = Math.ceil((1280 + BLEED - BUNTING_X) / 58)
 
 export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickSceneProps) {
   const running = phase === 'run'
@@ -173,7 +176,7 @@ function Flower({ x, y, petal, spin }: { x: number; y: number; petal: string; sp
 function HorseBackground() {
   const wave = { transformBox: 'fill-box' as const, originX: 0.5, originY: 0 }
   return (
-    <svg width="1280" height="720" viewBox="0 0 1280 720" className="absolute inset-0" aria-hidden="true">
+    <SceneSvg>
       <defs>
         <pattern id="hrChk" width="24" height="24" patternUnits="userSpaceOnUse">
           <rect width="24" height="24" fill="#FFFFFF" />
@@ -181,7 +184,7 @@ function HorseBackground() {
           <rect x="12" y="12" width="12" height="12" fill="#1F2A44" />
         </pattern>
       </defs>
-      <rect width="1280" height="720" fill="#CFE8FF" />
+      <rect x={BLEED_X} width={BLEED_W} height="720" fill="#CFE8FF" />
       <motion.circle
         cx="1150" cy="120" r="64" fill="#FFD15C" opacity="0.25"
         style={{ transformBox: 'fill-box', originX: 0.5, originY: 0.5 }}
@@ -192,12 +195,12 @@ function HorseBackground() {
       <Cloud x={170} y={96} scale={1.1} duration={18} />
       <Cloud x={560} y={70} scale={0.8} duration={24} drift={-30} />
       <Cloud x={880} y={104} scale={0.9} duration={20} />
-      <path d="M0 170 Q 220 110 470 160 T 920 150 T 1280 140 V 720 H0Z" fill="#B9E4A8" />
-      <rect x="0" y="176" width="1280" height="410" fill="#E9CFA6" />
-      <rect x="0" y="170" width="1280" height="8" fill="#FFFFFF" />
-      <rect x="0" y="584" width="1280" height="8" fill="#FFFFFF" />
+      <path d={`M${BLEED_X} 170 H0 Q 220 110 470 160 T 920 150 T 1280 140 H${1280 + BLEED} V 720 H${BLEED_X}Z`} fill="#B9E4A8" />
+      <rect x={BLEED_X} y="176" width={BLEED_W} height="410" fill="#E9CFA6" />
+      <rect x={BLEED_X} y="170" width={BLEED_W} height="8" fill="#FFFFFF" />
+      <rect x={BLEED_X} y="584" width={BLEED_W} height="8" fill="#FFFFFF" />
       {[258, 340, 422, 504].map((y) => (
-        <line key={y} x1="0" y1={y} x2="1280" y2={y} stroke="#FFFFFF" strokeWidth="3" strokeDasharray="18 14" opacity="0.8" />
+        <line key={y} x1={BLEED_X} y1={y} x2={1280 + BLEED} y2={y} stroke="#FFFFFF" strokeWidth="3" strokeDasharray="18 14" opacity="0.8" />
       ))}
       <rect x="1118" y="176" width="24" height="410" fill="url(#hrChk)" />
       <rect x="1112" y="120" width="8" height="64" fill="#FFFFFF" />
@@ -208,11 +211,11 @@ function HorseBackground() {
           Đích
         </text>
       </motion.g>
-      <line x1="0" y1="144" x2="1280" y2="144" stroke="#FFFFFF" strokeWidth="3" />
-      {Array.from({ length: 22 }, (_, i) => (
+      <line x1={BLEED_X} y1="144" x2={1280 + BLEED} y2="144" stroke="#FFFFFF" strokeWidth="3" />
+      {Array.from({ length: BUNTING_FLAGS }, (_, i) => (
         <motion.path
           key={i}
-          d={`M${i * 58} 144 L${i * 58 + 58} 144 L${i * 58 + 29} 168Z`}
+          d={`M${BUNTING_X + i * 58} 144 l58 0 l-29 24Z`}
           fill={BUNTING[i % BUNTING.length]}
           style={wave}
           animate={{ rotate: [-8, 8] }}
@@ -226,6 +229,6 @@ function HorseBackground() {
       <Flower x={1030} y={650} petal="#FFFFFF" spin />
       <Flower x={1210} y={690} petal="#FF8FB1" />
       <Flower x={1150} y={620} petal="#FFD15C" spin />
-    </svg>
+    </SceneSvg>
   )
 }

@@ -15,7 +15,9 @@ function fitScale() {
 
 /**
  * Fixed 1280×720 canvas scaled to fit the window, so projector screens keep
- * the same layout on any classroom screen.
+ * the same layout on any classroom screen. The canvas does not clip: the
+ * background covers the whole window and scenes may paint past the canvas
+ * edges (see SceneSvg), so screens wider than 16:9 have no empty bars.
  */
 export function ProjectorStage({ background, children }: ProjectorStageProps) {
   const [scale, setScale] = useState(fitScale)
@@ -27,19 +29,19 @@ export function ProjectorStage({ background, children }: ProjectorStageProps) {
   }, [])
 
   return (
-    <div className="flex h-dvh w-full items-center justify-center overflow-hidden bg-ink">
-      <div style={{ width: STAGE_WIDTH * scale, height: STAGE_HEIGHT * scale }}>
-        <div
-          className="relative origin-top-left overflow-hidden bg-cover bg-center text-ink"
-          style={{
-            width: STAGE_WIDTH,
-            height: STAGE_HEIGHT,
-            transform: `scale(${scale})`,
-            backgroundImage: background ? `url(${background})` : undefined,
-          }}
-        >
-          {children}
-        </div>
+    <div
+      className="relative h-dvh w-full overflow-hidden bg-ink bg-cover bg-center"
+      style={{ backgroundImage: background ? `url(${background})` : undefined }}
+    >
+      <div
+        className="absolute top-1/2 left-1/2 text-ink"
+        style={{
+          width: STAGE_WIDTH,
+          height: STAGE_HEIGHT,
+          transform: `translate(-50%, -50%) scale(${scale})`,
+        }}
+      >
+        {children}
       </div>
     </div>
   )

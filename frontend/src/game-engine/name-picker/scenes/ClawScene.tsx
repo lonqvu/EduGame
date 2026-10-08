@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
 import { useState } from 'react'
-import { Twinkle } from '@/game-engine/name-picker/effects'
+import { BLEED_W, BLEED_X, SceneSvg, Twinkle } from '@/game-engine/name-picker/effects'
 import { EASE_IN_OUT, fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
 
@@ -192,7 +192,7 @@ function MachineBackground() {
   const blink = (delay: number) => ({ animate: { opacity: [1, 0.25] }, transition: { duration: 0.5, delay, repeat: Infinity, repeatType: 'reverse' as const, ease: 'linear' as const } })
   const lights = Array.from({ length: 11 }, (_, i) => 180 + i * 46)
   return (
-    <svg width="1280" height="720" viewBox="0 0 1280 720" className="absolute inset-0" aria-hidden="true">
+    <SceneSvg>
       <defs>
         <pattern id="clDots" width="48" height="48" patternUnits="userSpaceOnUse">
           <rect width="48" height="48" fill="#F3E9FF" />
@@ -200,8 +200,8 @@ function MachineBackground() {
           <circle cx="36" cy="36" r="4" fill="#E6D8FF" />
         </pattern>
       </defs>
-      <rect width="1280" height="720" fill="url(#clDots)" />
-      <rect y="610" width="1280" height="110" fill="#E3D5FF" />
+      <rect x={BLEED_X} width={BLEED_W} height="720" fill="url(#clDots)" />
+      <rect x={BLEED_X} y="610" width={BLEED_W} height="110" fill="#E3D5FF" />
       <rect x="140" y="96" width="540" height="560" rx="34" fill="#E9719A" />
       <rect x="150" y="86" width="520" height="100" rx="30" fill="#FF8FB1" />
       <text x="410" y="138" textAnchor="middle" dominantBaseline="middle" fontFamily="'Baloo 2', Nunito, sans-serif" fontWeight={800} fontSize="40" fill="#FFFFFF" stroke="#C2456F" strokeWidth="2" paintOrder="stroke">
@@ -225,6 +225,6 @@ function MachineBackground() {
       <Twinkle x={760} y={140} size={32} fill="#FFD15C" />
       <Twinkle x={110} y={300} size={24} fill="#FFFFFF" delay={0.7} />
       <Twinkle x={730} y={560} size={20} fill="#FFFFFF" delay={1.2} />
-    </svg>
+    </SceneSvg>
   )
 }
