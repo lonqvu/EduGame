@@ -39,7 +39,8 @@ const FOOTER_NAV: NavItem[] = [
 export function MainLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname } = useLocation()
-  const isHome = pathname === '/'
+  // Pages laid out edge to edge, as in their designs; the others keep a centered column.
+  const fullWidth = pathname === '/' || pathname === '/games/new'
 
   return (
     <div className="flex min-h-full bg-page text-ink">
@@ -60,8 +61,7 @@ export function MainLayout() {
           </button>
         </div>
 
-        {isHome ? (
-          // The home page lays itself out edge to edge, as in the design.
+        {fullWidth ? (
           <main className="min-w-0 flex-1 px-4 pt-3 pb-6 lg:pr-5 lg:pl-[17px]">
             <Outlet />
           </main>

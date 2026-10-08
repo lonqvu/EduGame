@@ -19,7 +19,7 @@ export function toGameTemplate(t: GameTemplateResponse): GameTemplate | null {
     category: t.categoryCode as GameCategory,
     name: t.name,
     description: t.description ?? '',
-    tags: gameRegistry[t.code].tags,
+    tags: [gameRegistry[t.code].players, gameRegistry[t.code].duration],
     isNew: t.isNew,
   }
 }

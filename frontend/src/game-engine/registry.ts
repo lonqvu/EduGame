@@ -1,5 +1,7 @@
 import type { GameType } from '@/types/game'
 
+export type GameBadge = 'POPULAR' | 'EASY' | 'NEW'
+
 interface GameDefinition {
   /** Has a projector player in game-engine. */
   playable: boolean
@@ -7,19 +9,25 @@ interface GameDefinition {
   usesQuestions: boolean
   /** The item editor can edit it (see editor/editorDefinitions.tsx). */
   hasEditor: boolean
-  /** Chips on the template card (not stored on the backend). */
-  tags: string[]
+  /** Who plays, e.g. "Theo đội" (not stored on the backend). */
+  players: string
+  /** Typical length of a round, e.g. "10–15 phút". */
+  duration: string
+  /** Ribbon on the game card. */
+  badge?: GameBadge
+  /** Order of "Phổ biến nhất": lower comes first. */
+  popularity: number
   /** Unit of `itemCount` in the library, e.g. "24 câu". */
   itemUnit: string
 }
 
 export const gameRegistry: Record<GameType, GameDefinition> = {
-  GRID_BOARD: { playable: true, usesQuestions: true, hasEditor: true, tags: ['Theo đội', '10–15 phút'], itemUnit: 'câu' },
-  QUIZ: { playable: true, usesQuestions: true, hasEditor: true, tags: ['Cá nhân hoặc đội'], itemUnit: 'câu' },
-  MATCHING: { playable: true, usesQuestions: true, hasEditor: true, tags: ['Lần lượt'], itemUnit: 'bộ' },
-  MEMORY: { playable: true, usesQuestions: true, hasEditor: true, tags: ['Theo đội'], itemUnit: 'bộ thẻ' },
-  SPIN_WHEEL: { playable: true, usesQuestions: false, hasEditor: false, tags: ['Dùng danh sách lớp'], itemUnit: 'ô' },
-  NAME_RACE: { playable: true, usesQuestions: false, hasEditor: false, tags: ['Dùng danh sách lớp'], itemUnit: 'ô' },
+  GRID_BOARD: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'POPULAR', popularity: 1, itemUnit: 'câu' },
+  QUIZ: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân hoặc đội', duration: '5–10 phút', badge: 'EASY', popularity: 2, itemUnit: 'câu' },
+  MATCHING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', badge: 'NEW', popularity: 3, itemUnit: 'bộ' },
+  MEMORY: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 4, itemUnit: 'bộ thẻ' },
+  SPIN_WHEEL: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '2–5 phút', popularity: 5, itemUnit: 'ô' },
+  NAME_RACE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '5–10 phút', popularity: 6, itemUnit: 'ô' },
 }
 
 /** Templates from the backend that this frontend has no engine for are hidden. */
