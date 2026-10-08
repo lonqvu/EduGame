@@ -36,6 +36,8 @@ interface GameLibraryState {
   /** Creates a game with one empty item; resolves with its id. */
   createGame: (type: GameType, grade?: number) => Promise<string>
   renameGame: (gameId: string, title: string) => void
+  /** Soft-deletes the game: it leaves the library. */
+  archiveGame: (gameId: string) => Promise<void>
   /** Resolves with the created items (they need server ids, so this waits for the backend). */
   addItems: (gameId: string, drafts: ItemDraft[]) => Promise<GameItem[]>
   updateItem: (gameId: string, itemId: string, patch: Partial<ItemDraft>) => void
@@ -201,6 +203,14 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
         // A blank title is rejected by the backend: keep the last saved one until the teacher types a name.
         if (latest) await gameApi.updateGame(gameId, { title: latest })
       })
+    },
+
+    archiveGame: async (gameId) => {
+      // Pending edits go first; a failed archive must not reload the game into the editor.
+      flush(gameId)
+      await queue
+      await gameApi.archiveGame(gameId)
+      set((s) => ({ games: s.games.filter((g) => g.id !== gameId) }))
     },
 
     addItems: async (gameId, drafts) => {

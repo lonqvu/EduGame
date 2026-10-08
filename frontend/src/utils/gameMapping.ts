@@ -26,13 +26,21 @@ export function toGameTemplate(t: GameTemplateResponse): GameTemplate | null {
 
 export function toGameSummary(g: GameSummaryResponse): GameSummary | null {
   if (!isGameType(g.templateCode)) return null
-  return { id: g.code, type: g.templateCode, title: g.title, grade: g.grade, itemCount: g.itemCount }
+  return { id: g.code, type: g.templateCode, title: g.title, grade: g.grade, itemCount: g.itemCount, subject: g.subject, updatedAt: g.updatedAt }
 }
 
 /** Summary of a game from its detail response (opened directly, e.g. /games/:id/edit). */
 export function detailToSummary(g: GameResponse): GameSummary | null {
   if (!isGameType(g.templateCode)) return null
-  return { id: g.code, type: g.templateCode, title: g.title, grade: g.grade, itemCount: g.items.length }
+  return {
+    id: g.code,
+    type: g.templateCode,
+    title: g.title,
+    grade: g.grade,
+    itemCount: g.items.length,
+    subject: g.subject,
+    updatedAt: g.updatedAt,
+  }
 }
 
 export function toQuestion(item: GameItemResponse): Question {
@@ -62,7 +70,7 @@ export function toCreateItemRequest(q: Omit<Question, 'id'>): CreateGameItemRequ
 
 /** `stars` is the weekly count: it drives "Ngôi sao tuần này". */
 export function toStudent(s: StudentResponse): Student {
-  return { id: String(s.id), name: s.displayName, stars: s.weeklyStars }
+  return { id: String(s.id), name: s.displayName, stars: s.weeklyStars, totalStars: s.totalStars }
 }
 
 /** "24 câu", "1 bộ thẻ"... */

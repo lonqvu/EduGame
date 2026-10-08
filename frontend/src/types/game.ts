@@ -21,6 +21,10 @@ export interface GameSummary {
   grade?: number
   /** Items of the version being edited (questions, card sets...). */
   itemCount: number
+  /** "Toán", "Tiếng Việt"... */
+  subject?: string
+  /** ISO time of the last edit. */
+  updatedAt?: string
 }
 
 export interface Question {
@@ -78,5 +82,7 @@ export interface Team {
 export interface Student {
   id: string
   name: string
+  /** Stars this week. */
   stars: number
+  totalStars: number
 }
