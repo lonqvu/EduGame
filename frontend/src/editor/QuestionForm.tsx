@@ -16,7 +16,7 @@ interface QuestionFormProps {
   onNext: () => void
 }
 
-const fieldClass =
+export const fieldClass =
   'w-full rounded-[18px] border-2 border-line bg-white font-[inherit] font-bold text-ink outline-none focus:border-primary'
 
 /** Edit form of one question. Mount with `key={question.id}` so it resets when switching questions. */
@@ -129,7 +129,7 @@ interface ImagePickerProps {
 /**
  * Local preview only: the image is kept as an object URL until the asset upload API exists.
  */
-function ImagePicker({ value, onChange }: ImagePickerProps) {
+export function ImagePicker({ value, onChange }: ImagePickerProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
 

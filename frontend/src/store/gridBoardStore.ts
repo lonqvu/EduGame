@@ -1,13 +1,7 @@
 import { create } from 'zustand'
-import { DEFAULT_TEAMS } from '@/game-engine/grid-board/teams'
-import type { Team } from '@/types/game'
+import { award, freshTeams, miss, type TeamScore } from '@/game-engine/shared/teamScore'
 
-export interface TeamScore extends Team {
-  score: number
-  correct: number
-  streak: number
-  bestStreak: number
-}
+export type { TeamScore }
 
 interface Snapshot {
   teams: TeamScore[]
@@ -27,9 +21,6 @@ interface GridBoardState extends Snapshot {
   undo: () => void
 }
 
-const freshTeams = (): TeamScore[] =>
-  DEFAULT_TEAMS.map((t) => ({ ...t, score: 0, correct: 0, streak: 0, bestStreak: 0 }))
-
 export const useGridBoardStore = create<GridBoardState>()((set, get) => ({
   gameId: null,
   teams: freshTeams(),
@@ -48,18 +39,7 @@ export const useGridBoardStore = create<GridBoardState>()((set, get) => ({
   answer: (tileNo, teamId, correct, points) =>
     set((s) => ({
       history: [...s.history, { teams: s.teams, openedTiles: s.openedTiles, turn: s.turn }],
-      teams: s.teams.map((t) => {
-        if (t.id !== teamId) return t
-        if (!correct) return { ...t, streak: 0 }
-        const streak = t.streak + 1
-        return {
-          ...t,
-          score: t.score + points,
-          correct: t.correct + 1,
-          streak,
-          bestStreak: Math.max(t.bestStreak, streak),
-        }
-      }),
+      teams: correct ? award(s.teams, teamId, points) : miss(s.teams, teamId),
       openedTiles: correct ? [...s.openedTiles, tileNo] : s.openedTiles,
       turn: (s.turn + 1) % s.teams.length,
     })),

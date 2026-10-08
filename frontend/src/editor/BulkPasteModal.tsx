@@ -1,19 +1,18 @@
 import { Input, Modal } from 'antd'
 import { useState } from 'react'
-import { parseBulkQuestions } from '@/editor/parseBulkQuestions'
-import type { Question } from '@/types/game'
+import type { EditorDefinition } from '@/editor/editorDefinitions'
+import type { ItemDraft } from '@/types/game'
 
 interface BulkPasteModalProps {
   open: boolean
+  paste: EditorDefinition['paste']
   onClose: () => void
-  onAdd: (drafts: Omit<Question, 'id'>[]) => void
+  onAdd: (drafts: ItemDraft[]) => void
 }
 
-const PLACEHOLDER = 'Con gì kêu meo meo? = Con mèo\n25 + 13 = ? = 38\nThủ đô của Việt Nam? = Hà Nội'
-
-export function BulkPasteModal({ open, onClose, onAdd }: BulkPasteModalProps) {
+export function BulkPasteModal({ open, paste, onClose, onAdd }: BulkPasteModalProps) {
   const [text, setText] = useState('')
-  const drafts = parseBulkQuestions(text, 20)
+  const drafts = paste.parse(text)
 
   const submit = () => {
     onAdd(drafts)
@@ -24,20 +23,20 @@ export function BulkPasteModal({ open, onClose, onAdd }: BulkPasteModalProps) {
   return (
     <Modal
       open={open}
-      title={<span className="font-display text-2xl font-extrabold">Dán nhiều câu hỏi</span>}
-      okText={drafts.length ? `Thêm ${drafts.length} câu` : 'Thêm câu hỏi'}
+      title={<span className="font-display text-2xl font-extrabold">{paste.title}</span>}
+      okText={drafts.length ? `Thêm ${drafts.length} ${paste.unit}` : 'Thêm'}
       cancelText="Hủy"
       okButtonProps={{ disabled: drafts.length === 0 }}
       onOk={submit}
       onCancel={onClose}
       width={640}
     >
-      <p className="mb-3 text-ink-soft">Mỗi dòng một câu. Đáp án đặt sau dấu “=”.</p>
+      <p className="mb-3 text-ink-soft">{paste.hint}</p>
       <Input.TextArea
-        aria-label="Danh sách câu hỏi"
+        aria-label="Nội dung cần dán"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder={PLACEHOLDER}
+        placeholder={paste.placeholder}
         autoSize={{ minRows: 6, maxRows: 14 }}
         className="text-lg"
       />

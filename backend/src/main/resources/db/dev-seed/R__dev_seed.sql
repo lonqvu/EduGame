@@ -171,3 +171,88 @@ BEGIN
     UPDATE game SET current_version_id = v_version_id WHERE id = v_game_id;
 END;
 $$;
+
+-- "Đố vui Tiếng Việt" - QUIZ, 6 questions (4 single choice + 2 true / false), draft.
+DO $$
+DECLARE
+    v_game_id    BIGINT;
+    v_version_id BIGINT;
+BEGIN
+    IF EXISTS (SELECT 1 FROM game WHERE code = 'g-quiz-vn') THEN
+        RETURN;
+    END IF;
+
+    INSERT INTO game (code, owner_id, template_id, title, subject, grade)
+    VALUES ('g-quiz-vn',
+            (SELECT id FROM users WHERE code = 'u-lan'),
+            (SELECT id FROM game_template WHERE code = 'QUIZ'),
+            'Đố vui Tiếng Việt', 'Tiếng Việt', 3)
+    RETURNING id INTO v_game_id;
+
+    INSERT INTO game_version (game_id, version, schema_version, settings)
+    SELECT v_game_id, 1, t.schema_version, t.default_config
+    FROM game_template t WHERE t.code = 'QUIZ'
+    RETURNING id INTO v_version_id;
+
+    UPDATE game SET current_version_id = v_version_id WHERE id = v_game_id;
+
+    -- [question, correct option index (0-based), option texts...]; two options "Đúng" / "Sai" = TRUE_FALSE.
+    INSERT INTO game_item (game_version_id, item_type, position, content, solution)
+    SELECT v_version_id,
+           CASE WHEN q.value -> 2 = '"Đúng"' AND jsonb_array_length(q.value) = 4 THEN 'TRUE_FALSE' ELSE 'SINGLE_CHOICE' END,
+           q.ord - 1,
+           jsonb_build_object(
+               'text', q.value ->> 0,
+               'options', (SELECT jsonb_agg(jsonb_build_object('id', chr(96 + o.ord::int), 'text', o.value #>> '{}') ORDER BY o.ord)
+                           FROM jsonb_array_elements(q.value - 0 - 0) WITH ORDINALITY AS o (value, ord))),
+           jsonb_build_object('correct', jsonb_build_array(chr(97 + (q.value ->> 1)::int)))
+    FROM jsonb_array_elements('[
+        ["Từ nào chỉ con vật?", 2, "Bàn ghế", "Chạy nhảy", "Con mèo", "Xinh đẹp"],
+        ["Từ nào viết đúng chính tả?", 1, "Xung xướng", "Sung sướng", "Sung xướng"],
+        ["Trái nghĩa với \"cao\" là gì?", 0, "Thấp", "Dài", "To", "Rộng"],
+        ["Câu \"Em đi học.\" có mấy tiếng?", 1, "Hai", "Ba", "Bốn"],
+        ["\"Mặt trời mọc ở đằng Đông.\"", 0, "Đúng", "Sai"],
+        ["\"Con cá sống trên cây.\"", 1, "Đúng", "Sai"]
+    ]'::jsonb) WITH ORDINALITY AS q (value, ord);
+END;
+$$;
+
+-- "Thủ đô và danh lam" - MATCHING, one set of 5 pairs, draft.
+DO $$
+DECLARE
+    v_game_id    BIGINT;
+    v_version_id BIGINT;
+BEGIN
+    IF EXISTS (SELECT 1 FROM game WHERE code = 'g-match-places') THEN
+        RETURN;
+    END IF;
+
+    INSERT INTO game (code, owner_id, template_id, title, subject, grade)
+    VALUES ('g-match-places',
+            (SELECT id FROM users WHERE code = 'u-lan'),
+            (SELECT id FROM game_template WHERE code = 'MATCHING'),
+            'Thành phố và danh lam', 'Tự nhiên và Xã hội', 3)
+    RETURNING id INTO v_game_id;
+
+    INSERT INTO game_version (game_id, version, schema_version, settings)
+    SELECT v_game_id, 1, t.schema_version, t.default_config
+    FROM game_template t WHERE t.code = 'MATCHING'
+    RETURNING id INTO v_version_id;
+
+    UPDATE game SET current_version_id = v_version_id WHERE id = v_game_id;
+
+    -- [left, right] -> lN / rN, pair (lN, rN).
+    INSERT INTO game_item (game_version_id, item_type, position, content, solution)
+    SELECT v_version_id,
+           'PAIR_SET',
+           0,
+           jsonb_build_object(
+               'left', jsonb_agg(jsonb_build_object('id', 'l' || p.ord, 'text', p.value ->> 0) ORDER BY p.ord),
+               'right', jsonb_agg(jsonb_build_object('id', 'r' || p.ord, 'text', p.value ->> 1) ORDER BY p.ord)),
+           jsonb_build_object('pairs', jsonb_agg(jsonb_build_array('l' || p.ord, 'r' || p.ord) ORDER BY p.ord))
+    FROM jsonb_array_elements('[
+        ["Hà Nội", "Hồ Gươm"], ["Huế", "Sông Hương"], ["Đà Nẵng", "Cầu Rồng"],
+        ["Quảng Ninh", "Vịnh Hạ Long"], ["TP. Hồ Chí Minh", "Chợ Bến Thành"]
+    ]'::jsonb) WITH ORDINALITY AS p (value, ord);
+END;
+$$;

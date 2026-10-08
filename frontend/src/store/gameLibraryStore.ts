@@ -1,15 +1,10 @@
 import { create } from 'zustand'
 import * as gameApi from '@/api/gameApi'
 import type { GameResponse, LoadStatus } from '@/types/api'
-import type { GameSummary, GameType, Question } from '@/types/game'
+import type { GameItem, GameSummary, GameType, ItemDraft } from '@/types/game'
 import { isNotFound } from '@/utils/apiError'
-import {
-  detailToSummary,
-  toCreateItemRequest,
-  toGameSummary,
-  toItemFields,
-  toQuestion,
-} from '@/utils/gameMapping'
+import { itemCodec, toCreateRequest } from '@/utils/gameItems'
+import { detailToSummary, toGameSummary } from '@/utils/gameMapping'
 
 /**
  * - `play`: loaded read-only (GET), enough for the projector.
@@ -20,35 +15,35 @@ export type GameLoadState = 'loading' | 'play' | 'edit' | 'missing' | 'error'
 export type SaveState = 'saved' | 'saving' | 'error'
 
 /**
- * Teacher's games and their questions, backed by /api/v1/games.
+ * Teacher's games and their items (questions, pair sets...), backed by /api/v1/games.
  *
  * Edits are applied to the store at once (the editor autosaves on every keystroke), then sent to the backend:
- * typing is debounced per question / title, and all requests go through one queue so they reach the server in
+ * typing is debounced per item / title, and all requests go through one queue so they reach the server in
  * the order they were made. If a request fails, the game is reloaded from the server.
  */
 interface GameLibraryState {
   games: GameSummary[]
   gamesStatus: LoadStatus
-  questions: Record<string, Question[]>
+  items: Record<string, GameItem[]>
+  /** `settings` of the version being edited (time limit, rules...). */
+  settings: Record<string, Record<string, unknown>>
   gameStatus: Record<string, GameLoadState>
   saveState: SaveState
 
   loadGames: () => Promise<void>
   /** Waits for pending saves first, so what is loaded includes the latest edits. */
   loadGame: (gameId: string, mode: 'play' | 'edit') => Promise<void>
-  /** Creates a game with one empty question; resolves with its id. */
+  /** Creates a game with one empty item; resolves with its id. */
   createGame: (type: GameType, grade?: number) => Promise<string>
   renameGame: (gameId: string, title: string) => void
-  /** Resolves with the created questions (they need server ids, so this waits for the backend). */
-  addQuestions: (gameId: string, drafts: Omit<Question, 'id'>[]) => Promise<Question[]>
-  updateQuestion: (gameId: string, questionId: string, patch: Partial<Omit<Question, 'id'>>) => void
-  removeQuestion: (gameId: string, questionId: string) => void
-  reorderQuestions: (gameId: string, orderedIds: string[]) => void
+  /** Resolves with the created items (they need server ids, so this waits for the backend). */
+  addItems: (gameId: string, drafts: ItemDraft[]) => Promise<GameItem[]>
+  updateItem: (gameId: string, itemId: string, patch: Partial<ItemDraft>) => void
+  removeItem: (gameId: string, itemId: string) => void
+  reorderItems: (gameId: string, orderedIds: string[]) => void
 }
 
 const SAVE_DELAY_MS = 600
-
-export const emptyQuestion = (): Omit<Question, 'id'> => ({ text: '', answer: '', points: 20 })
 
 export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
   // --- Save pipeline -------------------------------------------------------------------------------------------
@@ -56,7 +51,7 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
   /** Requests run one after another, in call order. */
   let queue: Promise<unknown> = Promise.resolve()
   let running = 0
-  /** Debounced saves, by key ("title:<game>", "item:<game>:<question>"). */
+  /** Debounced saves, by key ("title:<game>", "item:<game>:<item>"). */
   const timers = new Map<string, { gameId: string; timer: ReturnType<typeof setTimeout>; run: () => Promise<unknown> }>()
 
   const refreshSaveState = () => {
@@ -119,14 +114,15 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
 
   // --- State helpers ----------------------------------------------------------------------------------------------
 
-  const setQuestions = (gameId: string, list: Question[]) =>
+  const setItems = (gameId: string, list: GameItem[]) =>
     set((s) => ({
-      questions: { ...s.questions, [gameId]: list },
+      items: { ...s.items, [gameId]: list },
       games: s.games.map((g) => (g.id === gameId ? { ...g, itemCount: list.length } : g)),
     }))
 
   const applyGame = (response: GameResponse, mode: 'play' | 'edit') => {
     const summary = detailToSummary(response)
+    const codec = summary && itemCodec(summary.type)
     if (!summary) {
       set((s) => ({ gameStatus: { ...s.gameStatus, [response.code]: 'missing' } }))
       return
@@ -135,19 +131,26 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
       games: s.games.some((g) => g.id === summary.id)
         ? s.games.map((g) => (g.id === summary.id ? summary : g))
         : [summary, ...s.games],
-      questions: { ...s.questions, [summary.id]: response.items.map(toQuestion) },
+      items: { ...s.items, [summary.id]: codec ? response.items.map(codec.fromItem) : [] },
+      settings: { ...s.settings, [summary.id]: response.settings ?? {} },
       gameStatus: { ...s.gameStatus, [summary.id]: mode },
     }))
   }
 
-  const questionsOf = (gameId: string) => get().questions[gameId] ?? []
+  const itemsOf = (gameId: string) => get().items[gameId] ?? []
+  const typeOf = (gameId: string) => {
+    const type = get().games.find((g) => g.id === gameId)?.type
+    if (!type) throw new Error(`Game ${gameId} is not loaded`)
+    return type
+  }
 
   // --- Store --------------------------------------------------------------------------------------------------------
 
   return {
     games: [],
     gamesStatus: 'idle',
-    questions: {},
+    items: {},
+    settings: {},
     gameStatus: {},
     saveState: 'saved',
 
@@ -178,9 +181,11 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
 
     createGame: async (type, grade) => {
       const created = await gameApi.createGame({ templateCode: type, grade })
+      const codec = itemCodec(type)
+      if (!codec) throw new Error(`${type} has no items`)
       try {
-        const withQuestion = await gameApi.addItems(created.code, [toCreateItemRequest(emptyQuestion())])
-        applyGame(withQuestion, 'edit')
+        const withItem = await gameApi.addItems(created.code, [toCreateRequest(type, codec.empty())])
+        applyGame(withItem, 'edit')
         return created.code
       } catch (error) {
         // Do not leave an empty, half-created game in the library.
@@ -198,38 +203,44 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
       })
     },
 
-    addQuestions: async (gameId, drafts) => {
+    addItems: async (gameId, drafts) => {
+      const type = typeOf(gameId)
+      const codec = itemCodec(type)
+      if (!codec) throw new Error(`${type} has no items`)
       flush(gameId)
-      const response = await enqueue(gameId, () => gameApi.addItems(gameId, drafts.map(toCreateItemRequest)))
+      const response = await enqueue(gameId, () =>
+        gameApi.addItems(gameId, drafts.map((d) => toCreateRequest(type, d))),
+      )
       // New items are appended, so they are the last ones of the response.
-      const created = response.items.slice(response.items.length - drafts.length).map(toQuestion)
-      setQuestions(gameId, [...questionsOf(gameId), ...created])
+      const created = response.items.slice(response.items.length - drafts.length).map(codec.fromItem)
+      setItems(gameId, [...itemsOf(gameId), ...created])
       return created
     },
 
-    updateQuestion: (gameId, questionId, patch) => {
-      setQuestions(
+    updateItem: (gameId, itemId, patch) => {
+      setItems(
         gameId,
-        questionsOf(gameId).map((q) => (q.id === questionId ? { ...q, ...patch } : q)),
+        itemsOf(gameId).map((item) => (item.id === itemId ? ({ ...item, ...patch } as GameItem) : item)),
       )
-      schedule(`item:${gameId}:${questionId}`, gameId, async () => {
-        const latest = questionsOf(gameId).find((q) => q.id === questionId)
-        if (latest) await gameApi.updateItem(gameId, Number(questionId), toItemFields(latest))
+      schedule(`item:${gameId}:${itemId}`, gameId, async () => {
+        const latest = itemsOf(gameId).find((item) => item.id === itemId)
+        const codec = itemCodec(typeOf(gameId))
+        if (latest && codec) await gameApi.updateItem(gameId, Number(itemId), codec.toFields(latest))
       })
     },
 
-    removeQuestion: (gameId, questionId) => {
-      cancel(`item:${gameId}:${questionId}`)
-      setQuestions(
+    removeItem: (gameId, itemId) => {
+      cancel(`item:${gameId}:${itemId}`)
+      setItems(
         gameId,
-        questionsOf(gameId).filter((q) => q.id !== questionId),
+        itemsOf(gameId).filter((item) => item.id !== itemId),
       )
-      fireAndForget(gameId, () => gameApi.deleteItem(gameId, Number(questionId)))
+      fireAndForget(gameId, () => gameApi.deleteItem(gameId, Number(itemId)))
     },
 
-    reorderQuestions: (gameId, orderedIds) => {
-      const byId = new Map(questionsOf(gameId).map((q) => [q.id, q]))
-      setQuestions(
+    reorderItems: (gameId, orderedIds) => {
+      const byId = new Map(itemsOf(gameId).map((item) => [item.id, item]))
+      setItems(
         gameId,
         orderedIds.flatMap((id) => byId.get(id) ?? []),
       )

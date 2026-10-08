@@ -46,10 +46,13 @@ public class GameItemService {
                     "A game has at most %d items".formatted(MAX_ITEMS));
         }
 
+        // Validate the whole batch before saving anything: one bad item rejects all of them.
+        for (CreateGameItemRequest item : request.items()) {
+            gameItemValidator.validate(game.getTemplate().getConfigSchema(), item.itemType(), item.content(),
+                    nullIfJsonNull(item.solution()));
+        }
         for (CreateGameItemRequest item : request.items()) {
             JsonNode solution = nullIfJsonNull(item.solution());
-            gameItemValidator.validate(game.getTemplate().getConfigSchema(), item.itemType(), item.content(),
-                    solution);
             gameItemRepository.save(GameItem.create(draft.version(), item.itemType(), position++, item.content(),
                     solution, blankToNull(item.explanation())));
         }

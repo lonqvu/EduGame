@@ -5,10 +5,7 @@ interface GameDefinition {
   playable: boolean
   /** Edited with the question editor (otherwise it is a tool that uses the class list). */
   usesQuestions: boolean
-  /**
-   * The question editor can edit it. The editor writes GRID_BOARD items (`OPEN_QUESTION`: text, answer, points);
-   * QUIZ / MATCHING / MEMORY items have other shapes (options, pairs, cards) and the backend rejects them.
-   */
+  /** The item editor can edit it (see editor/editorDefinitions.tsx). */
   hasEditor: boolean
   /** Chips on the template card (not stored on the backend). */
   tags: string[]
@@ -18,9 +15,9 @@ interface GameDefinition {
 
 export const gameRegistry: Record<GameType, GameDefinition> = {
   GRID_BOARD: { playable: true, usesQuestions: true, hasEditor: true, tags: ['Theo đội', '10–15 phút'], itemUnit: 'câu' },
-  QUIZ: { playable: false, usesQuestions: true, hasEditor: false, tags: ['Cá nhân hoặc đội'], itemUnit: 'câu' },
-  MATCHING: { playable: false, usesQuestions: true, hasEditor: false, tags: ['Lần lượt'], itemUnit: 'bộ' },
-  MEMORY: { playable: false, usesQuestions: true, hasEditor: false, tags: ['Theo đội'], itemUnit: 'bộ thẻ' },
+  QUIZ: { playable: true, usesQuestions: true, hasEditor: true, tags: ['Cá nhân hoặc đội'], itemUnit: 'câu' },
+  MATCHING: { playable: true, usesQuestions: true, hasEditor: true, tags: ['Lần lượt'], itemUnit: 'bộ' },
+  MEMORY: { playable: true, usesQuestions: true, hasEditor: true, tags: ['Theo đội'], itemUnit: 'bộ thẻ' },
   SPIN_WHEEL: { playable: true, usesQuestions: false, hasEditor: false, tags: ['Dùng danh sách lớp'], itemUnit: 'ô' },
   NAME_RACE: { playable: true, usesQuestions: false, hasEditor: false, tags: ['Dùng danh sách lớp'], itemUnit: 'ô' },
 }

@@ -93,11 +93,12 @@ Mở <http://localhost:5173>.
 | Mục đích | Lệnh |
 |---|---|
 | Build backend (kèm test) | `cd backend && ./mvnw clean package` |
-| Chạy test backend | `cd backend && ./mvnw test` |
+| Chạy test backend (cần PostgreSQL đang chạy: `docker compose up -d --wait`) | `cd backend && ./mvnw test` |
 | Chạy jar | `java -jar backend/target/edu-game-backend-0.0.1-SNAPSHOT.jar` |
 | Build frontend | `cd frontend && npm run build` |
 | Type-check frontend | `cd frontend && npm run typecheck` |
 | Lint frontend | `cd frontend && npm run lint` |
+| Chạy test frontend (Vitest) | `cd frontend && npm test` |
 | Dừng DB | `docker compose down` |
 | Xoá sạch dữ liệu DB | `docker compose down -v` |
 

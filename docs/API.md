@@ -209,6 +209,21 @@ Thêm vào cuối danh sách, theo thứ tự gửi. Dùng cho cả thêm 1 câu
 - `itemType` không thuộc template, hoặc thiếu field bắt buộc → `400 INVALID_GAME_ITEM`.
 - Vượt 200 câu → `400 TOO_MANY_ITEMS`.
 
+#### Nội dung item theo loại game
+
+| Game | `itemType` | `content` | `solution` |
+|---|---|---|---|
+| GRID_BOARD (Lật ô) | `OPEN_QUESTION` | `{text, image?, points}` | `{answer}` |
+| QUIZ (Trắc nghiệm) | `SINGLE_CHOICE` | `{text, image?, options: [{id, text}]}`, 2–6 phương án | `{correct: [optionId]}` |
+| QUIZ | `TRUE_FALSE` | như trên, đúng 2 phương án (Đúng / Sai) | `{correct: [optionId]}` |
+| MATCHING (Nối cặp) | `PAIR_SET` | `{left: [{id, text}], right: [{id, text}]}`, mỗi cột 1–12 ô | `{pairs: [[leftId, rightId]]}` |
+| MEMORY (Lật thẻ) | `CARD_SET` | `{cards: [{id, text}]}`, 2–24 thẻ | `{pairs: [[cardId, cardId]]}` |
+
+Backend kiểm tra thêm (→ `400 INVALID_GAME_ITEM`): `id` không rỗng và không trùng (với PAIR_SET là không trùng giữa
+cả hai cột), `correct` có đúng 1 id và id đó là một phương án, mỗi cặp nối một id cột trái với một id cột phải
+(PAIR_SET) hoặc hai thẻ có thật (CARD_SET), mỗi id chỉ nằm trong một cặp. `text` để trống được (đang soạn dở);
+màn chiếu tự bỏ qua câu / cặp chưa điền đủ. Thêm nhiều item một lúc: một item sai thì cả lô bị từ chối.
+
 #### 10. `PATCH /games/{code}/items/{itemId}` — Sửa câu hỏi
 
 Field không gửi thì giữ nguyên.
@@ -281,7 +296,7 @@ Mọi lỗi trả về dạng:
 | 400 | `MALFORMED_REQUEST` | Body không phải JSON hợp lệ | Mọi API có body |
 | 400 | `INVALID_GRADE` | Khối lớp không hợp với cấp học | 4, 6 |
 | 400 | `INVALID_SETTINGS` | `settings` không phải object | 6 |
-| 400 | `INVALID_GAME_ITEM` | Sai `itemType` / thiếu field trong `content`, `solution` | 9, 10 |
+| 400 | `INVALID_GAME_ITEM` | Sai `itemType` / thiếu field trong `content`, `solution` / đáp án hoặc cặp không khớp nội dung | 9, 10 |
 | 400 | `TOO_MANY_ITEMS` | Vượt 200 câu / game | 9 |
 | 400 | `INVALID_ITEM_ORDER` | Danh sách id không khớp đúng các câu hiện có | 12 |
 | 400 | `INVALID_POINTS` | `points = 0` | 15 |

@@ -1,4 +1,4 @@
-import type { TeamScore } from '@/store/gridBoardStore'
+import type { TeamScore } from '@/game-engine/shared/teamScore'
 
 export interface RankedTeam extends TeamScore {
   rank: number
