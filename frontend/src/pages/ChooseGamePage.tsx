@@ -137,11 +137,14 @@ export function ChooseGamePage() {
   return (
     <div className="flex flex-col gap-[10px]">
       <header className="@container relative flex min-h-[146px] flex-col justify-between gap-4 sm:flex-row">
-        <img
-          src={`${ASSETS}/choose-hero.png`}
-          alt=""
-          className="pointer-events-none absolute top-[-12px] right-[128px] hidden h-[148px] w-auto select-none [mask-image:linear-gradient(to_right,transparent,black_40px,black_88%,transparent)] @min-[1340px]:block"
-        />
+        {/* Drawn wider than the page (scripts/extend_banners.py), so it fills the space from the text to the bell. */}
+        <div className="pointer-events-none absolute top-[-12px] right-[10px] left-[650px] hidden @min-[1400px]:right-[128px] h-[148px] overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_60px,black_90%,transparent)] @min-[1060px]:block">
+          <img
+            src={`${ASSETS}/choose-hero-wide.png`}
+            alt=""
+            className="absolute top-0 right-0 h-full w-auto max-w-none select-none"
+          />
+        </div>
         <div className="relative flex flex-col">
           <nav aria-label="Đường dẫn" className="flex items-center gap-3 pt-[2px] text-[14.5px] text-ink-soft">
             <Link to="/" aria-label="Trang chủ" className="flex text-[#8A93A8] hover:text-primary">
