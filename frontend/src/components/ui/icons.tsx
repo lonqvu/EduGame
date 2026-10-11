@@ -223,3 +223,84 @@ export const MenuIcon = (p: IconProps) => (
     <path d="M4 6h16M4 12h16M4 18h16" />
   </StrokeIcon>
 )
+
+export const MailIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={1.8} {...p}>
+    <rect x="3" y="5" width="18" height="14" rx="2.5" />
+    <path d="M3.5 6.5l8.5 6.5 8.5-6.5" />
+  </StrokeIcon>
+)
+
+export const LockIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={1.8} {...p}>
+    <rect x="4.5" y="10.5" width="15" height="11" rx="2.5" />
+    <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 15v2.5" />
+  </StrokeIcon>
+)
+
+export const EyeOffIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={2} {...p}>
+    <path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-2.9 3.9M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6" />
+    <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18" />
+  </StrokeIcon>
+)
+
+/** Filled glyphs on colored round badges (login page). */
+export const GamepadFilledIcon = ({ size = 24, ...rest }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...rest}>
+    <path d="M7 6.5h10a5.2 5.2 0 0 1 5.2 5.6l-.3 3.7a3 3 0 0 1-5.4 1.5L15 15.5H9l-1.5 1.8a3 3 0 0 1-5.4-1.5l-.3-3.7A5.2 5.2 0 0 1 7 6.5zm-.8 3.3v1.4H4.8v1.6h1.4v1.4h1.6v-1.4h1.4v-1.6H7.8V9.8zm9.8 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm2 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" fillRule="evenodd" />
+  </svg>
+)
+
+export const UsersFilledIcon = ({ size = 24, ...rest }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...rest}>
+    <circle cx="12" cy="7.5" r="3.5" />
+    <circle cx="5.5" cy="9" r="2.6" />
+    <circle cx="18.5" cy="9" r="2.6" />
+    <path d="M12 12.5c3.6 0 6 2 6 4.8V19a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-1.7c0-2.8 2.4-4.8 6-4.8zM5.2 13c.4 0 .8 0 1.2.1A5.9 5.9 0 0 0 4.6 17v1H2a1 1 0 0 1-1-1v-.7C1 14.5 2.8 13 5.2 13zm13.6 0c2.4 0 4.2 1.5 4.2 3.3v.7a1 1 0 0 1-1 1h-2.6v-1a5.9 5.9 0 0 0-1.8-3.9c.4-.1.8-.1 1.2-.1z" />
+  </svg>
+)
+
+export const BookOpenFilledIcon = ({ size = 24, ...rest }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...rest}>
+    <path d="M2 5.2c0-.7.6-1.2 1.3-1.1 2.9.3 5.5 1.2 7.7 2.8v13.3c-2.3-1.5-4.9-2.4-7.8-2.7A1.3 1.3 0 0 1 2 16.2zM22 5.2c0-.7-.6-1.2-1.3-1.1-2.9.3-5.5 1.2-7.7 2.8v13.3c2.3-1.5 4.9-2.4 7.8-2.7a1.3 1.3 0 0 0 1.2-1.3z" />
+  </svg>
+)
+
+export const UserIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={1.8} {...p}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4.5 20.5c.8-3.6 3.8-6 7.5-6s6.7 2.4 7.5 6" />
+  </StrokeIcon>
+)
+
+export const ArrowLeftIcon = (p: IconProps) => (
+  <StrokeIcon {...p}>
+    <path d="M19 12H5M11 6l-6 6 6 6" />
+  </StrokeIcon>
+)
+
+export const InfoFilledIcon = ({ size = 24, ...rest }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...rest}>
+    <path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm0 8.2a1.1 1.1 0 0 0-1.1 1.1v5a1.1 1.1 0 0 0 2.2 0v-5a1.1 1.1 0 0 0-1.1-1.1zm0-4.1a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z" fillRule="evenodd" />
+  </svg>
+)
+
+/** Filled glyphs on colored round badges (forgotten password page). */
+export const SendFilledIcon = ({ size = 24, ...rest }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...rest}>
+    <path d="M21.4 2.6a1 1 0 0 1 .2 1.1l-7.2 16.8a1 1 0 0 1-1.8.1l-3-6.1 6.3-7.3-7.3 6.3-6.1-3a1 1 0 0 1 .1-1.8L19.4 2.4a1 1 0 0 1 2 .2z" />
+  </svg>
+)
+
+export const ShieldCheckFilledIcon = ({ size = 24, ...rest }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...rest}>
+    <path d="M11.4 1.7a1.5 1.5 0 0 1 1.2 0l7 3A1.5 1.5 0 0 1 20.5 6v5.3c0 4.9-3.3 9.2-8 10.6a1.5 1.5 0 0 1-1 0c-4.7-1.4-8-5.7-8-10.6V6a1.5 1.5 0 0 1 .9-1.3zm4.3 7.6a1 1 0 0 0-1.4 0L11 12.6l-1.3-1.3a1 1 0 1 0-1.4 1.4l2 2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4z" fillRule="evenodd" />
+  </svg>
+)
+
+export const HeartFilledIcon = ({ size = 24, ...rest }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...rest}>
+    <path d="M12 21s-7.5-4.6-9.5-9.3C1 8 3.3 4 7.2 4c2 0 3.6 1 4.8 2.6C13.2 5 14.8 4 16.8 4 20.7 4 23 8 21.5 11.7 19.5 16.4 12 21 12 21z" />
+  </svg>
+)

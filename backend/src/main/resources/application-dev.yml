@@ -8,5 +8,12 @@ spring:
 
 app:
   auth:
-    # No login yet: every request acts as the seeded teacher "Cô Lan".
-    default-user-code: u-lan
+    # Requests without an access token act as the seeded teacher "Cô Lan" (password 123456), so the
+    # frontend works before it has a login page. Set APP_DEFAULT_USER_CODE= (empty) to test real login.
+    default-user-code: ${APP_DEFAULT_USER_CODE:u-lan}
+    jwt:
+      # Local only. Never reuse this value anywhere else.
+      secret: ${JWT_SECRET:dev-only-jwt-secret-do-not-use-elsewhere-0123456789}
+  mail:
+    # Also print verification codes in the log, in case Mailpit (docker compose) is not running.
+    log-codes: true

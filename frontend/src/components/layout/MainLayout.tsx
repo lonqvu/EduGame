@@ -9,9 +9,9 @@ import {
   HomeIcon,
   MenuIcon,
   SettingsIcon,
-  StarIcon,
   UsersIcon,
 } from '@/components/ui/icons'
+import { BrandLogo } from '@/components/ui/BrandLogo'
 
 interface NavItem {
   label: string
@@ -88,11 +88,8 @@ export function MainLayout() {
 
 function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-3 text-ink hover:text-ink">
-      <span className="flex size-10 items-center justify-center rounded-[12px] bg-sun shadow-[0_2px_0_#E9B93C]">
-        <StarIcon size={22} strokeWidth={2.2} />
-      </span>
-      <span className="text-[22px] font-black tracking-[-0.01em]">EduGame</span>
+    <Link to="/" className="flex text-ink hover:text-ink">
+      <BrandLogo />
     </Link>
   )
 }

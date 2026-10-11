@@ -50,12 +50,15 @@ File `.env` ở root được dùng chung bởi Docker Compose và frontend (Vit
 Backend đọc cùng tên biến từ environment; nếu không set sẽ dùng giá trị mặc định trong
 `backend/src/main/resources/application.yml` (khớp với `.env.example`).
 
-### 2. Khởi động PostgreSQL
+### 2. Khởi động PostgreSQL và Mailpit
 
 ```bash
 docker compose up -d --wait
 docker compose ps           # STATUS phải là (healthy)
 ```
+
+Mailpit là hộp thư giả cho môi trường dev: mọi mail backend gửi (mã xác nhận khi đăng ký...) nằm ở
+<http://localhost:8025>, không gửi thật ra ngoài. Profile `dev` cũng in mã xác nhận ra log backend.
 
 ### 3. Chạy backend
 
@@ -71,8 +74,12 @@ PowerShell tách tham số `-D...` tại dấu chấm, nên phải đặt trong 
 ```
 
 Flyway tự chạy migration khi khởi động. Profile `dev` nạp thêm dữ liệu demo (`db/dev-seed/R__dev_seed.sql`:
-giáo viên Cô Lan, lớp 3A với 28 học sinh, 3 game) và cho mọi request đóng vai Cô Lan, vì chưa có đăng nhập.
-Thiếu profile `dev` thì các API của giáo viên trả `401`. Sau khi chạy:
+giáo viên Cô Lan `colan` / `123456`, lớp 3A với 28 học sinh, 3 game). Đăng nhập: `POST /api/v1/auth/login`
+trả access token (JWT), gửi kèm `Authorization: Bearer <token>`. Riêng profile `dev`, request không có token được coi
+là Cô Lan, để frontend chạy được khi chưa có màn đăng nhập (đặt `APP_DEFAULT_USER_CODE=` rỗng để tắt).
+
+Chạy **không** có profile `dev` thì bắt buộc đặt biến môi trường `JWT_SECRET` (chuỗi ngẫu nhiên ≥ 32 byte,
+ví dụ `openssl rand -base64 48`), nếu không backend dừng ngay khi khởi động. Sau khi chạy:
 
 - API base: <http://localhost:8080/api>
 - Swagger UI: <http://localhost:8080/swagger-ui.html>

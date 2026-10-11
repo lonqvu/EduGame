@@ -47,6 +47,19 @@ spring:
       max-file-size: 10MB
       max-request-size: 20MB
 
+  # SMTP. Defaults point at Mailpit from docker-compose (dev); production sets a real provider (SES, Brevo...).
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_STARTTLS:false}
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
+
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -58,9 +71,30 @@ app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   auth:
-    # Temporary until the auth module exists: code of the user every request acts as.
-    # Empty = no current user (all teacher endpoints answer 401).
+    # Development aid: code of the user a request acts as when it carries no access token.
+    # Empty (the default) = such requests are anonymous (teacher endpoints answer 401).
     default-user-code: ${APP_DEFAULT_USER_CODE:}
+    jwt:
+      # HMAC-SHA256 key that signs access tokens, at least 32 bytes. Required: startup fails without it.
+      secret: ${JWT_SECRET:}
+      issuer: edu-game
+      access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}
+    refresh:
+      remember-ttl: ${REFRESH_REMEMBER_TTL:30d}
+      session-ttl: ${REFRESH_SESSION_TTL:12h}
+      reuse-grace: 10s
+      cookie-name: edugame_refresh
+      cookie-secure: ${REFRESH_COOKIE_SECURE:true}
+    # One-time codes mailed to confirm an email address (sign-up).
+    verification:
+      code-ttl: 10m
+      max-attempts: 5
+      resend-cooldown: 60s
+      max-sends-per-hour: 5
+  mail:
+    from: ${MAIL_FROM:EduGame <no-reply@edugame.local>}
+    # Also write verification codes to the log. Development only.
+    log-codes: false
   # Used for "this week" star totals.
   time-zone: ${APP_TIME_ZONE:Asia/Ho_Chi_Minh}
 

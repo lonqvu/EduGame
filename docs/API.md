@@ -9,7 +9,7 @@ Swagger UI (chạy thử trực tiếp): <http://localhost:8080/swagger-ui.html>
 |---|---|
 | Base URL | `http://localhost:8080/api/v1` (frontend: `VITE_API_BASE_URL` = `.../api`, path bắt đầu bằng `/v1/...`) |
 | Định dạng | JSON, field camelCase. Field `null` không được trả về (`default-property-inclusion: non_null`) |
-| Người dùng hiện tại | Chưa có đăng nhập. Profile `dev` cho mọi request đóng vai giáo viên `u-lan` (Cô Lan) — xem [CurrentUserService.java](../backend/src/main/java/com/edugame/user/service/CurrentUserService.java). Không có profile `dev` → mọi API dưới đây trả `401` (trừ `GET /game-templates`) |
+| Người dùng hiện tại | Header `Authorization: Bearer <accessToken>`, token lấy từ `POST /auth/login` (mục 0), hạn 15 phút, gia hạn bằng `POST /auth/refresh` (mục 0b) với refresh token trong cookie HttpOnly. Thiếu token → `401` (trừ mục 0–0h và 2). Riêng profile `dev`: request **không có** header `Authorization` được coi là giáo viên `u-lan` (Cô Lan), để frontend chạy được khi chưa có màn đăng nhập (tắt bằng `APP_DEFAULT_USER_CODE=`). Xem [SecurityConfig.java](../backend/src/main/java/com/edugame/security/SecurityConfig.java), [CurrentUserService.java](../backend/src/main/java/com/edugame/user/service/CurrentUserService.java) |
 | Định danh | Game, lớp dùng `code` (`g-addition`, `c-3a`). Câu hỏi (item), học sinh dùng `id` số |
 | Quyền | Chỉ thấy / sửa game và lớp **của mình**. Game / lớp của người khác hoặc đã lưu trữ → `404` |
 | Lỗi | Luôn theo format `ApiError` (xem [Mã lỗi](#mã-lỗi)) |
@@ -20,7 +20,15 @@ Cột **Backend**: controller · service. Cột **Frontend**: hàm trong `api/` 
 
 | # | Method | Path | Mục đích | Backend | Frontend |
 |---|---|---|---|---|---|
-| 1 | GET | `/me` | Thông tin giáo viên đang dùng | [MeController.java:21](../backend/src/main/java/com/edugame/user/api/MeController.java#L21) · [CurrentUserService.java:42](../backend/src/main/java/com/edugame/user/service/CurrentUserService.java#L42) | [userApi.ts:4](../frontend/src/api/userApi.ts#L4) · [teacherStore.load](../frontend/src/store/teacherStore.ts#L34) · HomePage (lời chào, avatar) |
+| 0 | POST | `/auth/login` | Đăng nhập bằng email (hoặc username) + mật khẩu: access token + cookie refresh token | [AuthController.java:39](../backend/src/main/java/com/edugame/auth/api/AuthController.java#L39) · [AuthService.java:41](../backend/src/main/java/com/edugame/auth/service/AuthService.java#L41) | [authApi.ts:5](../frontend/src/api/authApi.ts#L5) · [authStore.login](../frontend/src/store/authStore.ts#L28) · LoginPage |
+| 0b | POST | `/auth/refresh` | Access token mới từ cookie, đổi refresh token mới | [AuthController.java:50](../backend/src/main/java/com/edugame/auth/api/AuthController.java#L50) · [UserSessionService.java](../backend/src/main/java/com/edugame/auth/service/UserSessionService.java) | [session.ts:56](../frontend/src/api/session.ts#L56) · [authStore.restore](../frontend/src/store/authStore.ts#L22) (mỗi lần tải trang), gặp `401`, hẹn giờ 1 phút trước khi token hết hạn |
+| 0c | POST | `/auth/logout` | Kết thúc phiên đăng nhập, xoá cookie | [AuthController.java:64](../backend/src/main/java/com/edugame/auth/api/AuthController.java#L64) · [AuthService.java:68](../backend/src/main/java/com/edugame/auth/service/AuthService.java#L68) | [authApi.ts:11](../frontend/src/api/authApi.ts#L11) · [authStore.logout](../frontend/src/store/authStore.ts#L32) · TopBar (Đăng xuất) |
+| 0d | POST | `/auth/register` | Đăng ký: gửi mã 6 số về email (chưa tạo tài khoản) | [AuthController.java:80](../backend/src/main/java/com/edugame/auth/api/AuthController.java#L80) · [RegistrationService.java](../backend/src/main/java/com/edugame/auth/service/RegistrationService.java) | [authApi.ts:16](../frontend/src/api/authApi.ts#L16) · RegisterPage (bước 1) |
+| 0e | POST | `/auth/register/resend` | Gửi lại mã | [AuthController.java:87](../backend/src/main/java/com/edugame/auth/api/AuthController.java#L87) | [authApi.ts:21](../frontend/src/api/authApi.ts#L21) · RegisterPage (Gửi lại mã) |
+| 0f | POST | `/auth/register/verify` | Nhập đúng mã: tạo giáo viên + đăng nhập | [AuthController.java:95](../backend/src/main/java/com/edugame/auth/api/AuthController.java#L95) | [authApi.ts:27](../frontend/src/api/authApi.ts#L27) · [authStore.completeSignUp](../frontend/src/store/authStore.ts#L34) · RegisterPage (bước 2) |
+| 0g | POST | `/auth/password/forgot` | Quên mật khẩu: gửi mã 6 số về email (cũng dùng để gửi lại mã) | [AuthController.java:109](../backend/src/main/java/com/edugame/auth/api/AuthController.java#L109) · [PasswordResetService.java](../backend/src/main/java/com/edugame/auth/service/PasswordResetService.java) | [authApi.ts:40](../frontend/src/api/authApi.ts#L40) · ForgotPasswordPage |
+| 0h | POST | `/auth/password/reset` | Nhập mã + mật khẩu mới: đổi mật khẩu, đăng xuất mọi phiên cũ, đăng nhập | [AuthController.java:118](../backend/src/main/java/com/edugame/auth/api/AuthController.java#L118) | [authApi.ts:46](../frontend/src/api/authApi.ts#L46) · [authStore.completePasswordReset](../frontend/src/store/authStore.ts#L40) · ForgotPasswordPage (bước 2) |
+| 1 | GET | `/me` | Thông tin giáo viên đang dùng | [MeController.java:21](../backend/src/main/java/com/edugame/user/api/MeController.java#L21) · [CurrentUserService.java:45](../backend/src/main/java/com/edugame/user/service/CurrentUserService.java#L45) | [userApi.ts:4](../frontend/src/api/userApi.ts#L4) · [teacherStore.load](../frontend/src/store/teacherStore.ts#L34) · HomePage (lời chào, avatar) |
 | 2 | GET | `/game-templates` | Danh sách loại game để chọn khi tạo game | [GameTemplateController.java:23](../backend/src/main/java/com/edugame/catalog/api/GameTemplateController.java#L23) · [GameTemplateService.java:29](../backend/src/main/java/com/edugame/catalog/service/GameTemplateService.java#L29) | [templateApi.ts:5](../frontend/src/api/templateApi.ts#L5) · [catalogStore.load](../frontend/src/store/catalogStore.ts#L17) · ChooseGamePage, HomePage, GameEditorPage (tên template) |
 | 3 | GET | `/games` | Thư viện game của giáo viên | [GameController.java:34](../backend/src/main/java/com/edugame/game/api/GameController.java#L34) · [GameService.java:57](../backend/src/main/java/com/edugame/game/service/GameService.java#L57) | [gameApi.ts:13](../frontend/src/api/gameApi.ts#L13) · [loadGames](../frontend/src/store/gameLibraryStore.ts#L154) · HomePage (trò chơi gần đây) |
 | 4 | POST | `/games` | Tạo game mới từ template | [GameController.java:40](../backend/src/main/java/com/edugame/game/api/GameController.java#L40) · [GameService.java:72](../backend/src/main/java/com/edugame/game/service/GameService.java#L72) | [gameApi.ts:18](../frontend/src/api/gameApi.ts#L18) · [createGame](../frontend/src/store/gameLibraryStore.ts#L179) (tạo game + 1 câu trống) · ChooseGamePage |
@@ -73,6 +81,94 @@ Chưa gửi lên server: ảnh chọn từ máy (chỉ xem trước bằng `blob
 ---
 
 ## Chi tiết
+
+### 0. `POST /auth/login` — Đăng nhập
+
+```json
+{ "username": "colan@edugame.local", "password": "123456", "remember": true }
+```
+
+```json
+{ "accessToken": "eyJhbGciOiJIUzI1NiJ9...", "tokenType": "Bearer", "expiresIn": 900 }
+```
+
+Kèm header `Set-Cookie: edugame_refresh=<sid>.<bí mật>; Path=/api/v1/auth; HttpOnly; Secure; SameSite=Strict`
+(thêm `Max-Age` 30 ngày khi `remember`, không thì cookie mất khi đóng trình duyệt và phiên tối đa 12 giờ không dùng).
+
+Access token là JWT ký HS256 (`app.auth.jwt.secret`): `sub` = mã người dùng (`u-lan`), `roles` = `["TEACHER"]`,
+`sid` = phiên đăng nhập (bảng `user_session`). Server từ chối access token ngay khi phiên của nó bị thu hồi / hết hạn.
+`username` nhận username (`colan`) hoặc email (không phân biệt hoa thường). Sai tên, sai mật khẩu, tài khoản bị khóa
+hoặc đã xóa đều trả cùng `401 INVALID_CREDENTIALS`. Mật khẩu lưu dạng BCrypt; hash cũ (như `{noop}` của seed dev)
+được tự băm lại bằng BCrypt ở lần đăng nhập đúng đầu tiên. Swagger UI: bấm **Authorize**, dán `accessToken`.
+
+Frontend giữ access token **chỉ trong bộ nhớ** ([authToken.ts](../frontend/src/utils/authToken.ts)), không lưu
+`localStorage`. Gọi `/auth/*` với `withCredentials` để trình duyệt gửi / nhận cookie ([session.ts](../frontend/src/api/session.ts)).
+
+### 0b. `POST /auth/refresh` — Gia hạn
+
+Không body, refresh token đi trong cookie. Trả cùng format mục 0 và cookie mới (refresh token đổi mỗi lần, phiên được
+gia hạn). Token vừa bị thay vẫn được chấp nhận trong 10 giây (2 tab refresh cùng lúc), khi đó trả access token mới
+nhưng **không** đổi cookie. Dùng lại token cũ hơn → coi là bị đánh cắp: thu hồi cả phiên (`TOKEN_REUSE`), mọi access
+token của phiên đó hết hiệu lực. Thất bại → `401 INVALID_REFRESH_TOKEN` và xoá cookie.
+
+Frontend ([httpClient.ts](../frontend/src/api/httpClient.ts)): mọi request gặp `401` thì refresh một lần rồi gửi lại;
+refresh thất bại mới về `/login`. Các lời gọi refresh đồng thời dùng chung 1 request.
+
+### 0c. `POST /auth/logout` — Đăng xuất → `204`
+
+Thu hồi phiên của cookie (`LOGOUT`) và xoá cookie. Access token của phiên bị từ chối ngay (`401 INVALID_TOKEN`), không
+phải đợi hết hạn. Không có cookie vẫn trả `204`.
+
+Bảo vệ CSRF cho 0b, 0c: cookie `SameSite=Strict` (trang web khác không gửi được cookie), CORS chỉ cho origin của
+frontend đọc response. Frontend và API phải cùng site (ví dụ `edugame.vn` và `api.edugame.vn`).
+
+### 0d–0f. Đăng ký giáo viên (xác nhận email bằng mã 6 số)
+
+Ai có email cũng đăng ký được. Tài khoản **chỉ được tạo khi nhập đúng mã** gửi về email
+([RegistrationService.java](../backend/src/main/java/com/edugame/auth/service/RegistrationService.java)).
+
+**0d. `POST /auth/register` → `202`**
+
+```json
+{ "email": "co.hoa@truong.edu.vn", "displayName": "Cô Hoa", "password": "matkhau123" }
+```
+
+```json
+{ "email": "co.hoa@truong.edu.vn", "expiresIn": 600, "resendAfter": 60 }
+```
+
+Lưu tạm tên + mật khẩu (đã băm BCrypt) cùng mã, gửi mail "Mã xác nhận EduGame: 123456". Email đã có tài khoản →
+**vẫn trả đúng câu trả lời trên** (không lộ email nào đã đăng ký), nhưng mail gửi tới là "Bạn đã có tài khoản EduGame".
+Mật khẩu ≥ 8 ký tự. Email được chuẩn hoá chữ thường, bỏ khoảng trắng.
+
+**0e. `POST /auth/register/resend` → `202`** — `{ "email": "..." }`: mã mới cho lần đăng ký đang chờ (mã cũ hết
+dùng được). Không có đăng ký đang chờ thì không gửi gì, câu trả lời vẫn như 0d.
+
+**0f. `POST /auth/register/verify`** — `{ "email": "...", "code": "123456" }`: mã đúng → tạo giáo viên (`TEACHER`,
+username lấy từ phần trước `@`, thêm số nếu trùng), mở phiên và trả **như đăng nhập** (access token + cookie).
+
+| Giới hạn | |
+|---|---|
+| Hiệu lực mã | 10 phút, dùng 1 lần, chỉ mã mới nhất của email có giá trị |
+| Nhập sai | 5 lần thì mã bị huỷ (`CODE_EXPIRED`), phải gửi lại |
+| Gửi mã | Cách nhau ≥ 60 giây (`RESEND_TOO_SOON`), tối đa 5 mail / giờ / email (`TOO_MANY_CODES`) |
+
+Cấu hình: `app.auth.verification.*`. Mail gửi qua SMTP **sau khi transaction commit**, chạy nền
+([AuthMailer.java](../backend/src/main/java/com/edugame/auth/mail/AuthMailer.java)); dev dùng Mailpit
+(<http://localhost:8025>), profile `dev` còn in mã ra log.
+
+### 0g–0h. Quên mật khẩu
+
+Cùng cơ chế mã 6 số và cùng giới hạn như đăng ký (purpose `RESET_PASSWORD`), giao diện ở `/forgot-password`.
+
+**0g. `POST /auth/password/forgot` → `202`** — `{ "email": "..." }`, trả như 0d. Chỉ gửi mail khi email thuộc tài khoản
+**đang hoạt động**; email lạ / tài khoản bị khóa: không gửi gì nhưng câu trả lời (và giới hạn gửi) y hệt, nên không dò
+được email nào có tài khoản. Gọi lại để nhận mã mới.
+
+**0h. `POST /auth/password/reset`** — `{ "email": "...", "code": "123456", "newPassword": "matkhaumoi1" }`: mã đúng →
+đặt mật khẩu mới (≥ 8 ký tự), **thu hồi mọi phiên đăng nhập cũ** của tài khoản (`PASSWORD_RESET`: ai còn biết mật khẩu cũ
+đều bị đăng xuất, access token cũ bị từ chối ngay), đánh dấu email đã xác minh, rồi đăng nhập (trả như đăng nhập, phiên
+không "ghi nhớ"). Lỗi: `INVALID_CODE`, `CODE_EXPIRED`.
 
 ### 1. `GET /me` — Giáo viên hiện tại
 
@@ -300,7 +396,16 @@ Mọi lỗi trả về dạng:
 | 400 | `TOO_MANY_ITEMS` | Vượt 200 câu / game | 9 |
 | 400 | `INVALID_ITEM_ORDER` | Danh sách id không khớp đúng các câu hiện có | 12 |
 | 400 | `INVALID_POINTS` | `points = 0` | 15 |
-| 401 | `UNAUTHENTICATED` | Không có người dùng hiện tại (chạy thiếu profile `dev`) | Tất cả trừ 2 |
+| 401 | `INVALID_CREDENTIALS` | Sai tên đăng nhập / mật khẩu, hoặc tài khoản bị khóa / đã xóa | 0 |
+| 401 | `INVALID_REFRESH_TOKEN` | Không có cookie, phiên hết hạn / bị thu hồi, token cũ bị dùng lại, tài khoản bị khóa | 0b |
+| 400 | `INVALID_CODE` | Mã xác nhận sai (còn lượt thử) | 0f, 0h |
+| 400 | `CODE_EXPIRED` | Mã hết hạn, đã dùng, sai quá 5 lần, hoặc không có mã | 0f, 0h |
+| 409 | `EMAIL_TAKEN` | Email vừa được đăng ký bởi người khác trong lúc chờ mã | 0f |
+| 429 | `RESEND_TOO_SOON` | Chưa đủ 60 giây từ mã trước | 0d, 0e, 0g |
+| 429 | `TOO_MANY_CODES` | Đã gửi 5 mã trong 1 giờ tới email này | 0d, 0e, 0g |
+| 401 | `UNAUTHENTICATED` | Không gửi access token, hoặc tài khoản đã bị khóa / xóa sau khi đăng nhập | Tất cả trừ 0, 2 |
+| 401 | `INVALID_TOKEN` | Access token sai định dạng, sai chữ ký, hết hạn, hoặc phiên đăng nhập của nó đã kết thúc (kèm header `WWW-Authenticate`) | Tất cả trừ 0, 2 |
+| 403 | `FORBIDDEN` | Đã đăng nhập nhưng vai trò không được phép | (chưa API nào giới hạn theo vai trò) |
 | 404 | `RESOURCE_NOT_FOUND` | Không tồn tại, không phải của mình, hoặc đã lưu trữ | Các API có `{code}` / `{id}`, 4 (template) |
 | 409 | `NOTHING_TO_PUBLISH` | Không có bản nháp để publish | 8 |
 | 500 | `INTERNAL_ERROR` | Lỗi không lường trước (xem log backend) | |
@@ -309,7 +414,7 @@ Mọi lỗi trả về dạng:
 
 | API | Mục đích |
 |---|---|
-| `POST /auth/login`, ... | Đăng nhập thật, thay cho người dùng mặc định |
+| Đổi mật khẩu khi đang đăng nhập, đăng nhập Google, danh sách thiết bị + đăng xuất mọi thiết bị, giới hạn số lần thử đăng nhập / đăng ký theo IP, CAPTCHA | Phần còn lại của đăng nhập |
 | `POST /game-sessions`, `POST /game-sessions/{id}/events`, `POST /game-sessions/{id}/undo`, `GET /game-sessions/{id}`, `POST /game-sessions/{id}/end` | Một ván chơi: điểm đội Lật ô, Undo, khôi phục khi F5 (bảng `game_session`, `player`, `session_event`) |
 | CRUD `/classrooms`, `/classrooms/{code}/students` | Tạo lớp, thêm / sửa / xóa học sinh |
 | `/games/{code}/assets` | Upload ảnh, âm thanh cho câu hỏi |

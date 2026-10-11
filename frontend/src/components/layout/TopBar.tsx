@@ -1,9 +1,11 @@
 import { App, Dropdown } from 'antd'
 import { BellIcon, ChevronDownIcon } from '@/components/ui/icons'
+import { useAuthStore } from '@/store/authStore'
 
 /** Bell + the teacher's chip. */
 export function TopBar({ teacherName, initial }: { teacherName: string; initial: string }) {
   const { message } = App.useApp()
+  const logout = useAuthStore((s) => s.logout)
   return (
     <div className="flex h-[48px] items-center justify-end gap-[22px] pr-1">
       <button
@@ -20,7 +22,7 @@ export function TopBar({ teacherName, initial }: { teacherName: string; initial:
         menu={{
           items: [
             { key: 'profile', label: 'Hồ sơ của tôi', onClick: () => message.info('Trang hồ sơ đang được hoàn thiện.') },
-            { key: 'logout', label: 'Đăng xuất', disabled: true },
+            { key: 'logout', label: 'Đăng xuất', onClick: () => void logout() },
           ],
         }}
       >

@@ -54,7 +54,8 @@ Quy ước chung:
 ## Tổng quan
 
 ```
-① TÀI KHOẢN          users
+① TÀI KHOẢN          users ──< user_session
+                     email_verification (theo email, chưa cần user)
 
 ② DANH MỤC GAME      game_category ──< game_template
 
@@ -73,6 +74,8 @@ Quy ước chung:
 | Khối | Bảng | Dùng để |
 |---|---|---|
 | ① | `users` | Tài khoản giáo viên, admin |
+| ① | `user_session` | Phiên đăng nhập trên một trình duyệt + refresh token (đã băm) |
+| ① | `email_verification` | Mã xác nhận email (đăng ký, quên mật khẩu) |
 | ② | `game_category` | Nhóm game trên menu |
 | ② | `game_template` | Loại game, chỉ định engine, schema và luật mặc định |
 | ③ | `game` | Game giáo viên tạo từ template |
@@ -93,6 +96,7 @@ Quy ước chung:
 erDiagram
     game_category ||--o{ game_template : groups
     game_template ||--o{ game : "created from"
+    users ||--o{ user_session : "signs in"
     users ||--o{ game : owns
     users ||--o{ classroom : teaches
     users ||--o{ game_session : hosts
@@ -301,7 +305,49 @@ Chỉ giáo viên và admin có tài khoản. Học sinh không có tài khoản
 | `role` | VARCHAR(20) | ✓ | `ADMIN`: quản trị hệ thống, quản lý template. `TEACHER`: tạo game, quản lý lớp, mở buổi chơi |
 | `status` | VARCHAR(20) | ✓ | `ACTIVE`, `LOCKED` (bị khóa), `DELETED` (xóa mềm, giữ lịch sử) |
 | `last_login_at` | TIMESTAMPTZ | | Lần đăng nhập gần nhất |
+| `email_verified_at` | TIMESTAMPTZ | | Lúc xác nhận email bằng mã (V4). `NULL`: tài khoản seed / do admin tạo |
 | `created_at` / `updated_at` | TIMESTAMPTZ | ✓ | Thời điểm tạo / sửa (trigger tự cập nhật) |
+
+### `user_session` — Phiên đăng nhập (V3)
+
+Mỗi lần đăng nhập trên một trình duyệt là một dòng. Trình duyệt giữ refresh token `<sid>.<bí mật>` trong cookie
+HttpOnly; bảng chỉ lưu SHA-256 của nó. Mỗi lần refresh, token được thay mới (rotation). Access token mang `sid`:
+phiên bị thu hồi hoặc hết hạn thì access token của phiên đó bị từ chối ngay. Phiên đã kết thúc quá 7 ngày được job
+`UserSessionService.deleteEndedSessions` (3:30 sáng) xoá.
+
+| Trường | Kiểu | Bắt buộc | Mục đích |
+|---|---|---|---|
+| `id` | BIGSERIAL | PK | Khóa nội bộ |
+| `sid` | UUID | ✓, unique | Mã phiên, nằm trong refresh token và claim `sid` của access token |
+| `user_id` | BIGINT | ✓, FK `users` | Chủ phiên |
+| `token_hash` | CHAR(64) | ✓ | SHA-256 (hex) của refresh token hiện tại |
+| `previous_token_hash` | CHAR(64) | | Token vừa bị thay. Còn được chấp nhận trong 10 giây (2 tab refresh cùng lúc); sau đó dùng lại = bị đánh cắp → thu hồi cả phiên |
+| `rotated_at` | TIMESTAMPTZ | | Lần thay token gần nhất |
+| `remember` | BOOLEAN | ✓ | "Ghi nhớ đăng nhập": cookie lâu dài, phiên 30 ngày; không thì cookie mất khi đóng trình duyệt, phiên 12 giờ |
+| `user_agent` | VARCHAR(255) | | Trình duyệt / thiết bị, để hiện danh sách phiên |
+| `expires_at` | TIMESTAMPTZ | ✓ | Hết hạn nếu không dùng; mỗi lần refresh được gia hạn |
+| `last_used_at` | TIMESTAMPTZ | ✓ | Lần refresh gần nhất |
+| `revoked_at` / `revoke_reason` | TIMESTAMPTZ / VARCHAR(20) | | Thu hồi: `LOGOUT`, `TOKEN_REUSE` (token cũ bị dùng lại), `USER_INACTIVE` (tài khoản bị khóa / xoá), `PASSWORD_RESET` (đặt lại mật khẩu, V5). Có cả hai hoặc không có cả hai |
+| `created_at` | TIMESTAMPTZ | ✓ | Lúc đăng nhập |
+
+### `email_verification` — Mã xác nhận email (V4)
+
+Mã 6 số gửi về email để chứng minh email là của người dùng: đăng ký (`REGISTER`), quên mật khẩu
+(`RESET_PASSWORD`). Chỉ lưu SHA-256 của mã; chỉ mã **mới nhất** của một email + mục đích có giá trị. Với đăng ký,
+tài khoản cần tạo nằm trong `payload` và chỉ thành dòng `users` khi nhập đúng mã. Không có FK: email chưa có user.
+Mã hết hạn quá 1 ngày được job `EmailVerificationService.deleteExpiredCodes` (3:40 sáng) xoá.
+
+| Trường | Kiểu | Bắt buộc | Mục đích |
+|---|---|---|---|
+| `id` | BIGSERIAL | PK | Khóa nội bộ |
+| `email` | VARCHAR(255) | ✓ | Email nhận mã, chữ thường |
+| `purpose` | VARCHAR(20) | ✓ | `REGISTER`, `RESET_PASSWORD` |
+| `code_hash` | CHAR(64) | ✓ | SHA-256 (hex) của mã |
+| `payload` | JSONB | | `REGISTER`: `{displayName, passwordHash}`; `RESET_PASSWORD`: `{userCode}`. `NULL` khi không có mã hợp lệ để gửi (đăng ký email đã có tài khoản, quên mật khẩu với email lạ): yêu cầu vẫn được ghi để tính giới hạn |
+| `attempts` | INT | ✓ | Số lần nhập sai; đủ 5 thì mã bị huỷ |
+| `expires_at` | TIMESTAMPTZ | ✓ | Hết hạn (10 phút) |
+| `consumed_at` | TIMESTAMPTZ | | Đã dùng |
+| `created_at` | TIMESTAMPTZ | ✓ | Lúc gửi. Dùng để giới hạn: cách nhau 60 giây, tối đa 5 mã / giờ / email |
 
 ---
 
@@ -579,6 +625,7 @@ GROUP BY s.id ORDER BY stars DESC LIMIT 5;
 
 | FK | Rule | Lý do |
 |---|---|---|
+| `user_session.user_id` | CASCADE | Phiên đăng nhập không có ý nghĩa khi không còn user |
 | `game_template.category_id` | RESTRICT | Không xóa nhóm còn template |
 | `game.owner_id`, `game.template_id` | RESTRICT | User / template xóa mềm |
 | `game.current_version_id` | NO ACTION, deferred | Composite: version thuộc đúng game |

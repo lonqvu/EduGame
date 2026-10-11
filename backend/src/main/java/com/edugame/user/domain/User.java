@@ -46,4 +46,22 @@ public class User extends AuditableEntity {
 
     @Column(name = "last_login_at")
     private Instant lastLoginAt;
+
+    /** When the user proved the email is theirs (sign-up code); {@code null} for seeded / admin-made accounts. */
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
+
+    /** A teacher who signed up and confirmed the email address. */
+    public static User verifiedTeacher(String code, String username, String passwordHash, String displayName,
+                                       String email, Instant verifiedAt) {
+        User user = new User();
+        user.code = code;
+        user.username = username;
+        user.passwordHash = passwordHash;
+        user.displayName = displayName;
+        user.email = email;
+        user.role = UserRole.TEACHER;
+        user.emailVerifiedAt = verifiedAt;
+        return user;
+    }
 }

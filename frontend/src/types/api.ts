@@ -17,6 +17,53 @@ export interface FieldViolation {
 // DTOs of /api/v1 (see docs/API.md). Names mirror the backend records.
 // ---------------------------------------------------------------------------
 
+export interface LoginRequest {
+  /** Username or email */
+  username: string
+  password: string
+  /** "Ghi nhớ đăng nhập": keep the session after the browser closes */
+  remember: boolean
+}
+
+export interface RegisterRequest {
+  email: string
+  /** "Cô Hoa" */
+  displayName: string
+  /** At least 8 characters */
+  password: string
+}
+
+export interface VerifyEmailRequest {
+  email: string
+  /** 6 digits from the mail */
+  code: string
+}
+
+export interface ResetPasswordRequest {
+  email: string
+  /** 6 digits from the mail */
+  code: string
+  /** At least 8 characters */
+  newPassword: string
+}
+
+/** Answer to sign-up / resend / forgotten password (the same whether or not the address has an account). */
+export interface CodeSentResponse {
+  /** Normalized (lower-case) */
+  email: string
+  /** Seconds the code works */
+  expiresIn: number
+  /** Seconds before another code can be asked for */
+  resendAfter: number
+}
+
+export interface TokenResponse {
+  accessToken: string
+  tokenType: 'Bearer'
+  /** Seconds until the token expires */
+  expiresIn: number
+}
+
 export interface UserResponse {
   code: string
   username: string
