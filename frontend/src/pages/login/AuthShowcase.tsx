@@ -22,7 +22,8 @@ export interface ShowcaseContent {
     alt: string
     /** Position and size inside the panel (absolute, right aligned). */
     className: string
-    /** Fade into the sky: always on the left, at the bottom when the art does not end there. */
+    /** Fade into the sky: always on the left, at the top and bottom when the art does not end there. */
+    fadeTop: boolean
     fadeBottom: boolean
   }
   /** The stats card at the bottom ("10.000+ Giáo viên tin dùng"...). */
@@ -37,8 +38,11 @@ const STATS: { icon: ReactNode; badge: string; value: string; label: string }[] 
   { icon: <FilledStarIcon size={28} stroke="#F5B400" fill="#FFC928" />, badge: 'bg-sun-soft', value: '500.000+', label: 'Học sinh tham gia' },
 ]
 
-function fadeMask(fadeBottom: boolean): CSSProperties {
-  const mask = `linear-gradient(to right, transparent 0, #000 12%), linear-gradient(to bottom, #000 ${fadeBottom ? '88%' : '100%'}, transparent 100%)`
+function fadeMask({ fadeTop, fadeBottom }: ShowcaseContent['image']): CSSProperties {
+  const mask = [
+    'linear-gradient(to right, transparent 0, #000 16%)',
+    `linear-gradient(to bottom, ${fadeTop ? 'transparent 0, #000 24%' : '#000 0'}, #000 ${fadeBottom ? '86%' : '100%'}, transparent 100%)`,
+  ].join(', ')
   return { maskImage: mask, maskComposite: 'intersect', WebkitMaskImage: mask, WebkitMaskComposite: 'source-in' }
 }
 
@@ -70,7 +74,7 @@ export function AuthShowcase({ content }: { content: ShowcaseContent }) {
         )}
       </div>
 
-      <img src={image.src} alt={image.alt} className={`absolute right-0 object-cover ${image.className}`} style={fadeMask(image.fadeBottom)} />
+      <img src={image.src} alt={image.alt} className={`absolute right-0 object-cover ${image.className}`} style={fadeMask(image)} />
 
       <div className="relative flex flex-1 flex-col px-[7.6%] pt-[clamp(24px,3.7vh,36px)] pb-[clamp(24px,6vh,58px)]">
         <BrandLogo size={46} />

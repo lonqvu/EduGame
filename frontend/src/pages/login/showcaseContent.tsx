@@ -59,6 +59,7 @@ export const LOGIN_SHOWCASE: ShowcaseContent = {
     alt: 'Cô giáo cùng các bạn học sinh vui vẻ học trong lớp',
     // Sits on the stats card.
     className: 'bottom-[17%] aspect-[595/782] max-h-[83%] w-[min(60.4%,calc(100%-390px))] object-[38%_100%]',
+    fadeTop: false,
     fadeBottom: true,
   },
   stats: true,
@@ -81,7 +82,10 @@ export const REGISTER_SHOWCASE: ShowcaseContent = {
   image: {
     src: '/assets/auth/register-hero.jpg',
     alt: 'Cô giáo cầm máy tính bảng giữa các bạn học sinh trong lớp',
-    className: 'bottom-[17%] aspect-[495/455] max-h-[80%] w-[min(60%,calc(100%-430px))] object-[50%_100%]',
+    // Starts where the title ends (em = the title's size) and ends behind the stats card.
+    className:
+      'bottom-[calc(clamp(24px,6vh,58px)+34px)] w-[min(calc(92.4%-7.8em),calc(92.4%-330px))] aspect-[495/455] max-h-[78%] text-[clamp(36px,2.9vw,50px)] object-[100%_100%]',
+    fadeTop: true,
     fadeBottom: true,
   },
   stats: true,
@@ -129,8 +133,11 @@ export const FORGOT_SHOWCASE: ShowcaseContent = {
   image: {
     src: '/assets/auth/forgot-hero.jpg',
     alt: 'Cô giáo và hai bạn nhỏ bên máy tính, cạnh biểu tượng thư',
-    // The art ends in clouds: it reaches the bottom edge.
-    className: 'bottom-0 aspect-[552/451] max-h-[86%] w-[min(64%,calc(100%-380px))] object-[50%_100%]',
+    // Starts where the text ends (em = the title's size); the art ends in clouds, so it reaches the bottom edge.
+    // The box is a little narrower than the art: the plants on its left are cut first.
+    className:
+      'bottom-0 w-[min(calc(92.4%-6.6em),calc(92.4%-320px))] aspect-[500/451] max-h-[86%] text-[clamp(36px,2.9vw,50px)] object-[100%_100%]',
+    fadeTop: true,
     fadeBottom: false,
   },
   stats: false,
