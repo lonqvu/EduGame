@@ -106,6 +106,7 @@ Mở <http://localhost:5173>.
 | Type-check frontend | `cd frontend && npm run typecheck` |
 | Lint frontend | `cd frontend && npm run lint` |
 | Chạy test frontend (Vitest) | `cd frontend && npm test` |
+| Chạy test trình duyệt chơi thử cả 6 trò (Playwright; cần backend profile `dev` + `npm run dev` đang chạy; lần đầu: `npx playwright install chromium`) | `cd frontend && npm run e2e` |
 | Dừng DB | `docker compose down` |
 | Xoá sạch dữ liệu DB | `docker compose down -v` |
 

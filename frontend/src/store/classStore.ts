@@ -22,6 +22,12 @@ interface ClassState {
 
 let inflight: Promise<void> | null = null
 
+/**
+ * Star requests still waiting for an answer, by student. The server's totals are only taken when a request
+ * ran alone: with quick clicks the answers may come back out of order, and an older answer would undo newer stars.
+ */
+const awarding = new Map<string, { pending: number; overlapped: boolean }>()
+
 export const useClassStore = create<ClassState>()((set, get) => ({
   status: 'idle',
   classroomCode: null,
@@ -55,15 +61,29 @@ export const useClassStore = create<ClassState>()((set, get) => ({
     const { classroomCode } = get()
     if (!classroomCode) return
     const addStars = (delta: number) =>
-      set((s) => ({ students: s.students.map((st) => (st.id === studentId ? { ...st, stars: st.stars + delta } : st)) }))
+      set((s) => ({
+        students: s.students.map((st) =>
+          st.id === studentId ? { ...st, stars: st.stars + delta, totalStars: st.totalStars + delta } : st,
+        ),
+      }))
+
+    const track = awarding.get(studentId) ?? { pending: 0, overlapped: false }
+    awarding.set(studentId, track)
+    track.pending++
+    if (track.pending > 1) track.overlapped = true
 
     addStars(count)
     try {
       const saved = await classroomApi.awardStars(classroomCode, Number(studentId), count)
-      set((s) => ({ students: s.students.map((st) => (st.id === studentId ? toStudent(saved) : st)) }))
+      if (track.pending === 1 && !track.overlapped) {
+        set((s) => ({ students: s.students.map((st) => (st.id === studentId ? toStudent(saved) : st)) }))
+      }
     } catch (error) {
       addStars(-count)
       throw error
+    } finally {
+      track.pending--
+      if (track.pending === 0) awarding.delete(studentId)
     }
   },
 }))

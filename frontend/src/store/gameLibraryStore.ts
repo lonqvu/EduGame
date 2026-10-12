@@ -19,7 +19,8 @@ export type SaveState = 'saved' | 'saving' | 'error'
  *
  * Edits are applied to the store at once (the editor autosaves on every keystroke), then sent to the backend:
  * typing is debounced per item / title, and all requests go through one queue so they reach the server in
- * the order they were made. If a request fails, the game is reloaded from the server.
+ * the order they were made. If a request fails, the game is reloaded from the server
+ * (again, if the teacher edits it while it loads, so nothing typed meanwhile is lost).
  */
 interface GameLibraryState {
   games: GameSummary[]
@@ -55,6 +56,9 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
   let running = 0
   /** Debounced saves, by key ("title:<game>", "item:<game>:<item>"). */
   const timers = new Map<string, { gameId: string; timer: ReturnType<typeof setTimeout>; run: () => Promise<unknown> }>()
+  /** Local edits made so far, by game: a reload that raced with an edit must not overwrite it. */
+  const edits = new Map<string, number>()
+  const edited = (gameId: string) => edits.set(gameId, (edits.get(gameId) ?? 0) + 1)
 
   const refreshSaveState = () => {
     if (running === 0 && timers.size === 0) set((s) => (s.saveState === 'error' ? s : { saveState: 'saved' }))
@@ -171,13 +175,22 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
       if (current !== 'play' && current !== 'edit') {
         set((s) => ({ gameStatus: { ...s.gameStatus, [gameId]: 'loading' } }))
       }
-      flush(gameId)
-      await queue
-      try {
-        applyGame(mode === 'edit' ? await gameApi.openDraft(gameId) : await gameApi.getGame(gameId), mode)
+      for (;;) {
+        const editsBefore = edits.get(gameId) ?? 0
+        flush(gameId)
+        await queue
+        let response: GameResponse
+        try {
+          response = mode === 'edit' ? await gameApi.openDraft(gameId) : await gameApi.getGame(gameId)
+        } catch (error) {
+          set((s) => ({ gameStatus: { ...s.gameStatus, [gameId]: isNotFound(error) ? 'missing' : 'error' } }))
+          return
+        }
+        // The teacher kept editing while this was loading: save that first, then load again.
+        if ((edits.get(gameId) ?? 0) !== editsBefore) continue
+        applyGame(response, mode)
         if (get().saveState === 'error' && running === 0) set({ saveState: 'saved' })
-      } catch (error) {
-        set((s) => ({ gameStatus: { ...s.gameStatus, [gameId]: isNotFound(error) ? 'missing' : 'error' } }))
+        return
       }
     },
 
@@ -197,6 +210,7 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
     },
 
     renameGame: (gameId, title) => {
+      edited(gameId)
       set((s) => ({ games: s.games.map((g) => (g.id === gameId ? { ...g, title } : g)) }))
       schedule(`title:${gameId}`, gameId, async () => {
         const latest = get().games.find((g) => g.id === gameId)?.title.trim()
@@ -217,6 +231,7 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
       const type = typeOf(gameId)
       const codec = itemCodec(type)
       if (!codec) throw new Error(`${type} has no items`)
+      edited(gameId)
       flush(gameId)
       const response = await enqueue(gameId, () =>
         gameApi.addItems(gameId, drafts.map((d) => toCreateRequest(type, d))),
@@ -228,6 +243,7 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
     },
 
     updateItem: (gameId, itemId, patch) => {
+      edited(gameId)
       setItems(
         gameId,
         itemsOf(gameId).map((item) => (item.id === itemId ? ({ ...item, ...patch } as GameItem) : item)),
@@ -240,6 +256,7 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
     },
 
     removeItem: (gameId, itemId) => {
+      edited(gameId)
       cancel(`item:${gameId}:${itemId}`)
       setItems(
         gameId,
@@ -249,6 +266,7 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
     },
 
     reorderItems: (gameId, orderedIds) => {
+      edited(gameId)
       const byId = new Map(itemsOf(gameId).map((item) => [item.id, item]))
       setItems(
         gameId,

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import { award, freshTeams, miss, type TeamScore } from '@/game-engine/shared/teamScore'
 
 export type { TeamScore }
@@ -24,35 +25,48 @@ interface GridBoardState extends Snapshot {
   undo: () => void
 }
 
-export const useGridBoardStore = create<GridBoardState>()((set, get) => ({
-  gameId: null,
-  teams: freshTeams(),
-  openedTiles: [],
-  turn: 0,
-  history: [],
+/**
+ * Kept in the tab's sessionStorage, so reloading the projector page (F5) mid-game does not lose the scores and the
+ * opened tiles.
+ */
+export const useGridBoardStore = create<GridBoardState>()(
+  persist(
+    (set, get) => ({
+      gameId: null,
+      teams: freshTeams(),
+      openedTiles: [],
+      turn: 0,
+      history: [],
 
-  ensureRound: (gameId) => {
-    if (get().gameId !== gameId) {
-      set({ gameId, teams: freshTeams(), openedTiles: [], turn: 0, history: [] })
-    }
-  },
+      ensureRound: (gameId) => {
+        if (get().gameId !== gameId) {
+          set({ gameId, teams: freshTeams(), openedTiles: [], turn: 0, history: [] })
+        }
+      },
 
-  restart: () => set({ teams: freshTeams(), openedTiles: [], turn: 0, history: [] }),
+      restart: () => set({ teams: freshTeams(), openedTiles: [], turn: 0, history: [] }),
 
-  answer: (tileNo, teamId, correct, points) =>
-    set((s) => {
-      if (s.openedTiles.includes(tileNo) || !s.teams.some((t) => t.id === teamId)) return s
-      return {
-        history: [...s.history, { teams: s.teams, openedTiles: s.openedTiles, turn: s.turn }],
-        teams: correct ? award(s.teams, teamId, points) : miss(s.teams, teamId),
-        openedTiles: correct ? [...s.openedTiles, tileNo] : s.openedTiles,
-        turn: (s.turn + 1) % s.teams.length,
-      }
+      answer: (tileNo, teamId, correct, points) =>
+        set((s) => {
+          if (s.openedTiles.includes(tileNo) || !s.teams.some((t) => t.id === teamId)) return s
+          return {
+            history: [...s.history, { teams: s.teams, openedTiles: s.openedTiles, turn: s.turn }],
+            teams: correct ? award(s.teams, teamId, points) : miss(s.teams, teamId),
+            openedTiles: correct ? [...s.openedTiles, tileNo] : s.openedTiles,
+            turn: (s.turn + 1) % s.teams.length,
+          }
+        }),
+
+      undo: () =>
+        set((s) => {
+          const previous = s.history.at(-1)
+          return previous ? { ...previous, history: s.history.slice(0, -1) } : s
+        }),
     }),
-
-  undo: () =>
-    set((s) => {
-      const previous = s.history.at(-1)
-      return previous ? { ...previous, history: s.history.slice(0, -1) } : s
-    }),
-}))
+    {
+      name: 'edugame.gridBoard',
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: ({ gameId, teams, openedTiles, turn, history }) => ({ gameId, teams, openedTiles, turn, history }),
+    },
+  ),
+)

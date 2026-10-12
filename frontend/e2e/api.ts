@@ -1,0 +1,111 @@
+import { request, type APIRequestContext, type BrowserContext } from '@playwright/test'
+
+export const TEACHER = { username: 'colan@edugame.local', password: '123456' }
+const API_URL = process.env.E2E_API_URL ?? 'http://localhost:8080/api/v1/'
+
+/** Signs the browser in like the login page does: the backend sets the refresh token cookie, the app restores from it. */
+export async function signInBrowser(context: BrowserContext) {
+  const res = await context.request.post(`${API_URL}auth/login`, { data: { ...TEACHER, remember: true } })
+  if (!res.ok()) throw new Error(`Sign-in failed: ${res.status()} ${await res.text()}`)
+}
+
+export interface Item {
+  id: number
+  itemType: string
+  content: Record<string, any>
+  solution?: Record<string, any>
+}
+
+export interface Game {
+  code: string
+  title: string
+  items: Item[]
+}
+
+/** The backend, signed in as the same teacher as the browser (to set up games and check what was saved). */
+export class Backend {
+  private readonly http: APIRequestContext
+  private readonly created: string[] = []
+
+  private constructor(http: APIRequestContext) {
+    this.http = http
+  }
+
+  static async signIn(): Promise<Backend> {
+    const anonymous = await request.newContext({ baseURL: API_URL })
+    const login = await anonymous.post('auth/login', { data: TEACHER })
+    if (!login.ok()) throw new Error(`Sign-in failed: ${login.status()} ${await login.text()}`)
+    const { accessToken } = await login.json()
+    await anonymous.dispose()
+    return new Backend(await request.newContext({ baseURL: API_URL, extraHTTPHeaders: { Authorization: `Bearer ${accessToken}` } }))
+  }
+
+  private async call<T>(method: 'get' | 'post' | 'patch' | 'delete', path: string, data?: unknown): Promise<T> {
+    const res = await this.http[method](path, data === undefined ? {} : { data })
+    if (!res.ok()) throw new Error(`${method.toUpperCase()} ${path}: ${res.status()} ${await res.text()}`)
+    return res.status() === 204 ? (undefined as T) : res.json()
+  }
+
+  /** A new game with these items; archived again by `cleanUp`. */
+  async createGame(templateCode: string, title: string, items: Omit<Item, 'id'>[] = []): Promise<Game> {
+    const game = await this.call<Game>('post', 'games', { templateCode, title, grade: 3 })
+    this.created.push(game.code)
+    return items.length ? this.call<Game>('post', `games/${game.code}/items`, { items }) : game
+  }
+
+  game(code: string) {
+    return this.call<Game>('get', `games/${code}`)
+  }
+
+  library() {
+    return this.call<{ code: string; title: string }[]>('get', 'games')
+  }
+
+  students() {
+    return this.call<{ id: number; displayName: string; weeklyStars: number; totalStars: number }[]>('get', 'classrooms/c-3a/students')
+  }
+
+  /** Undoes a star a test gave, so the class keeps its real stars. */
+  takeBackStar(studentId: number) {
+    return this.call('post', `classrooms/c-3a/students/${studentId}/points`, { points: -1, reason: 'E2E' })
+  }
+
+  adopt(code: string) {
+    this.created.push(code)
+  }
+
+  async cleanUp() {
+    for (const code of this.created.splice(0)) {
+      await this.http.delete(`games/${code}`)
+    }
+    await this.http.dispose()
+  }
+}
+
+export const quizItem = (text: string, options: string[], correct: number) => ({
+  itemType: 'SINGLE_CHOICE',
+  content: { text, options: options.map((t, i) => ({ id: 'abcdef'[i], text: t })) },
+  solution: { correct: ['abcdef'[correct]] },
+})
+
+export const pairSet = (itemType: 'PAIR_SET' | 'CARD_SET', pairs: [string, string][]) =>
+  itemType === 'PAIR_SET'
+    ? {
+        itemType,
+        content: {
+          left: pairs.map(([a], i) => ({ id: `l${i}`, text: a })),
+          right: pairs.map(([, b], i) => ({ id: `r${i}`, text: b })),
+        },
+        solution: { pairs: pairs.map((_, i) => [`l${i}`, `r${i}`]) },
+      }
+    : {
+        itemType,
+        content: { cards: pairs.flatMap(([a, b], i) => [{ id: `a${i}`, text: a }, { id: `b${i}`, text: b }]) },
+        solution: { pairs: pairs.map((_, i) => [`a${i}`, `b${i}`]) },
+      }
+
+export const gridQuestion = (text: string, answer: string, points = 10) => ({
+  itemType: 'OPEN_QUESTION',
+  content: { text, points },
+  solution: { answer },
+})
