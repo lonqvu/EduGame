@@ -447,3 +447,103 @@ BEGIN
     JOIN game g ON g.code = (ARRAY['g-quiz-vn', 'g-addition', 'g-match-places', 'g-animals'])[1 + s.n % 4];
 END;
 $$;
+
+-- ⑥ Question sets (V10) ---------------------------------------------------------
+
+-- A set of Cô Lan with its questions: {"q", "o": options, "c": correct index} for multiple choice,
+-- {"q", "a": answer} for short answer; "e" is an optional explanation.
+CREATE OR REPLACE FUNCTION pg_temp.seed_question_set(p_code TEXT, p_title TEXT, p_description TEXT, p_subject TEXT,
+                                                     p_grade INT, p_age INTERVAL, p_questions JSONB)
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+    v_set_id BIGINT;
+BEGIN
+    IF EXISTS (SELECT 1 FROM question_set WHERE code = p_code) THEN
+        RETURN;
+    END IF;
+    INSERT INTO question_set (code, owner_id, title, description, subject, grade, created_at, updated_at)
+    VALUES (p_code, (SELECT id FROM users WHERE code = 'u-lan'), p_title, p_description, p_subject, p_grade,
+            now() - p_age - interval '3 days', now() - p_age)
+    RETURNING id INTO v_set_id;
+
+    INSERT INTO question (question_set_id, position, question_type, text, options, correct_option, answer, explanation)
+    SELECT v_set_id, q.ord - 1,
+           CASE WHEN q.value ? 'o' THEN 'MULTIPLE_CHOICE' ELSE 'SHORT_ANSWER' END,
+           q.value ->> 'q', q.value -> 'o', (q.value ->> 'c')::SMALLINT, q.value ->> 'a', q.value ->> 'e'
+    FROM jsonb_array_elements(p_questions) WITH ORDINALITY AS q (value, ord);
+END;
+$$;
+
+SELECT pg_temp.seed_question_set('qs-toan2-cong100', 'Toán lớp 2 - Phép cộng trong phạm vi 100',
+    'Phép cộng có nhớ và không nhớ trong phạm vi 100, phù hợp cho hoạt động ôn tập và củng cố kiến thức.', 'TOAN', 2,
+    interval '2 hours', '[
+    {"q": "25 + 13 = ?", "o": ["38", "37", "48", "28"], "c": 0},
+    {"q": "47 + 8 = ?", "o": ["54", "55", "56"], "c": 1, "e": "7 cộng 8 bằng 15, viết 5 nhớ 1; 4 thêm 1 là 5."},
+    {"q": "36 + 24 = ?", "o": ["50", "60", "70", "62"], "c": 1},
+    {"q": "Số liền sau của 59 + 1 là số nào?", "o": ["60", "61", "59"], "c": 1},
+    {"q": "68 + 17 = ?", "o": ["75", "85", "84", "95"], "c": 1},
+    {"q": "Mẹ có 35 quả cam, mẹ mua thêm 27 quả. Mẹ có tất cả bao nhiêu quả cam?", "o": ["52", "62", "63", "61"], "c": 1},
+    {"q": "40 + 50 = ?", "o": ["80", "90", "100"], "c": 1},
+    {"q": "Tổng của 19 và 19 là bao nhiêu?", "a": "38"}
+]');
+
+SELECT pg_temp.seed_question_set('qs-tv1-doc-hieu', 'Tiếng Việt - Luyện đọc hiểu',
+    'Câu hỏi giúp học sinh rèn kỹ năng đọc hiểu qua các đoạn văn ngắn, câu hỏi đa dạng.', 'TIENG_VIET', 1,
+    interval '2 days', '[
+    {"q": "\"Mèo con đi học, quên cả mang cặp.\" Mèo con quên mang gì?", "a": "Cái cặp"},
+    {"q": "\"Bé Na dậy sớm tưới cây cho mẹ.\" Ai dậy sớm tưới cây?", "a": "Bé Na"},
+    {"q": "Tìm từ chỉ màu sắc trong câu: \"Lá cờ đỏ tung bay trước gió.\"", "a": "Đỏ"},
+    {"q": "\"Trời mưa, đàn kiến vội vã tha mồi về tổ.\" Đàn kiến làm gì khi trời mưa?", "a": "Tha mồi về tổ"},
+    {"q": "Từ nào trái nghĩa với \"chăm chỉ\"?", "a": "Lười biếng"},
+    {"q": "Đặt một câu có từ \"ngoan ngoãn\".", "a": "Em bé rất ngoan ngoãn."}
+]');
+
+SELECT pg_temp.seed_question_set('qs-ta3-tu-vung', 'Tiếng Anh - Từ vựng theo chủ đề',
+    'Tổng hợp các câu hỏi từ vựng theo chủ đề: động vật, đồ vật, gia đình.', 'TIENG_ANH', 3,
+    interval '4 days', '[
+    {"q": "\"Con mèo\" trong tiếng Anh là gì?", "o": ["Dog", "Cat", "Bird", "Fish"], "c": 1},
+    {"q": "\"Book\" nghĩa là gì?", "o": ["Cái bút", "Quyển sách", "Cái bàn"], "c": 1},
+    {"q": "\"Mother\" là ai trong gia đình?", "o": ["Bố", "Mẹ", "Anh trai", "Bà"], "c": 1},
+    {"q": "Con vật nào là \"elephant\"?", "o": ["Con voi", "Con hổ", "Con khỉ"], "c": 0},
+    {"q": "\"Cái thước kẻ\" trong tiếng Anh là gì?", "o": ["Ruler", "Rubber", "Pencil", "Bag"], "c": 0},
+    {"q": "\"Brother\" nghĩa là gì?", "o": ["Chị gái", "Anh/em trai", "Ông"], "c": 1},
+    {"q": "Từ nào chỉ một con vật biết bay?", "o": ["Fish", "Bird", "Cow"], "c": 1}
+]');
+
+SELECT pg_temp.seed_question_set('qs-tnxh2-tu-nhien', 'Tự nhiên và Xã hội - Khám phá thế giới tự nhiên',
+    'Câu hỏi tìm hiểu về cây cối, động vật và môi trường xung quanh.', 'TU_NHIEN_XA_HOI', 2,
+    interval '7 days', '[
+    {"q": "Cây xanh cần gì để sống?", "o": ["Nước, ánh sáng và không khí", "Chỉ cần đất", "Chỉ cần nước"], "c": 0},
+    {"q": "Con vật nào sống dưới nước?", "o": ["Con cá", "Con gà", "Con mèo"], "c": 0},
+    {"q": "Bộ phận nào của cây hút nước từ đất?", "o": ["Lá", "Hoa", "Rễ", "Quả"], "c": 2},
+    {"q": "Việc làm nào giúp bảo vệ môi trường?", "o": ["Vứt rác bừa bãi", "Trồng thêm cây xanh", "Bẻ cành cây"], "c": 1},
+    {"q": "Con vật nào đẻ trứng?", "o": ["Con gà", "Con chó", "Con bò"], "c": 0}
+]');
+
+SELECT pg_temp.seed_question_set('qs-ksn1-ky-nang', 'Kỹ năng sống - Ứng xử hằng ngày',
+    'Các câu hỏi giúp học sinh rèn luyện kỹ năng sống hằng ngày.', 'KHAC', 1,
+    interval '11 days', '[
+    {"q": "Khi gặp thầy cô giáo, em cần làm gì?", "o": ["Lễ phép chào hỏi", "Đi lướt qua", "Quay mặt đi"], "c": 0},
+    {"q": "Trước khi ăn, em cần làm gì?", "o": ["Rửa tay sạch", "Chơi điện thoại", "Chạy nhảy"], "c": 0},
+    {"q": "Khi qua đường, em đi ở đâu?", "o": ["Vạch kẻ cho người đi bộ", "Bất kỳ chỗ nào", "Giữa lòng đường"], "c": 0},
+    {"q": "Khi bạn bị ngã, em nên làm gì?", "a": "Đỡ bạn dậy và hỏi thăm bạn"}
+]');
+
+SELECT pg_temp.seed_question_set('qs-toan3-bang-nhan', 'Toán lớp 3 - Bảng nhân 6, 7, 8',
+    'Ôn tập bảng nhân, có cả câu trắc nghiệm và câu trả lời nhanh.', 'TOAN', 3,
+    interval '15 days', '[
+    {"q": "6 x 7 = ?", "o": ["42", "36", "48"], "c": 0},
+    {"q": "8 x 8 = ?", "o": ["56", "64", "72"], "c": 1},
+    {"q": "7 x 9 = ?", "o": ["63", "56", "72", "81"], "c": 0},
+    {"q": "Mỗi hộp có 6 cái bánh. 5 hộp có bao nhiêu cái bánh?", "a": "30 cái bánh"},
+    {"q": "8 x 4 = ?", "a": "32"}
+]');
+
+SELECT pg_temp.seed_question_set('qs-kh4-co-the', 'Khoa học - Cơ thể người và sức khỏe',
+    'Tìm hiểu các bộ phận cơ thể và thói quen tốt cho sức khỏe.', 'KHOA_HOC', 4,
+    interval '20 days', '[
+    {"q": "Cơ quan nào giúp chúng ta thở?", "o": ["Phổi", "Dạ dày", "Tim"], "c": 0},
+    {"q": "Nên đánh răng mấy lần một ngày?", "o": ["Ít nhất 2 lần", "1 lần mỗi tuần", "Không cần"], "c": 0},
+    {"q": "Nhóm thức ăn nào giàu vitamin?", "o": ["Rau và hoa quả", "Kẹo", "Nước ngọt"], "c": 0},
+    {"q": "Tim có nhiệm vụ gì?", "o": ["Bơm máu đi khắp cơ thể", "Tiêu hóa thức ăn", "Giúp ta nhìn"], "c": 0}
+]');

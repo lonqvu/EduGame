@@ -1,8 +1,10 @@
 /**
  * Module: question.
  * <p>
- * Questions and answers belonging to a game.
+ * Question sets ("Bộ câu hỏi"): a teacher's question bank, kept apart from the games. A set is used in a game by
+ * copying its questions into a new game of a question template (quiz family, Lật ô); each such game is recorded as
+ * a use of the set.
  * <p>
- * Not implemented yet. Follow the module layout described in docs/ARCHITECTURE.md.
+ * Follows the module layout described in docs/ARCHITECTURE.md.
  */
 package com.edugame.question;

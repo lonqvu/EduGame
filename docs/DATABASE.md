@@ -10,6 +10,7 @@ PostgreSQL 13+ · Flyway (`src/main/resources/db/migration`)
 | `V7__add_classroom_games.sql` | Nhóm `CLASS_TOOL` và 8 template: GOLDEN_BELL, BOAT_RACE (dùng item như QUIZ), CROSSWORD (`CROSSWORD_ROW`), ORDERING (`ORDER_SET`), SORTING (`SORT_SET`), TEAM_MAKER, TIMER, DICE |
 | `V8__rename_random_tool_category.sql` | Nhóm `RANDOM_TOOL` đổi tên thành "Gọi tên" (vòng quay và các trò gọi tên) |
 | `V9__classroom_management.sql` | `classroom.school_name`, `classroom.avatar`, trạng thái `PAUSED`, tên lớp không trùng (theo giáo viên + năm học, trừ lớp đã xóa), index đếm `game_session` theo lớp |
+| `V10__question_sets.sql` | Bộ câu hỏi: `question_set`, `question` (trắc nghiệm / tự luận, ràng buộc đúng hình dạng từng loại), `question_set_use` (trò chơi tạo từ bộ) |
 | `db/dev-seed/R__dev_seed.sql` | **Chỉ profile `dev`**: dữ liệu demo (Cô Lan, lớp 3A, một game mẫu cho mỗi trò có câu hỏi). Idempotent, chạy lại khi file đổi |
 
 Các thay đổi sau này tạo migration mới `V2__...`, `V3__...`; **không sửa V1** khi đã chạy trên môi trường dùng chung.
@@ -646,6 +647,46 @@ GROUP BY s.id ORDER BY stars DESC LIMIT 5;
 
 ---
 
+## ⑥ Bộ câu hỏi
+
+Ngân hàng câu hỏi của giáo viên, tách khỏi game. "Sử dụng" một bộ thì **chép** câu hỏi sang một game mới: game chơi
+được tiếp dù bộ bị sửa hay xóa.
+
+### `question_set`
+
+| Cột | Kiểu | Bắt buộc | Ghi chú |
+|---|---|---|---|
+| `code` | VARCHAR(30) | ✓ | `qs-` + 10 ký tự, unique |
+| `owner_id` | BIGINT | ✓ | Giáo viên |
+| `title` | VARCHAR(120) | ✓ | Không trống |
+| `description` | VARCHAR(500) | | |
+| `subject` | VARCHAR(30) | ✓ | `TOAN` / `TIENG_VIET` / `TIENG_ANH` / `TU_NHIEN_XA_HOI` / `KHOA_HOC` / `KHAC` |
+| `grade` | SMALLINT | | 1–12; không ghi = dùng cho mọi khối |
+| `status` | VARCHAR(20) | ✓ | `ACTIVE` / `ARCHIVED` (đã xóa) |
+| `created_at`, `updated_at` | TIMESTAMPTZ | ✓ | `updated_at` đổi cả khi sửa câu hỏi |
+
+### `question`
+
+| Cột | Kiểu | Bắt buộc | Ghi chú |
+|---|---|---|---|
+| `question_set_id` | BIGINT | ✓ | |
+| `position` | INT | ✓ | 0..n-1, unique trong bộ (deferrable để sắp xếp lại) |
+| `question_type` | VARCHAR(20) | ✓ | `MULTIPLE_CHOICE` / `SHORT_ANSWER` |
+| `text` | VARCHAR(500) | ✓ | Không trống |
+| `options` | JSONB | | Trắc nghiệm: mảng 2–6 chuỗi |
+| `correct_option` | SMALLINT | | Trắc nghiệm: chỉ số đáp án đúng, nằm trong `options` |
+| `answer` | VARCHAR(200) | | Tự luận: câu trả lời, không trống |
+| `explanation` | VARCHAR(500) | | |
+
+`ck_question_shape` bắt buộc đúng hình dạng: trắc nghiệm có `options` + `correct_option` và không có `answer`; tự luận
+ngược lại. Đáp án không trùng nhau được kiểm tra ở service.
+
+### `question_set_use`
+
+Một game tạo từ bộ (`game_id` unique): đếm "lượt sử dụng", và lượt chơi qua `game_session` của game đó.
+
+---
+
 ## ON DELETE
 
 | FK | Rule | Lý do |
@@ -669,6 +710,9 @@ GROUP BY s.id ORDER BY stars DESC LIMIT 5;
 | `student_point → classroom_student` | CASCADE | Sao thuộc về học sinh |
 | `student_point.session_id` | SET NULL | Xóa buổi chơi vẫn giữ sao |
 | `student_point.created_by` | RESTRICT | Giữ người cộng sao |
+| `question_set.owner_id` | RESTRICT | User xóa mềm |
+| `question → question_set`, `question_set_use → question_set` | CASCADE | Thành phần của bộ (bộ thường chỉ ARCHIVED) |
+| `question_set_use.game_id` | CASCADE | Game đã chép câu hỏi, không phụ thuộc bộ |
 
 ## Ràng buộc DB tự đảm bảo
 

@@ -44,6 +44,17 @@ Cột **Backend**: controller · service. Cột **Frontend**: hàm trong `api/` 
 | 13 | GET | `/classrooms` | Các lớp của giáo viên (xem mục 13: tạo, sửa, tạm ngưng, xóa lớp; thêm / sửa / xóa học sinh; ghi lần chơi) | [ClassroomController.java:31](../backend/src/main/java/com/edugame/classroom/api/ClassroomController.java#L31) · [ClassroomService.java:46](../backend/src/main/java/com/edugame/classroom/service/ClassroomService.java#L46) | [classroomApi.ts:6](../frontend/src/api/classroomApi.ts#L6) · [classStore.load](../frontend/src/store/classStore.ts#L32) (lấy lớp đầu tiên) · HomePage, ChooseGamePage, vòng quay, đua tên |
 | 14 | GET | `/classrooms/{code}/students` | Danh sách học sinh + số sao | [ClassroomController.java:37](../backend/src/main/java/com/edugame/classroom/api/ClassroomController.java#L37) · [ClassroomService.java:62](../backend/src/main/java/com/edugame/classroom/service/ClassroomService.java#L62) | [classroomApi.ts:12](../frontend/src/api/classroomApi.ts#L12) · [classStore.load](../frontend/src/store/classStore.ts#L32) · HomePage (ngôi sao tuần này), SpinWheelScreen, PickerScreen |
 | 15 | POST | `/classrooms/{code}/students/{studentId}/points` | Thưởng / trừ sao cho học sinh | [ClassroomController.java:43](../backend/src/main/java/com/edugame/classroom/api/ClassroomController.java#L43) · [ClassroomService.java:74](../backend/src/main/java/com/edugame/classroom/service/ClassroomService.java#L74) | [classroomApi.ts:18](../frontend/src/api/classroomApi.ts#L18) · [classStore.awardStars](../frontend/src/store/classStore.ts#L54) · SpinWheelScreen, PickerScreen (Thưởng 1 sao) |
+| 16 | GET | `/question-sets` | Bộ câu hỏi của giáo viên (mới sửa trước), kèm số câu theo loại, lượt sử dụng, lượt chơi | [QuestionSetController.list](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 17 | POST | `/question-sets` | Tạo bộ câu hỏi (chưa có câu) | [QuestionSetController.create](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 18 | GET | `/question-sets/{code}` | Bộ câu hỏi + các câu + trò chơi đã tạo từ bộ | [QuestionSetController.get](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 19 | PATCH | `/question-sets/{code}` | Đổi tên, mô tả, môn, khối | [QuestionSetController.update](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 20 | DELETE | `/question-sets/{code}` | Xóa bộ (lưu trữ; trò chơi đã tạo vẫn giữ câu hỏi) → `204` | [QuestionSetController.archive](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 21 | POST | `/question-sets/{code}/copy` | Nhân bản bộ cùng các câu: "… (bản sao)" | [QuestionSetController.copy](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 22 | POST | `/question-sets/{code}/questions` | Thêm 1 hoặc nhiều câu (dán danh sách); một câu sai thì không lưu câu nào | [QuestionSetController.addQuestions](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 23 | PUT | `/question-sets/{code}/questions/{id}` | Lưu một câu (đổi được loại câu) | [QuestionSetController.updateQuestion](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 24 | DELETE | `/question-sets/{code}/questions/{id}` | Xóa một câu, các câu sau dồn lên | [QuestionSetController.deleteQuestion](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 25 | PUT | `/question-sets/{code}/questions/order` | Sắp xếp lại thứ tự câu | [QuestionSetController.reorderQuestions](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 26 | POST | `/question-sets/{code}/games` | "Sử dụng": tạo trò chơi từ bộ (chép câu hỏi sang game) | [QuestionSetController.use](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
 
 Logic dùng chung (không phải endpoint):
 
@@ -438,6 +449,59 @@ Trả về học sinh với số sao đã cập nhật (cùng format mục 14).
 
 ---
 
+### 16–26. Bộ câu hỏi (`/question-sets`)
+
+Ngân hàng câu hỏi của giáo viên, tách khỏi trò chơi. Mỗi bộ có môn (`TOAN`, `TIENG_VIET`, `TIENG_ANH`,
+`TU_NHIEN_XA_HOI`, `KHOA_HOC`, `KHAC`), khối (1–12 hoặc không ghi) và tối đa 200 câu. Mỗi giáo viên giữ tối đa 200 bộ.
+Bộ đã xóa, hoặc của giáo viên khác → `404`.
+
+**Danh sách / chi tiết.** `GET /question-sets` trả về mảng tóm tắt; các API còn lại trả về cả bộ:
+
+```json
+{
+  "summary": { "code": "qs-toan2-cong100", "title": "Toán lớp 2 - Phép cộng trong phạm vi 100", "description": "…",
+               "subject": "TOAN", "grade": 2, "questionCount": 8, "multipleChoiceCount": 7, "shortAnswerCount": 1,
+               "useCount": 2, "playCount": 5, "ownerName": "Cô Lan", "createdAt": "…", "updatedAt": "…" },
+  "questions": [
+    { "id": 41, "type": "MULTIPLE_CHOICE", "text": "47 + 8 = ?", "options": ["54", "55", "56"], "correctOption": 1,
+      "explanation": "7 cộng 8 bằng 15, viết 5 nhớ 1." },
+    { "id": 48, "type": "SHORT_ANSWER", "text": "Tổng của 19 và 19 là bao nhiêu?", "answer": "38" }
+  ],
+  "games": [ { "code": "g-…", "title": "…", "templateCode": "QUIZ", "createdAt": "…" } ]
+}
+```
+
+- `useCount`: số trò chơi đã tạo từ bộ (kể cả trò đã xóa). `playCount`: số lần các trò đó được mở cho lớp chơi.
+- `games`: các trò tạo từ bộ còn trong thư viện, mới nhất trước.
+
+**Tạo / sửa bộ.** `POST {"title", "description"?, "subject", "grade"?}`. `PATCH` chỉ đổi field được gửi;
+`description: ""` xóa mô tả, `grade: 0` bỏ khối.
+
+**Câu hỏi.** Body của một câu (thêm: `{"questions": [ … ]}`, tối đa 200 câu mỗi lần):
+
+| Field | Ghi chú |
+|---|---|
+| `type` | `MULTIPLE_CHOICE` (trắc nghiệm) hoặc `SHORT_ANSWER` (tự luận: trả lời ngắn, cô chấm) |
+| `text` | Bắt buộc, tối đa 500 ký tự |
+| `options`, `correctOption` | Trắc nghiệm: 2–6 đáp án khác nhau (không phân biệt hoa thường), không trống, mỗi đáp án ≤ 200 ký tự; `correctOption` là chỉ số đáp án đúng |
+| `answer` | Tự luận: câu trả lời, bắt buộc, ≤ 200 ký tự |
+| `explanation` | Giải thích, tùy chọn, ≤ 500 ký tự |
+
+Field của loại câu kia bị bỏ qua. Câu không chơi được → `400 INVALID_QUESTION`, `message` nêu câu số mấy.
+
+**Sử dụng trong trò chơi.** `POST /question-sets/{code}/games {"templateCode": "QUIZ"}` → `201`
+`{"gameCode", "templateCode", "questionCount", "skippedCount"}`.
+
+| Trò chơi | Câu được dùng |
+|---|---|
+| `QUIZ`, `GOLDEN_BELL`, `BOAT_RACE` | Các câu trắc nghiệm (thành `SINGLE_CHOICE`); câu tự luận bị bỏ qua (`skippedCount`) |
+| `GRID_BOARD` (Lật ô) | Mọi câu (thành `OPEN_QUESTION`, 10 điểm); đáp án là đáp án đúng hoặc câu trả lời tự luận |
+
+Trò chơi mang tên, mô tả, môn và khối của bộ (khối 6–12 thì để trống, game là tiểu học). Câu hỏi được chép sang game:
+sửa bộ sau đó không đổi game, và ngược lại. Không có câu nào dùng được → `409 NO_USABLE_QUESTIONS`.
+
+---
+
 ## Mã lỗi
 
 Mọi lỗi trả về dạng:
@@ -455,6 +519,10 @@ Mọi lỗi trả về dạng:
 | 400 | `INVALID_STUDENT_ORDER` | Danh sách sắp xếp thiếu / thừa / trùng học sinh | `PUT /classrooms/{code}/students/order` |
 | 409 | `CLASSROOM_NAME_TAKEN` | Trùng tên lớp trong cùng năm học | `/classrooms` |
 | 409 | `TOO_MANY_CLASSROOMS`, `TOO_MANY_STUDENTS` | Quá 30 lớp / quá 60 học sinh một lớp | `/classrooms` |
+| 400 | `INVALID_QUESTION` | Câu hỏi không chơi được (thiếu / trùng đáp án, đáp án đúng không có, thiếu câu trả lời) | 17–26 |
+| 400 | `INVALID_QUESTION_ORDER` | Danh sách sắp xếp thiếu / thừa / trùng câu | 25 |
+| 409 | `TOO_MANY_QUESTION_SETS`, `TOO_MANY_QUESTIONS` | Quá 200 bộ / quá 200 câu một bộ | 17, 21, 22 |
+| 409 | `NO_USABLE_QUESTIONS` | Bộ không có câu nào trò chơi này chơi được | 26 |
 | 409 | `CLASSROOM_PAUSED` | Mở trò chơi cho lớp đang tạm ngưng | `POST /classrooms/{code}/sessions` |
 | 400 | `INVALID_PARAMETER` | Tham số trên URL sai kiểu hoặc thiếu (vd. id không phải số) | Mọi API |
 | 404 | `NOT_FOUND` | Không có API ở đường dẫn này | Mọi đường dẫn |
