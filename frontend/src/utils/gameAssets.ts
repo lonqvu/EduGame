@@ -2,8 +2,12 @@ import type { GameType } from '@/types/game'
 
 const toFileName = (type: GameType) => type.toLowerCase().replace(/_/g, '-')
 
-/** 320×200 game illustration, e.g. SPIN_WHEEL → /assets/icons/games/spin-wheel.svg */
-export const gameIcon = (type: GameType) => `/assets/icons/games/${toFileName(type)}.svg`
+/** Games drawn as 320×200 illustrations in /assets/icons/games; the newer ones only have their card art. */
+const ICONS: ReadonlySet<GameType> = new Set(['GRID_BOARD', 'QUIZ', 'MATCHING', 'MEMORY', 'SPIN_WHEEL', 'NAME_RACE'])
+
+/** Game illustration, e.g. SPIN_WHEEL → /assets/icons/games/spin-wheel.svg, GOLDEN_BELL → its card art. */
+export const gameIcon = (type: GameType) =>
+  ICONS.has(type) ? `/assets/icons/games/${toFileName(type)}.svg` : `/assets/games/card-${toFileName(type)}.svg`
 
 /** 128×128 square game icon. */
 export const gameSquareIcon = (type: GameType) => `/assets/icons/games-square/${toFileName(type)}.svg`

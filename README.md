@@ -18,6 +18,17 @@ chỉnh sửa câu hỏi / đáp án / giao diện / cài đặt, sau đó publi
 | Database | PostgreSQL 17 (JSONB cho config riêng của từng loại game) |
 | Infra | Docker Compose |
 
+## Các trò chơi
+
+| Nhóm | Trò chơi (`game_template.code`) | Ghi chú |
+|---|---|---|
+| Hỏi đáp | Lật ô thi đua (`GRID_BOARD`), Trắc nghiệm (`QUIZ`), Rung chuông vàng (`GOLDEN_BELL`), Đua thuyền (`BOAT_RACE`) | Ba trò sau dùng chung câu trắc nghiệm: bộ nào cũng chơi được theo kiểu khác (`/play/:id?as=GOLDEN_BELL`) |
+| Giải đố | Nối cặp (`MATCHING`), Lật thẻ trí nhớ (`MEMORY`), Ô chữ bí mật (`CROSSWORD`), Sắp xếp thứ tự (`ORDERING`), Phân loại (`SORTING`) | |
+| Ngẫu nhiên | Vòng quay may mắn (`SPIN_WHEEL`), Đua tên (`NAME_RACE`: đua ngựa, bóng bay, máy gắp thú, câu cá, tên lửa) | Dùng danh sách lớp, không cần câu hỏi |
+| Công cụ | Chia nhóm ngẫu nhiên (`TEAM_MAKER`), Đồng hồ đếm ngược (`TIMER`), Xúc xắc (`DICE`) | `/tools/groups`, `/tools/timer`, `/tools/dice` |
+
+Ảnh thẻ của các trò mới vẽ bằng `frontend/scripts/make_card_art.py`.
+
 ## Cấu trúc thư mục
 
 ```

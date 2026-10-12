@@ -35,9 +35,9 @@ export const gameRegistry: Record<GameType, GameDefinition> = {
   SORTING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 9, itemUnit: 'bộ' },
   SPIN_WHEEL: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '2–5 phút', popularity: 10, itemUnit: 'ô', toolRoute: '/tools/wheel' },
   NAME_RACE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '5–10 phút', popularity: 11, itemUnit: 'ô', toolRoute: '/tools/pick/horse' },
-  TEAM_MAKER: { playable: false, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 12, itemUnit: 'nhóm', toolRoute: '/tools/groups' },
-  TIMER: { playable: false, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 13, itemUnit: 'phút', toolRoute: '/tools/timer' },
-  DICE: { playable: false, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 14, itemUnit: 'lần', toolRoute: '/tools/dice' },
+  TEAM_MAKER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 12, itemUnit: 'nhóm', toolRoute: '/tools/groups' },
+  TIMER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 13, itemUnit: 'phút', toolRoute: '/tools/timer' },
+  DICE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 14, itemUnit: 'lần', toolRoute: '/tools/dice' },
 }
 
 /** Games whose items are quiz questions: any of them can be played the way of the others. */

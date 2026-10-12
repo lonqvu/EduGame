@@ -7,6 +7,7 @@ import { GameEditorPage } from '@/pages/GameEditorPage'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { DicePage, TeamMakerPage, TimerPage } from '@/pages/play/ClassToolPages'
 import { GridBoardPage } from '@/pages/play/GridBoardPage'
 import { NamePickerPage } from '@/pages/play/NamePickerPage'
 import { PlayGamePage } from '@/pages/play/PlayGamePage'
@@ -36,6 +37,9 @@ export const router = createBrowserRouter([
       { path: 'play/:gameId/results', element: <GridBoardPage screen="results" /> },
       { path: 'tools/wheel', element: <SpinWheelPage /> },
       { path: 'tools/pick/:mode', element: <NamePickerPage /> },
+      { path: 'tools/groups', element: <TeamMakerPage /> },
+      { path: 'tools/timer', element: <TimerPage /> },
+      { path: 'tools/dice', element: <DicePage /> },
     ],
   },
 ])

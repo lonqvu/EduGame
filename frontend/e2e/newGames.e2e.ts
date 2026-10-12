@@ -231,3 +231,63 @@ test('Phân loại editor: picking a basket for a card is saved', async ({ page,
     .poll(async () => (await backend.game(game.code)).items[0].solution?.assign)
     .toEqual([['c1', 'g1'], ['c2', 'g2'], ['c3', 'g2']])
 })
+
+test('Chia nhóm: the whole class split into the chosen number of groups', async ({ page }) => {
+  await page.goto('/tools/groups')
+  await expect(page.getByText('Chia 28 bạn thành 4 nhóm')).toBeVisible()
+  await page.getByRole('button', { name: 'Bớt một nhóm' }).click()
+  await expect(page.getByText('Mỗi nhóm khoảng 9–10 bạn.', { exact: false })).toBeVisible()
+  await page.getByRole('button', { name: 'Chia nhóm' }).click()
+  const groups = page.getByRole('region', { name: /^Nhóm \d$/ })
+  await expect(groups).toHaveCount(3)
+  const names = (await groups.locator('span.rounded-full').allInnerTexts()).map((n) => n.trim())
+  expect(names).toHaveLength(28)
+  expect(new Set(names).size).toBe(28)
+  await page.getByRole('button', { name: 'Chia lại' }).click()
+  await expect(groups).toHaveCount(3)
+})
+
+test('Đồng hồ: counts down, pauses, and says time is up at zero', async ({ page }) => {
+  await page.clock.install()
+  await page.goto('/tools/timer')
+  await page.getByRole('button', { name: '1 phút', exact: true }).click()
+  const timer = page.getByRole('timer', { name: 'Thời gian còn lại' })
+  await expect(timer).toHaveText('01:00')
+  await page.getByRole('button', { name: 'Bắt đầu' }).click()
+  await page.clock.runFor(20_000)
+  await expect(timer).toHaveText('00:40')
+  await page.getByRole('button', { name: 'Tạm dừng' }).click()
+  await page.clock.runFor(10_000)
+  await expect(timer).toHaveText('00:40')
+  await page.getByRole('button', { name: '+ 1 phút' }).click()
+  await expect(timer).toHaveText('01:40')
+  await page.getByRole('button', { name: 'Chạy tiếp' }).click()
+  await page.clock.runFor(101_000)
+  await expect(timer).toHaveText('Hết giờ!')
+  // Reset goes back to the time chosen.
+  await page.getByRole('button', { name: 'Đặt lại' }).click()
+  await expect(timer).toHaveText('01:00')
+  await expect(page.getByRole('button', { name: 'Bắt đầu' })).toBeVisible()
+})
+
+test('Xúc xắc: rolls the chosen number of dice and keeps the last rolls', async ({ page }) => {
+  await page.goto('/tools/dice')
+  await page.getByRole('button', { name: '3 xúc xắc' }).click()
+  await page.getByRole('button', { name: 'Gieo xúc xắc' }).click()
+  await expect(page.getByRole('button', { name: 'Gieo xúc xắc' })).toBeEnabled()
+  const faces = await page.getByLabel('Kết quả').getByRole('img').evaluateAll((els) =>
+    els.map((e) => Number(e.getAttribute('aria-label')!.replace('Mặt ', ''))),
+  )
+  expect(faces).toHaveLength(3)
+  faces.forEach((f) => expect(f).toBeGreaterThanOrEqual(1))
+  await expect(page.getByText(`Tổng: ${faces.reduce((a, b) => a + b, 0)}`)).toBeVisible()
+  await expect(page.getByLabel('Các lần gieo trước')).toContainText(`${faces.join(' + ')} = `)
+})
+
+test('the "Công cụ" filter lists the classroom tools, and each opens', async ({ page }) => {
+  await page.goto('/games/new')
+  await page.getByRole('tab', { name: 'Công cụ' }).click()
+  await expect(page.getByText('Tổng 3 trò chơi')).toBeVisible()
+  await page.getByRole('button', { name: 'Chọn trò chơi Xúc xắc' }).click()
+  await expect(page).toHaveURL(/\/tools\/dice$/)
+})

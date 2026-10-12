@@ -25,8 +25,13 @@ const SETS_LIMIT = 3
 const ITEM_UNITS: Partial<Record<GameType, string>> = {
   GRID_BOARD: 'câu hỏi',
   QUIZ: 'câu hỏi',
+  GOLDEN_BELL: 'câu hỏi',
+  BOAT_RACE: 'câu hỏi',
   MATCHING: 'bộ nối cặp',
   MEMORY: 'bộ thẻ',
+  CROSSWORD: 'hàng ngang',
+  ORDERING: 'bài sắp xếp',
+  SORTING: 'bộ phân loại',
 }
 
 export function HomePage() {
