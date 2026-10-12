@@ -10,7 +10,9 @@ import {
   HomeIcon,
 } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
+import { PICK_MODES } from '@/game-engine/name-picker/modes'
 import { editPath, gameRegistry, playPath, toolPath, type GameBadge } from '@/game-engine/registry'
+import { PickModeDialog } from '@/pages/choose/PickModeDialog'
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
@@ -22,6 +24,9 @@ import { gradeLabel } from '@/utils/gameMapping'
 
 const ASSETS = '/assets/games'
 const RECENT_LIMIT = 3
+/** "Đua tên" is a folder of name-picking games, chosen in a dialog. */
+const PICK_FOLDER: GameType = 'NAME_RACE'
+const PICK_GAME_COUNT = Object.keys(PICK_MODES).length
 
 const FILE_NAMES: Record<GameType, string> = {
   GRID_BOARD: 'grid-board',
@@ -84,6 +89,7 @@ export function ChooseGamePage() {
   const [filter, setFilter] = useState<Filter>('ALL')
   const [sort, setSort] = useState<Sort>('popular')
   const [allRecent, setAllRecent] = useState(false)
+  const [pickOpen, setPickOpen] = useState(false)
 
   useEffect(() => {
     void loadTemplates()
@@ -93,6 +99,10 @@ export function ChooseGamePage() {
   }, [loadTemplates, loadClass, loadTeacher, loadGames])
 
   const choose = async (template: GameTemplate) => {
+    if (template.type === PICK_FOLDER) {
+      setPickOpen(true)
+      return
+    }
     if (!gameRegistry[template.type].usesQuestions) {
       navigate(toolPath(template.type))
       return
@@ -277,12 +287,18 @@ export function ChooseGamePage() {
           <ul className="m-0 mt-[12px] grid list-none grid-cols-1 gap-4 p-0 @min-[520px]:grid-cols-2 @min-[820px]:grid-cols-3 @min-[1080px]:grid-cols-4">
             {shown.map((template) => (
               <li key={template.type} className="@min-[520px]:aspect-square">
-                <GameCard template={template} disabled={creating} onChoose={() => void choose(template)} />
+                <GameCard
+                  template={template}
+                  disabled={creating}
+                  folderSize={template.type === PICK_FOLDER ? PICK_GAME_COUNT : undefined}
+                  onChoose={() => void choose(template)}
+                />
               </li>
             ))}
           </ul>
         )}
       </section>
+      <PickModeDialog open={pickOpen} onClose={() => setPickOpen(false)} />
     </div>
   )
 }
@@ -290,10 +306,12 @@ export function ChooseGamePage() {
 interface GameCardProps {
   template: GameTemplate
   disabled: boolean
+  /** Number of games inside, for a card that opens a list of games instead of one game. */
+  folderSize?: number
   onChoose: () => void
 }
 
-function GameCard({ template, disabled, onChoose }: GameCardProps) {
+function GameCard({ template, disabled, folderSize, onChoose }: GameCardProps) {
   const def = gameRegistry[template.type]
   const badge = def.badge && BADGES[def.badge]
   return (
@@ -304,6 +322,11 @@ function GameCard({ template, disabled, onChoose }: GameCardProps) {
         {badge && (
           <span className={`absolute top-[8px] right-[8px] rounded-full px-[11px] py-[3px] text-[12.5px] font-bold ${badge.className}`}>
             {badge.label}
+          </span>
+        )}
+        {folderSize && (
+          <span className="absolute bottom-[8px] left-[8px] rounded-full bg-white/95 px-[11px] py-[3px] text-[12.5px] font-bold text-ink shadow-[0_1px_3px_rgba(31,42,68,0.12)]">
+            {folderSize} trò
           </span>
         )}
       </div>
@@ -324,10 +347,10 @@ function GameCard({ template, disabled, onChoose }: GameCardProps) {
             type="button"
             onClick={onChoose}
             disabled={disabled}
-            aria-label={`Chọn trò chơi ${template.name}`}
+            aria-label={folderSize ? `Xem ${folderSize} trò ${template.name}` : `Chọn trò chơi ${template.name}`}
             className="flex h-[34px] w-full cursor-pointer items-center justify-center gap-2 rounded-[8px] border-0 bg-primary font-[inherit] text-[14.5px] font-semibold text-white hover:brightness-110 disabled:cursor-wait disabled:opacity-70"
           >
-            Chọn trò chơi
+            {folderSize ? `Xem ${folderSize} trò` : 'Chọn trò chơi'}
             <ArrowRightIcon size={16} strokeWidth={2.4} />
           </button>
         </div>

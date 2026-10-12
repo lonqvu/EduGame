@@ -264,3 +264,23 @@ test('a new game made from the chooser shows up in the library', async ({ page, 
   await expect(page.getByLabel('Nội dung câu hỏi')).toBeVisible()
   expect((await backend.library()).map((g) => g.code)).toContain(code)
 })
+
+test('"Đua tên" on the chooser lists its 5 games, and each one opens', async ({ page }) => {
+  await page.goto('/games/new')
+  await page.getByRole('button', { name: 'Xem 5 trò Đua tên' }).click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByRole('heading', { name: 'Đua tên: chọn trò' })).toBeVisible()
+  for (const title of ['Đua ngựa', 'Bóng bay', 'Máy gắp thú', 'Câu cá', 'Tên lửa']) {
+    await expect(dialog.getByRole('button', { name: `Chơi ${title}` })).toBeVisible()
+  }
+  await dialog.getByRole('button', { name: 'Chơi Câu cá' }).click()
+  await expect(page).toHaveURL(/\/tools\/pick\/fishing$/)
+  await expect(page.getByRole('button', { name: 'Thả câu', exact: true })).toBeVisible()
+
+  // Closing the list stays on the chooser.
+  await page.goto('/games/new')
+  await page.getByRole('button', { name: 'Xem 5 trò Đua tên' }).click()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await expect(page).toHaveURL(/\/games\/new$/)
+})
