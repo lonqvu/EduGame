@@ -1,14 +1,19 @@
 import type { ReactNode } from 'react'
+import { CrosswordForm } from '@/editor/CrosswordForm'
+import { OrderSetForm } from '@/editor/OrderSetForm'
 import { PairSetForm, type PairSetLabels } from '@/editor/PairSetForm'
-import { parseBulkPairs, parseBulkQuiz } from '@/editor/parseBulkItems'
+import { parseBulkCrossword, parseBulkOrder, parseBulkPairs, parseBulkQuiz, parseBulkSort } from '@/editor/parseBulkItems'
 import { parseBulkQuestions } from '@/editor/parseBulkQuestions'
 import { QuestionForm } from '@/editor/QuestionForm'
 import { QuizForm } from '@/editor/QuizForm'
-import type { GameItem, GameType, ItemDraft, PairSet, Question, QuizQuestion } from '@/types/game'
-import { emptyPairSet, emptyQuizQuestion } from '@/utils/gameItems'
+import { SortSetForm } from '@/editor/SortSetForm'
+import type { CrosswordRow, GameItem, GameType, ItemDraft, OrderSet, PairSet, Question, QuizQuestion, SortSet } from '@/types/game'
+import { emptyCrosswordRow, emptyOrderSet, emptyPairSet, emptyQuizQuestion, emptySortSet } from '@/utils/gameItems'
 
 export interface ItemFormProps {
   item: GameItem
+  /** Every item of the game (the crossword shows the keyword they spell). */
+  items: GameItem[]
   number: number
   isLast: boolean
   onChange: (patch: Partial<ItemDraft>) => void
@@ -111,5 +116,47 @@ export const EDITOR_DEFINITIONS: Partial<Record<GameType, EditorDefinition>> = {
     blankLabel: 'Bộ chưa có thẻ nào',
     form: ({ item, ...props }) => <PairSetForm set={item as PairSet} labels={MEMORY_LABELS} {...props} />,
     paste: { ...PAIRS_PASTE, title: 'Dán nhiều cặp thẻ', placeholder: 'Con mèo = Meo meo\nCon chó = Gâu gâu\n5 x 5 = 25' },
+  },
+  CROSSWORD: {
+    noun: 'Hàng ngang',
+    addLabel: 'Thêm hàng ngang',
+    newItem: emptyCrosswordRow,
+    blankLabel: 'Hàng chưa có gợi ý',
+    form: ({ item, items, ...props }) => <CrosswordForm row={item as CrosswordRow} rows={items} {...props} />,
+    paste: {
+      title: 'Dán nhiều hàng ngang',
+      hint: 'Mỗi dòng một hàng: câu gợi ý, dấu “=”, rồi đáp án. Đặt chữ nằm ở cột từ khóa trong ngoặc vuông.',
+      placeholder: 'Thứ gì mọc ở đằng Đông? = MẶT T[R]ỜI\nĐồ dùng để kẻ đường thẳng? = CÁI TH[Ư]ỚC',
+      parse: parseBulkCrossword,
+      unit: 'hàng',
+    },
+  },
+  ORDERING: {
+    noun: 'Bài sắp xếp',
+    addLabel: 'Thêm bài sắp xếp',
+    newItem: emptyOrderSet,
+    blankLabel: 'Bài chưa có thẻ nào',
+    form: ({ item, ...props }) => <OrderSetForm set={item as OrderSet} {...props} />,
+    paste: {
+      title: 'Dán nhiều bài sắp xếp',
+      hint: 'Mỗi dòng một bài: đề bài, dấu “=”, rồi các thẻ theo đúng thứ tự, cách nhau bởi “|”.',
+      placeholder: 'Xếp từ bé đến lớn = 12 | 25 | 38 | 47\nGhép thành câu = Em | rất | yêu | trường',
+      parse: parseBulkOrder,
+      unit: 'bài',
+    },
+  },
+  SORTING: {
+    noun: 'Bộ phân loại',
+    addLabel: 'Thêm bộ phân loại',
+    newItem: emptySortSet,
+    blankLabel: 'Bộ chưa có giỏ nào',
+    form: ({ item, ...props }) => <SortSetForm set={item as SortSet} {...props} />,
+    paste: {
+      title: 'Dán bộ phân loại',
+      hint: 'Mỗi dòng một giỏ: tên giỏ, dấu “=”, rồi các thẻ cách nhau bởi dấu phẩy. Để một dòng trống giữa hai bộ.',
+      placeholder: 'Con vật này ăn gì?\nĂn cỏ = Bò, Dê, Ngựa\nĂn thịt = Hổ, Sư tử, Sói',
+      parse: parseBulkSort,
+      unit: 'bộ',
+    },
   },
 }

@@ -1,5 +1,14 @@
-import type { Draft, PairSet, QuizQuestion } from '@/types/game'
-import { localId, MAX_OPTIONS, MAX_PAIRS, TRUE_FALSE_OPTIONS } from '@/utils/gameItems'
+import { answerLetters } from '@/game-engine/crossword/letters'
+import type { CrosswordRow, Draft, OrderSet, PairSet, QuizQuestion, SortSet } from '@/types/game'
+import {
+  localId,
+  MAX_GROUPS,
+  MAX_OPTIONS,
+  MAX_ORDER_ENTRIES,
+  MAX_PAIRS,
+  MAX_SORT_CARDS,
+  TRUE_FALSE_OPTIONS,
+} from '@/utils/gameItems'
 
 const lines = (text: string) =>
   text
@@ -63,4 +72,63 @@ export function parseBulkPairs(text: string): Draft<PairSet>[] {
   const sets: Draft<PairSet>[] = []
   for (let i = 0; i < pairs.length; i += MAX_PAIRS) sets.push({ pairs: pairs.slice(i, i + MAX_PAIRS) })
   return sets
+}
+
+/**
+ * Crossword rows, one per line: clue, "=", answer, with the keyword letter in brackets:
+ *   "Thứ gì mọc ở đằng Đông? = MẶT T[R]ỜI"
+ * Without brackets the row comes in without its key letter (the teacher picks it in the form).
+ */
+export function parseBulkCrossword(text: string): Draft<CrosswordRow>[] {
+  return lines(text).flatMap((line): Draft<CrosswordRow>[] => {
+    const [clue, raw] = splitAtLastEquals(line)
+    if (!clue && !raw) return []
+    const marked = /^(.*?)\[(.)\](.*)$/u.exec(raw)
+    if (!marked) return [{ clue, answer: raw, keyIndex: null }]
+    const [, before, key, after] = marked
+    return [{ clue, answer: `${before}${key}${after}`, keyIndex: answerLetters(before).length }]
+  })
+}
+
+/**
+ * Orderings, one per line: the task, "=", then the cards in the right order split by "|":
+ *   "Xếp từ bé đến lớn = 12 | 25 | 38"
+ * A line with no "=" is only cards.
+ */
+export function parseBulkOrder(text: string): Draft<OrderSet>[] {
+  return lines(text).flatMap((line): Draft<OrderSet>[] => {
+    const [task, rest] = line.includes('=') ? splitAtLastEquals(line) : ['', line]
+    const entries = rest
+      .split('|')
+      .map((e) => e.trim())
+      .filter(Boolean)
+      .slice(0, MAX_ORDER_ENTRIES)
+      .map((e) => ({ id: localId('e'), text: e }))
+    return entries.length ? [{ text: task, entries }] : []
+  })
+}
+
+/**
+ * Sortings, one block per set (blocks split by an empty line). In a block, each line is a group, "=", and its cards
+ * split by ",": "Ăn cỏ = Bò, Dê, Ngựa". A first line without "=" is the task.
+ */
+export function parseBulkSort(text: string): Draft<SortSet>[] {
+  return text
+    .split(/\r?\n\s*\r?\n/)
+    .map(lines)
+    .flatMap((block): Draft<SortSet>[] => {
+      const task = block[0] && !block[0].includes('=') ? block[0] : ''
+      const groups: SortSet['groups'] = []
+      const cards: SortSet['cards'] = []
+      for (const line of block.slice(task ? 1 : 0)) {
+        const [name, rest] = splitAtLastEquals(line)
+        if (!name || groups.length >= MAX_GROUPS) continue
+        const group = { id: localId('g'), text: name }
+        groups.push(group)
+        for (const card of rest.split(',').map((c) => c.trim()).filter(Boolean)) {
+          if (cards.length < MAX_SORT_CARDS) cards.push({ id: localId('c'), text: card, groupId: group.id })
+        }
+      }
+      return groups.length >= 2 && cards.length ? [{ text: task, groups, cards }] : []
+    })
 }

@@ -79,8 +79,44 @@ export interface PairSet {
   pairs: TextPair[]
 }
 
+/** CROSSWORD row: content `{clue}`, solution `{answer, keyIndex}`. */
+export interface CrosswordRow {
+  id: string
+  clue: string
+  answer: string
+  /** Letter of the answer (spaces not counted) that sits in the keyword column; null until the teacher picks it. */
+  keyIndex: number | null
+}
+
+/** A card of an ORDERING or SORTING set. */
+export interface TextEntry {
+  id: string
+  text: string
+}
+
+/** ORDERING `ORDER_SET`: entries in the right order (the projector shuffles them). */
+export interface OrderSet {
+  id: string
+  /** What to put in order, e.g. "Xếp các số từ bé đến lớn". */
+  text: string
+  entries: TextEntry[]
+}
+
+/** A SORTING card and the group it belongs in (null while the teacher has not said). */
+export interface SortCard extends TextEntry {
+  groupId: string | null
+}
+
+/** SORTING `SORT_SET`: 2-4 groups and the cards to drop into them. */
+export interface SortSet {
+  id: string
+  text: string
+  groups: TextEntry[]
+  cards: SortCard[]
+}
+
 /** Item of any game, as the editor and the projector use it. Which one depends on the game type. */
-export type GameItem = Question | QuizQuestion | PairSet
+export type GameItem = Question | QuizQuestion | PairSet | CrosswordRow | OrderSet | SortSet
 
 /** An item before it has a server id (distributes over unions, unlike Omit). */
 export type Draft<T> = T extends unknown ? Omit<T, 'id'> : never

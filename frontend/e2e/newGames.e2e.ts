@@ -1,5 +1,5 @@
 import { test as base, expect } from '@playwright/test'
-import { Backend, quizItem, signInBrowser } from './api'
+import { Backend, crosswordRow, orderSet, quizItem, signInBrowser, sortSet } from './api'
 
 const test = base.extend<{ backend: Backend }>({
   // Playwright needs the destructuring pattern here, even with no fixtures to take.
@@ -117,4 +117,117 @@ test('the chooser lists the new games, and a new Rung chuông vàng opens the qu
   backend.adopt(page.url().match(/(g-[a-z0-9]+)\/edit$/)![1])
   await expect(page.getByRole('button', { name: 'Thêm câu Đúng / Sai' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Chơi kiểu khác' })).toBeVisible()
+})
+
+test('Ô chữ: rows open in turn, a steal, and the keyword guessed early', async ({ page, backend }) => {
+  const game = await backend.createGame('CROSSWORD', 'E2E Ô chữ', [
+    crosswordRow('Thủ đô?', 'HÀ NỘI', 0),
+    crosswordRow('Sông ở Huế?', 'SÔNG HƯƠNG', 4),
+    crosswordRow('Con vật kêu meo?', 'CON MÈO', 4),
+  ])
+  await backend.setSettings(game.code, { rules: { participants: { teams: 2 }, scoring: { points: 10, keywordPoints: 40, allowSteal: true } } })
+  await page.goto(`/play/${game.code}`)
+  await expect(page.getByText('Còn 3 / 3 hàng')).toBeVisible()
+
+  // Đội Cam picks row 1 and gets it.
+  await page.getByRole('button', { name: 'Hàng 1' }).click()
+  await expect(page.getByText('Hàng 1 · 5 chữ cái · Đội Cam trả lời')).toBeVisible()
+  await page.getByRole('button', { name: 'Đúng', exact: true }).click()
+  await expect(page.getByText('Còn 2 / 3 hàng')).toBeVisible()
+
+  // Đội Biển picks row 2, misses; Đội Cam steals it.
+  await page.getByRole('button', { name: 'Hàng 2' }).click()
+  await page.getByRole('button', { name: 'Sai' }).click()
+  await expect(page.getByText('Hàng 2 · 9 chữ cái · Đội Cam trả lời (giành quyền)')).toBeVisible()
+  await page.getByRole('button', { name: 'Đúng', exact: true }).click()
+
+  // One row hidden: the keyword (HHÈ) is worth 40 + 10.
+  await page.getByRole('button', { name: 'Đoán từ khóa' }).click()
+  await page.getByRole('button', { name: /Đội Biển/ }).click()
+  await page.getByRole('button', { name: 'Đúng (+50)' }).click()
+  await expect(page.getByText(/Đội Biển đoán đúng từ khóa\s*HHÈ/)).toBeVisible()
+  await page.getByRole('button', { name: 'Xem kết quả' }).click()
+  await expect(page.getByText('Đội Biển chiến thắng!')).toBeVisible()
+})
+
+test('Ô chữ editor: the key letter picked in the form is saved', async ({ page, backend }) => {
+  const game = await backend.createGame('CROSSWORD', 'E2E Soạn ô chữ', [{ itemType: 'CROSSWORD_ROW', content: { clue: '' } }])
+  await page.goto(`/games/${game.code}/edit`)
+  await page.getByLabel('Câu gợi ý').fill('Mọc ở đằng Đông?')
+  await page.getByLabel('Đáp án').fill('mặt trời')
+  await expect(page.getByText('Cô bấm vào chữ cái nằm ở cột từ khóa.')).toBeVisible()
+  await page.getByRole('button', { name: 'Chữ thứ 5: R' }).click()
+  await expect(page.getByLabel('Từ khóa')).toHaveText('R')
+  await expect
+    .poll(async () => (await backend.game(game.code)).items[0].solution)
+    .toEqual({ answer: 'mặt trời', keyIndex: 4 })
+})
+
+test('Sắp xếp: a wrong check keeps the right cards, the next team completes it', async ({ page, backend }) => {
+  const game = await backend.createGame('ORDERING', 'E2E Sắp xếp', [orderSet('Từ bé đến lớn', ['1', '2', '3'])])
+  await page.goto(`/play/${game.code}`)
+  const card = (text: string) => page.getByLabel('Các thẻ').getByRole('button', { name: text, exact: true })
+
+  await card('1').click()
+  await card('3').click()
+  await card('2').click()
+  await page.getByRole('button', { name: 'Kiểm tra' }).click()
+  await expect(page.getByRole('button', { name: 'Ô 1: 1' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Ô 2 trống' })).toBeVisible()
+  await expect(page.getByText('Đội Biển: nói thứ tự')).toBeVisible({ timeout: 3000 })
+
+  await card('2').click()
+  await card('3').click()
+  await page.getByRole('button', { name: 'Kiểm tra' }).click()
+  await expect(page.getByText('Đội Biển xếp đúng!')).toBeVisible()
+  await page.getByRole('button', { name: 'Xem kết quả' }).click()
+  await expect(page.getByText('Đội Biển chiến thắng!')).toBeVisible()
+})
+
+test('Sắp xếp editor: cards move up and down, and the order is saved', async ({ page, backend }) => {
+  const game = await backend.createGame('ORDERING', 'E2E Soạn sắp xếp', [orderSet('Xếp', ['B', 'A'])])
+  await page.goto(`/games/${game.code}/edit`)
+  await page.getByRole('button', { name: 'Đưa thẻ 2 lên' }).click()
+  await expect(page.getByLabel('Thẻ 1', { exact: true })).toHaveValue('A')
+  await expect
+    .poll(async () => (await backend.game(game.code)).items[0].content.items.map((e: { text: string }) => e.text))
+    .toEqual(['A', 'B'])
+})
+
+test('Phân loại: cards go into the right basket, a wrong one comes back later', async ({ page, backend }) => {
+  const game = await backend.createGame('SORTING', 'E2E Phân loại', [sortSet('Chẵn hay lẻ?', { Chẵn: ['2', '4'], Lẻ: ['1'] })])
+  await page.goto(`/play/${game.code}`)
+  const right: Record<string, string> = { '2': 'Chẵn', '4': 'Chẵn', '1': 'Lẻ' }
+  const wrong: Record<string, string> = { '2': 'Lẻ', '4': 'Lẻ', '1': 'Chẵn' }
+
+  // First card: dropped in the wrong basket, then every card right.
+  // The card on show (the previous one may still be flying into its basket).
+  const onShow = async () => {
+    await expect(page.getByLabel('Thẻ đang chờ')).toHaveCount(1)
+    return (await page.getByLabel('Thẻ đang chờ').innerText()).trim()
+  }
+  const first = await onShow()
+  await page.getByRole('button', { name: `Giỏ ${wrong[first]}` }).click()
+  await expect(page.getByText('Chưa đúng giỏ, thẻ quay lại cuối chồng.')).toBeVisible()
+  await expect(page.getByText(/Còn 3 thẻ/)).toBeVisible()
+  for (let i = 0; i < 3; i++) {
+    await expect(page.getByRole('button', { name: /^Giỏ / }).first()).toBeEnabled()
+    const text = await onShow()
+    await page.getByRole('button', { name: `Giỏ ${right[text]}` }).click()
+  }
+  await expect(page.getByText('Đã phân loại xong!')).toBeVisible()
+  await page.getByRole('button', { name: 'Xem kết quả' }).click()
+  await expect(page.getByText('Kết thúc trò chơi')).toBeVisible()
+})
+
+test('Phân loại editor: picking a basket for a card is saved', async ({ page, backend }) => {
+  const game = await backend.createGame('SORTING', 'E2E Soạn phân loại', [sortSet('', { Chẵn: ['2'], Lẻ: ['1'] })])
+  await page.goto(`/games/${game.code}/edit`)
+  await page.getByRole('button', { name: 'Thêm thẻ' }).click()
+  await page.getByLabel('Thẻ 3', { exact: true }).fill('5')
+  await expect(page.getByText('Còn 1 thẻ chưa chọn giỏ đúng.')).toBeVisible()
+  await page.getByRole('radiogroup', { name: 'Giỏ của thẻ 3' }).getByRole('radio', { name: 'Lẻ' }).click()
+  await expect
+    .poll(async () => (await backend.game(game.code)).items[0].solution?.assign)
+    .toEqual([['c1', 'g1'], ['c2', 'g2'], ['c3', 'g2']])
 })

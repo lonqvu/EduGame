@@ -206,6 +206,7 @@ export function GameEditorPage() {
             <div key={selected.id} className="contents">
               {definition.form({
                 item: selected,
+                items,
                 number: selectedIndex + 1,
                 isLast: selectedIndex === items.length - 1,
                 onChange: (patch) => updateItem(gameId, selected.id, patch),

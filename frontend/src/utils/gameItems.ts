@@ -1,5 +1,19 @@
 import type { CreateGameItemRequest, GameItemResponse } from '@/types/api'
-import type { ChoiceOption, Draft, GameItem, GameType, ItemDraft, PairSet, Question, QuizQuestion, TextPair } from '@/types/game'
+import { answerLetters } from '@/game-engine/crossword/letters'
+import type {
+  ChoiceOption,
+  CrosswordRow,
+  Draft,
+  GameItem,
+  GameType,
+  ItemDraft,
+  OrderSet,
+  PairSet,
+  Question,
+  QuizQuestion,
+  SortSet,
+  TextPair,
+} from '@/types/game'
 import { toItemFields, toQuestion } from '@/utils/gameMapping'
 
 type ItemFields = Pick<CreateGameItemRequest, 'content' | 'solution'>
@@ -18,6 +32,13 @@ export interface ItemCodec<T extends GameItem> {
 export const MAX_OPTIONS = 6
 export const MIN_OPTIONS = 2
 export const MAX_PAIRS = 12
+/** Limits of the puzzles (same as GameItemValidator). */
+export const MAX_ANSWER_LETTERS = 15
+export const MIN_ORDER_ENTRIES = 2
+export const MAX_ORDER_ENTRIES = 8
+export const MIN_GROUPS = 2
+export const MAX_GROUPS = 4
+export const MAX_SORT_CARDS = 16
 
 export const OPTION_LETTERS = 'ABCDEF'
 
@@ -150,6 +171,102 @@ const memoryCodec: ItemCodec<PairSet> = {
   summary: pairSummary,
 }
 
+// --- CROSSWORD --------------------------------------------------------------------------------------------------
+
+export const emptyCrosswordRow = (): Draft<CrosswordRow> => ({ clue: '', answer: '', keyIndex: null })
+
+/** CROSSWORD `CROSSWORD_ROW`: content `{clue}`, solution `{answer, keyIndex}` (none until both are set and valid). */
+const crosswordCodec: ItemCodec<CrosswordRow> = {
+  itemType: () => 'CROSSWORD_ROW',
+  fromItem: (item) => {
+    const key = item.solution?.keyIndex
+    return {
+      id: String(item.id),
+      clue: str(item.content.clue),
+      answer: str(item.solution?.answer),
+      keyIndex: typeof key === 'number' && Number.isInteger(key) ? key : null,
+    }
+  },
+  toFields: (row) => {
+    const letters = answerLetters(row.answer).length
+    const valid = letters > 0 && letters <= MAX_ANSWER_LETTERS && row.keyIndex !== null && row.keyIndex < letters
+    return {
+      content: { clue: row.clue },
+      solution: valid ? { answer: row.answer.trim(), keyIndex: row.keyIndex } : null,
+    }
+  },
+  empty: emptyCrosswordRow,
+  summary: (row) => row.clue.trim() || row.answer.trim(),
+}
+
+// --- ORDERING ---------------------------------------------------------------------------------------------------
+
+export const emptyOrderSet = (): Draft<OrderSet> => ({
+  text: '',
+  entries: [0, 1, 2].map(() => ({ id: localId('e'), text: '' })),
+})
+
+/** ORDERING `ORDER_SET`: content `{text, items: [{id, text}]}`, solution `{order: [id]}`. */
+const orderingCodec: ItemCodec<OrderSet> = {
+  itemType: () => 'ORDER_SET',
+  fromItem: (item) => {
+    const entries = list(item.content.items).map((e) => ({ id: String(e.id ?? ''), text: str(e.text) }))
+    const order = Array.isArray(item.solution?.order) ? item.solution.order.filter((id): id is string => typeof id === 'string') : []
+    const byId = new Map(entries.map((e) => [e.id, e]))
+    const ordered = order.flatMap((id) => byId.get(id) ?? [])
+    // Entries the order does not mention (should not happen) keep their stored place at the end.
+    const rest = entries.filter((e) => !order.includes(e.id))
+    return { id: String(item.id), text: str(item.content.text), entries: [...ordered, ...rest] }
+  },
+  toFields: (set) => {
+    const items = set.entries.map((e, i) => ({ id: `e${i + 1}`, text: e.text }))
+    return { content: { text: set.text, items }, solution: { order: items.map((e) => e.id) } }
+  },
+  empty: emptyOrderSet,
+  summary: (set) => set.text.trim() || set.entries.map((e) => e.text.trim()).filter(Boolean).join(', '),
+}
+
+// --- SORTING ----------------------------------------------------------------------------------------------------
+
+export const emptySortSet = (): Draft<SortSet> => {
+  const groups = [
+    { id: localId('g'), text: '' },
+    { id: localId('g'), text: '' },
+  ]
+  return { text: '', groups, cards: [0, 1, 2, 3].map(() => ({ id: localId('c'), text: '', groupId: null })) }
+}
+
+/** SORTING `SORT_SET`: content `{text, groups, cards}`, solution `{assign: [[cardId, groupId]]}`. */
+const sortingCodec: ItemCodec<SortSet> = {
+  itemType: () => 'SORT_SET',
+  fromItem: (item) => {
+    const groups = list(item.content.groups).map((g) => ({ id: String(g.id ?? ''), text: str(g.text) }))
+    const groupOf = new Map(
+      (Array.isArray(item.solution?.assign) ? item.solution.assign : []).flatMap((a) =>
+        Array.isArray(a) && typeof a[0] === 'string' && typeof a[1] === 'string' ? [[a[0], a[1]] as const] : [],
+      ),
+    )
+    const cards = list(item.content.cards).map((c) => {
+      const id = String(c.id ?? '')
+      const groupId = groupOf.get(id)
+      return { id, text: str(c.text), groupId: groupId && groups.some((g) => g.id === groupId) ? groupId : null }
+    })
+    return { id: String(item.id), text: str(item.content.text), groups, cards }
+  },
+  toFields: (set) => {
+    const groupIds = new Map(set.groups.map((g, i) => [g.id, `g${i + 1}`]))
+    const cards = set.cards.map((c, i) => ({ id: `c${i + 1}`, text: c.text }))
+    return {
+      content: { text: set.text, groups: set.groups.map((g) => ({ id: groupIds.get(g.id), text: g.text })), cards },
+      solution: {
+        assign: set.cards.flatMap((c, i) => (c.groupId && groupIds.has(c.groupId) ? [[`c${i + 1}`, groupIds.get(c.groupId)]] : [])),
+      },
+    }
+  },
+  empty: emptySortSet,
+  summary: (set) => set.text.trim() || set.groups.map((g) => g.text.trim()).filter(Boolean).join(' / '),
+}
+
 // --- Registry -----------------------------------------------------------------------------------------------------
 
 interface ItemOf {
@@ -159,6 +276,9 @@ interface ItemOf {
   BOAT_RACE: QuizQuestion
   MATCHING: PairSet
   MEMORY: PairSet
+  CROSSWORD: CrosswordRow
+  ORDERING: OrderSet
+  SORTING: SortSet
 }
 
 const CODECS: { [K in keyof ItemOf]: ItemCodec<ItemOf[K]> } = {
@@ -169,6 +289,9 @@ const CODECS: { [K in keyof ItemOf]: ItemCodec<ItemOf[K]> } = {
   BOAT_RACE: quizCodec,
   MATCHING: matchingCodec,
   MEMORY: memoryCodec,
+  CROSSWORD: crosswordCodec,
+  ORDERING: orderingCodec,
+  SORTING: sortingCodec,
 }
 
 /** Codec of a game type, or null for tools without items (wheel, name race). */

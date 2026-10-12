@@ -114,3 +114,31 @@ export const gridQuestion = (text: string, answer: string, points = 10) => ({
   content: { text, points },
   solution: { answer },
 })
+
+export const crosswordRow = (clue: string, answer: string, keyIndex: number) => ({
+  itemType: 'CROSSWORD_ROW',
+  content: { clue },
+  solution: { answer, keyIndex },
+})
+
+/** Cards in the right order. */
+export const orderSet = (text: string, cards: string[]) => ({
+  itemType: 'ORDER_SET',
+  content: { text, items: cards.map((t, i) => ({ id: `e${i + 1}`, text: t })) },
+  solution: { order: cards.map((_, i) => `e${i + 1}`) },
+})
+
+/** Groups as {name: cards}. */
+export const sortSet = (text: string, groups: Record<string, string[]>) => {
+  const names = Object.keys(groups)
+  const cards = names.flatMap((name, g) => groups[name].map((t) => ({ text: t, group: `g${g + 1}` })))
+  return {
+    itemType: 'SORT_SET',
+    content: {
+      text,
+      groups: names.map((name, g) => ({ id: `g${g + 1}`, text: name })),
+      cards: cards.map((c, i) => ({ id: `c${i + 1}`, text: c.text })),
+    },
+    solution: { assign: cards.map((c, i) => [`c${i + 1}`, c.group]) },
+  }
+}
