@@ -110,46 +110,54 @@ export function HomePage() {
       },
     })
 
-  const topBar = <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+  // One spacing everywhere (GAP), and two rows that share the columns: the banner and "Hôm nay" are one row, so
+  // their tops and bottoms line up; the rest starts on one line below.
+  const columns = 'grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_306px]'
 
   return (
-    <div className="grid grid-cols-1 gap-[18px] xl:grid-cols-[minmax(0,1fr)_306px]">
-      <div className="xl:hidden">{topBar}</div>
+    <div className="flex flex-col gap-5">
+      <div className="flex justify-end">
+        <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+      </div>
 
-      <div className="@container flex min-w-0 flex-col gap-[10px] xl:pt-[45px]">
+      <div className={columns}>
         <HomeHero
           greetingName={teacher?.greetingName ?? 'cô'}
           className={className}
           studentCount={students.length}
           onPickClass={() => message.info('Cô đang dạy một lớp. Thêm lớp khác sẽ có ở trang "Lớp học".')}
         />
-        <ActionCards startTarget={startTarget} onCreate={() => navigate('/games/new')} onOpenClass={() => notReady('Lớp học')} />
-        <div className="mt-[7px] grid grid-cols-1 items-start gap-[18px] @min-[900px]:grid-cols-[minmax(0,1fr)_356px]">
-          <RecentActivity
-            games={recent}
-            status={gamesStatus}
-            expanded={allRecent}
-            onToggleExpanded={() => setAllRecent((v) => !v)}
-            templateName={templateName}
-            meta={meta}
-            onRetry={() => void loadGames()}
-            onArchive={confirmArchive}
-          />
-          <PraiseCorner students={students} period={period} onPeriodChange={setPeriod} />
-        </div>
+        <TodayPanel games={games.slice(0, TODAY_LIMIT)} subtitle={(g) => `${classLabel(g)} - ${templateName(g)}`} />
       </div>
 
-      <div className="flex min-w-0 flex-col gap-[19px]">
-        <div className="-mb-[5px] hidden xl:block">{topBar}</div>
-        <TodayPanel games={games.slice(0, TODAY_LIMIT)} subtitle={(g) => `${classLabel(g)} - ${templateName(g)}`} />
-        <FeaturedGames onStart={(type) => void startGame(type)} />
-        <QuestionSets
-          games={sets}
-          expanded={allSets}
-          onToggleExpanded={() => setAllSets((v) => !v)}
-          title={(g) => (g.subject ? `${g.subject} - ${g.title}` : g.title)}
-          count={countLabel}
-        />
+      <div className={`${columns} items-start`}>
+        <div className="@container flex min-w-0 flex-col gap-5">
+          <ActionCards startTarget={startTarget} onCreate={() => navigate('/games/new')} onOpenClass={() => notReady('Lớp học')} />
+          <div className="grid grid-cols-1 items-start gap-5 @min-[900px]:grid-cols-[minmax(0,1fr)_356px]">
+            <RecentActivity
+              games={recent}
+              status={gamesStatus}
+              expanded={allRecent}
+              onToggleExpanded={() => setAllRecent((v) => !v)}
+              templateName={templateName}
+              meta={meta}
+              onRetry={() => void loadGames()}
+              onArchive={confirmArchive}
+            />
+            <PraiseCorner students={students} period={period} onPeriodChange={setPeriod} />
+          </div>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-5">
+          <FeaturedGames onStart={(type) => void startGame(type)} />
+          <QuestionSets
+            games={sets}
+            expanded={allSets}
+            onToggleExpanded={() => setAllSets((v) => !v)}
+            title={(g) => (g.subject ? `${g.subject} - ${g.title}` : g.title)}
+            count={countLabel}
+          />
+        </div>
       </div>
     </div>
   )

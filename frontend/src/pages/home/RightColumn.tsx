@@ -22,7 +22,8 @@ interface TodayPanelProps {
 /** Today's date and the games to pick up again, then a button to start a new one. */
 export function TodayPanel({ games, subtitle }: TodayPanelProps) {
   return (
-    <Panel className="flex flex-col gap-[10px] px-[15px] pt-[17px] pb-[15px]">
+    // Stretches to the height of the banner beside it; the button stays at the bottom.
+    <Panel className="flex h-full flex-col gap-[10px] px-[15px] pt-[17px] pb-[15px]">
       <PanelHeader
         icon={<CalendarIcon size={22} className="text-ink" />}
         title="Hôm nay"
@@ -49,7 +50,7 @@ export function TodayPanel({ games, subtitle }: TodayPanelProps) {
       ))}
       <Link
         to="/games/new"
-        className="mt-[2px] flex h-[40px] items-center justify-center gap-3 rounded-[11px] bg-primary text-[15px] font-bold text-white hover:text-white hover:brightness-110"
+        className="mt-auto flex h-[40px] shrink-0 items-center justify-center gap-3 rounded-[11px] bg-primary text-[15px] font-bold text-white hover:text-white hover:brightness-110"
       >
         Tạo hoạt động mới
         <PlusIcon size={18} strokeWidth={2.4} />
