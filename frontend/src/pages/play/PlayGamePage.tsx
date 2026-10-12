@@ -9,6 +9,7 @@ import { MatchingScreen } from '@/game-engine/matching/MatchingScreen'
 import { MemoryScreen } from '@/game-engine/memory/MemoryScreen'
 import { OrderingScreen } from '@/game-engine/ordering/OrderingScreen'
 import { QuizScreen } from '@/game-engine/quiz/QuizScreen'
+import { useBeginPlaySession } from '@/game-engine/shared/usePlaySession'
 import { SortingScreen } from '@/game-engine/sorting/SortingScreen'
 import { isGameType, isQuizFamily } from '@/game-engine/registry'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -37,6 +38,7 @@ export function PlayGamePage() {
     const state = useGameLibraryStore.getState().gameStatus[gameId]
     if (state !== 'play' && state !== 'edit') void loadGame(gameId, 'play')
   }, [gameId, loadGame])
+  useBeginPlaySession(!!game && (loadState === 'play' || loadState === 'edit'))
 
   if (loadState === 'missing') return <NotFoundPage />
   if (loadState === 'error') return <LoadError onRetry={() => void loadGame(gameId, 'play')} />

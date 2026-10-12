@@ -3,10 +3,11 @@ import type { StudentResponse } from '@/types/api'
 
 /** A class 3A on a fake backend whose star requests are answered when the test says so, in any order. */
 const backend = vi.hoisted(() => {
+  const threeA: Record<string, unknown> = { code: 'c-3a', name: '3A', grade: 3, studentCount: 2, status: 'ACTIVE' }
   const state = {
     stars: new Map<number, { weekly: number; total: number }>(),
     pending: [] as { resolve: () => void; reject: (e: unknown) => void }[],
-    classrooms: [{ code: 'c-3a', name: '3A', grade: 3, studentCount: 2 }],
+    classrooms: [threeA],
     failLoad: false,
   }
   const student = (id: number): StudentResponse => ({
@@ -20,7 +21,7 @@ const backend = vi.hoisted(() => {
       if (state.failLoad) throw new Error('offline')
       return state.classrooms
     }),
-    listStudents: vi.fn(async () => [...state.stars.keys()].map(student)),
+    listStudents: vi.fn(async (_code: string) => [...state.stars.keys()].map(student)),
     /** The server adds the stars when the request arrives; the answer comes back when released. */
     awardStars: vi.fn(
       (_code: string, id: number, points: number) =>
@@ -41,10 +42,19 @@ const backend = vi.hoisted(() => {
         }),
     ),
   }
-  return { state, api }
+  return { state, api, threeA }
 })
+const THREE_A = backend.threeA
 
 vi.mock('@/api/classroomApi', () => backend.api)
+
+/** The device's storage (tests run in Node). */
+const saved = new Map<string, string>()
+vi.stubGlobal('localStorage', {
+  getItem: (key: string) => saved.get(key) ?? null,
+  setItem: (key: string, value: string) => void saved.set(key, value),
+  clear: () => saved.clear(),
+})
 
 type Store = typeof import('@/store/classStore').useClassStore
 let store: Store
@@ -139,6 +149,51 @@ describe('class store', () => {
     await store.getState().awardStars('1', 1)
     expect(backend.api.awardStars).not.toHaveBeenCalled()
     expect(store.getState()).toMatchObject({ classroomCode: null, className: '', students: [] })
-    backend.state.classrooms = [{ code: 'c-3a', name: '3A', grade: 3, studentCount: 2 }]
+    backend.state.classrooms = [THREE_A]
+  })
+})
+
+describe('current class', () => {
+  const ONE_A = { ...THREE_A, code: 'c-1a', name: '1A', grade: 1, lastPlayedAt: '2026-10-01T08:00:00Z' }
+  const TWO_B = { ...THREE_A, code: 'c-2b', name: 'Lớp 2B', grade: 2, status: 'PAUSED', lastPlayedAt: '2026-10-12T08:00:00Z' }
+
+  beforeEach(() => {
+    localStorage.clear()
+    backend.state.classrooms = [ONE_A, TWO_B, { ...THREE_A, lastPlayedAt: '2026-10-11T08:00:00Z' }]
+  })
+
+  it('is the active class played with most recently (a paused class is never picked)', async () => {
+    await store.getState().load()
+    expect(store.getState()).toMatchObject({ classroomCode: 'c-3a', className: 'Lớp 3A' })
+    expect(store.getState().classrooms).toHaveLength(3)
+    expect(backend.api.listStudents).toHaveBeenLastCalledWith('c-3a')
+  })
+
+  it('is the class the teacher picked, remembered after a reload', async () => {
+    await store.getState().select('c-1a')
+    expect(store.getState()).toMatchObject({ classroomCode: 'c-1a', className: 'Lớp 1A', grade: 1 })
+    expect(backend.api.listStudents).toHaveBeenLastCalledWith('c-1a')
+
+    vi.resetModules()
+    store = (await import('@/store/classStore')).useClassStore
+    await store.getState().load()
+    expect(store.getState().classroomCode).toBe('c-1a')
+  })
+
+  it('falls back when the picked class was paused, and keeps "Lớp" typed in the name', async () => {
+    localStorage.setItem('edugame.currentClass', 'c-2b')
+    await store.getState().load()
+    expect(store.getState().classroomCode).toBe('c-3a')
+
+    backend.state.classrooms = [{ ...TWO_B, status: 'ACTIVE' }]
+    await store.getState().load()
+    expect(store.getState()).toMatchObject({ classroomCode: 'c-2b', className: 'Lớp 2B' })
+  })
+
+  it('a pick made while loading wins over the load', async () => {
+    const loading = store.getState().load()
+    const picking = store.getState().select('c-1a')
+    await Promise.all([loading, picking])
+    expect(store.getState().classroomCode).toBe('c-1a')
   })
 })

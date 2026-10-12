@@ -14,6 +14,7 @@ import { useGameLibraryStore } from '@/store/gameLibraryStore'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { GameSummary, GameType } from '@/types/game'
 import { apiErrorMessage } from '@/utils/apiError'
+import { classTitle } from '@/utils/classrooms'
 import { relativeTimeLabel } from '@/utils/dateLabels'
 import { gradeLabel } from '@/utils/gameMapping'
 
@@ -50,6 +51,9 @@ export function HomePage() {
   const classGrade = useClassStore((s) => s.grade)
   const students = useClassStore((s) => s.students)
   const loadClass = useClassStore((s) => s.load)
+  const classrooms = useClassStore((s) => s.classrooms)
+  const currentCode = useClassStore((s) => s.classroomCode)
+  const selectClass = useClassStore((s) => s.select)
 
   const [allRecent, setAllRecent] = useState(false)
   const [allSets, setAllSets] = useState(false)
@@ -76,7 +80,14 @@ export function HomePage() {
   const meta = (game: GameSummary) =>
     [classLabel(game), countLabel(game), relativeTimeLabel(game.updatedAt)].filter(Boolean).join(' · ')
 
-  const notReady = (page: string) => message.info(`Trang "${page}" đang được hoàn thiện.`)
+  const pickClass = async (code: string) => {
+    if (code === currentCode) return
+    try {
+      await selectClass(code)
+    } catch (error) {
+      message.error(apiErrorMessage(error))
+    }
+  }
 
   const startGame = async (type: GameType) => {
     if (!gameRegistry[type].usesQuestions) {
@@ -125,14 +136,19 @@ export function HomePage() {
           greetingName={teacher?.greetingName ?? 'cô'}
           className={className}
           studentCount={students.length}
-          onPickClass={() => message.info('Cô đang dạy một lớp. Thêm lớp khác sẽ có ở trang "Lớp học".')}
+          classes={classrooms
+            .filter((c) => c.status === 'ACTIVE')
+            .map((c) => ({ code: c.code, label: classTitle(c.name), studentCount: c.studentCount }))}
+          currentCode={currentCode}
+          onPickClass={(code) => void pickClass(code)}
+          onManageClasses={() => navigate('/classes')}
         />
         <TodayPanel games={games.slice(0, TODAY_LIMIT)} subtitle={(g) => `${classLabel(g)} - ${templateName(g)}`} />
       </div>
 
       <div className={`${columns} items-start`}>
         <div className="@container flex min-w-0 flex-col gap-5">
-          <ActionCards startTarget={startTarget} onCreate={() => navigate('/games/new')} onOpenClass={() => notReady('Lớp học')} />
+          <ActionCards startTarget={startTarget} onCreate={() => navigate('/games/new')} onOpenClass={() => navigate(currentCode ? `/classes/${encodeURIComponent(currentCode)}` : '/classes')} />
           <div className="grid grid-cols-1 items-start gap-5 @min-[900px]:grid-cols-[minmax(0,1fr)_356px]">
             <RecentActivity
               games={recent}

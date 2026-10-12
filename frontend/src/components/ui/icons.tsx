@@ -114,6 +114,39 @@ export const BulbIcon = (p: IconProps) => (
   </StrokeIcon>
 )
 
+export const SearchIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={2.2} {...p}>
+    <circle cx="11" cy="11" r="6.5" />
+    <path d="M20 20l-4.2-4.2" />
+  </StrokeIcon>
+)
+
+export const PencilIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={2} {...p}>
+    <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z" />
+    <path d="M13.5 6.5l4 4" />
+  </StrokeIcon>
+)
+
+export const TrashIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={2} {...p}>
+    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+  </StrokeIcon>
+)
+
+export const PauseIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={2.4} {...p}>
+    <path d="M9 6v12M15 6v12" />
+  </StrokeIcon>
+)
+
+/** A–Z with a down arrow: sort alphabetically. */
+export const SortAzIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={2} {...p}>
+    <path d="M17 5v14M14 16l3 3 3-3M4 11l2.5-6L9 11M4.8 9h3.4M4 14h5l-5 5h5" />
+  </StrokeIcon>
+)
+
 export const GripIcon = (p: IconProps) => (
   <StrokeIcon strokeWidth={2.4} {...p}>
     <path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" />

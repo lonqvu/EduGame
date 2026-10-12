@@ -156,12 +156,57 @@ export interface UpdateGameItemRequest {
   explanation?: string
 }
 
+/** ACTIVE: played with; PAUSED: kept, not played with (archived classes are never returned). */
+export type ClassroomStatus = 'ACTIVE' | 'PAUSED'
+
 export interface ClassroomResponse {
   code: string
   name: string
   grade: number
   schoolYear?: string
+  schoolName?: string
+  avatar?: string
+  status: ClassroomStatus
   studentCount: number
+  /** Games played with the class */
+  activityCount: number
+  /** Of those, games played to the results */
+  completedCount: number
+  /** completedCount / activityCount, in % (0 when nothing was played) */
+  completionRate: number
+  lastPlayedAt?: string
+  createdAt: string
+}
+
+export interface CreateClassroomRequest {
+  name: string
+  grade: number
+  schoolYear?: string
+  schoolName?: string
+  avatar?: string
+}
+
+/** Partial update: absent fields stay; an empty school year / school name clears it. */
+export interface UpdateClassroomRequest {
+  name?: string
+  grade?: number
+  schoolYear?: string
+  schoolName?: string
+  avatar?: string
+  status?: ClassroomStatus
+}
+
+export interface NewStudentRequest {
+  displayName: string
+  avatar?: string
+}
+
+export interface PlaySessionResponse {
+  id: number
+  gameCode: string
+  status: 'IN_PROGRESS' | 'ENDED'
+  startedAt: string
+  endedAt?: string
 }
 
 export interface StudentResponse {

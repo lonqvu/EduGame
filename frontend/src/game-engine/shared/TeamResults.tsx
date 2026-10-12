@@ -5,6 +5,7 @@ import { Link } from 'react-router'
 import { BoltIcon, FilledStarIcon, MedalIcon } from '@/components/ui/icons'
 import { bestBy, podiumHeight, podiumOrder, rankTeams } from '@/game-engine/grid-board/ranking'
 import type { TeamScore } from '@/game-engine/shared/teamScore'
+import { useFinishPlaySession } from '@/game-engine/shared/usePlaySession'
 
 const WINNER_STARS = 3
 
@@ -26,6 +27,7 @@ export function TeamResults({
 }: TeamResultsProps) {
   const { message } = App.useApp()
   const [starsGiven, setStarsGiven] = useState(false)
+  const playAgain = useFinishPlaySession(onPlayAgain)
 
   const ranked = rankTeams(teams)
   const winners = ranked.filter((t) => t.rank === 1 && t.score > 0)
@@ -109,7 +111,7 @@ export function TeamResults({
         )}
         <button
           type="button"
-          onClick={onPlayAgain}
+          onClick={playAgain}
           className="h-[60px] cursor-pointer rounded-full border-0 bg-white px-[26px] font-[inherit] text-[19px] font-extrabold text-ink hover:text-primary-ink"
         >
           Chơi lại

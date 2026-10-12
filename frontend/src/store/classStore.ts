@@ -1,26 +1,59 @@
 import { create } from 'zustand'
 import * as classroomApi from '@/api/classroomApi'
-import type { LoadStatus } from '@/types/api'
+import type { ClassroomResponse, CreateClassroomRequest, LoadStatus, UpdateClassroomRequest } from '@/types/api'
 import type { Student } from '@/types/game'
+import { classTitle, pickCurrentClass } from '@/utils/classrooms'
 import { toStudent } from '@/utils/gameMapping'
 
+/** The class chosen on the home page, remembered on this device. */
+const CURRENT_CLASS_KEY = 'edugame.currentClass'
+
+function remembered(): string | null {
+  try {
+    return localStorage.getItem(CURRENT_CLASS_KEY)
+  } catch {
+    return null
+  }
+}
+
+function remember(code: string) {
+  try {
+    localStorage.setItem(CURRENT_CLASS_KEY, code)
+  } catch {
+    // Private window / blocked storage: the choice lasts until the page is reloaded.
+  }
+}
+
 /**
- * The teacher's class list and weekly stars. There is no class picker yet: the first active class is used.
+ * The class being taught (the games are played with it) and its class list with weekly stars. It is the class the
+ * teacher picked on this device while it stays active, else the active class played with most recently.
  */
 interface ClassState {
   status: LoadStatus
+  /** The teacher's classes, active and paused (the picker shows the active ones). */
+  classrooms: ClassroomResponse[]
   classroomCode: string | null
   /** "Lớp 3A" (empty when the teacher has no class) */
   className: string
   grade: number | undefined
   students: Student[]
-  /** Refetches the class list; keeps showing the current one meanwhile. */
+  /** Refetches the classes and the current class list; keeps showing the current one meanwhile. */
   load: () => Promise<void>
+  /** Teaches another (active) class from now on, on this device. */
+  select: (code: string) => Promise<void>
+  /** Creates a class; the lists are refreshed before it resolves. */
+  createClassroom: (request: CreateClassroomRequest) => Promise<ClassroomResponse>
+  updateClassroom: (code: string, request: UpdateClassroomRequest) => Promise<ClassroomResponse>
+  archiveClassroom: (code: string) => Promise<void>
+  /** Refreshes after the class list of a class changed elsewhere (detail page). */
+  refresh: () => Promise<void>
   /** Shows the stars at once, then saves; rolls back and rejects if saving fails. */
   awardStars: (studentId: string, count: number) => Promise<void>
 }
 
 let inflight: Promise<void> | null = null
+/** Code picked while a load was running: the load must not bring the older choice back. */
+let picked: string | null = null
 
 /**
  * Star requests still waiting for an answer, by student. The server's totals are only taken when a request
@@ -30,6 +63,7 @@ const awarding = new Map<string, { pending: number; overlapped: boolean }>()
 
 export const useClassStore = create<ClassState>()((set, get) => ({
   status: 'idle',
+  classrooms: [],
   classroomCode: null,
   className: '',
   grade: undefined,
@@ -39,12 +73,14 @@ export const useClassStore = create<ClassState>()((set, get) => ({
     inflight ??= (async () => {
       if (get().status !== 'ready') set({ status: 'loading' })
       try {
-        const [classroom] = await classroomApi.listClassrooms()
+        const classrooms = await classroomApi.listClassrooms()
+        const classroom = pickCurrentClass(classrooms, picked ?? remembered())
         const students = classroom ? await classroomApi.listStudents(classroom.code) : []
         set({
           status: 'ready',
+          classrooms,
           classroomCode: classroom?.code ?? null,
-          className: classroom ? `Lớp ${classroom.name}` : '',
+          className: classroom ? classTitle(classroom.name) : '',
           grade: classroom?.grade,
           students: students.map(toStudent),
         })
@@ -55,6 +91,39 @@ export const useClassStore = create<ClassState>()((set, get) => ({
       }
     })()
     return inflight
+  },
+
+  select: async (code) => {
+    remember(code)
+    picked = code
+    try {
+      await get().refresh()
+    } finally {
+      picked = null
+    }
+  },
+
+  createClassroom: async (request) => {
+    const created = await classroomApi.createClassroom(request)
+    await get().refresh()
+    return created
+  },
+
+  updateClassroom: async (code, request) => {
+    const updated = await classroomApi.updateClassroom(code, request)
+    await get().refresh()
+    return updated
+  },
+
+  archiveClassroom: async (code) => {
+    await classroomApi.archiveClassroom(code)
+    await get().refresh()
+  },
+
+  refresh: async () => {
+    // A load already running may have read the classes before the change: wait for it, then read again.
+    await inflight
+    await get().load()
   },
 
   awardStars: async (studentId, count) => {

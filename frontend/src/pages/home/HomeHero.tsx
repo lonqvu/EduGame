@@ -1,16 +1,27 @@
-import { ChevronDownIcon, UsersIcon } from '@/components/ui/icons'
+import { Dropdown } from 'antd'
+import { CheckIcon, ChevronDownIcon, UsersIcon } from '@/components/ui/icons'
 import { HOME_ASSETS } from '@/pages/home/homeAssets'
 import { Art } from '@/pages/home/homeUi'
+
+/** An active class the teacher can switch to. */
+export interface ClassChoice {
+  code: string
+  label: string
+  studentCount: number
+}
 
 interface HomeHeroProps {
   greetingName: string
   className: string
   studentCount: number
-  onPickClass: () => void
+  classes: ClassChoice[]
+  currentCode: string | null
+  onPickClass: (code: string) => void
+  onManageClasses: () => void
 }
 
 /** Greeting banner: teacher, class being taught, class size; illustration on the right. */
-export function HomeHero({ greetingName, className, studentCount, onPickClass }: HomeHeroProps) {
+export function HomeHero({ greetingName, className, studentCount, classes, currentCode, onPickClass, onManageClasses }: HomeHeroProps) {
   return (
     <section className="@container relative flex min-h-[235px] overflow-hidden rounded-[22px] bg-[linear-gradient(100deg,#DCEDFD_0%,#D3E8FC_45%,#CDE5FC_100%)]">
       {/* Soft clouds behind the text, as in the design. */}
@@ -25,22 +36,47 @@ export function HomeHero({ greetingName, className, studentCount, onPickClass }:
         <p className="m-0 text-[17px] text-[#3F4B68] sm:text-[19px]">Cùng tạo những giờ học thật vui và ý nghĩa nhé!</p>
 
         <div className="mt-[14px] flex w-fit flex-wrap items-center gap-x-7 gap-y-2 rounded-[22px] bg-white/75 py-[9px] pr-7 pl-[10px] shadow-[0_2px_8px_rgba(53,99,233,0.06)]">
-          <button
-            type="button"
-            onClick={onPickClass}
-            className="flex cursor-pointer items-center gap-3 border-0 bg-transparent p-0 text-left font-[inherit] text-ink"
+          <Dropdown
+            trigger={['click']}
+            placement="bottomLeft"
+            menu={{
+              selectable: true,
+              selectedKeys: currentCode ? [currentCode] : [],
+              items: [
+                ...classes.map((c) => ({
+                  key: c.code,
+                  label: (
+                    <span className="flex min-w-[210px] items-center justify-between gap-4">
+                      <span>
+                        <strong>{c.label}</strong> <span className="text-ink-muted">· {c.studentCount} học sinh</span>
+                      </span>
+                      {c.code === currentCode && <CheckIcon size={16} className="text-primary" />}
+                    </span>
+                  ),
+                  onClick: () => onPickClass(c.code),
+                })),
+                ...(classes.length ? [{ type: 'divider' as const }] : []),
+                { key: 'manage', label: classes.length ? 'Quản lý lớp học' : 'Tạo lớp học', onClick: onManageClasses },
+              ],
+            }}
           >
-            <span className="flex size-[46px] items-center justify-center rounded-full bg-[#CFE3FB] text-primary">
-              <UsersIcon size={24} strokeWidth={2} />
-            </span>
-            <span className="flex flex-col">
-              <span className="text-[12.5px] text-ink-soft">Lớp đang dạy</span>
-              <span className="flex items-center gap-1.5 text-[15.5px] font-extrabold">
-                {className || 'Chưa có lớp'}
-                <ChevronDownIcon size={16} strokeWidth={2.6} />
+            <button
+              type="button"
+              aria-label={`Lớp đang dạy: ${className || 'chưa có lớp'}. Đổi lớp`}
+              className="flex cursor-pointer items-center gap-3 border-0 bg-transparent p-0 text-left font-[inherit] text-ink"
+            >
+              <span className="flex size-[46px] items-center justify-center rounded-full bg-[#CFE3FB] text-primary">
+                <UsersIcon size={24} strokeWidth={2} />
               </span>
-            </span>
-          </button>
+              <span className="flex flex-col">
+                <span className="text-[12.5px] text-ink-soft">Lớp đang dạy</span>
+                <span className="flex items-center gap-1.5 text-[15.5px] font-extrabold">
+                  {className || 'Chưa có lớp'}
+                  <ChevronDownIcon size={16} strokeWidth={2.6} />
+                </span>
+              </span>
+            </button>
+          </Dropdown>
           <span className="flex items-center gap-3">
             <span className="flex size-[42px] items-center justify-center rounded-full bg-[#E4E9FF] text-[#4B57D6]">
               <UsersIcon size={22} strokeWidth={2} />

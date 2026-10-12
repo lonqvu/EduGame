@@ -26,7 +26,7 @@ const MAIN_NAV: NavItem[] = [
   { label: 'Trang chủ', icon: <HomeIcon size={22} />, to: '/', match: (p) => p === '/' },
   { label: 'Trò chơi', icon: <GamepadIcon size={22} />, to: '/games/new', match: (p) => p.startsWith('/games') },
   { label: 'Bộ câu hỏi', icon: <FileTextIcon size={22} /> },
-  { label: 'Lớp học', icon: <UsersIcon size={22} strokeWidth={1.8} /> },
+  { label: 'Lớp học', icon: <UsersIcon size={22} strokeWidth={1.8} />, to: '/classes', match: (p) => p.startsWith('/classes') },
   { label: 'Báo cáo', icon: <ChartIcon size={22} /> },
 ]
 
@@ -40,7 +40,7 @@ export function MainLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname } = useLocation()
   // Pages laid out edge to edge, as in their designs; the others keep a centered column.
-  const fullWidth = pathname === '/' || pathname === '/games/new'
+  const fullWidth = pathname === '/' || pathname === '/games/new' || pathname.startsWith('/classes')
 
   return (
     <div className="flex min-h-full bg-page text-ink">

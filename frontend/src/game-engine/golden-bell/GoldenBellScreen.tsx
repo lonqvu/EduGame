@@ -10,6 +10,7 @@ import { Countdown, QuizOption } from '@/game-engine/quiz/QuizParts'
 import { playableQuizQuestions, questionFontSize } from '@/game-engine/quiz/quizRound'
 import { readPlaySettings } from '@/game-engine/shared/gameSettings'
 import { NothingToPlay, PlayFrame, playButtonClass } from '@/game-engine/shared/PlayFrame'
+import { useFinishPlaySession } from '@/game-engine/shared/usePlaySession'
 import { editPath } from '@/game-engine/registry'
 import { useClassStore } from '@/store/classStore'
 import type { GameSummary, QuizQuestion, Student } from '@/types/game'
@@ -227,6 +228,7 @@ function BellResults({ winners, total, onPlayAgain }: BellResultsProps) {
   const { message } = App.useApp()
   const awardStars = useClassStore((s) => s.awardStars)
   const [starred, setStarred] = useState(false)
+  const playAgain = useFinishPlaySession(onPlayAgain)
   const names = winners.map((w) => w.name)
   const headline =
     winners.length === 1 ? `${names[0]} rung chuông vàng!` : `${winners.length} bạn cùng rung chuông vàng!`
@@ -279,7 +281,7 @@ function BellResults({ winners, total, onPlayAgain }: BellResultsProps) {
         )}
         <button
           type="button"
-          onClick={onPlayAgain}
+          onClick={playAgain}
           className="h-[60px] cursor-pointer rounded-full border-0 bg-white px-[26px] font-[inherit] text-[19px] font-extrabold text-ink hover:text-primary-ink"
         >
           Chơi lại

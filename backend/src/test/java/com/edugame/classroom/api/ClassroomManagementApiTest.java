@@ -418,7 +418,7 @@ class ClassroomManagementApiTest {
 
     private long countClasses() {
         return jdbcTemplate.queryForObject("""
-                SELECT count(*) FROM classroom c JOIN users u ON u.id = c.teacher_id WHERE u.code = 'u-lan'
+                SELECT count(*) FROM classroom c JOIN users u ON u.id = c.teacher_id WHERE u.code = 'u-lan' AND c.status <> 'ARCHIVED'
                 """, Long.class);
     }
 

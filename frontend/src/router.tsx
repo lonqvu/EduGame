@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { RequireAuth } from '@/components/layout/RequireAuth'
 import { ChooseGamePage } from '@/pages/ChooseGamePage'
+import { ClassesPage } from '@/pages/ClassesPage'
+import { ClassroomDetailPage } from '@/pages/ClassroomDetailPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { GameEditorPage } from '@/pages/GameEditorPage'
 import { HomePage } from '@/pages/HomePage'
@@ -28,6 +30,8 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: 'games/new', element: <ChooseGamePage /> },
           { path: 'games/:gameId/edit', element: <GameEditorPage /> },
+          { path: 'classes', element: <ClassesPage /> },
+          { path: 'classes/:code', element: <ClassroomDetailPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

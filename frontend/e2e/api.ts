@@ -22,10 +22,23 @@ export interface Game {
   items: Item[]
 }
 
+export interface Classroom {
+  code: string
+  name: string
+  status: 'ACTIVE' | 'PAUSED'
+  studentCount: number
+  activityCount: number
+  completedCount: number
+  completionRate: number
+  schoolName?: string
+  avatar?: string
+}
+
 /** The backend, signed in as the same teacher as the browser (to set up games and check what was saved). */
 export class Backend {
   private readonly http: APIRequestContext
   private readonly created: string[] = []
+  private readonly classrooms: string[] = []
 
   private constructor(http: APIRequestContext) {
     this.http = http
@@ -79,7 +92,37 @@ export class Backend {
     this.created.push(code)
   }
 
+  classroom(code: string) {
+    return this.call<Classroom>('get', `classrooms/${code}`)
+  }
+
+  classroomList() {
+    return this.call<Classroom[]>('get', 'classrooms')
+  }
+
+  classStudents(code: string) {
+    return this.call<{ id: number; displayName: string; rollNumber: number }[]>('get', `classrooms/${code}/students`)
+  }
+
+  /** A class made by the test (archived by `cleanUp`), with these students. */
+  async createClassroom(name: string, students: string[] = []): Promise<Classroom> {
+    const classroom = await this.call<Classroom>('post', 'classrooms', { name, grade: 2, schoolName: 'Trường E2E' })
+    this.classrooms.push(classroom.code)
+    if (students.length) {
+      await this.call('post', `classrooms/${classroom.code}/students`, { students: students.map((displayName) => ({ displayName })) })
+    }
+    return this.classroom(classroom.code)
+  }
+
+  /** A class the test made in the browser, archived by `cleanUp`. */
+  adoptClassroom(code: string) {
+    this.classrooms.push(code)
+  }
+
   async cleanUp() {
+    for (const code of this.classrooms.splice(0)) {
+      await this.http.delete(`classrooms/${code}`)
+    }
     for (const code of this.created.splice(0)) {
       await this.http.delete(`games/${code}`)
     }
