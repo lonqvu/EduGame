@@ -46,4 +46,4 @@ export const PICK_TOOL_LINKS: { key: string; label: string; path: string }[] = [
 ]
 
 export const isPickMode = (value: string | undefined): value is PickMode =>
-  value !== undefined && value in PICK_MODES
+  value !== undefined && Object.hasOwn(PICK_MODES, value)

@@ -1,17 +1,25 @@
 import { useState } from 'react'
+import { shuffle } from '@/game-engine/shared/shuffle'
 import { useClassStore } from '@/store/classStore'
 import { usePickerStore } from '@/store/pickerStore'
 import type { Student } from '@/types/game'
 
 export type PickPhase = 'idle' | 'run' | 'done'
 
-function shuffle<T>(items: T[]): T[] {
-  const copy = [...items]
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[copy[i], copy[j]] = [copy[j], copy[i]]
-  }
-  return copy
+/** Students who may still be picked: everyone, or only those not called yet when "no repeat" is on. */
+export const pickCandidates = (students: Student[], calledIds: string[], noRepeat: boolean) =>
+  noRepeat ? students.filter((s) => !calledIds.includes(s.id)) : students
+
+/**
+ * Draws a winner among `candidates` and fills the other scene slots with classmates, the winner in a random slot.
+ * Null when there is nobody to pick.
+ */
+export function drawPick(students: Student[], candidates: Student[], slotCount: number, random: () => number = Math.random) {
+  if (candidates.length === 0) return null
+  const winner = candidates[Math.floor(random() * candidates.length)]
+  const others = shuffle(students.filter((s) => s.id !== winner.id), random).slice(0, slotCount - 1)
+  const slots = shuffle([winner, ...others], random)
+  return { slots, winnerSlot: slots.indexOf(winner) }
 }
 
 /**
@@ -29,16 +37,14 @@ export function usePickRound(slotCount: number) {
   const [slots, setSlots] = useState<Student[]>(() => students.slice(0, slotCount))
   const [winnerSlot, setWinnerSlot] = useState(0)
 
-  const candidates = noRepeat ? students.filter((s) => !calledIds.includes(s.id)) : students
+  const candidates = pickCandidates(students, calledIds, noRepeat)
   const allCalled = candidates.length === 0
 
   const start = () => {
-    if (phase === 'run' || allCalled) return
-    const winner = candidates[Math.floor(Math.random() * candidates.length)]
-    const others = shuffle(students.filter((s) => s.id !== winner.id)).slice(0, slotCount - 1)
-    const round = shuffle([winner, ...others])
-    setSlots(round)
-    setWinnerSlot(round.indexOf(winner))
+    const round = phase === 'run' ? null : drawPick(students, candidates, slotCount)
+    if (!round) return
+    setSlots(round.slots)
+    setWinnerSlot(round.winnerSlot)
     setPhase('run')
     setRunId((id) => id + 1)
   }

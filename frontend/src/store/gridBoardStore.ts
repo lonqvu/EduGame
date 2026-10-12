@@ -16,7 +16,10 @@ interface GridBoardState extends Snapshot {
   /** Starts a fresh round unless this game's round is already running. */
   ensureRound: (gameId: string) => void
   restart: () => void
-  /** Records the answer of `teamId` for a tile; a wrong answer leaves the tile open for later. */
+  /**
+   * Records the answer of `teamId` for a tile; a wrong answer leaves the tile open for later. A tile already won
+   * (e.g. "Đúng" clicked twice) or an unknown team is ignored.
+   */
   answer: (tileNo: number, teamId: string, correct: boolean, points: number) => void
   undo: () => void
 }
@@ -37,12 +40,15 @@ export const useGridBoardStore = create<GridBoardState>()((set, get) => ({
   restart: () => set({ teams: freshTeams(), openedTiles: [], turn: 0, history: [] }),
 
   answer: (tileNo, teamId, correct, points) =>
-    set((s) => ({
-      history: [...s.history, { teams: s.teams, openedTiles: s.openedTiles, turn: s.turn }],
-      teams: correct ? award(s.teams, teamId, points) : miss(s.teams, teamId),
-      openedTiles: correct ? [...s.openedTiles, tileNo] : s.openedTiles,
-      turn: (s.turn + 1) % s.teams.length,
-    })),
+    set((s) => {
+      if (s.openedTiles.includes(tileNo) || !s.teams.some((t) => t.id === teamId)) return s
+      return {
+        history: [...s.history, { teams: s.teams, openedTiles: s.openedTiles, turn: s.turn }],
+        teams: correct ? award(s.teams, teamId, points) : miss(s.teams, teamId),
+        openedTiles: correct ? [...s.openedTiles, tileNo] : s.openedTiles,
+        turn: (s.turn + 1) % s.teams.length,
+      }
+    }),
 
   undo: () =>
     set((s) => {
