@@ -408,6 +408,9 @@ Mọi lỗi trả về dạng:
 |---|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body sai ràng buộc (`violations` chỉ rõ field) | Mọi API có body |
 | 400 | `MALFORMED_REQUEST` | Body không phải JSON hợp lệ | Mọi API có body |
+| 400 | `INVALID_PARAMETER` | Tham số trên URL sai kiểu hoặc thiếu (vd. id không phải số) | Mọi API |
+| 404 | `NOT_FOUND` | Không có API ở đường dẫn này | Mọi đường dẫn |
+| 405 | `METHOD_NOT_ALLOWED` | Đường dẫn có, nhưng không nhận phương thức HTTP này | Mọi API |
 | 400 | `INVALID_GRADE` | Khối lớp không hợp với cấp học | 4, 6 |
 | 400 | `INVALID_SETTINGS` | `settings` không phải object | 6 |
 | 400 | `INVALID_GAME_ITEM` | Sai `itemType` / thiếu field trong `content`, `solution` / đáp án hoặc cặp không khớp nội dung | 9, 10 |

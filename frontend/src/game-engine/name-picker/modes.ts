@@ -6,6 +6,8 @@ export type PanelPlacement = 'bottom' | 'top' | 'left' | 'right'
 export interface PickModeConfig {
   mode: PickMode
   title: string
+  /** One or two sentences for the game list. */
+  description: string
   /** Number of students shown in the scene at once. */
   slots: number
   prompt: string
@@ -18,22 +20,27 @@ export interface PickModeConfig {
 
 export const PICK_MODES: Record<PickMode, PickModeConfig> = {
   horse: {
+    description: 'Mỗi chú ngựa mang tên một bạn. Chú ngựa về đích đầu tiên gọi tên bạn trả lời.',
     mode: 'horse', title: 'Đua ngựa', slots: 5, prompt: 'Chú ngựa nào về nhất?',
     startLabel: 'Bắt đầu đua', againLabel: 'Đua lại', resultLabel: 'Về nhất', idleAt: 'bottom', resultAt: 'bottom',
   },
   balloon: {
+    description: 'Thả cả chùm bóng bay mang tên các bạn, quả bay cao nhất được gọi.',
     mode: 'balloon', title: 'Bóng bay', slots: 7, prompt: 'Quả bóng nào bay cao nhất?',
     startLabel: 'Thả bóng bay', againLabel: 'Thả bóng lại', resultLabel: 'Bay cao nhất', idleAt: 'top', resultAt: 'bottom',
   },
   claw: {
+    description: 'Máy gắp thú gắp ngẫu nhiên một bạn trong lớp, hồi hộp như ở khu vui chơi.',
     mode: 'claw', title: 'Máy gắp thú', slots: 11, prompt: 'Gắp trúng ai, bạn đó trả lời!',
     startLabel: 'Gắp thú', againLabel: 'Gắp lại', resultLabel: 'Gắp trúng', idleAt: 'right', resultAt: 'right',
   },
   fishing: {
+    description: 'Thả câu xuống hồ, chú cá nào cắn câu thì bạn mang tên chú cá đó trả lời.',
     mode: 'fishing', title: 'Câu cá', slots: 7, prompt: 'Chú cá nào sẽ cắn câu?',
     startLabel: 'Thả câu', againLabel: 'Thả câu lại', resultLabel: 'Câu được bạn', idleAt: 'right', resultAt: 'right',
   },
   rocket: {
+    description: 'Các tên lửa cùng rời bệ phóng, tên lửa tới Mặt Trăng trước gọi tên bạn đó.',
     mode: 'rocket', title: 'Tên lửa', slots: 4, prompt: 'Tên lửa nào bay tới Mặt Trăng?',
     startLabel: 'Phóng tên lửa', againLabel: 'Phóng lại', resultLabel: 'Bay lên Mặt Trăng', idleAt: 'left', resultAt: 'left',
   },

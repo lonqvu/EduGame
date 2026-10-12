@@ -266,6 +266,105 @@ five = [(-18, -18), (18, -18), (0, 0), (-18, 18), (18, 18)]
 three = [(-18, -18), (0, 0), (18, 18)]
 cards.append(card('dice', '#FFF3E3', '#FFDDB5', '#FFCF96', die(200, 118, -12, five, '#E5484D') + die(290, 126, 10, three, '#3563E9'), '#FFFFFF', '#F28C28'))
 
+
+# --- Gọi tên: one card per name picker. ---
+
+def horse(x, y, color, mane, tag):
+    dark = '#00000022'
+    return f'''<g transform="translate({x} {y}) scale(1.2)">
+  <path d="M-30 -6 q-16 2 -18 20" stroke="{mane}" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <rect x="-24" y="6" width="7" height="26" rx="3" fill="{color}"/><rect x="-24" y="6" width="7" height="26" rx="3" fill="{dark}"/>
+  <rect x="-12" y="8" width="7" height="24" rx="3" fill="{color}"/>
+  <rect x="12" y="8" width="7" height="24" rx="3" fill="{color}"/><rect x="12" y="8" width="7" height="24" rx="3" fill="{dark}"/>
+  <rect x="22" y="6" width="7" height="26" rx="3" fill="{color}"/>
+  <ellipse cx="0" cy="0" rx="32" ry="17" fill="{color}"/>
+  <path d="M16 -8 L28 -34 L42 -30 L32 4 Z" fill="{color}"/>
+  <ellipse cx="42" cy="-31" rx="14" ry="9" fill="{color}" transform="rotate(22 42 -31)"/>
+  <path d="M28 -40 l4 -11 l5 10 z" fill="{color}"/>
+  <path d="M18 -10 Q22 -28 30 -40" stroke="{mane}" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <circle cx="44" cy="-34" r="2.4" fill="#1F2A44"/>
+  {rect(-12, -10, 24, 15, 5, '#FFFFFF')}{text(0, 1, tag, 10)}
+</g>'''
+
+
+track2 = ('<rect x="-10" y="132" width="500" height="120" fill="#E7C48F"/><rect x="-10" y="130" width="500" height="5" fill="#FFFFFF" opacity="0.85"/>'
+          '<path d="M-10 178 H500 M-10 222 H500" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="14 12" opacity="0.6"/>'
+          '<rect x="432" y="60" width="10" height="190" fill="#1F2A44"/>'
+          + ''.join(f'<rect x="432" y="{y}" width="10" height="10" fill="#FFFFFF"/>' for y in range(60, 250, 20))
+          + ''.join(f'<path d="M{x} 30 l12 16 l12 -16 z" fill="{c}"/>' for x, c in zip(range(40, 460, 26), ['#E5484D', '#FFC93C', '#3563E9', '#2E9E6A', '#8B5CF6', '#F28C28'] * 3))
+          + '<path d="M30 30 Q240 46 470 30" stroke="#5B6478" stroke-width="2" fill="none"/>')
+cards.append(card('pick-horse', '#E4F6FF', '#CDEBFA', '#B9E2F7',
+                  track2 + horse(150, 116, '#B5733C', '#5A3A1C', 'An') + horse(340, 116, '#8A5A3B', '#3E2414', 'Chi')
+                  + horse(240, 160, '#E59A4F', '#9A5A1E', 'Bảo'), '#FFFFFF', '#3563E9'))
+
+
+def balloon2(x, y, color, tag, scale=1.0):
+    return f'''<g transform="translate({x} {y}) scale({scale})">
+  <path d="M0 30 q-6 14 2 28 q6 12 -2 24" stroke="#7A8499" stroke-width="2" fill="none"/>
+  <ellipse cx="0" cy="0" rx="24" ry="29" fill="{color}"/><path d="M-5 28 L5 28 L0 34 Z" fill="{color}"/>
+  <ellipse cx="-9" cy="-11" rx="5" ry="9" fill="#FFFFFF" opacity="0.5"/>
+  {text(0, 5, tag, 12, '#FFFFFF')}
+</g>'''
+
+
+clouds = ''.join(f'<g fill="#FFFFFF" opacity="0.9"><ellipse cx="{x}" cy="{y}" rx="26" ry="11"/><ellipse cx="{x + 16}" cy="{y - 8}" rx="16" ry="12"/></g>'
+                 for x, y in [(70, 70), (360, 52), (420, 150)])
+hill = '<path d="M-10 214 Q120 176 250 206 T500 196 L500 250 L-10 250 Z" fill="#B7E4A0"/>'
+cards.append(card('pick-balloon', '#EAF4FF', '#F8E6F4', '#DCE9FB',
+                  clouds + hill + balloon2(150, 120, '#3563E9', 'An') + balloon2(205, 92, '#F28C28', 'Hà', 1.05)
+                  + balloon2(262, 64, '#E5484D', 'Chi', 1.12) + balloon2(318, 104, '#2E9E6A', 'Mai') + balloon2(366, 132, '#8B5CF6', 'Vy', 0.9),
+                  '#FFFFFF', '#E5484D'))
+
+plush = ''.join(f'<circle cx="{x}" cy="{y}" r="13" fill="{c}"/><circle cx="{x - 5}" cy="{y - 2}" r="1.8" fill="#1F2A44"/><circle cx="{x + 5}" cy="{y - 2}" r="1.8" fill="#1F2A44"/>'
+                for x, y, c in [(188, 160, '#FFD15C'), (214, 164, '#9FD9B4'), (240, 160, '#A9D6F5'), (266, 164, '#F7B5CF'), (292, 160, '#C9B6F2'),
+                                (201, 142, '#FF9B8E'), (229, 140, '#FFC6A0'), (279, 142, '#B7E4C7')])
+machine = (rect(150, 46, 180, 150, 22, '#F27BA6') + rect(162, 54, 156, 16, 8, '#FFD3E2') + text(240, 66, 'MÁY GẮP THÚ', 11, '#C2417B')
+           + rect(164, 76, 152, 100, 10, '#E9F4FF') + '<path d="M178 82 L196 172 M282 82 L300 172" stroke="#FFFFFF" stroke-width="5" opacity="0.7"/>'
+           + plush + '<rect x="252" y="76" width="4" height="26" fill="#5B6478"/><rect x="242" y="100" width="24" height="7" rx="3.5" fill="#5B6478"/>'
+           + '<path d="M244 107 L238 122 L245 126 M264 107 L270 122 L263 126" stroke="#5B6478" stroke-width="4" fill="none" stroke-linecap="round"/>'
+           + '<circle cx="254" cy="134" r="12" fill="#FFD15C"/><circle cx="249" cy="132" r="1.8" fill="#1F2A44"/><circle cx="259" cy="132" r="1.8" fill="#1F2A44"/>'
+           + rect(164, 180, 46, 12, 4, '#2A2F45') + '<circle cx="290" cy="186" r="7" fill="#FFC93C"/><circle cx="270" cy="186" r="6" fill="#E5484D"/>')
+cards.append(card('pick-claw', '#F6EEFF', '#FBE3F0', '#E8D7FB', machine, '#FFFFFF', '#C2417B'))
+
+
+def fish2(x, y, color, tag, flip=False):
+    s = -1 if flip else 1
+    return f'''<g transform="translate({x} {y}) scale({s * 1.3} 1.3)">
+  <path d="M-26 0 Q0 -22 22 0 Q0 22 -26 0 Z" fill="{color}"/><path d="M22 0 L38 -12 L38 12 Z" fill="{color}"/>
+  <circle cx="-12" cy="-4" r="3" fill="#FFFFFF"/><circle cx="-12" cy="-4" r="1.4" fill="#1F2A44"/>
+</g>{text(x + (8 if not flip else -8), y + 5, tag, 12, '#FFFFFF')}'''
+
+
+pond = ('<path d="M-10 108 C90 98 170 116 260 108 C350 100 420 114 500 106 L500 250 L-10 250 Z" fill="#7CC4F0"/>'
+        '<path d="M60 150 q14 -6 28 0 t28 0 M300 206 q14 -6 28 0 t28 0" stroke="#C6E9FC" stroke-width="4" fill="none" stroke-linecap="round"/>'
+        '<rect x="-10" y="92" width="130" height="16" rx="4" fill="#B98552"/><rect x="20" y="108" width="10" height="60" fill="#8E6236"/><rect x="80" y="108" width="10" height="60" fill="#8E6236"/>'
+        '<path d="M70 92 Q170 10 300 40" stroke="#6B4E2E" stroke-width="5" fill="none" stroke-linecap="round"/>'
+        '<path d="M300 40 V150" stroke="#5B6478" stroke-width="2"/><path d="M300 150 q0 10 -8 8" stroke="#5B6478" stroke-width="3" fill="none"/>'
+        '<ellipse cx="300" cy="112" rx="7" ry="5" fill="#E5484D"/><path d="M293 112 h14" stroke="#FFFFFF" stroke-width="2"/>')
+cards.append(card('pick-fishing', '#E8F7EC', '#CFEBF7', '#BFE5D0',
+                  pond + fish2(228, 168, '#F28C28', 'An') + fish2(352, 150, '#8B5CF6', 'Bảo', True) + fish2(296, 192, '#2E9E6A', 'Chi'),
+                  '#FFFFFF', '#3563E9'))
+
+
+def rocket2(x, y, color, flame=False):
+    fire = '<path d="M-8 34 Q0 62 8 34 Z" fill="#FFB547"/><path d="M-4 34 Q0 50 4 34 Z" fill="#FFF3C4"/>' if flame else ''
+    return f'''<g transform="translate({x} {y})">{fire}
+  <path d="M0 -40 Q16 -18 13 30 L-13 30 Q-16 -18 0 -40 Z" fill="#FFFFFF"/>
+  <path d="M0 -40 Q9 -28 11 -18 L-11 -18 Q-9 -28 0 -40 Z" fill="{color}"/>
+  <circle cx="0" cy="-2" r="7" fill="{color}"/><circle cx="0" cy="-2" r="4" fill="#BFE3FF"/>
+  <path d="M-13 14 L-24 34 L-13 30 Z M13 14 L24 34 L13 30 Z" fill="{color}"/>
+</g>'''
+
+
+space = ('<circle cx="372" cy="70" r="32" fill="#FFF3C4"/><circle cx="362" cy="62" r="6" fill="#F2D98A"/><circle cx="382" cy="82" r="4" fill="#F2D98A"/>'
+         + ''.join(f'<circle cx="{x}" cy="{y}" r="{r}" fill="#FFFFFF" opacity="0.9"/>' for x, y, r in
+                   [(120, 40, 2), (180, 70, 1.6), (260, 30, 2.2), (300, 90, 1.5), (420, 140, 1.8), (90, 120, 1.6), (230, 120, 1.4)])
+         + '<path d="M-10 214 Q240 188 500 214 L500 250 L-10 250 Z" fill="#3B4C94"/>'
+         + ''.join(rect(x - 20, 196, 40, 8, 4, '#8A97C9') for x in (170, 240, 310)))
+cards.append(card('pick-rocket', '#2B3A7A', '#1B2552', '#3B4C94',
+                  space + rocket2(170, 158, '#E5484D') + rocket2(240, 112, '#F28C28', True) + rocket2(310, 158, '#8B5CF6'),
+                  '#FFFFFF', '#FFD15C'))
+
 for name, svg in cards:
     with open(f'{OUT}/card-{name}.svg', 'w') as f:
         f.write(svg)

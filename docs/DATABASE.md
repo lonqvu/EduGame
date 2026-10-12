@@ -8,6 +8,7 @@ PostgreSQL 13+ · Flyway (`src/main/resources/db/migration`)
 | `V2__add_grid_board_and_name_race_templates.sql` | Thêm template GRID_BOARD (item `OPEN_QUESTION`: `{text, image, points}` / `{answer}`) và NAME_RACE |
 | `V3__` … `V6__` | Đăng nhập: phiên (`user_session`), mã email, lý do thu hồi phiên, khóa tạm khi nhập sai (`login_throttle`) |
 | `V7__add_classroom_games.sql` | Nhóm `CLASS_TOOL` và 8 template: GOLDEN_BELL, BOAT_RACE (dùng item như QUIZ), CROSSWORD (`CROSSWORD_ROW`), ORDERING (`ORDER_SET`), SORTING (`SORT_SET`), TEAM_MAKER, TIMER, DICE |
+| `V8__rename_random_tool_category.sql` | Nhóm `RANDOM_TOOL` đổi tên thành "Gọi tên" (vòng quay và các trò gọi tên) |
 | `db/dev-seed/R__dev_seed.sql` | **Chỉ profile `dev`**: dữ liệu demo (Cô Lan, lớp 3A, một game mẫu cho mỗi trò có câu hỏi). Idempotent, chạy lại khi file đổi |
 
 Các thay đổi sau này tạo migration mới `V2__...`, `V3__...`; **không sửa V1** khi đã chạy trên môi trường dùng chung.

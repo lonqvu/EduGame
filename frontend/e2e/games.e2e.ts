@@ -265,22 +265,31 @@ test('a new game made from the chooser shows up in the library', async ({ page, 
   expect((await backend.library()).map((g) => g.code)).toContain(code)
 })
 
-test('"Đua tên" on the chooser lists its 5 games, and each one opens', async ({ page }) => {
+test('each name picker is its own game, grouped under the "Gọi tên" filter', async ({ page }) => {
   await page.goto('/games/new')
-  await page.getByRole('button', { name: 'Xem 5 trò Đua tên' }).click()
-  const dialog = page.getByRole('dialog')
-  await expect(dialog.getByRole('heading', { name: 'Đua tên: chọn trò' })).toBeVisible()
-  for (const title of ['Đua ngựa', 'Bóng bay', 'Máy gắp thú', 'Câu cá', 'Tên lửa']) {
-    await expect(dialog.getByRole('button', { name: `Chơi ${title}` })).toBeVisible()
+  await page.getByRole('tab', { name: 'Gọi tên' }).click()
+  await expect(page.getByText('Tổng 6 trò chơi')).toBeVisible()
+  const names = ['Vòng quay may mắn', 'Đua ngựa', 'Bóng bay', 'Máy gắp thú', 'Câu cá', 'Tên lửa']
+  for (const name of names) {
+    await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
   }
-  await dialog.getByRole('button', { name: 'Chơi Câu cá' }).click()
-  await expect(page).toHaveURL(/\/tools\/pick\/fishing$/)
-  await expect(page.getByRole('button', { name: 'Thả câu', exact: true })).toBeVisible()
+  // No folder card any more.
+  await expect(page.getByRole('heading', { name: 'Đua tên', exact: true })).toHaveCount(0)
 
-  // Closing the list stays on the chooser.
+  // Each card opens its own game.
+  for (const [name, mode, start] of [
+    ['Câu cá', 'fishing', 'Thả câu'],
+    ['Tên lửa', 'rocket', 'Phóng tên lửa'],
+  ]) {
+    await page.goto('/games/new')
+    await page.getByRole('button', { name: `Chọn trò chơi ${name}` }).click()
+    await expect(page).toHaveURL(new RegExp(`/tools/pick/${mode}$`))
+    await expect(page.getByRole('button', { name: start, exact: true })).toBeVisible()
+  }
+
+  // Searching finds a name picker by its own name.
   await page.goto('/games/new')
-  await page.getByRole('button', { name: 'Xem 5 trò Đua tên' }).click()
-  await page.keyboard.press('Escape')
-  await expect(page.getByRole('dialog')).toBeHidden()
-  await expect(page).toHaveURL(/\/games\/new$/)
+  await page.getByLabel('Tìm kiếm trò chơi').fill('bong bay')
+  await expect(page.getByText('Tổng 1 trò chơi')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Bóng bay', exact: true })).toBeVisible()
 })

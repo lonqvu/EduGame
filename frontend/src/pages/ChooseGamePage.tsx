@@ -10,9 +10,8 @@ import {
   HomeIcon,
 } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
-import { PICK_MODES } from '@/game-engine/name-picker/modes'
+import { PICK_MODES, type PickMode } from '@/game-engine/name-picker/modes'
 import { editPath, gameRegistry, playPath, toolPath, type GameBadge } from '@/game-engine/registry'
-import { PickModeDialog } from '@/pages/choose/PickModeDialog'
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
@@ -24,19 +23,45 @@ import { gradeLabel } from '@/utils/gameMapping'
 
 const ASSETS = '/assets/games'
 const RECENT_LIMIT = 3
-/** "Đua tên" is a folder of name-picking games, chosen in a dialog. */
-const PICK_FOLDER: GameType = 'NAME_RACE'
-const PICK_GAME_COUNT = Object.keys(PICK_MODES).length
 
 /** Card picture of each game: vector art (scripts/make_card_art.py), sharp at any size and pixel density. */
 const cardArt = (type: GameType) => `${ASSETS}/card-${type.toLowerCase().replace(/_/g, '-')}.svg`
+
+/** One card of the list: a template, or one name picker of NAME_RACE (each is its own game). */
+interface Entry {
+  key: string
+  template: GameTemplate
+  name: string
+  description: string
+  art: string
+  pickMode?: PickMode
+  /** Order of "Phổ biến nhất". */
+  popularity: number
+}
+
+/** The cards of a template: NAME_RACE is shown as its name pickers, every other template as itself. */
+function entriesOf(template: GameTemplate): Entry[] {
+  const popularity = gameRegistry[template.type].popularity
+  if (template.type !== 'NAME_RACE') {
+    return [{ key: template.type, template, name: template.name, description: template.description, art: cardArt(template.type), popularity }]
+  }
+  return Object.values(PICK_MODES).map((m, i) => ({
+    key: `pick-${m.mode}`,
+    template,
+    name: m.title,
+    description: m.description,
+    art: `${ASSETS}/card-pick-${m.mode}.svg`,
+    pickMode: m.mode,
+    popularity: popularity + i / 10,
+  }))
+}
 type Filter = 'ALL' | GameCategory
 
 const FILTERS: { key: Filter; label: string; icon: ReactNode }[] = [
   { key: 'ALL', label: 'Tất cả', icon: <GridIcon /> },
   { key: 'QUESTION', label: 'Hỏi đáp', icon: <img src={`${ASSETS}/cat-question.png`} alt="" className="size-[22px]" /> },
   { key: 'PUZZLE', label: 'Giải đố', icon: <img src={`${ASSETS}/cat-puzzle.png`} alt="" className="size-[22px]" /> },
-  { key: 'RANDOM_TOOL', label: 'Ngẫu nhiên', icon: <img src={`${ASSETS}/cat-random.png`} alt="" className="size-[22px]" /> },
+  { key: 'RANDOM_TOOL', label: 'Gọi tên', icon: <img src={`${ASSETS}/cat-random.png`} alt="" className="size-[22px]" /> },
   { key: 'CLASS_TOOL', label: 'Công cụ', icon: <ToolboxIcon /> },
 ]
 
@@ -79,7 +104,6 @@ export function ChooseGamePage() {
   const [filter, setFilter] = useState<Filter>('ALL')
   const [sort, setSort] = useState<Sort>('popular')
   const [allRecent, setAllRecent] = useState(false)
-  const [pickOpen, setPickOpen] = useState(false)
 
   useEffect(() => {
     void loadTemplates()
@@ -88,9 +112,9 @@ export function ChooseGamePage() {
     void loadGames()
   }, [loadTemplates, loadClass, loadTeacher, loadGames])
 
-  const choose = async (template: GameTemplate) => {
-    if (template.type === PICK_FOLDER) {
-      setPickOpen(true)
+  const choose = async ({ template, pickMode }: Entry) => {
+    if (pickMode) {
+      navigate(`/tools/pick/${pickMode}`)
       return
     }
     if (!gameRegistry[template.type].playable && !gameRegistry[template.type].hasEditor) {
@@ -122,11 +146,12 @@ export function ChooseGamePage() {
   const words = fold(query).split(/\s+/).filter(Boolean)
   const shown = templates
     .filter((t) => filter === 'ALL' || t.category === filter)
-    .filter((t) => words.every((w) => fold(`${t.name} ${t.description}`).includes(w)))
+    .flatMap(entriesOf)
+    .filter((e) => words.every((w) => fold(`${e.name} ${e.description}`).includes(w)))
     .sort((a, b) => {
       if (sort === 'name') return a.name.localeCompare(b.name, 'vi')
-      if (sort === 'new' && !!a.isNew !== !!b.isNew) return a.isNew ? -1 : 1
-      return gameRegistry[a.type].popularity - gameRegistry[b.type].popularity
+      if (sort === 'new' && !!a.template.isNew !== !!b.template.isNew) return a.template.isNew ? -1 : 1
+      return a.popularity - b.popularity
     })
 
   const recent = allRecent ? games : games.slice(0, RECENT_LIMIT)
@@ -279,43 +304,34 @@ export function ChooseGamePage() {
           <p className="m-0 py-12 text-center text-ink-soft">Không tìm thấy trò chơi nào phù hợp.</p>
         ) : (
           <ul className="m-0 mt-[12px] grid list-none grid-cols-1 gap-4 p-0 @min-[520px]:grid-cols-2 @min-[820px]:grid-cols-3 @min-[1080px]:grid-cols-4">
-            {shown.map((template) => (
-              <li key={template.type} className="@min-[520px]:aspect-square">
-                <GameCard
-                  template={template}
-                  disabled={creating}
-                  folderSize={template.type === PICK_FOLDER ? PICK_GAME_COUNT : undefined}
-                  onChoose={() => void choose(template)}
-                />
+            {shown.map((entry) => (
+              <li key={entry.key} className="@min-[520px]:aspect-square">
+                <GameCard entry={entry} disabled={creating} onChoose={() => void choose(entry)} />
               </li>
             ))}
           </ul>
         )}
       </section>
-      <PickModeDialog open={pickOpen} onClose={() => setPickOpen(false)} />
     </div>
   )
 }
 
 interface GameCardProps {
-  template: GameTemplate
+  entry: Entry
   disabled: boolean
-  /** Number of games inside, for a card that opens a list of games instead of one game. */
-  folderSize?: number
   onChoose: () => void
 }
 
-function GameCard({ template, disabled, folderSize, onChoose }: GameCardProps) {
-  const def = gameRegistry[template.type]
+function GameCard({ entry, disabled, onChoose }: GameCardProps) {
+  const def = gameRegistry[entry.template.type]
   const badge = def.badge && BADGES[def.badge]
-  const action = folderSize ? `Xem ${folderSize} trò` : 'Chọn trò chơi'
   return (
     // Fills its square list item; the picture takes whatever height the text leaves. The whole card is clickable
     // (the button's ::after covers it).
     <article className="group relative flex h-full min-h-0 flex-col rounded-[16px] border border-[#E6EBF3] bg-white p-[6px] pb-[10px] shadow-[0_1px_3px_rgba(31,42,68,0.05)] transition-[box-shadow,transform,border-color] duration-200 focus-within:border-primary hover:-translate-y-1 hover:border-[#C9D6F5] hover:shadow-[0_12px_28px_rgba(31,42,68,0.12)]">
       <div className="relative flex min-h-[96px] flex-1 overflow-hidden rounded-[12px]">
         <img
-          src={cardArt(template.type)}
+          src={entry.art}
           alt=""
           loading="lazy"
           className="absolute inset-0 block size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
@@ -325,17 +341,12 @@ function GameCard({ template, disabled, folderSize, onChoose }: GameCardProps) {
             {badge.label}
           </span>
         )}
-        {folderSize && (
-          <span className="absolute bottom-[8px] left-[8px] rounded-full bg-white/95 px-[11px] py-[3px] text-[12.5px] font-bold text-ink shadow-[0_1px_3px_rgba(31,42,68,0.12)]">
-            {folderSize} trò
-          </span>
-        )}
       </div>
       <div className="flex shrink-0 flex-col px-[6px]">
-        <h3 className="m-0 mt-[10px] truncate text-[17px] font-black">{template.name}</h3>
+        <h3 className="m-0 mt-[10px] truncate text-[17px] font-black">{entry.name}</h3>
         {/* Always two lines tall, so every picture of a row has the same height. */}
-        <p className="m-0 mt-[3px] line-clamp-2 min-h-[2.8em] text-[13px] leading-[1.4] text-ink-soft" title={template.description}>
-          {template.description}
+        <p className="m-0 mt-[3px] line-clamp-2 min-h-[2.8em] text-[13px] leading-[1.4] text-ink-soft" title={entry.description}>
+          {entry.description}
         </p>
         {/* One line: a fact that does not fit wraps out of sight whole, instead of being cut mid-word. */}
         <div className="mt-[8px] flex h-[18px] min-w-0 flex-wrap items-center gap-x-[10px] gap-y-[8px] overflow-hidden text-[12.5px] whitespace-nowrap text-[#3F4B68]">
@@ -348,10 +359,10 @@ function GameCard({ template, disabled, folderSize, onChoose }: GameCardProps) {
             type="button"
             onClick={onChoose}
             disabled={disabled}
-            aria-label={folderSize ? `Xem ${folderSize} trò ${template.name}` : `Chọn trò chơi ${template.name}`}
+            aria-label={`Chọn trò chơi ${entry.name}`}
             className="flex h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border-0 bg-primary font-[inherit] text-[14.5px] font-semibold text-white outline-none after:absolute after:inset-0 after:rounded-[16px] group-hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
           >
-            {action}
+            Chọn trò chơi
             <ArrowRightIcon size={16} strokeWidth={2.4} className="transition-transform duration-200 group-hover:translate-x-0.5" />
           </button>
         </div>
