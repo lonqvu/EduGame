@@ -180,7 +180,8 @@ public class GameService {
         return gameMapper.toResponse(game, editing, gameItemRepository.findByGameVersionOrderByPosition(editing));
     }
 
-    private GameVersion latestVersion(Game game) {
+    /** The newest version of the game: its draft if there is one, else the last published. */
+    public GameVersion latestVersion(Game game) {
         return gameVersionRepository.findFirstByGameOrderByVersionDesc(game)
                 .orElseThrow(() -> new IllegalStateException("Game %s has no version".formatted(game.getCode())));
     }

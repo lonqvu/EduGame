@@ -386,3 +386,64 @@ SELECT pg_temp.seed_game('g-sorting', 'SORTING', 'Phân loại vui', 'Tự nhiê
         ["Từ nào chỉ sự vật, từ nào chỉ hoạt động?", ["Chỉ sự vật", "Chỉ hoạt động"],
          [["Cái bàn", 1], ["Chạy", 2], ["Quyển sách", 1], ["Viết", 2], ["Cây bàng", 1], ["Hát", 2]]]
     ]'::jsonb) WITH ORDINALITY AS s (value, ord)));
+
+-- ⑤ Classroom management (V9) --------------------------------------------------
+
+UPDATE classroom SET school_name = 'Tiểu học Kim Đồng', avatar = 'bear'
+WHERE code = 'c-3a' AND school_name IS NULL;
+
+-- Two more classes of Cô Lan: 1A (active) and 2B (paused), with their students.
+CREATE OR REPLACE FUNCTION pg_temp.seed_classroom(p_code TEXT, p_name TEXT, p_grade INT, p_school TEXT, p_avatar TEXT,
+                                                  p_status TEXT, p_names JSONB)
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+    v_classroom_id BIGINT;
+BEGIN
+    IF EXISTS (SELECT 1 FROM classroom WHERE code = p_code) THEN
+        RETURN;
+    END IF;
+    INSERT INTO classroom (code, teacher_id, name, grade, school_year, school_name, avatar, status)
+    VALUES (p_code, (SELECT id FROM users WHERE code = 'u-lan'), p_name, p_grade, '2026-2027', p_school, p_avatar, p_status)
+    RETURNING id INTO v_classroom_id;
+
+    INSERT INTO classroom_student (classroom_id, display_name, roll_number)
+    SELECT v_classroom_id, n.value #>> '{}', n.ord FROM jsonb_array_elements(p_names) WITH ORDINALITY AS n (value, ord);
+END;
+$$;
+
+SELECT pg_temp.seed_classroom('c-1a', '1A', 1, 'Tiểu học Kim Đồng', 'rabbit', 'ACTIVE', '[
+    "Bảo An", "Gia Bảo", "Minh Châu", "Thành Đạt", "Hải Đăng", "Ngọc Diệp", "Anh Duy", "Thu Hà", "Gia Hân", "Minh Hiếu",
+    "Khánh Linh", "Bảo Long", "Tuệ Minh", "Hoài Nam", "Bảo Ngọc", "Thảo Nguyên", "Minh Nhật", "Yến Nhi", "Hoàng Phúc",
+    "Minh Quân", "Như Quỳnh", "Đức Tài", "Phương Thảo", "Anh Thư", "Khánh Vy"
+]');
+
+SELECT pg_temp.seed_classroom('c-2b', '2B', 2, 'Tiểu học Nguyễn Huệ', 'lion', 'PAUSED', '[
+    "Quốc Anh", "Ngọc Ánh", "Gia Huy", "Đăng Khoa", "Mai Lan", "Tuấn Kiệt", "Bảo Châu", "Thùy Dương", "Trung Hiếu",
+    "Hà My", "Phương Nhi", "Đức Minh", "Thanh Tâm", "Hồng Nhung", "Văn Toàn", "Kim Ngân", "Hữu Phước", "Lan Chi",
+    "Minh Khang", "Tường Vi"
+]');
+
+-- Games played with the classes, so the class list has activity and completion to show.
+DO $$
+DECLARE
+    v_teacher_id BIGINT := (SELECT id FROM users WHERE code = 'u-lan');
+BEGIN
+    IF EXISTS (SELECT 1 FROM game_session WHERE host_id = v_teacher_id) THEN
+        RETURN;
+    END IF;
+    -- [class code, game code, ended?] repeated: 3A played 12 games (9 to the end), 1A 8 (5), 2B 3 (1).
+    INSERT INTO game_session (game_id, game_version_id, host_id, classroom_id, mode, status, started_at, ended_at)
+    SELECT g.id, g.current_version_id, v_teacher_id, c.id, 'CLASSROOM',
+           CASE WHEN s.ended THEN 'ENDED' ELSE 'IN_PROGRESS' END,
+           now() - s.ago,
+           CASE WHEN s.ended THEN now() - s.ago + interval '12 minutes' END
+    FROM (
+        -- 3A is the class taught most recently (the app opens on it).
+        SELECT 'c-3a' AS class_code, n, n <= 9 AS ended, n * interval '6 hours' AS ago FROM generate_series(1, 12) AS n
+        UNION ALL SELECT 'c-1a', n, n <= 5, n * interval '2 days' FROM generate_series(1, 8) AS n
+        UNION ALL SELECT 'c-2b', n, n <= 1, (n + 20) * interval '1 day' FROM generate_series(1, 3) AS n
+    ) AS s
+    JOIN classroom c ON c.code = s.class_code
+    JOIN game g ON g.code = (ARRAY['g-quiz-vn', 'g-addition', 'g-match-places', 'g-animals'])[1 + s.n % 4];
+END;
+$$;

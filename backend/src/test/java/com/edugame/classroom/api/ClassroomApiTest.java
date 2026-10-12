@@ -57,9 +57,8 @@ class ClassroomApiTest {
     @Test
     void listsTheClassAndItsStudentsInRollCallOrder() throws Exception {
         mockMvc.perform(get("/api/v1/classrooms")).andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].code").value("c-3a"))
-                .andExpect(jsonPath("$[0].name").value("3A"))
-                .andExpect(jsonPath("$[0].studentCount").value(28));
+                .andExpect(jsonPath("$[?(@.code == 'c-3a')].name").value("3A"))
+                .andExpect(jsonPath("$[?(@.code == 'c-3a')].studentCount").value(28));
 
         JsonNode students = body(mockMvc.perform(get(STUDENTS)).andExpect(status().isOk()));
         assertThat(students).hasSize(28);

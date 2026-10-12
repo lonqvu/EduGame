@@ -78,4 +78,25 @@ public class GameSession extends AuditableEntity {
 
     @Column(name = "ended_at")
     private Instant endedAt;
+
+    /** A game played with a class on the projector, starting now. */
+    public static GameSession startInClassroom(Game game, GameVersion version, User host, Classroom classroom, Instant now) {
+        GameSession session = new GameSession();
+        session.game = game;
+        session.gameVersion = version;
+        session.host = host;
+        session.classroom = classroom;
+        session.mode = GameSessionMode.CLASSROOM;
+        session.status = GameSessionStatus.IN_PROGRESS;
+        session.startedAt = now;
+        return session;
+    }
+
+    /** The class reached the results screen. Ending twice keeps the first end time. */
+    public void end(Instant now) {
+        if (status == GameSessionStatus.IN_PROGRESS) {
+            status = GameSessionStatus.ENDED;
+            endedAt = now;
+        }
+    }
 }

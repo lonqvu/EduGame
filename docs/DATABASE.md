@@ -9,6 +9,7 @@ PostgreSQL 13+ · Flyway (`src/main/resources/db/migration`)
 | `V3__` … `V6__` | Đăng nhập: phiên (`user_session`), mã email, lý do thu hồi phiên, khóa tạm khi nhập sai (`login_throttle`) |
 | `V7__add_classroom_games.sql` | Nhóm `CLASS_TOOL` và 8 template: GOLDEN_BELL, BOAT_RACE (dùng item như QUIZ), CROSSWORD (`CROSSWORD_ROW`), ORDERING (`ORDER_SET`), SORTING (`SORT_SET`), TEAM_MAKER, TIMER, DICE |
 | `V8__rename_random_tool_category.sql` | Nhóm `RANDOM_TOOL` đổi tên thành "Gọi tên" (vòng quay và các trò gọi tên) |
+| `V9__classroom_management.sql` | `classroom.school_name`, `classroom.avatar`, trạng thái `PAUSED`, tên lớp không trùng (theo giáo viên + năm học, trừ lớp đã xóa), index đếm `game_session` theo lớp |
 | `db/dev-seed/R__dev_seed.sql` | **Chỉ profile `dev`**: dữ liệu demo (Cô Lan, lớp 3A, một game mẫu cho mỗi trò có câu hỏi). Idempotent, chạy lại khi file đổi |
 
 Các thay đổi sau này tạo migration mới `V2__...`, `V3__...`; **không sửa V1** khi đã chạy trên môi trường dùng chung.
@@ -516,8 +517,12 @@ Giáo viên tạo lớp một lần, dùng lại cho mọi buổi chơi: gọi t
 | `name` | VARCHAR(50) | ✓ | Tên lớp, ví dụ "3A" |
 | `grade` | SMALLINT | ✓ | Khối lớp, dùng để gợi ý game phù hợp |
 | `school_year` | VARCHAR(9) | | Năm học dạng `2026-2027` |
-| `status` | VARCHAR(20) | ✓ | `ACTIVE` / `ARCHIVED` (hết năm học thì lưu trữ, giữ lịch sử) |
+| `school_name` | VARCHAR(100) | | Tên trường, ví dụ "Tiểu học Kim Đồng" (V9) |
+| `avatar` | VARCHAR(30) | | Con vật đại diện cho lớp: `bear`, `rabbit`, `lion`, `cat`, `fox`, `panda`, `owl`, `frog` (V9) |
+| `status` | VARCHAR(20) | ✓ | `ACTIVE` / `PAUSED` (tạm ngưng, V9) / `ARCHIVED` (đã xóa: hết năm học thì lưu trữ, giữ lịch sử) |
 | `created_at` / `updated_at` | TIMESTAMPTZ | ✓ | |
+
+Tên lớp không trùng trong cùng giáo viên và năm học (không phân biệt hoa thường), trừ lớp đã xóa: index `uq_classroom_teacher_name`.
 
 ### `classroom_student` — Học sinh trong lớp
 

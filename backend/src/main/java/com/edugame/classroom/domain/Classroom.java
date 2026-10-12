@@ -39,7 +39,30 @@ public class Classroom extends AuditableEntity {
     @Column(name = "school_year", length = 9)
     private String schoolYear;
 
+    @Column(name = "school_name", length = 100)
+    private String schoolName;
+
+    /** Animal shown for the class ({@link #AVATARS}). */
+    @Column(name = "avatar", length = 30)
+    private String avatar;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private ClassroomStatus status = ClassroomStatus.ACTIVE;
+
+    /** Animals a class can have as its picture. */
+    public static final String AVATARS = "bear|rabbit|lion|cat|fox|panda|owl|frog";
+
+    public static Classroom create(String code, User teacher, String name, Short grade) {
+        Classroom classroom = new Classroom();
+        classroom.code = code;
+        classroom.teacher = teacher;
+        classroom.name = name;
+        classroom.grade = grade;
+        return classroom;
+    }
+
+    public boolean isOwnedBy(User user) {
+        return teacher.getId().equals(user.getId());
+    }
 }

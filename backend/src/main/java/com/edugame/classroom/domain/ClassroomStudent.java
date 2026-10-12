@@ -38,4 +38,13 @@ public class ClassroomStudent extends CreatedEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private ClassroomStudentStatus status = ClassroomStudentStatus.ACTIVE;
+
+    public static ClassroomStudent create(Classroom classroom, String displayName, String avatar, Short rollNumber) {
+        ClassroomStudent student = new ClassroomStudent();
+        student.classroom = classroom;
+        student.displayName = displayName;
+        student.avatar = avatar;
+        student.rollNumber = rollNumber;
+        return student;
+    }
 }

@@ -19,6 +19,15 @@ public interface ClassroomStudentRepository extends JpaRepository<ClassroomStude
     Optional<ClassroomStudent> findByIdAndClassroomAndStatus(
             Long id, Classroom classroom, ClassroomStudentStatus status);
 
+    long countByClassroomAndStatus(Classroom classroom, ClassroomStudentStatus status);
+
+    /** Highest roll number of the students still in the class, 0 when there is none. */
+    @Query("""
+            select coalesce(max(s.rollNumber), 0) from ClassroomStudent s
+            where s.classroom = :classroom and s.status = com.edugame.classroom.domain.ClassroomStudentStatus.ACTIVE
+            """)
+    int maxRollNumber(Classroom classroom);
+
     @Query("""
             select s.classroom.id as classroomId, count(s) as studentCount
             from ClassroomStudent s

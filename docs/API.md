@@ -41,7 +41,7 @@ Cột **Backend**: controller · service. Cột **Frontend**: hàm trong `api/` 
 | 10 | PATCH | `/games/{code}/items/{itemId}` | Sửa một câu hỏi | [GameItemController.java:43](../backend/src/main/java/com/edugame/game/api/GameItemController.java#L43) · [GameItemService.java:61](../backend/src/main/java/com/edugame/game/service/GameItemService.java#L61) | [gameApi.ts:45](../frontend/src/api/gameApi.ts#L45) · [updateQuestion](../frontend/src/store/gameLibraryStore.ts#L204) (debounce 600ms) · QuestionForm |
 | 11 | DELETE | `/games/{code}/items/{itemId}` | Xóa một câu hỏi | [GameItemController.java:50](../backend/src/main/java/com/edugame/game/api/GameItemController.java#L50) · [GameItemService.java:80](../backend/src/main/java/com/edugame/game/service/GameItemService.java#L80) | [gameApi.ts:50](../frontend/src/api/gameApi.ts#L50) · [removeQuestion](../frontend/src/store/gameLibraryStore.ts#L215) · GameEditorPage (Xóa câu này) |
 | 12 | PUT | `/games/{code}/items/order` | Sắp xếp lại thứ tự câu hỏi | [GameItemController.java:56](../backend/src/main/java/com/edugame/game/api/GameItemController.java#L56) · [GameItemService.java:95](../backend/src/main/java/com/edugame/game/service/GameItemService.java#L95) | [gameApi.ts:55](../frontend/src/api/gameApi.ts#L55) · [reorderQuestions](../frontend/src/store/gameLibraryStore.ts#L224) · QuestionList (kéo-thả) |
-| 13 | GET | `/classrooms` | Các lớp đang dạy | [ClassroomController.java:31](../backend/src/main/java/com/edugame/classroom/api/ClassroomController.java#L31) · [ClassroomService.java:46](../backend/src/main/java/com/edugame/classroom/service/ClassroomService.java#L46) | [classroomApi.ts:6](../frontend/src/api/classroomApi.ts#L6) · [classStore.load](../frontend/src/store/classStore.ts#L32) (lấy lớp đầu tiên) · HomePage, ChooseGamePage, vòng quay, đua tên |
+| 13 | GET | `/classrooms` | Các lớp của giáo viên (xem mục 13: tạo, sửa, tạm ngưng, xóa lớp; thêm / sửa / xóa học sinh; ghi lần chơi) | [ClassroomController.java:31](../backend/src/main/java/com/edugame/classroom/api/ClassroomController.java#L31) · [ClassroomService.java:46](../backend/src/main/java/com/edugame/classroom/service/ClassroomService.java#L46) | [classroomApi.ts:6](../frontend/src/api/classroomApi.ts#L6) · [classStore.load](../frontend/src/store/classStore.ts#L32) (lấy lớp đầu tiên) · HomePage, ChooseGamePage, vòng quay, đua tên |
 | 14 | GET | `/classrooms/{code}/students` | Danh sách học sinh + số sao | [ClassroomController.java:37](../backend/src/main/java/com/edugame/classroom/api/ClassroomController.java#L37) · [ClassroomService.java:62](../backend/src/main/java/com/edugame/classroom/service/ClassroomService.java#L62) | [classroomApi.ts:12](../frontend/src/api/classroomApi.ts#L12) · [classStore.load](../frontend/src/store/classStore.ts#L32) · HomePage (ngôi sao tuần này), SpinWheelScreen, PickerScreen |
 | 15 | POST | `/classrooms/{code}/students/{studentId}/points` | Thưởng / trừ sao cho học sinh | [ClassroomController.java:43](../backend/src/main/java/com/edugame/classroom/api/ClassroomController.java#L43) · [ClassroomService.java:74](../backend/src/main/java/com/edugame/classroom/service/ClassroomService.java#L74) | [classroomApi.ts:18](../frontend/src/api/classroomApi.ts#L18) · [classStore.awardStars](../frontend/src/store/classStore.ts#L54) · SpinWheelScreen, PickerScreen (Thưởng 1 sao) |
 
@@ -361,13 +361,56 @@ Gửi **toàn bộ** id câu hỏi theo thứ tự mới. Thiếu / thừa / tr�
 { "itemIds": [3, 1, 2] }
 ```
 
-### 13. `GET /classrooms` — Các lớp đang dạy
+### 13. Lớp học (`/classrooms`)
 
-Lớp `ACTIVE` của giáo viên, sắp theo khối rồi tên lớp.
+Lớp của giáo viên có 3 trạng thái: `ACTIVE` (đang dạy), `PAUSED` (tạm ngưng: giữ nguyên học sinh, sao, nhưng không mở
+trò chơi cho lớp được) và `ARCHIVED` (đã xóa). Lớp đã xóa và lớp của giáo viên khác đều trả `404 RESOURCE_NOT_FOUND`.
+
+| Method | Path | Mô tả |
+|---|---|---|
+| GET | `/classrooms?status=ACTIVE\|PAUSED` | Lớp `ACTIVE` + `PAUSED` (hoặc một trạng thái), theo khối rồi tên |
+| POST | `/classrooms` → `201` | Tạo lớp |
+| GET | `/classrooms/{code}` | Một lớp |
+| PATCH | `/classrooms/{code}` | Sửa thông tin, tạm ngưng / mở lại (`status`) |
+| DELETE | `/classrooms/{code}` → `204` | Xóa lớp (lưu trữ; sao và lịch sử vẫn còn) |
 
 ```json
-[{ "code": "c-3a", "name": "3A", "grade": 3, "schoolYear": "2026-2027", "studentCount": 28 }]
+{ "code": "c-3a", "name": "3A", "grade": 3, "schoolYear": "2026-2027", "schoolName": "Tiểu học Kim Đồng",
+  "avatar": "bear", "status": "ACTIVE", "studentCount": 28, "activityCount": 12, "completedCount": 9,
+  "completionRate": 75, "lastPlayedAt": "...", "createdAt": "..." }
 ```
+
+- `activityCount`: số lần chơi trò chơi với lớp; `completedCount`: số lần chơi tới màn kết quả;
+  `completionRate` = phần trăm hoàn thành (0 khi chưa chơi). `lastPlayedAt`: lần chơi gần nhất (để mở đúng lớp đang dạy).
+
+Tạo / sửa lớp:
+
+| Field | Tạo | Ghi chú |
+|---|---|---|
+| `name` | ✓ | Tối đa 50 ký tự. Không trùng tên (không phân biệt hoa thường) với lớp khác của giáo viên trong cùng năm học → `409 CLASSROOM_NAME_TAKEN` |
+| `grade` | ✓ | 1–12 |
+| `schoolYear` | | `2026-2027`, năm sau = năm trước + 1 (`400 INVALID_SCHOOL_YEAR`). Gửi `""` khi sửa để xóa |
+| `schoolName` | | Tối đa 100 ký tự |
+| `avatar` | | `bear`, `rabbit`, `lion`, `cat`, `fox`, `panda`, `owl`, `frog` |
+| `status` | (chỉ sửa) | `ACTIVE` hoặc `PAUSED` |
+
+Một giáo viên có tối đa 30 lớp chưa xóa (`409 TOO_MANY_CLASSROOMS`).
+
+#### 13b. Học sinh trong lớp
+
+| Method | Path | Mô tả |
+|---|---|---|
+| POST | `/classrooms/{code}/students` → `201` | Thêm một hoặc nhiều bạn vào cuối danh sách: `{ "students": [{ "displayName": "Minh Anh", "avatar": "cat" }] }`; số thứ tự tiếp theo số lớn nhất. Một lớp tối đa 60 bạn (`409 TOO_MANY_STUDENTS`) |
+| PATCH | `/classrooms/{code}/students/{id}` | Đổi tên / ảnh đại diện |
+| DELETE | `/classrooms/{code}/students/{id}` → `204` | Cho bạn rời lớp (sao vẫn còn trong lịch sử, số thứ tự được dùng lại) |
+| PUT | `/classrooms/{code}/students/order` | `{ "studentIds": [...] }` đủ mọi bạn, mỗi bạn một lần → số thứ tự thành 1..n (`400 INVALID_STUDENT_ORDER`) |
+
+#### 13c. Trò chơi đã chơi với lớp
+
+| Method | Path | Mô tả |
+|---|---|---|
+| POST | `/classrooms/{code}/sessions` → `201` | `{ "gameCode": "g-quiz-vn" }`: màn chiếu mở trò cho lớp (tính là một hoạt động). Lớp tạm ngưng → `409 CLASSROOM_PAUSED` |
+| POST | `/classrooms/{code}/sessions/{id}/end` | Lớp chơi tới màn kết quả (tính là hoàn thành); gọi lại nhiều lần không sao |
 
 ### 14. `GET /classrooms/{code}/students` — Danh sách học sinh
 
@@ -408,6 +451,11 @@ Mọi lỗi trả về dạng:
 |---|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body sai ràng buộc (`violations` chỉ rõ field) | Mọi API có body |
 | 400 | `MALFORMED_REQUEST` | Body không phải JSON hợp lệ | Mọi API có body |
+| 400 | `INVALID_SCHOOL_YEAR` | Năm học không phải hai năm liên tiếp | `/classrooms` |
+| 400 | `INVALID_STUDENT_ORDER` | Danh sách sắp xếp thiếu / thừa / trùng học sinh | `PUT /classrooms/{code}/students/order` |
+| 409 | `CLASSROOM_NAME_TAKEN` | Trùng tên lớp trong cùng năm học | `/classrooms` |
+| 409 | `TOO_MANY_CLASSROOMS`, `TOO_MANY_STUDENTS` | Quá 30 lớp / quá 60 học sinh một lớp | `/classrooms` |
+| 409 | `CLASSROOM_PAUSED` | Mở trò chơi cho lớp đang tạm ngưng | `POST /classrooms/{code}/sessions` |
 | 400 | `INVALID_PARAMETER` | Tham số trên URL sai kiểu hoặc thiếu (vd. id không phải số) | Mọi API |
 | 404 | `NOT_FOUND` | Không có API ở đường dẫn này | Mọi đường dẫn |
 | 405 | `METHOD_NOT_ALLOWED` | Đường dẫn có, nhưng không nhận phương thức HTTP này | Mọi API |
@@ -438,5 +486,4 @@ Mọi lỗi trả về dạng:
 |---|---|
 | Đổi mật khẩu khi đang đăng nhập, đăng nhập Google, danh sách thiết bị + đăng xuất mọi thiết bị, giới hạn số lần thử đăng nhập / đăng ký theo IP, CAPTCHA | Phần còn lại của đăng nhập |
 | `POST /game-sessions`, `POST /game-sessions/{id}/events`, `POST /game-sessions/{id}/undo`, `GET /game-sessions/{id}`, `POST /game-sessions/{id}/end` | Một ván chơi: điểm đội Lật ô, Undo, khôi phục khi F5 (bảng `game_session`, `player`, `session_event`) |
-| CRUD `/classrooms`, `/classrooms/{code}/students` | Tạo lớp, thêm / sửa / xóa học sinh |
 | `/games/{code}/assets` | Upload ảnh, âm thanh cho câu hỏi |
