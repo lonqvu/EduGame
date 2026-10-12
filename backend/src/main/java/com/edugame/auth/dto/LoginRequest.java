@@ -12,6 +12,9 @@ public record LoginRequest(
         @NotBlank @Size(max = 100) String password,
         Boolean remember) {
 
+    /** BCrypt reads at most 72 bytes; longer passwords are refused when set, and can never match at sign-in. */
+    public static final int PASSWORD_MAX_BYTES = 72;
+
     public boolean rememberMe() {
         return Boolean.TRUE.equals(remember);
     }

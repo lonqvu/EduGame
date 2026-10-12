@@ -101,6 +101,13 @@ Access token là JWT ký HS256 (`app.auth.jwt.secret`): `sub` = mã người dù
 hoặc đã xóa đều trả cùng `401 INVALID_CREDENTIALS`. Mật khẩu lưu dạng BCrypt; hash cũ (như `{noop}` của seed dev)
 được tự băm lại bằng BCrypt ở lần đăng nhập đúng đầu tiên. Swagger UI: bấm **Authorize**, dán `accessToken`.
 
+**Chống dò mật khẩu** ([LoginThrottle.java](../backend/src/main/java/com/edugame/auth/service/LoginThrottle.java),
+bảng `login_throttle`): sai **5 lần** với cùng một tên đăng nhập / email, hoặc **30 lần** từ cùng một địa chỉ IP,
+trong 15 phút → khoá 15 phút, mọi lần thử (kể cả đúng mật khẩu) trả `429 TOO_MANY_LOGIN_ATTEMPTS`. Tên không tồn
+tại cũng bị đếm và khoá như thật, nên không lộ tài khoản nào có. Đăng nhập đúng hoặc đặt lại mật khẩu thì xoá bộ
+đếm của tên đó. Sau reverse proxy (Caddy / Nginx trong mạng nội bộ) IP lấy từ `X-Forwarded-For`
+(`server.forward-headers-strategy: native`).
+
 Frontend giữ access token **chỉ trong bộ nhớ** ([authToken.ts](../frontend/src/utils/authToken.ts)), không lưu
 `localStorage`. Gọi `/auth/*` với `withCredentials` để trình duyệt gửi / nhận cookie ([session.ts](../frontend/src/api/session.ts)).
 
@@ -139,7 +146,8 @@ Ai có email cũng đăng ký được. Tài khoản **chỉ được tạo khi 
 
 Lưu tạm tên + mật khẩu (đã băm BCrypt) cùng mã, gửi mail "Mã xác nhận EduGame: 123456". Email đã có tài khoản →
 **vẫn trả đúng câu trả lời trên** (không lộ email nào đã đăng ký), nhưng mail gửi tới là "Bạn đã có tài khoản EduGame".
-Mật khẩu ≥ 8 ký tự. Email được chuẩn hoá chữ thường, bỏ khoảng trắng.
+Mật khẩu ≥ 8 ký tự và **≤ 72 byte UTF-8** (giới hạn của BCrypt; chữ có dấu chiếm 2–3 byte, nên mật khẩu tiếng Việt
+có dấu khoảng 24–36 ký tự là tối đa). Email được chuẩn hoá chữ thường, bỏ khoảng trắng.
 
 **0e. `POST /auth/register/resend` → `202`** — `{ "email": "..." }`: mã mới cho lần đăng ký đang chờ (mã cũ hết
 dùng được). Không có đăng ký đang chờ thì không gửi gì, câu trả lời vẫn như 0d.
@@ -166,7 +174,7 @@ Cùng cơ chế mã 6 số và cùng giới hạn như đăng ký (purpose `RESE
 được email nào có tài khoản. Gọi lại để nhận mã mới.
 
 **0h. `POST /auth/password/reset`** — `{ "email": "...", "code": "123456", "newPassword": "matkhaumoi1" }`: mã đúng →
-đặt mật khẩu mới (≥ 8 ký tự), **thu hồi mọi phiên đăng nhập cũ** của tài khoản (`PASSWORD_RESET`: ai còn biết mật khẩu cũ
+đặt mật khẩu mới (≥ 8 ký tự, ≤ 72 byte), **thu hồi mọi phiên đăng nhập cũ** của tài khoản (`PASSWORD_RESET`: ai còn biết mật khẩu cũ
 đều bị đăng xuất, access token cũ bị từ chối ngay), đánh dấu email đã xác minh, rồi đăng nhập (trả như đăng nhập, phiên
 không "ghi nhớ"). Lỗi: `INVALID_CODE`, `CODE_EXPIRED`.
 
@@ -401,6 +409,7 @@ Mọi lỗi trả về dạng:
 | 400 | `INVALID_CODE` | Mã xác nhận sai (còn lượt thử) | 0f, 0h |
 | 400 | `CODE_EXPIRED` | Mã hết hạn, đã dùng, sai quá 5 lần, hoặc không có mã | 0f, 0h |
 | 409 | `EMAIL_TAKEN` | Email vừa được đăng ký bởi người khác trong lúc chờ mã | 0f |
+| 429 | `TOO_MANY_LOGIN_ATTEMPTS` | Sai mật khẩu quá nhiều lần (5 / tên đăng nhập hoặc 30 / IP trong 15 phút), khoá 15 phút | 0 |
 | 429 | `RESEND_TOO_SOON` | Chưa đủ 60 giây từ mã trước | 0d, 0e, 0g |
 | 429 | `TOO_MANY_CODES` | Đã gửi 5 mã trong 1 giờ tới email này | 0d, 0e, 0g |
 | 401 | `UNAUTHENTICATED` | Không gửi access token, hoặc tài khoản đã bị khóa / xóa sau khi đăng nhập | Tất cả trừ 0, 2 |

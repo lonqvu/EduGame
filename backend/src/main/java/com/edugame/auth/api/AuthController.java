@@ -42,13 +42,14 @@ public class AuthController {
     private final RefreshTokenCookie refreshTokenCookie;
 
     @Operation(summary = "Sign in with username (or email) and password",
-            description = "Returns an access token and sets the refresh token cookie.")
+            description = "Returns an access token and sets the refresh token cookie. 401 INVALID_CREDENTIALS; "
+                    + "429 TOO_MANY_LOGIN_ATTEMPTS after too many failures for the username or the address.")
     @SecurityRequirements
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request,
                                                @RequestHeader(value = HttpHeaders.USER_AGENT, required = false)
-                                               String userAgent) {
-        return withCookie(authService.login(request, userAgent));
+                                               String userAgent, HttpServletRequest servletRequest) {
+        return withCookie(authService.login(request, userAgent, servletRequest.getRemoteAddr()));
     }
 
     @Operation(summary = "New access token from the refresh token cookie",

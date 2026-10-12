@@ -1,5 +1,8 @@
 server:
   port: ${SERVER_PORT:8080}
+  # Behind a reverse proxy (Caddy, Nginx) on a private network, take the client address from X-Forwarded-For;
+  # the header is ignored when the request does not come from such a proxy.
+  forward-headers-strategy: native
   shutdown: graceful
   error:
     include-stacktrace: never
@@ -85,6 +88,12 @@ app:
       reuse-grace: 10s
       cookie-name: edugame_refresh
       cookie-secure: ${REFRESH_COOKIE_SECURE:true}
+    # Failed sign-ins: lock a username / email (or a client address) for a while after too many.
+    login:
+      max-failures: 5
+      max-failures-per-ip: 30
+      window: 15m
+      lock-for: 15m
     # One-time codes mailed to confirm an email address (sign-up).
     verification:
       code-ttl: 10m

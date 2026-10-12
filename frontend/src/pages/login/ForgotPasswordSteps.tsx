@@ -10,7 +10,7 @@ import { useResend } from '@/pages/login/useResend'
 import { useAuthStore } from '@/store/authStore'
 import type { CodeSentResponse } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
-import { EMAIL_PATTERN, MAX_PASSWORD, MIN_PASSWORD } from '@/utils/authRules'
+import { EMAIL_PATTERN, MIN_PASSWORD, passwordTooLong } from '@/utils/authRules'
 
 /** Step 1: the address to send the code to. */
 export function ForgotPasswordForm({ initialEmail, onCodeSent }: {
@@ -149,7 +149,7 @@ export function ResetPasswordStep({ sent, onBack, onDone }: {
                 {...register('newPassword', {
                   required: 'Vui lòng nhập mật khẩu mới',
                   minLength: { value: MIN_PASSWORD, message: `Cần ít nhất ${MIN_PASSWORD} ký tự` },
-                  maxLength: { value: MAX_PASSWORD, message: `Tối đa ${MAX_PASSWORD} ký tự` },
+                  validate: (v) => passwordTooLong(v) || true,
                 })}
                 className={`${inputClass} pr-14`}
               />

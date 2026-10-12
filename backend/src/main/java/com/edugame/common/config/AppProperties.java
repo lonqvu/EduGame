@@ -21,7 +21,14 @@ public record AppProperties(Cors cors, Auth auth, Mail mail, ZoneId timeZone) {
      * @param defaultUserCode development aid: {@code users.code} a request acts as when it carries no access
      *                        token; blank means such requests are anonymous
      */
-    public record Auth(String defaultUserCode, Jwt jwt, Refresh refresh, Verification verification) {
+    public record Auth(String defaultUserCode, Jwt jwt, Refresh refresh, Verification verification, Login login) {
+    }
+
+    /**
+     * Failed sign-ins: a username (or email) with {@code maxFailures} failures, or a client address with
+     * {@code maxFailuresPerIp}, within {@code window} is locked for {@code lockFor}.
+     */
+    public record Login(int maxFailures, int maxFailuresPerIp, Duration window, Duration lockFor) {
     }
 
     /**

@@ -56,6 +56,7 @@ Quy ước chung:
 ```
 ① TÀI KHOẢN          users ──< user_session
                      email_verification (theo email, chưa cần user)
+                     login_throttle (đếm lần đăng nhập sai)
 
 ② DANH MỤC GAME      game_category ──< game_template
 
@@ -76,6 +77,7 @@ Quy ước chung:
 | ① | `users` | Tài khoản giáo viên, admin |
 | ① | `user_session` | Phiên đăng nhập trên một trình duyệt + refresh token (đã băm) |
 | ① | `email_verification` | Mã xác nhận email (đăng ký, quên mật khẩu) |
+| ① | `login_throttle` | Đếm lần đăng nhập sai theo tên đăng nhập / IP, khoá tạm khi quá nhiều |
 | ② | `game_category` | Nhóm game trên menu |
 | ② | `game_template` | Loại game, chỉ định engine, schema và luật mặc định |
 | ③ | `game` | Game giáo viên tạo từ template |
@@ -348,6 +350,21 @@ Mã hết hạn quá 1 ngày được job `EmailVerificationService.deleteExpire
 | `expires_at` | TIMESTAMPTZ | ✓ | Hết hạn (10 phút) |
 | `consumed_at` | TIMESTAMPTZ | | Đã dùng |
 | `created_at` | TIMESTAMPTZ | ✓ | Lúc gửi. Dùng để giới hạn: cách nhau 60 giây, tối đa 5 mã / giờ / email |
+
+### `login_throttle` — Đếm lần đăng nhập sai (V6)
+
+Chống dò mật khẩu. Một dòng cho mỗi khoá: `user:<tên đăng nhập hoặc email đã gõ, chữ thường>` hoặc `ip:<địa chỉ>`.
+Mỗi lần sai cộng 1 trong cửa sổ 15 phút (một câu `INSERT ... ON CONFLICT`, nên đăng nhập đồng thời vẫn đếm đủ);
+đủ 5 (theo tên) hoặc 30 (theo IP) thì khoá 15 phút. Tên không tồn tại cũng được đếm, để khoá không làm lộ tài khoản.
+Đăng nhập đúng / đặt lại mật khẩu thì xoá dòng của tên đó. Dòng cũ được job `LoginThrottle.deleteOldRows`
+(3:50 sáng) xoá. Không FK: khoá có thể là tên không tồn tại.
+
+| Trường | Kiểu | Bắt buộc | Mục đích |
+|---|---|---|---|
+| `throttle_key` | VARCHAR(300) | PK | `user:...` hoặc `ip:...` |
+| `failures` | INT | ✓ | Số lần sai trong cửa sổ hiện tại |
+| `window_started_at` | TIMESTAMPTZ | ✓ | Đầu cửa sổ 15 phút |
+| `locked_until` | TIMESTAMPTZ | | Khoá tới lúc này (`NULL` = không khoá) |
 
 ---
 

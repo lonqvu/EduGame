@@ -34,6 +34,7 @@ public class PasswordResetService {
     private final EmailVerificationService verificationService;
     private final UserAccountService userAccountService;
     private final UserSessionService userSessionService;
+    private final LoginThrottle loginThrottle;
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
@@ -72,6 +73,8 @@ public class PasswordResetService {
         UserAccount updated = userAccountService.resetPassword(account.code(),
                 passwordEncoder.encode(request.newPassword()));
         userSessionService.revokeAllOfUser(updated.id(), SessionRevokeReason.PASSWORD_RESET);
+        // Whoever was locked out by failed guesses proved who they are: sign-in works again at once.
+        loginThrottle.clear(email, updated.username());
         return authService.signIn(updated, false, userAgent);
     }
 
