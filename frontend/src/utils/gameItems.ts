@@ -155,6 +155,8 @@ const memoryCodec: ItemCodec<PairSet> = {
 interface ItemOf {
   GRID_BOARD: Question
   QUIZ: QuizQuestion
+  GOLDEN_BELL: QuizQuestion
+  BOAT_RACE: QuizQuestion
   MATCHING: PairSet
   MEMORY: PairSet
 }
@@ -162,6 +164,9 @@ interface ItemOf {
 const CODECS: { [K in keyof ItemOf]: ItemCodec<ItemOf[K]> } = {
   GRID_BOARD: gridCodec,
   QUIZ: quizCodec,
+  // Same questions as QUIZ, played another way.
+  GOLDEN_BELL: quizCodec,
+  BOAT_RACE: quizCodec,
   MATCHING: matchingCodec,
   MEMORY: memoryCodec,
 }

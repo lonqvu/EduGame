@@ -1,7 +1,21 @@
 /** Mirrors `game_template.code` on the backend. */
-export type GameType = 'GRID_BOARD' | 'QUIZ' | 'MATCHING' | 'MEMORY' | 'SPIN_WHEEL' | 'NAME_RACE'
+export type GameType =
+  | 'GRID_BOARD'
+  | 'QUIZ'
+  | 'GOLDEN_BELL'
+  | 'BOAT_RACE'
+  | 'MATCHING'
+  | 'MEMORY'
+  | 'CROSSWORD'
+  | 'ORDERING'
+  | 'SORTING'
+  | 'SPIN_WHEEL'
+  | 'NAME_RACE'
+  | 'TEAM_MAKER'
+  | 'TIMER'
+  | 'DICE'
 
-export type GameCategory = 'QUESTION' | 'PUZZLE' | 'RANDOM_TOOL'
+export type GameCategory = 'QUESTION' | 'PUZZLE' | 'RANDOM_TOOL' | 'CLASS_TOOL'
 
 export interface GameTemplate {
   type: GameType

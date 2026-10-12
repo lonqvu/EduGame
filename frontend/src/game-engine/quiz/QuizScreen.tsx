@@ -1,16 +1,13 @@
-import { motion } from 'motion/react'
-import { useEffect, useReducer, useState } from 'react'
-import { CheckIcon, ChevronRightIcon, CloseIcon, EyeIcon } from '@/components/ui/icons'
-import { initialQuizRound, playableQuizQuestions, quizReducer } from '@/game-engine/quiz/quizRound'
+import { useReducer, useState } from 'react'
+import { ChevronRightIcon, EyeIcon } from '@/components/ui/icons'
+import { Countdown, QuizOption } from '@/game-engine/quiz/QuizParts'
+import { initialQuizRound, playableQuizQuestions, questionFontSize, quizReducer } from '@/game-engine/quiz/quizRound'
 import { readPlaySettings } from '@/game-engine/shared/gameSettings'
 import { NothingToPlay, PlayFrame, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import { TeamBar } from '@/game-engine/shared/TeamBar'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
 import { editPath } from '@/game-engine/registry'
 import type { GameSummary, QuizQuestion } from '@/types/game'
-
-const OPTION_COLORS = ['#3563E9', '#F28C28', '#2E9E6A', '#8B5CF6', '#E5484D', '#0E9AA7']
-const LETTERS = 'ABCDEF'
 
 interface QuizScreenProps {
   game: GameSummary
@@ -74,7 +71,7 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
         )}
         <span
           className="font-display leading-[1.1] font-extrabold"
-          style={{ fontSize: question.text.length > 90 ? 36 : question.text.length > 50 ? 46 : 56 }}
+          style={{ fontSize: questionFontSize(question.text) }}
         >
           {question.text}
         </span>
@@ -84,13 +81,13 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
         {question.options.map((option, i) => {
           const tried = state.tried[option.id]
           const isCorrect = option.id === question.correctId
-          const showRight = state.revealed && isCorrect
-          const showWrong = tried === false
-          const color = question.trueFalse ? (i === 0 ? '#2E9E6A' : '#E5484D') : OPTION_COLORS[i % OPTION_COLORS.length]
           return (
-            <motion.button
+            <QuizOption
               key={option.id}
-              type="button"
+              option={option}
+              index={i}
+              trueFalse={question.trueFalse}
+              look={state.revealed && isCorrect ? 'right' : tried === false ? 'wrong' : state.revealed ? 'dim' : 'idle'}
               disabled={!answering || state.revealed || tried !== undefined}
               onClick={() =>
                 dispatch({
@@ -101,22 +98,7 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
                   allowSteal: rules.allowSteal,
                 })
               }
-              animate={showWrong ? { x: [0, -10, 10, -6, 6, 0] } : showRight ? { scale: [1, 1.04, 1] } : {}}
-              transition={{ duration: 0.45 }}
-              className={`flex min-h-[76px] cursor-pointer items-center gap-4 rounded-3xl border-4 px-5 py-2 text-left font-[inherit] text-ink disabled:cursor-default ${
-                showRight ? 'border-success bg-[#E3F6EC]' : showWrong ? 'border-danger bg-[#FBE6E1] opacity-70' : 'border-white bg-white'
-              } ${state.revealed && !isCorrect ? 'opacity-50' : ''}`}
-            >
-              <span
-                className="flex size-12 shrink-0 items-center justify-center rounded-2xl font-display text-[26px] font-extrabold text-white"
-                style={{ background: showRight ? '#1B7A50' : showWrong ? '#A3361A' : color }}
-              >
-                {showRight ? <CheckIcon size={28} /> : showWrong ? <CloseIcon size={26} /> : LETTERS[i]}
-              </span>
-              <span className={`font-display font-extrabold ${option.text.length > 30 ? 'text-[24px]' : 'text-[30px]'}`}>
-                {option.text}
-              </span>
-            </motion.button>
+            />
           )
         })}
       </div>
@@ -151,29 +133,5 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
         </div>
       </div>
     </PlayFrame>
-  )
-}
-
-/** Seconds left to answer; "Hết giờ!" at zero (answers are still accepted). */
-function Countdown({ seconds, paused }: { seconds: number; paused: boolean }) {
-  const [left, setLeft] = useState(seconds)
-
-  useEffect(() => {
-    if (paused || left <= 0) return
-    const timer = setTimeout(() => setLeft((s) => s - 1), 1000)
-    return () => clearTimeout(timer)
-  }, [left, paused])
-
-  const urgent = left <= 5
-  return (
-    <span
-      role="timer"
-      aria-live="off"
-      className={`rounded-full px-4 py-1.5 text-lg font-extrabold tabular-nums ${
-        left === 0 ? 'bg-danger text-white' : urgent ? 'bg-sun text-ink' : 'bg-white text-ink'
-      }`}
-    >
-      {left === 0 ? 'Hết giờ!' : `⏱ ${left}s`}
-    </span>
   )
 }

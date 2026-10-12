@@ -28,15 +28,24 @@ const RECENT_LIMIT = 3
 const PICK_FOLDER: GameType = 'NAME_RACE'
 const PICK_GAME_COUNT = Object.keys(PICK_MODES).length
 
-const FILE_NAMES: Record<GameType, string> = {
-  GRID_BOARD: 'grid-board',
-  QUIZ: 'quiz',
-  MATCHING: 'matching',
-  MEMORY: 'memory',
-  SPIN_WHEEL: 'spin-wheel',
-  NAME_RACE: 'name-race',
+/** Card picture of each game (the newer ones are SVG, drawn by scripts/make_card_art.py). */
+const CARD_ART: Record<GameType, string> = {
+  GRID_BOARD: 'card-grid-board.png',
+  QUIZ: 'card-quiz.png',
+  GOLDEN_BELL: 'card-golden-bell.svg',
+  BOAT_RACE: 'card-boat-race.svg',
+  MATCHING: 'card-matching.png',
+  MEMORY: 'card-memory.png',
+  CROSSWORD: 'card-crossword.svg',
+  ORDERING: 'card-ordering.svg',
+  SORTING: 'card-sorting.svg',
+  SPIN_WHEEL: 'card-spin-wheel.png',
+  NAME_RACE: 'card-name-race.png',
+  TEAM_MAKER: 'card-team-maker.svg',
+  TIMER: 'card-timer.svg',
+  DICE: 'card-dice.svg',
 }
-const cardArt = (type: GameType) => `${ASSETS}/card-${FILE_NAMES[type]}.png`
+const cardArt = (type: GameType) => `${ASSETS}/${CARD_ART[type]}`
 /** Square-ish picture for the "recent" row; games without one show their card art, cropped. */
 const THUMBS: Partial<Record<GameType, string>> = { GRID_BOARD: 'grid-board', QUIZ: 'quiz', SPIN_WHEEL: 'spin-wheel' }
 const recentThumb = (type: GameType) => (THUMBS[type] ? `${ASSETS}/thumb-${THUMBS[type]}.png` : cardArt(type))
@@ -48,6 +57,7 @@ const FILTERS: { key: Filter; label: string; icon: ReactNode }[] = [
   { key: 'QUESTION', label: 'Hỏi đáp', icon: <img src={`${ASSETS}/cat-question.png`} alt="" className="size-[22px]" /> },
   { key: 'PUZZLE', label: 'Giải đố', icon: <img src={`${ASSETS}/cat-puzzle.png`} alt="" className="size-[22px]" /> },
   { key: 'RANDOM_TOOL', label: 'Ngẫu nhiên', icon: <img src={`${ASSETS}/cat-random.png`} alt="" className="size-[22px]" /> },
+  { key: 'CLASS_TOOL', label: 'Công cụ', icon: <ToolboxIcon /> },
 ]
 
 type Sort = 'popular' | 'name' | 'new'
@@ -101,6 +111,10 @@ export function ChooseGamePage() {
   const choose = async (template: GameTemplate) => {
     if (template.type === PICK_FOLDER) {
       setPickOpen(true)
+      return
+    }
+    if (!gameRegistry[template.type].playable && !gameRegistry[template.type].hasEditor) {
+      message.info(`Trò "${template.name}" đang được hoàn thiện.`)
       return
     }
     if (!gameRegistry[template.type].usesQuestions) {
@@ -375,6 +389,17 @@ function PeopleIcon() {
       <path d="M1.5 20c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5v.5h-15z" />
       <circle cx="17" cy="9" r="3" opacity=".75" />
       <path d="M17.5 13.5c2.9.3 5 2.3 5 5.5v1.5h-4.2c0-2.9-1-5.2-2.9-6.8.6-.1 1.3-.2 2.1-.2z" opacity=".75" />
+    </svg>
+  )
+}
+
+function ToolboxIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="2.5" y="8" width="19" height="12.5" rx="2.5" fill="#F28C28" />
+      <path d="M8.5 8V5.8A1.8 1.8 0 0 1 10.3 4h3.4a1.8 1.8 0 0 1 1.8 1.8V8" fill="none" stroke="#9A4A00" strokeWidth="2" />
+      <path d="M2.5 12.5h19" stroke="#FFFFFF" strokeWidth="1.6" opacity="0.7" />
+      <rect x="10" y="11" width="4" height="3.5" rx="1" fill="#FFD15C" />
     </svg>
   )
 }

@@ -65,9 +65,14 @@ export class Backend {
     return this.call<{ id: number; displayName: string; weeklyStars: number; totalStars: number }[]>('get', 'classrooms/c-3a/students')
   }
 
-  /** Undoes a star a test gave, so the class keeps its real stars. */
-  takeBackStar(studentId: number) {
-    return this.call('post', `classrooms/c-3a/students/${studentId}/points`, { points: -1, reason: 'E2E' })
+  /** Undoes stars a test gave, so the class keeps its real stars. */
+  takeBackStar(studentId: number, stars = 1) {
+    return this.call('post', `classrooms/c-3a/students/${studentId}/points`, { points: -stars, reason: 'E2E' })
+  }
+
+  /** Replaces the settings of the version being edited. */
+  setSettings(code: string, settings: Record<string, unknown>) {
+    return this.call<Game>('patch', `games/${code}`, { settings })
   }
 
   adopt(code: string) {

@@ -61,6 +61,23 @@ const PAIRS_PASTE = {
   parse: parseBulkPairs,
 }
 
+/** Quiz questions; Rung chuông vàng and Đua thuyền are played with the same questions. */
+const QUIZ_EDITOR: EditorDefinition = {
+  noun: 'Câu hỏi',
+  addLabel: 'Thêm câu trắc nghiệm',
+  newItem: () => emptyQuizQuestion(),
+  extraAdds: [{ label: 'Thêm câu Đúng / Sai', newItem: () => emptyQuizQuestion(true) }],
+  blankLabel: 'Câu hỏi chưa có nội dung',
+  form: ({ item, ...props }) => <QuizForm question={item as QuizQuestion} {...props} />,
+  paste: {
+    title: 'Dán nhiều câu trắc nghiệm',
+    hint: 'Mỗi dòng một câu. Sau dấu “=” ghi đáp án đúng trước, các đáp án sai sau, cách nhau bởi “|”. Ghi “= Đúng” hoặc “= Sai” để tạo câu Đúng / Sai.',
+    placeholder: 'Thủ đô của Việt Nam? = Hà Nội | Huế | Đà Nẵng\n5 + 3 = ? = 8 | 7 | 9\nMặt trời mọc ở đằng Đông = Đúng',
+    parse: parseBulkQuiz,
+    unit: 'câu',
+  },
+}
+
 export const EDITOR_DEFINITIONS: Partial<Record<GameType, EditorDefinition>> = {
   GRID_BOARD: {
     noun: 'Câu hỏi',
@@ -76,21 +93,9 @@ export const EDITOR_DEFINITIONS: Partial<Record<GameType, EditorDefinition>> = {
       unit: 'câu',
     },
   },
-  QUIZ: {
-    noun: 'Câu hỏi',
-    addLabel: 'Thêm câu trắc nghiệm',
-    newItem: () => emptyQuizQuestion(),
-    extraAdds: [{ label: 'Thêm câu Đúng / Sai', newItem: () => emptyQuizQuestion(true) }],
-    blankLabel: 'Câu hỏi chưa có nội dung',
-    form: ({ item, ...props }) => <QuizForm question={item as QuizQuestion} {...props} />,
-    paste: {
-      title: 'Dán nhiều câu trắc nghiệm',
-      hint: 'Mỗi dòng một câu. Sau dấu “=” ghi đáp án đúng trước, các đáp án sai sau, cách nhau bởi “|”. Ghi “= Đúng” hoặc “= Sai” để tạo câu Đúng / Sai.',
-      placeholder: 'Thủ đô của Việt Nam? = Hà Nội | Huế | Đà Nẵng\n5 + 3 = ? = 8 | 7 | 9\nMặt trời mọc ở đằng Đông = Đúng',
-      parse: parseBulkQuiz,
-      unit: 'câu',
-    },
-  },
+  QUIZ: QUIZ_EDITOR,
+  GOLDEN_BELL: QUIZ_EDITOR,
+  BOAT_RACE: QUIZ_EDITOR,
   MATCHING: {
     noun: MATCHING_LABELS.noun,
     addLabel: 'Thêm bộ nối cặp',

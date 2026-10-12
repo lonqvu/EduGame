@@ -108,3 +108,7 @@ export function quizReducer(state: QuizRoundState, action: QuizAction): QuizRoun
       return initialQuizRound(action.teamCount)
   }
 }
+
+/** Font size of a question so long questions still fit their box. */
+export const questionFontSize = (text: string, base = 56) =>
+  text.length > 90 ? Math.round(base * 0.64) : text.length > 50 ? Math.round(base * 0.82) : base

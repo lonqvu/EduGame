@@ -1,12 +1,12 @@
-import { App, Tooltip } from 'antd'
+import { App, Dropdown, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
-import { BulbIcon, ChevronLeftIcon, ChevronRightIcon } from '@/components/ui/icons'
+import { BulbIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { BulkPasteModal } from '@/editor/BulkPasteModal'
 import { EDITOR_DEFINITIONS } from '@/editor/editorDefinitions'
 import { QuestionList } from '@/editor/QuestionList'
-import { gameRegistry, playPath } from '@/game-engine/registry'
+import { gameRegistry, isQuizFamily, playPath, QUIZ_FAMILY } from '@/game-engine/registry'
 import { useCatalogStore, useTemplateName } from '@/store/catalogStore'
 import { useGameLibraryStore, type SaveState } from '@/store/gameLibraryStore'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -39,6 +39,7 @@ export function GameEditorPage() {
   const removeItem = useGameLibraryStore((s) => s.removeItem)
   const reorderItems = useGameLibraryStore((s) => s.reorderItems)
   const loadTemplates = useCatalogStore((s) => s.load)
+  const templates = useCatalogStore((s) => s.templates)
   const templateName = useTemplateName(game?.type)
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -138,22 +139,48 @@ export function GameEditorPage() {
             </span>
           </div>
         </div>
-        <Tooltip title={playable ? undefined : 'Màn chiếu cho trò này đang được hoàn thiện'}>
-          {playable ? (
-            <Link
-              to={playPath(game)}
-              className="flex min-h-[52px] items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-extrabold text-white hover:text-white hover:brightness-110"
+        <div className="flex flex-wrap items-center gap-3">
+          {isQuizFamily(game.type) && (
+            // The same questions can be played as any quiz game.
+            <Dropdown
+              trigger={['click']}
+              menu={{
+                items: QUIZ_FAMILY.filter((t) => t !== game.type).map((t) => ({
+                  key: t,
+                  label: (
+                    <Link to={`${playPath(game)}?as=${t}`} className="text-base font-bold">
+                      {templates.find((tpl) => tpl.type === t)?.name ?? t}
+                    </Link>
+                  ),
+                })),
+              }}
             >
-              Xong, chơi thử
-              <ChevronRightIcon size={20} />
-            </Link>
-          ) : (
-            <span className="flex min-h-[52px] cursor-not-allowed items-center gap-2 rounded-full bg-line px-7 py-3.5 font-extrabold text-ink-soft">
-              Xong, chơi thử
-              <ChevronRightIcon size={20} />
-            </span>
+              <button
+                type="button"
+                className="flex min-h-[52px] cursor-pointer items-center gap-2 rounded-full border-0 bg-white px-6 font-[inherit] font-extrabold text-ink hover:text-primary-ink"
+              >
+                Chơi kiểu khác
+                <ChevronDownIcon size={18} />
+              </button>
+            </Dropdown>
           )}
-        </Tooltip>
+          <Tooltip title={playable ? undefined : 'Màn chiếu cho trò này đang được hoàn thiện'}>
+            {playable ? (
+              <Link
+                to={playPath(game)}
+                className="flex min-h-[52px] items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-extrabold text-white hover:text-white hover:brightness-110"
+              >
+                Xong, chơi thử
+                <ChevronRightIcon size={20} />
+              </Link>
+            ) : (
+              <span className="flex min-h-[52px] cursor-not-allowed items-center gap-2 rounded-full bg-line px-7 py-3.5 font-extrabold text-ink-soft">
+                Xong, chơi thử
+                <ChevronRightIcon size={20} />
+              </span>
+            )}
+          </Tooltip>
+        </div>
       </header>
 
       <div className="flex flex-wrap items-start gap-6">

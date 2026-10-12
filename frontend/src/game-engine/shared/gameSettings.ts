@@ -7,6 +7,12 @@ export interface PlaySettings {
   shuffleItems: boolean
   shuffleOptions: boolean
   flipBackDelayMs: number
+  /** Rung chuông vàng: times the teacher may bring every student who is out back in. */
+  rescues: number
+  /** Đua thuyền: right answers a boat needs to reach the finish. */
+  raceSteps: number
+  /** Ô chữ: points for guessing the keyword. */
+  keywordPoints: number
 }
 
 const obj = (value: unknown): Record<string, unknown> =>
@@ -28,5 +34,8 @@ export function readPlaySettings(settings: Record<string, unknown> | undefined, 
     shuffleItems: bool(settings?.shuffleItems, defaults.shuffleItems ?? false),
     shuffleOptions: bool(settings?.shuffleOptions, defaults.shuffleOptions ?? true),
     flipBackDelayMs: num(settings?.flipBackDelayMs, defaults.flipBackDelayMs ?? 1000, 300, 5000),
+    rescues: num(obj(rules.rescue).count, defaults.rescues ?? 1, 0, 5),
+    raceSteps: num(obj(rules.win).steps, defaults.raceSteps ?? 5, 2, 20),
+    keywordPoints: num(scoring.keywordPoints, defaults.keywordPoints ?? 40, 0, 1000),
   }
 }

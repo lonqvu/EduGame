@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="430" height="116" viewBox="0 0 430 116">
+<defs><clipPath id="c"><rect width="430" height="116" rx="12"/></clipPath></defs>
+<g clip-path="url(#c)">
+<rect width="430" height="116" fill="#E3F6EC"/>
+<circle cx="18" cy="8" r="46" fill="#C3EBD4" opacity="0.55"/>
+<circle cx="412" cy="112" r="52" fill="#C3EBD4" opacity="0.55"/>
+<circle cx="396" cy="10" r="18" fill="#C3EBD4" opacity="0.35"/>
+<path d="M58 61 Q59.98 70.02 69 72 Q59.98 73.98 58 83 Q56.02 73.98 47 72 Q56.02 70.02 58 61Z" fill="#FFFFFF" opacity="0.9"/><path d="M372 53 Q373.62 60.38 381 62 Q373.62 63.62 372 71 Q370.38 63.62 363 62 Q370.38 60.38 372 53Z" fill="#FFFFFF" opacity="0.9"/><path d="M96 20 Q97.08 24.92 102 26 Q97.08 27.08 96 32 Q94.92 27.08 90 26 Q94.92 24.92 96 20Z" fill="#FFFFFF" opacity="0.7"/>
+<rect x="120" y="34" width="42" height="48" rx="9" fill="#FFFFFF" stroke="#3563E9" stroke-width="3"/><text x="141" y="67" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" fill="#3563E9" text-anchor="middle">1</text><rect x="172" y="42" width="42" height="48" rx="9" fill="#FFFFFF" stroke="#F28C28" stroke-width="3"/><text x="193" y="75" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" fill="#F28C28" text-anchor="middle">2</text><rect x="224" y="30" width="42" height="48" rx="9" fill="#FFFFFF" stroke="#2E9E6A" stroke-width="3"/><text x="245" y="63" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" fill="#2E9E6A" text-anchor="middle">3</text><rect x="276" y="42" width="42" height="48" rx="9" fill="#FFFFFF" stroke="#8B5CF6" stroke-width="3"/><text x="297" y="75" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" fill="#8B5CF6" text-anchor="middle">4</text><path d="M120 96 H318" stroke="#2E9E6A" stroke-width="5" stroke-linecap="round"/><path d="M318 88 L330 96 L318 104 Z" fill="#2E9E6A"/>
+</g>
+</svg>

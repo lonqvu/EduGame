@@ -1,10 +1,13 @@
 import { useEffect } from 'react'
-import { useParams } from 'react-router'
+import { useParams, useSearchParams } from 'react-router'
 import { PROJECTOR_BOARD_BG, ProjectorStage } from '@/components/projector/ProjectorStage'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
+import { BoatRaceScreen } from '@/game-engine/boat-race/BoatRaceScreen'
+import { GoldenBellScreen } from '@/game-engine/golden-bell/GoldenBellScreen'
 import { MatchingScreen } from '@/game-engine/matching/MatchingScreen'
 import { MemoryScreen } from '@/game-engine/memory/MemoryScreen'
 import { QuizScreen } from '@/game-engine/quiz/QuizScreen'
+import { isGameType, isQuizFamily } from '@/game-engine/registry'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { GridBoardPage } from '@/pages/play/GridBoardPage'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
@@ -13,9 +16,13 @@ import type { GameItem, PairSet, QuizQuestion } from '@/types/game'
 const EMPTY: GameItem[] = []
 const NO_SETTINGS: Record<string, unknown> = {}
 
-/** /play/:gameId — the projector screen of a question game, by game type. */
+/**
+ * /play/:gameId — the projector screen of a question game, by game type. Quiz questions can be played the way of
+ * another quiz game: /play/:gameId?as=GOLDEN_BELL.
+ */
 export function PlayGamePage() {
   const { gameId = '' } = useParams()
+  const [params] = useSearchParams()
   const loadState = useGameLibraryStore((s) => s.gameStatus[gameId])
   const loadGame = useGameLibraryStore((s) => s.loadGame)
   const game = useGameLibraryStore((s) => s.games.find((g) => g.id === gameId))
@@ -32,13 +39,28 @@ export function PlayGamePage() {
   if (loadState === 'error') return <LoadError onRetry={() => void loadGame(gameId, 'play')} />
   if (!game || (loadState !== 'play' && loadState !== 'edit')) return <PageLoading />
 
-  switch (game.type) {
+  const as = params.get('as') ?? ''
+  const mode = isQuizFamily(game.type) && isGameType(as) && isQuizFamily(as) ? as : game.type
+
+  switch (mode) {
     case 'GRID_BOARD':
       return <GridBoardPage screen="board" />
     case 'QUIZ':
       return (
         <ProjectorStage background={PROJECTOR_BOARD_BG}>
           <QuizScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
+        </ProjectorStage>
+      )
+    case 'GOLDEN_BELL':
+      return (
+        <ProjectorStage background={PROJECTOR_BOARD_BG}>
+          <GoldenBellScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
+        </ProjectorStage>
+      )
+    case 'BOAT_RACE':
+      return (
+        <ProjectorStage background={PROJECTOR_BOARD_BG}>
+          <BoatRaceScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
         </ProjectorStage>
       )
     case 'MATCHING':
