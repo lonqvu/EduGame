@@ -27,7 +27,7 @@ chỉnh sửa câu hỏi / đáp án / giao diện / cài đặt, sau đó publi
 | Ngẫu nhiên | Vòng quay may mắn (`SPIN_WHEEL`), Đua tên (`NAME_RACE`: đua ngựa, bóng bay, máy gắp thú, câu cá, tên lửa) | Dùng danh sách lớp, không cần câu hỏi |
 | Công cụ | Chia nhóm ngẫu nhiên (`TEAM_MAKER`), Đồng hồ đếm ngược (`TIMER`), Xúc xắc (`DICE`) | `/tools/groups`, `/tools/timer`, `/tools/dice` |
 
-Ảnh thẻ của các trò mới vẽ bằng `frontend/scripts/make_card_art.py`.
+Ảnh thẻ của mọi trò là vector (SVG), vẽ bằng `frontend/scripts/make_card_art.py`.
 
 ## Cấu trúc thư mục
 

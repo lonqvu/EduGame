@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="240" viewBox="0 0 480 240">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E5F7EE"/><stop offset="1" stop-color="#C8EED9"/></linearGradient>
+  <filter id="sh" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="3.5" flood-color="#1F2A44" flood-opacity="0.14"/></filter>
+</defs>
+<rect width="480" height="240" fill="url(#bg)"/>
+<circle cx="14" cy="18" r="78" fill="#AFE3C6" opacity="0.6"/>
+<circle cx="470" cy="236" r="88" fill="#AFE3C6" opacity="0.6"/>
+<circle cx="452" cy="26" r="28" fill="#AFE3C6" opacity="0.4"/>
+<circle cx="38" cy="226" r="22" fill="#AFE3C6" opacity="0.4"/>
+<path d="M58 115 Q60.7 127.3 73 130 Q60.7 132.7 58 145 Q55.3 132.7 43 130 Q55.3 127.3 58 115Z" fill="#FFFFFF" opacity="0.95"/><path d="M424 105 Q426.34 115.66 437 118 Q426.34 120.34 424 131 Q421.66 120.34 411 118 Q421.66 115.66 424 105Z" fill="#FFFFFF" opacity="0.95"/><path d="M108 50 Q109.44 56.56 116 58 Q109.44 59.44 108 66 Q106.56 59.44 100 58 Q106.56 56.56 108 50Z" fill="#2E9E6A" opacity="0.8"/><path d="M388 188 Q389.44 194.56 396 196 Q389.44 197.44 388 204 Q386.56 197.44 380 196 Q386.56 194.56 388 188Z" fill="#2E9E6A" opacity="0.8"/>
+<g filter="url(#sh)">
+<rect x="118" y="66" width="76" height="50" rx="14" fill="#FFFFFF" /><circle cx="156" cy="92" r="13" fill="#E5484D"/><path d="M156 80 q2 -6 6 -8" stroke="#6B4E2E" stroke-width="2.5" fill="none"/><ellipse cx="163" cy="78" rx="5" ry="2.6" fill="#2E9E6A" transform="rotate(-25 163 78)"/><circle cx="152.2" cy="90.5" r="1.2" fill="#7A1F22"/><circle cx="159.8" cy="90.5" r="1.2" fill="#7A1F22"/><path d="M152.0 94.0 Q156 98.2 160.0 94.0" stroke="#7A1F22" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="286" y="66" width="104" height="50" rx="14" fill="#FFFFFF" /><text x="338" y="98" font-family="Nunito, Arial, Helvetica, sans-serif" font-size="17" font-weight="900" fill="#1F2A44" text-anchor="middle">Ngôi sao</text><rect x="118" y="136" width="76" height="50" rx="14" fill="#FFFFFF" /><polygon points="156.0,146.0 160.0,155.5 170.3,156.4 162.4,163.1 164.8,173.1 156.0,167.8 147.2,173.1 149.6,163.1 141.7,156.4 152.0,155.5" fill="#FFC93C" stroke="#FFC93C" stroke-width="2" stroke-linejoin="round"/><rect x="286" y="136" width="104" height="50" rx="14" fill="#FFFFFF" /><text x="338" y="168" font-family="Nunito, Arial, Helvetica, sans-serif" font-size="17" font-weight="900" fill="#1F2A44" text-anchor="middle">Quả táo</text><path d="M204 91 C 240 91, 240 161, 276 161" stroke="#2E9E6A" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M204 161 C 240 161, 240 91, 276 91" stroke="#2E9E6A" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-dasharray="1 10"/><circle cx="204" cy="91" r="6" fill="#2E9E6A"/><circle cx="276" cy="161" r="6" fill="#2E9E6A"/><circle cx="204" cy="161" r="6" fill="#2E9E6A"/><circle cx="276" cy="91" r="6" fill="#2E9E6A"/>
+</g>
+</svg>

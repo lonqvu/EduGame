@@ -28,28 +28,8 @@ const RECENT_LIMIT = 3
 const PICK_FOLDER: GameType = 'NAME_RACE'
 const PICK_GAME_COUNT = Object.keys(PICK_MODES).length
 
-/** Card picture of each game (the newer ones are SVG, drawn by scripts/make_card_art.py). */
-const CARD_ART: Record<GameType, string> = {
-  GRID_BOARD: 'card-grid-board.png',
-  QUIZ: 'card-quiz.png',
-  GOLDEN_BELL: 'card-golden-bell.svg',
-  BOAT_RACE: 'card-boat-race.svg',
-  MATCHING: 'card-matching.png',
-  MEMORY: 'card-memory.png',
-  CROSSWORD: 'card-crossword.svg',
-  ORDERING: 'card-ordering.svg',
-  SORTING: 'card-sorting.svg',
-  SPIN_WHEEL: 'card-spin-wheel.png',
-  NAME_RACE: 'card-name-race.png',
-  TEAM_MAKER: 'card-team-maker.svg',
-  TIMER: 'card-timer.svg',
-  DICE: 'card-dice.svg',
-}
-const cardArt = (type: GameType) => `${ASSETS}/${CARD_ART[type]}`
-/** Square-ish picture for the "recent" row; games without one show their card art, cropped. */
-const THUMBS: Partial<Record<GameType, string>> = { GRID_BOARD: 'grid-board', QUIZ: 'quiz', SPIN_WHEEL: 'spin-wheel' }
-const recentThumb = (type: GameType) => (THUMBS[type] ? `${ASSETS}/thumb-${THUMBS[type]}.png` : cardArt(type))
-
+/** Card picture of each game: vector art (scripts/make_card_art.py), sharp at any size and pixel density. */
+const cardArt = (type: GameType) => `${ASSETS}/card-${type.toLowerCase().replace(/_/g, '-')}.svg`
 type Filter = 'ALL' | GameCategory
 
 const FILTERS: { key: Filter; label: string; icon: ReactNode }[] = [
@@ -266,7 +246,7 @@ export function ChooseGamePage() {
                   to={playPath(game)}
                   className="flex items-center gap-4 rounded-[14px] bg-white p-[14px] pr-[16px] text-ink shadow-[0_1px_3px_rgba(31,42,68,0.05)] hover:text-ink hover:shadow-[0_6px_18px_rgba(31,42,68,0.08)]"
                 >
-                  <img src={recentThumb(game.type)} alt="" className="h-[73px] w-[104px] shrink-0 rounded-[10px] object-cover" />
+                  <img src={cardArt(game.type)} alt="" className="h-[73px] w-[104px] shrink-0 rounded-[10px] object-cover" />
                   <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
                     <span className="truncate text-[15px] font-black">{templateName(game.type)}</span>
                     <span className="truncate text-[13.5px] text-ink-soft" title={game.title}>
@@ -328,13 +308,20 @@ interface GameCardProps {
 function GameCard({ template, disabled, folderSize, onChoose }: GameCardProps) {
   const def = gameRegistry[template.type]
   const badge = def.badge && BADGES[def.badge]
+  const action = folderSize ? `Xem ${folderSize} trò` : 'Chọn trò chơi'
   return (
-    // Fills its square list item; the picture takes whatever height the text leaves.
-    <article className="flex h-full min-h-0 flex-col rounded-[14px] border border-[#EDF1F7] bg-white p-[6px] pb-[10px] shadow-[0_1px_3px_rgba(31,42,68,0.04)]">
-      <div className="relative flex min-h-[72px] flex-1">
-        <img src={cardArt(template.type)} alt="" className="absolute inset-0 block size-full rounded-[11px] object-cover" />
+    // Fills its square list item; the picture takes whatever height the text leaves. The whole card is clickable
+    // (the button's ::after covers it).
+    <article className="group relative flex h-full min-h-0 flex-col rounded-[16px] border border-[#E6EBF3] bg-white p-[6px] pb-[10px] shadow-[0_1px_3px_rgba(31,42,68,0.05)] transition-[box-shadow,transform,border-color] duration-200 focus-within:border-primary hover:-translate-y-1 hover:border-[#C9D6F5] hover:shadow-[0_12px_28px_rgba(31,42,68,0.12)]">
+      <div className="relative flex min-h-[96px] flex-1 overflow-hidden rounded-[12px]">
+        <img
+          src={cardArt(template.type)}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 block size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+        />
         {badge && (
-          <span className={`absolute top-[8px] right-[8px] rounded-full px-[11px] py-[3px] text-[12.5px] font-bold ${badge.className}`}>
+          <span className={`absolute top-[8px] right-[8px] rounded-full px-[11px] py-[3px] text-[12.5px] font-bold shadow-sm ${badge.className}`}>
             {badge.label}
           </span>
         )}
@@ -346,15 +333,15 @@ function GameCard({ template, disabled, folderSize, onChoose }: GameCardProps) {
       </div>
       <div className="flex shrink-0 flex-col px-[6px]">
         <h3 className="m-0 mt-[10px] truncate text-[17px] font-black">{template.name}</h3>
-        <p className="m-0 mt-[3px] line-clamp-2 text-[13px] leading-[1.4] text-ink-soft" title={template.description}>
+        {/* Always two lines tall, so every picture of a row has the same height. */}
+        <p className="m-0 mt-[3px] line-clamp-2 min-h-[2.8em] text-[13px] leading-[1.4] text-ink-soft" title={template.description}>
           {template.description}
         </p>
-        <div className="mt-[8px] flex flex-wrap gap-[6px]">
-          <Chip icon={<PeopleIcon />}>{def.players}</Chip>
-          <Chip icon={<ClockIcon size={16} strokeWidth={2.2} />}>{def.duration}</Chip>
-          <Chip icon={<img src={`${ASSETS}/${def.usesQuestions ? 'chip-book' : 'chip-nobook'}.png`} alt="" className="size-[18px]" />}>
-            {def.usesQuestions ? 'Cần bộ câu hỏi' : 'Không cần câu hỏi'}
-          </Chip>
+        {/* One line: a fact that does not fit wraps out of sight whole, instead of being cut mid-word. */}
+        <div className="mt-[8px] flex h-[18px] min-w-0 flex-wrap items-center gap-x-[10px] gap-y-[8px] overflow-hidden text-[12.5px] whitespace-nowrap text-[#3F4B68]">
+          <Meta icon={<PeopleIcon />}>{def.players}</Meta>
+          <Meta icon={<ClockIcon size={15} strokeWidth={2.2} />}>{def.duration}</Meta>
+          <Meta icon={def.usesQuestions ? <BookIcon /> : <SparkIcon />}>{def.usesQuestions ? 'Cần câu hỏi' : 'Không cần câu hỏi'}</Meta>
         </div>
         <div className="pt-[10px]">
           <button
@@ -362,10 +349,10 @@ function GameCard({ template, disabled, folderSize, onChoose }: GameCardProps) {
             onClick={onChoose}
             disabled={disabled}
             aria-label={folderSize ? `Xem ${folderSize} trò ${template.name}` : `Chọn trò chơi ${template.name}`}
-            className="flex h-[34px] w-full cursor-pointer items-center justify-center gap-2 rounded-[8px] border-0 bg-primary font-[inherit] text-[14.5px] font-semibold text-white hover:brightness-110 disabled:cursor-wait disabled:opacity-70"
+            className="flex h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border-0 bg-primary font-[inherit] text-[14.5px] font-semibold text-white outline-none after:absolute after:inset-0 after:rounded-[16px] group-hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
           >
-            {folderSize ? `Xem ${folderSize} trò` : 'Chọn trò chơi'}
-            <ArrowRightIcon size={16} strokeWidth={2.4} />
+            {action}
+            <ArrowRightIcon size={16} strokeWidth={2.4} className="transition-transform duration-200 group-hover:translate-x-0.5" />
           </button>
         </div>
       </div>
@@ -373,18 +360,36 @@ function GameCard({ template, disabled, folderSize, onChoose }: GameCardProps) {
   )
 }
 
-function Chip({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+/** One fact of a game card: icon and a short text. */
+function Meta({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
-    <span className="flex h-[25px] items-center gap-[6px] rounded-[7px] bg-[#F1F3F8] px-[8px] text-[12px] whitespace-nowrap text-ink">
-      <span className="flex text-[#2F3A5A]">{icon}</span>
+    <span className="flex h-[18px] shrink-0 items-center gap-[5px]">
+      <span className="flex shrink-0 text-[#5A6788]">{icon}</span>
       {children}
     </span>
   )
 }
 
+function BookIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 5.5C3 4.7 3.7 4 4.5 4H10c1.1 0 2 .9 2 2v14c0-.8-.7-1.5-1.5-1.5h-6C3.7 18.5 3 17.8 3 17z" fill="#3563E9" />
+      <path d="M21 5.5c0-.8-.7-1.5-1.5-1.5H14c-1.1 0-2 .9-2 2v14c0-.8.7-1.5 1.5-1.5h6c.8 0 1.5-.7 1.5-1.5z" fill="#F28C28" />
+    </svg>
+  )
+}
+
+function SparkIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z" fill="#8B5CF6" />
+    </svg>
+  )
+}
+
 function PeopleIcon() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <circle cx="9" cy="8" r="4" />
       <path d="M1.5 20c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5v.5h-15z" />
       <circle cx="17" cy="9" r="3" opacity=".75" />
