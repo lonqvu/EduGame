@@ -274,9 +274,9 @@ export function ChooseGamePage() {
         {shown.length === 0 ? (
           <p className="m-0 py-12 text-center text-ink-soft">Không tìm thấy trò chơi nào phù hợp.</p>
         ) : (
-          <ul className="m-0 mt-[12px] grid list-none grid-cols-1 gap-x-[18px] gap-y-[14px] p-0 @min-[640px]:grid-cols-2 @min-[1040px]:grid-cols-3">
+          <ul className="m-0 mt-[12px] grid list-none grid-cols-1 gap-4 p-0 @min-[520px]:grid-cols-2 @min-[820px]:grid-cols-3 @min-[1080px]:grid-cols-4">
             {shown.map((template) => (
-              <li key={template.type}>
+              <li key={template.type} className="@min-[520px]:aspect-square">
                 <GameCard template={template} disabled={creating} onChoose={() => void choose(template)} />
               </li>
             ))}
@@ -297,26 +297,29 @@ function GameCard({ template, disabled, onChoose }: GameCardProps) {
   const def = gameRegistry[template.type]
   const badge = def.badge && BADGES[def.badge]
   return (
-    <article className="flex h-full flex-col rounded-[14px] border border-[#EDF1F7] bg-white p-[6px] pb-[10px] shadow-[0_1px_3px_rgba(31,42,68,0.04)]">
-      <div className="relative">
-        <img src={cardArt(template.type)} alt="" className="block h-[115px] w-full rounded-[11px] object-cover" />
+    // Fills its square list item; the picture takes whatever height the text leaves.
+    <article className="flex h-full min-h-0 flex-col rounded-[14px] border border-[#EDF1F7] bg-white p-[6px] pb-[10px] shadow-[0_1px_3px_rgba(31,42,68,0.04)]">
+      <div className="relative flex min-h-[72px] flex-1">
+        <img src={cardArt(template.type)} alt="" className="absolute inset-0 block size-full rounded-[11px] object-cover" />
         {badge && (
           <span className={`absolute top-[8px] right-[8px] rounded-full px-[11px] py-[3px] text-[12.5px] font-bold ${badge.className}`}>
             {badge.label}
           </span>
         )}
       </div>
-      <div className="flex flex-1 flex-col px-[6px]">
-        <h3 className="m-0 mt-[10px] text-[17px] font-black">{template.name}</h3>
-        <p className="m-0 mt-[4px] text-[13.5px] leading-[1.4] text-ink-soft">{template.description}</p>
-        <div className="mt-[9px] flex flex-wrap gap-[7px]">
+      <div className="flex shrink-0 flex-col px-[6px]">
+        <h3 className="m-0 mt-[10px] truncate text-[17px] font-black">{template.name}</h3>
+        <p className="m-0 mt-[3px] line-clamp-2 text-[13px] leading-[1.4] text-ink-soft" title={template.description}>
+          {template.description}
+        </p>
+        <div className="mt-[8px] flex flex-wrap gap-[6px]">
           <Chip icon={<PeopleIcon />}>{def.players}</Chip>
           <Chip icon={<ClockIcon size={16} strokeWidth={2.2} />}>{def.duration}</Chip>
           <Chip icon={<img src={`${ASSETS}/${def.usesQuestions ? 'chip-book' : 'chip-nobook'}.png`} alt="" className="size-[18px]" />}>
             {def.usesQuestions ? 'Cần bộ câu hỏi' : 'Không cần câu hỏi'}
           </Chip>
         </div>
-        <div className="mt-auto pt-[10px]">
+        <div className="pt-[10px]">
           <button
             type="button"
             onClick={onChoose}
@@ -335,7 +338,7 @@ function GameCard({ template, disabled, onChoose }: GameCardProps) {
 
 function Chip({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
-    <span className="flex h-[27px] items-center gap-[7px] rounded-[8px] bg-[#F1F3F8] px-[10px] text-[12.5px] text-ink">
+    <span className="flex h-[25px] items-center gap-[6px] rounded-[7px] bg-[#F1F3F8] px-[8px] text-[12px] whitespace-nowrap text-ink">
       <span className="flex text-[#2F3A5A]">{icon}</span>
       {children}
     </span>
