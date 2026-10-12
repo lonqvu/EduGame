@@ -256,3 +256,133 @@ BEGIN
     ]'::jsonb) WITH ORDINALITY AS p (value, ord);
 END;
 $$;
+
+-- ④ New games (V7) -------------------------------------------------------------
+
+-- Creates a draft game of Cô Lan with its items unless it exists. items: [{"type", "content", "solution"}].
+CREATE OR REPLACE FUNCTION pg_temp.seed_game(p_code TEXT, p_template TEXT, p_title TEXT, p_subject TEXT, p_items JSONB)
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+    v_game_id    BIGINT;
+    v_version_id BIGINT;
+BEGIN
+    IF EXISTS (SELECT 1 FROM game WHERE code = p_code) THEN
+        RETURN;
+    END IF;
+
+    INSERT INTO game (code, owner_id, template_id, title, subject, grade)
+    VALUES (p_code, (SELECT id FROM users WHERE code = 'u-lan'),
+            (SELECT id FROM game_template WHERE code = p_template), p_title, p_subject, 3)
+    RETURNING id INTO v_game_id;
+
+    INSERT INTO game_version (game_id, version, schema_version, settings)
+    SELECT v_game_id, 1, t.schema_version, t.default_config FROM game_template t WHERE t.code = p_template
+    RETURNING id INTO v_version_id;
+
+    UPDATE game SET current_version_id = v_version_id WHERE id = v_game_id;
+
+    INSERT INTO game_item (game_version_id, item_type, position, content, solution)
+    SELECT v_version_id, i.value ->> 'type', i.ord - 1, i.value -> 'content', i.value -> 'solution'
+    FROM jsonb_array_elements(p_items) WITH ORDINALITY AS i (value, ord);
+END;
+$$;
+
+-- Choice questions as [question, correct option index, options...] (two options "Đúng" / "Sai" = TRUE_FALSE).
+CREATE OR REPLACE FUNCTION pg_temp.choice_items(p_questions JSONB)
+RETURNS JSONB LANGUAGE sql AS $$
+    SELECT jsonb_agg(jsonb_build_object(
+               'type', CASE WHEN q.value -> 2 = '"Đúng"' AND jsonb_array_length(q.value) = 4
+                            THEN 'TRUE_FALSE' ELSE 'SINGLE_CHOICE' END,
+               'content', jsonb_build_object(
+                   'text', q.value ->> 0,
+                   'options', (SELECT jsonb_agg(jsonb_build_object(
+                                          'id', CASE WHEN q.value -> 2 = '"Đúng"' AND jsonb_array_length(q.value) = 4
+                                                     THEN (ARRAY['true', 'false'])[o.ord] ELSE chr(96 + o.ord::int) END,
+                                          'text', o.value #>> '{}') ORDER BY o.ord)
+                               FROM jsonb_array_elements(q.value - 0 - 0) WITH ORDINALITY AS o (value, ord))),
+               'solution', jsonb_build_object('correct', jsonb_build_array(
+                   CASE WHEN q.value -> 2 = '"Đúng"' AND jsonb_array_length(q.value) = 4
+                        THEN (ARRAY['true', 'false'])[(q.value ->> 1)::int + 1] ELSE chr(97 + (q.value ->> 1)::int) END)))
+           ORDER BY q.ord)
+    FROM jsonb_array_elements(p_questions) WITH ORDINALITY AS q (value, ord);
+$$;
+
+SELECT pg_temp.seed_game('g-golden-bell', 'GOLDEN_BELL', 'Rung chuông vàng lớp 3', 'Tổng hợp', pg_temp.choice_items('[
+    ["7 x 8 = ?", 1, "54", "56", "64", "48"],
+    ["Từ nào là từ chỉ hoạt động?", 2, "Quyển vở", "Xanh biếc", "Chạy nhảy", "Cái bàn"],
+    ["Thủ đô của Việt Nam là thành phố nào?", 1, "Huế", "Hà Nội", "Đà Nẵng", "Hải Phòng"],
+    ["Con vật nào đẻ trứng?", 3, "Con mèo", "Con chó", "Con bò", "Con gà"],
+    ["1 giờ có 60 phút.", 0, "Đúng", "Sai"],
+    ["Số liền sau của 999 là số nào?", 1, "998", "1000", "990", "1001"],
+    ["Bộ phận nào của cây hút nước?", 0, "Rễ", "Lá", "Hoa", "Quả"],
+    ["Hình vuông có 3 cạnh.", 1, "Đúng", "Sai"]
+]'));
+
+SELECT pg_temp.seed_game('g-boat-math', 'BOAT_RACE', 'Đua thuyền tính nhẩm', 'Toán', pg_temp.choice_items('[
+    ["36 + 27 = ?", 2, "53", "61", "63", "73"],
+    ["90 - 45 = ?", 0, "45", "55", "35", "50"],
+    ["6 x 7 = ?", 1, "36", "42", "48", "49"],
+    ["72 : 8 = ?", 3, "7", "8", "10", "9"],
+    ["Số nào lớn nhất?", 2, "589", "598", "958", "895"],
+    ["1 km = ? m", 1, "100 m", "1000 m", "10 m", "10 000 m"],
+    ["Nửa giờ là bao nhiêu phút?", 0, "30 phút", "15 phút", "50 phút", "60 phút"],
+    ["8 x 9 = 72", 0, "Đúng", "Sai"],
+    ["Một tuần có 8 ngày.", 1, "Đúng", "Sai"],
+    ["125 + 375 = ?", 3, "400", "450", "490", "500"]
+]'));
+
+-- Keyword TRƯỜNG: [clue, answer, index of the key letter in the answer without spaces].
+SELECT pg_temp.seed_game('g-crossword', 'CROSSWORD', 'Ô chữ: Ngôi trường của em', 'Tiếng Việt', (
+    SELECT jsonb_agg(jsonb_build_object(
+               'type', 'CROSSWORD_ROW',
+               'content', jsonb_build_object('clue', r.value ->> 0),
+               'solution', jsonb_build_object('answer', r.value ->> 1, 'keyIndex', (r.value ->> 2)::int))
+           ORDER BY r.ord)
+    FROM jsonb_array_elements('[
+        ["Cây gì thân thẳng, có nhiều đốt, là hình ảnh quen thuộc của làng quê Việt Nam?", "CÂY TRE", 3],
+        ["Thứ gì mọc ở đằng Đông, lặn ở đằng Tây, cho ta ánh nắng?", "MẶT TRỜI", 4],
+        ["Đồ dùng học tập giúp em kẻ đường thẳng thật đẹp?", "CÁI THƯỚC", 5],
+        ["Ngước mắt nhìn lên, em thấy gì xanh thẳm với những đám mây trắng?", "BẦU TRỜI", 5],
+        ["Con vật nào phi nước đại, ngày xưa thường kéo xe?", "CON NGỰA", 2],
+        ["Ở trường, ai là người dạy em đọc, viết, làm toán?", "CÔ GIÁO", 2]
+    ]'::jsonb) WITH ORDINALITY AS r (value, ord)));
+
+-- [prompt, entries in the right order...] -> ids s1..sN, order s1..sN.
+SELECT pg_temp.seed_game('g-ordering', 'ORDERING', 'Sắp xếp cho đúng', 'Tổng hợp', (
+    SELECT jsonb_agg(jsonb_build_object(
+               'type', 'ORDER_SET',
+               'content', jsonb_build_object(
+                   'text', s.value ->> 0,
+                   'items', (SELECT jsonb_agg(jsonb_build_object('id', 's' || e.ord, 'text', e.value #>> '{}') ORDER BY e.ord)
+                             FROM jsonb_array_elements(s.value - 0) WITH ORDINALITY AS e (value, ord))),
+               'solution', jsonb_build_object(
+                   'order', (SELECT jsonb_agg('s' || e.ord ORDER BY e.ord)
+                             FROM jsonb_array_elements(s.value - 0) WITH ORDINALITY AS e (value, ord))))
+           ORDER BY s.ord)
+    FROM jsonb_array_elements('[
+        ["Sắp xếp các từ thành câu đúng", "Em", "rất", "yêu", "ngôi trường", "của em."],
+        ["Xếp các số theo thứ tự từ bé đến lớn", "125", "251", "512", "521", "1250"],
+        ["Thứ tự các mùa trong năm, bắt đầu từ mùa xuân", "Mùa xuân", "Mùa hạ", "Mùa thu", "Mùa đông"],
+        ["Các bước rửa tay đúng cách", "Làm ướt tay", "Xoa xà phòng", "Chà kỹ các ngón tay", "Rửa lại bằng nước sạch", "Lau khô tay"]
+    ]'::jsonb) WITH ORDINALITY AS s (value, ord)));
+
+-- [prompt, [group names], [[card, group number (1-based)]...]] -> groups g1.., cards c1..
+SELECT pg_temp.seed_game('g-sorting', 'SORTING', 'Phân loại vui', 'Tự nhiên và Xã hội', (
+    SELECT jsonb_agg(jsonb_build_object(
+               'type', 'SORT_SET',
+               'content', jsonb_build_object(
+                   'text', s.value ->> 0,
+                   'groups', (SELECT jsonb_agg(jsonb_build_object('id', 'g' || g.ord, 'text', g.value #>> '{}') ORDER BY g.ord)
+                              FROM jsonb_array_elements(s.value -> 1) WITH ORDINALITY AS g (value, ord)),
+                   'cards', (SELECT jsonb_agg(jsonb_build_object('id', 'c' || c.ord, 'text', c.value ->> 0) ORDER BY c.ord)
+                             FROM jsonb_array_elements(s.value -> 2) WITH ORDINALITY AS c (value, ord))),
+               'solution', jsonb_build_object(
+                   'assign', (SELECT jsonb_agg(jsonb_build_array('c' || c.ord, 'g' || (c.value ->> 1)) ORDER BY c.ord)
+                              FROM jsonb_array_elements(s.value -> 2) WITH ORDINALITY AS c (value, ord))))
+           ORDER BY s.ord)
+    FROM jsonb_array_elements('[
+        ["Con vật này ăn gì?", ["Ăn cỏ", "Ăn thịt"],
+         [["Con bò", 1], ["Con hổ", 2], ["Con dê", 1], ["Sư tử", 2], ["Con ngựa", 1], ["Cá sấu", 2], ["Con thỏ", 1], ["Chó sói", 2]]],
+        ["Từ nào chỉ sự vật, từ nào chỉ hoạt động?", ["Chỉ sự vật", "Chỉ hoạt động"],
+         [["Cái bàn", 1], ["Chạy", 2], ["Quyển sách", 1], ["Viết", 2], ["Cây bàng", 1], ["Hát", 2]]]
+    ]'::jsonb) WITH ORDINALITY AS s (value, ord)));

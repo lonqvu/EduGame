@@ -6,7 +6,9 @@ PostgreSQL 13+ · Flyway (`src/main/resources/db/migration`)
 |---|---|
 | `V1__init_schema.sql` | Toàn bộ schema (14 bảng) + seed 3 nhóm game và 4 template: QUIZ, MATCHING, MEMORY, SPIN_WHEEL |
 | `V2__add_grid_board_and_name_race_templates.sql` | Thêm template GRID_BOARD (item `OPEN_QUESTION`: `{text, image, points}` / `{answer}`) và NAME_RACE |
-| `db/dev-seed/R__dev_seed.sql` | **Chỉ profile `dev`**: dữ liệu demo (Cô Lan, lớp 3A, 3 game). Idempotent, chạy lại khi file đổi |
+| `V3__` … `V6__` | Đăng nhập: phiên (`user_session`), mã email, lý do thu hồi phiên, khóa tạm khi nhập sai (`login_throttle`) |
+| `V7__add_classroom_games.sql` | Nhóm `CLASS_TOOL` và 8 template: GOLDEN_BELL, BOAT_RACE (dùng item như QUIZ), CROSSWORD (`CROSSWORD_ROW`), ORDERING (`ORDER_SET`), SORTING (`SORT_SET`), TEAM_MAKER, TIMER, DICE |
+| `db/dev-seed/R__dev_seed.sql` | **Chỉ profile `dev`**: dữ liệu demo (Cô Lan, lớp 3A, một game mẫu cho mỗi trò có câu hỏi). Idempotent, chạy lại khi file đổi |
 
 Các thay đổi sau này tạo migration mới `V2__...`, `V3__...`; **không sửa V1** khi đã chạy trên môi trường dùng chung.
 
@@ -375,7 +377,7 @@ Mỗi lần sai cộng 1 trong cửa sổ 15 phút (một câu `INSERT ... ON CO
 | Trường | Kiểu | Bắt buộc | Mục đích |
 |---|---|---|---|
 | `id` | BIGSERIAL | PK | Khóa chính |
-| `code` | VARCHAR(50) | ✓, unique | `QUESTION`, `PUZZLE`, `RANDOM_TOOL` |
+| `code` | VARCHAR(50) | ✓, unique | `QUESTION`, `PUZZLE`, `RANDOM_TOOL`, `CLASS_TOOL` (V7) |
 | `name` | VARCHAR(100) | ✓ | Tên nhóm trên menu |
 | `icon` | VARCHAR(100) | | Icon của nhóm |
 | `sort_order` | INT | ✓ | Thứ tự nhóm, số nhỏ hiện trước |
@@ -461,7 +463,7 @@ Một đơn vị chơi: một câu hỏi, một bộ thẻ nối cặp, một ô
 |---|---|---|---|
 | `id` | BIGSERIAL | PK | Khóa chính |
 | `game_version_id` | BIGINT | ✓, FK → game_version | Thuộc version nào |
-| `item_type` | VARCHAR(50) | ✓ | `SINGLE_CHOICE`, `TRUE_FALSE`, `PAIR_SET`, `WHEEL_SEGMENT`... Phải nằm trong `config_schema.itemTypes` |
+| `item_type` | VARCHAR(50) | ✓ | `SINGLE_CHOICE`, `TRUE_FALSE`, `PAIR_SET`, `CARD_SET`, `CROSSWORD_ROW`, `ORDER_SET`, `SORT_SET`, `WHEEL_SEGMENT`... Phải nằm trong `config_schema.itemTypes` |
 | `position` | INT | ✓ | Thứ tự, từ 0. Unique trong version (DEFERRABLE để đổi chỗ trong 1 transaction) |
 | `content` | JSONB | ✓ | Nội dung hiển thị trên màn chiếu |
 | `solution` | JSONB | | Đáp án, chỉ backend dùng. NULL nếu game không có đúng/sai |

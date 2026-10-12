@@ -1,5 +1,6 @@
 package com.edugame.game.service;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Component;
  * into the content (choices, pairs, cards) are also checked for consistency: unique ids, and a solution that only
  * references ids of the content.
  * <p>
+ * The new puzzle items are checked the same way: a crossword row's key letter is inside its answer, an ordering
+ * lists every entry once, a sorting puts cards into existing groups.
+ * <p>
  * Deliberately lenient on text (no full JSON Schema engine): blank texts are fine, so half-written drafts can be
  * saved. A missing solution is allowed while editing.
  */
@@ -25,6 +29,10 @@ public class GameItemValidator {
     static final int MAX_OPTIONS = 6;
     static final int MAX_PAIRS = 12;
     static final int MAX_CARDS = MAX_PAIRS * 2;
+    static final int MAX_ANSWER_LETTERS = 15;
+    static final int MAX_ORDER_ENTRIES = 8;
+    static final int MAX_GROUPS = 4;
+    static final int MAX_SORT_CARDS = 16;
 
     public void validate(JsonNode configSchema, String itemType, JsonNode content, JsonNode solution) {
         List<String> allowed = new ArrayList<>();
@@ -48,6 +56,9 @@ public class GameItemValidator {
             case "TRUE_FALSE" -> validateChoice(content, solution, 2, 2);
             case "PAIR_SET" -> validatePairSet(content, solution);
             case "CARD_SET" -> validateCardSet(content, solution);
+            case "CROSSWORD_ROW" -> validateCrosswordRow(content, solution);
+            case "ORDER_SET" -> validateOrderSet(content, solution);
+            case "SORT_SET" -> validateSortSet(content, solution);
             default -> {
                 // No cross-field rules (OPEN_QUESTION, WHEEL_SEGMENT...).
             }
@@ -98,6 +109,72 @@ public class GameItemValidator {
                 throw invalid("solution.pairs %s refers to an unknown card".formatted(pair));
             }
             requireUnused(used, pair);
+        }
+    }
+
+    /**
+     * A clue, and an answer of 1-15 letters (spaces do not count) with {@code keyIndex} naming the letter that sits in
+     * the keyword column.
+     */
+    private static void validateCrosswordRow(JsonNode content, JsonNode solution) {
+        if (!content.path("clue").isTextual()) {
+            throw invalid("content.clue must be a string");
+        }
+        if (solution == null) {
+            return;
+        }
+        if (!solution.path("answer").isTextual()) {
+            throw invalid("solution.answer must be a string");
+        }
+        int letters = answerLetters(solution.path("answer").asText());
+        if (letters < 1 || letters > MAX_ANSWER_LETTERS) {
+            throw invalid("solution.answer must have 1-%d letters".formatted(MAX_ANSWER_LETTERS));
+        }
+        JsonNode keyIndex = solution.path("keyIndex");
+        if (!keyIndex.isIntegralNumber() || keyIndex.asInt() < 0 || keyIndex.asInt() >= letters) {
+            throw invalid("solution.keyIndex must point at a letter of the answer (0-%d)".formatted(letters - 1));
+        }
+    }
+
+    /** Letters of a crossword answer as the board shows them: NFC code points, spaces left out. */
+    static int answerLetters(String answer) {
+        String letters = Normalizer.normalize(answer, Normalizer.Form.NFC).replaceAll("\\s+", "");
+        return letters.codePointCount(0, letters.length());
+    }
+
+    /** 2-8 entries; {@code solution.order} lists every entry id exactly once. */
+    private static void validateOrderSet(JsonNode content, JsonNode solution) {
+        List<String> entries = ids("content.items", content.path("items"), 2, MAX_ORDER_ENTRIES);
+        if (solution == null) {
+            return;
+        }
+        List<String> order = strings("solution.order", solution.path("order"));
+        if (order.size() != entries.size() || !new HashSet<>(order).equals(new HashSet<>(entries))) {
+            throw invalid("solution.order must list every entry of content.items exactly once");
+        }
+    }
+
+    /** 2-4 groups and 1-16 cards, ids unique across both; each card is put in at most one existing group. */
+    private static void validateSortSet(JsonNode content, JsonNode solution) {
+        List<String> groups = ids("content.groups", content.path("groups"), 2, MAX_GROUPS);
+        List<String> cards = ids("content.cards", content.path("cards"), 1, MAX_SORT_CARDS);
+        requireDistinct("content.groups / content.cards", concat(groups, cards));
+        if (solution == null) {
+            return;
+        }
+        JsonNode assign = solution.path("assign");
+        if (!assign.isArray()) {
+            throw invalid("solution.assign must be an array");
+        }
+        Set<String> placed = new HashSet<>();
+        for (JsonNode entry : assign) {
+            List<String> pair = strings("solution.assign[]", entry);
+            if (pair.size() != 2 || !cards.contains(pair.get(0)) || !groups.contains(pair.get(1))) {
+                throw invalid("solution.assign %s must put a card into a group".formatted(pair));
+            }
+            if (!placed.add(pair.get(0))) {
+                throw invalid("%s is put in more than one group".formatted(pair.get(0)));
+            }
         }
     }
 

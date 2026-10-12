@@ -254,8 +254,12 @@ Cấu trúc `content` / `solution` theo template:
 | QUIZ | `SINGLE_CHOICE`, `TRUE_FALSE` | `{ text, image?, audio?, options: [{id, text}] }` | `{ correct: [optionId] }` |
 | MATCHING | `PAIR_SET` | `{ left: [{id, text}], right: [{id, text}] }` | `{ pairs: [[leftId, rightId]] }` |
 | MEMORY | `CARD_SET` | `{ cards: [{id, text?, image?}] }` | `{ pairs: [[cardId, cardId]] }` |
+| GOLDEN_BELL, BOAT_RACE | như QUIZ | như QUIZ | như QUIZ |
+| CROSSWORD | `CROSSWORD_ROW` | `{ clue, image? }` | `{ answer, keyIndex }` |
+| ORDERING | `ORDER_SET` | `{ text?, items: [{id, text}] }` | `{ order: [id] }` |
+| SORTING | `SORT_SET` | `{ text?, groups: [{id, text}], cards: [{id, text}] }` | `{ assign: [[cardId, groupId]] }` |
 | SPIN_WHEEL | `WHEEL_SEGMENT` (khi `settings.source = ITEMS`) | `{ label, color?, weight? }` | không có |
-| NAME_RACE | — (không có item, dùng danh sách lớp) | | |
+| NAME_RACE, TEAM_MAKER, TIMER, DICE | — (không có item; công cụ dùng danh sách lớp hoặc chỉ cài đặt) | | |
 
 > `solution` (đáp án) được trả về vì người gọi là chủ game, để hiện trên màn chiếu của giáo viên.
 > **Không** dùng API này cho thiết bị của học sinh.
@@ -322,10 +326,16 @@ Thêm vào cuối danh sách, theo thứ tự gửi. Dùng cho cả thêm 1 câu
 | QUIZ | `TRUE_FALSE` | như trên, đúng 2 phương án (Đúng / Sai) | `{correct: [optionId]}` |
 | MATCHING (Nối cặp) | `PAIR_SET` | `{left: [{id, text}], right: [{id, text}]}`, mỗi cột 1–12 ô | `{pairs: [[leftId, rightId]]}` |
 | MEMORY (Lật thẻ) | `CARD_SET` | `{cards: [{id, text}]}`, 2–24 thẻ | `{pairs: [[cardId, cardId]]}` |
+| GOLDEN_BELL (Rung chuông vàng), BOAT_RACE (Đua thuyền) | `SINGLE_CHOICE`, `TRUE_FALSE` | giống QUIZ | giống QUIZ |
+| CROSSWORD (Ô chữ bí mật) | `CROSSWORD_ROW` | `{clue, image?}`: một hàng ngang | `{answer, keyIndex}`: đáp án 1–15 chữ cái (không tính dấu cách); `keyIndex` là vị trí (từ 0) của chữ nằm ở cột từ khóa |
+| ORDERING (Sắp xếp) | `ORDER_SET` | `{text?, items: [{id, text}]}`, 2–8 thẻ | `{order: [id]}`: mọi id đúng một lần, theo thứ tự đúng |
+| SORTING (Phân loại) | `SORT_SET` | `{text?, groups: [{id, text}], cards: [{id, text}]}`, 2–4 giỏ, 1–16 thẻ | `{assign: [[cardId, groupId]]}`: mỗi thẻ vào nhiều nhất một giỏ |
 
 Backend kiểm tra thêm (→ `400 INVALID_GAME_ITEM`): `id` không rỗng và không trùng (với PAIR_SET là không trùng giữa
 cả hai cột), `correct` có đúng 1 id và id đó là một phương án, mỗi cặp nối một id cột trái với một id cột phải
-(PAIR_SET) hoặc hai thẻ có thật (CARD_SET), mỗi id chỉ nằm trong một cặp. `text` để trống được (đang soạn dở);
+(PAIR_SET) hoặc hai thẻ có thật (CARD_SET), mỗi id chỉ nằm trong một cặp; `keyIndex` trỏ vào một chữ của đáp án
+(CROSSWORD_ROW, chữ tính theo Unicode NFC); `order` liệt kê đủ mọi thẻ (ORDER_SET); thẻ và giỏ có thật, id không trùng
+giữa giỏ và thẻ (SORT_SET). `text` để trống được (đang soạn dở);
 màn chiếu tự bỏ qua câu / cặp chưa điền đủ. Thêm nhiều item một lúc: một item sai thì cả lô bị từ chối.
 
 #### 10. `PATCH /games/{code}/items/{itemId}` — Sửa câu hỏi

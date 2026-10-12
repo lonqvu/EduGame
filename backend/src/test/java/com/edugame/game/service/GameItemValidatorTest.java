@@ -238,6 +238,116 @@ class GameItemValidatorTest {
                 "content.cards must have 2-24 entries");
     }
 
+    // --- Ô chữ bí mật (CROSSWORD_ROW) ------------------------------------------------------------------------------
+
+    private final JsonNode crosswordSchema = json("""
+            {"itemTypes": ["CROSSWORD_ROW"],
+             "content":  {"type": "object", "required": ["clue"]},
+             "solution": {"type": "object", "required": ["answer", "keyIndex"]}}
+            """);
+
+    @Test
+    void acceptsCrosswordRowWithTheKeyLetterInsideTheAnswer() {
+        // "HÀ NỘI" has 5 letters: the space is not a cell.
+        assertThatCode(() -> validator.validate(crosswordSchema, "CROSSWORD_ROW", json("{\"clue\": \"Thủ đô?\"}"),
+                json("{\"answer\": \"HÀ NỘI\", \"keyIndex\": 4}"))).doesNotThrowAnyException();
+        // A clue without an answer yet is a draft.
+        assertThatCode(() -> validator.validate(crosswordSchema, "CROSSWORD_ROW", json("{\"clue\": \"\"}"), null))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void rejectsCrosswordKeyOutsideTheAnswerOrBadAnswers() {
+        JsonNode clue = json("{\"clue\": \"Thủ đô?\"}");
+        assertInvalid(() -> validator.validate(crosswordSchema, "CROSSWORD_ROW", clue,
+                json("{\"answer\": \"HÀ NỘI\", \"keyIndex\": 5}")), "keyIndex must point at a letter of the answer (0-4)");
+        assertInvalid(() -> validator.validate(crosswordSchema, "CROSSWORD_ROW", clue,
+                json("{\"answer\": \"HUẾ\", \"keyIndex\": -1}")), "keyIndex");
+        assertInvalid(() -> validator.validate(crosswordSchema, "CROSSWORD_ROW", clue,
+                json("{\"answer\": \"HUẾ\", \"keyIndex\": \"1\"}")), "keyIndex");
+        assertInvalid(() -> validator.validate(crosswordSchema, "CROSSWORD_ROW", clue,
+                json("{\"answer\": \"   \", \"keyIndex\": 0}")), "1-15 letters");
+        assertInvalid(() -> validator.validate(crosswordSchema, "CROSSWORD_ROW", clue,
+                json("{\"answer\": \"MƯỜI SÁU CHỮ CÁI LÀ QUÁ\", \"keyIndex\": 0}")), "1-15 letters");
+        assertInvalid(() -> validator.validate(crosswordSchema, "CROSSWORD_ROW", json("{\"clue\": 3}"), null),
+                "content.clue must be a string");
+    }
+
+    @Test
+    void countsDecomposedVietnameseLettersOnce() {
+        // "Ế" typed as E + two combining marks is still one cell.
+        org.assertj.core.api.Assertions.assertThat(GameItemValidator.answerLetters("HU\u0045\u0302\u0301")).isEqualTo(3);
+        org.assertj.core.api.Assertions.assertThat(GameItemValidator.answerLetters(" Hà  Nội ")).isEqualTo(5);
+    }
+
+    // --- Sắp xếp thứ tự (ORDER_SET) -----------------------------------------------------------------------------
+
+    private final JsonNode orderingSchema = json("""
+            {"itemTypes": ["ORDER_SET"],
+             "content":  {"type": "object", "required": ["items"]},
+             "solution": {"type": "object", "required": ["order"]}}
+            """);
+
+    private static final String THREE_STEPS = """
+            {"text": "Xếp thành câu", "items": [{"id": "s1", "text": "Em"}, {"id": "s2", "text": "đi"},
+                                                 {"id": "s3", "text": "học"}]}
+            """;
+
+    @Test
+    void acceptsOrderListingEveryEntryOnce() {
+        assertThatCode(() -> validator.validate(orderingSchema, "ORDER_SET", json(THREE_STEPS),
+                json("{\"order\": [\"s1\", \"s2\", \"s3\"]}"))).doesNotThrowAnyException();
+    }
+
+    @Test
+    void rejectsIncompleteOrRepeatedOrder() {
+        for (String order : new String[] {"[\"s1\", \"s2\"]", "[\"s1\", \"s1\", \"s2\"]", "[\"s1\", \"s2\", \"zz\"]"}) {
+            assertInvalid(() -> validator.validate(orderingSchema, "ORDER_SET", json(THREE_STEPS),
+                    json("{\"order\": " + order + "}")), "every entry of content.items exactly once");
+        }
+        assertInvalid(() -> validator.validate(orderingSchema, "ORDER_SET",
+                json("{\"items\": [{\"id\": \"s1\"}]}"), null), "content.items must have 2-8 entries");
+    }
+
+    // --- Phân loại (SORT_SET) -------------------------------------------------------------------------------------
+
+    private final JsonNode sortingSchema = json("""
+            {"itemTypes": ["SORT_SET"],
+             "content":  {"type": "object", "required": ["groups", "cards"]},
+             "solution": {"type": "object", "required": ["assign"]}}
+            """);
+
+    private static final String TWO_GROUPS = """
+            {"groups": [{"id": "g1", "text": "Ăn cỏ"}, {"id": "g2", "text": "Ăn thịt"}],
+             "cards": [{"id": "c1", "text": "Bò"}, {"id": "c2", "text": "Hổ"}, {"id": "c3", "text": "Dê"}]}
+            """;
+
+    @Test
+    void acceptsCardsPutIntoGroups() {
+        assertThatCode(() -> validator.validate(sortingSchema, "SORT_SET", json(TWO_GROUPS),
+                json("{\"assign\": [[\"c1\", \"g1\"], [\"c2\", \"g2\"], [\"c3\", \"g1\"]]}")))
+                .doesNotThrowAnyException();
+        // Cards not sorted yet are fine while drafting.
+        assertThatCode(() -> validator.validate(sortingSchema, "SORT_SET", json(TWO_GROUPS), json("{\"assign\": []}")))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void rejectsBadSorting() {
+        assertInvalid(() -> validator.validate(sortingSchema, "SORT_SET", json(TWO_GROUPS),
+                json("{\"assign\": [[\"c1\", \"g9\"]]}")), "must put a card into a group");
+        assertInvalid(() -> validator.validate(sortingSchema, "SORT_SET", json(TWO_GROUPS),
+                json("{\"assign\": [[\"g1\", \"c1\"]]}")), "must put a card into a group");
+        assertInvalid(() -> validator.validate(sortingSchema, "SORT_SET", json(TWO_GROUPS),
+                json("{\"assign\": [[\"c1\", \"g1\"], [\"c1\", \"g2\"]]}")), "c1 is put in more than one group");
+        assertInvalid(() -> validator.validate(sortingSchema, "SORT_SET",
+                json("{\"groups\": [{\"id\": \"x\"}, {\"id\": \"g2\"}], \"cards\": [{\"id\": \"x\"}]}"), null),
+                "duplicate ids");
+        assertInvalid(() -> validator.validate(sortingSchema, "SORT_SET",
+                json("{\"groups\": [{\"id\": \"g1\"}], \"cards\": [{\"id\": \"c1\"}]}"), null),
+                "content.groups must have 2-4 entries");
+    }
+
     private static void assertInvalid(org.assertj.core.api.ThrowableAssert.ThrowingCallable call, String message) {
         assertThatThrownBy(call)
                 .isInstanceOf(BusinessException.class)
