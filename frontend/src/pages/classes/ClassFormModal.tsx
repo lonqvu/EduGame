@@ -1,5 +1,5 @@
-import { App, Form, Input, Modal, Select } from 'antd'
-import { useEffect, useState } from 'react'
+import { App, Button, Form, Input, Modal, Select } from 'antd'
+import { useEffect, useRef, useState } from 'react'
 import { AvatarPicker } from '@/pages/classes/classUi'
 import type { ApiError, ClassroomResponse, CreateClassroomRequest } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
@@ -24,7 +24,8 @@ interface ClassFormModalProps {
   classrooms: ClassroomResponse[]
   onClose: () => void
   /** Saves; rejects with the API error to show. */
-  onSubmit: (values: CreateClassroomRequest) => Promise<unknown>
+  /** @param importList a new class whose list comes from a file next ("Tạo lớp và nhập danh sách") */
+  onSubmit: (values: CreateClassroomRequest, importList: boolean) => Promise<unknown>
 }
 
 /** Create a class, or edit one: name, grade, school year, school and its animal. */
@@ -61,6 +62,10 @@ export function ClassFormModal({ open, classroom, classrooms, onClose, onSubmit 
   const years = schoolYearOptions(today)
   if (classroom?.schoolYear && !years.includes(classroom.schoolYear)) years.unshift(classroom.schoolYear)
 
+  // Which create button was pressed: read when the form is valid (after antd's validation), shown on the button.
+  const importList = useRef(false)
+  const [importing, setImporting] = useState(false)
+
   const submit = async (values: FormValues) => {
     setSaving(true)
     try {
@@ -70,7 +75,7 @@ export function ClassFormModal({ open, classroom, classrooms, onClose, onSubmit 
         schoolYear: values.schoolYear,
         schoolName: values.schoolName.trim(),
         avatar: values.avatar,
-      })
+      }, importList.current)
       onClose()
     } catch (error) {
       if ((error as ApiError)?.code === 'CLASSROOM_NAME_TAKEN') {
@@ -87,11 +92,39 @@ export function ClassFormModal({ open, classroom, classrooms, onClose, onSubmit 
     <Modal
       open={open}
       title={editing ? 'Sửa thông tin lớp' : 'Tạo lớp học mới'}
-      okText={editing ? 'Lưu thay đổi' : 'Tạo lớp học'}
-      cancelText="Hủy"
-      onOk={() => form.submit()}
       onCancel={onClose}
-      confirmLoading={saving}
+      footer={[
+        <Button key="cancel" onClick={onClose}>
+          Hủy
+        </Button>,
+        !editing && (
+          <Button
+            key="import"
+            loading={saving && importing}
+            disabled={saving}
+            onClick={() => {
+              importList.current = true
+              setImporting(true)
+              form.submit()
+            }}
+          >
+            Tạo và nhập từ file
+          </Button>
+        ),
+        <Button
+          key="save"
+          type="primary"
+          loading={saving && !importing}
+          disabled={saving}
+          onClick={() => {
+            importList.current = false
+            setImporting(false)
+            form.submit()
+          }}
+        >
+          {editing ? 'Lưu thay đổi' : 'Tạo lớp học'}
+        </Button>,
+      ]}
       forceRender
       width={520}
     >

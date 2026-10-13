@@ -1,7 +1,7 @@
 import { Button, Input } from 'antd'
 import { type ReactNode, useMemo, useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
-import { FilledStarIcon, PencilIcon, PlusIcon, SearchIcon, SortAzIcon, TrashIcon } from '@/components/ui/icons'
+import { FileTextIcon, FilledStarIcon, PencilIcon, PlusIcon, SearchIcon, SortAzIcon, TrashIcon } from '@/components/ui/icons'
 import { CLASS_ASSETS } from '@/pages/classes/classUi'
 import type { StudentResponse } from '@/types/api'
 import { fold, MAX_STUDENTS } from '@/utils/classrooms'
@@ -9,13 +9,15 @@ import { fold, MAX_STUDENTS } from '@/utils/classrooms'
 interface StudentsCardProps {
   students: StudentResponse[]
   onAdd: () => void
+  /** "Nhập từ file": an Excel or CSV class list */
+  onImport: () => void
   onRename: (student: StudentResponse) => void
   onRemove: (student: StudentResponse) => void
   onSortByName: () => void
 }
 
 /** The class list in roll call order, with stars; add, rename, remove, sort A–Z. */
-export function StudentsCard({ students, onAdd, onRename, onRemove, onSortByName }: StudentsCardProps) {
+export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, onSortByName }: StudentsCardProps) {
   const [search, setSearch] = useState('')
   const shown = useMemo(() => {
     const query = fold(search.trim())
@@ -45,6 +47,9 @@ export function StudentsCard({ students, onAdd, onRename, onRemove, onSortByName
             Xếp theo tên
           </Button>
         )}
+        <Button icon={<FileTextIcon size={17} />} onClick={onImport} disabled={full} className="h-10 rounded-full font-bold">
+          Nhập từ file
+        </Button>
         <Button
           type="primary"
           icon={<PlusIcon size={16} />}
@@ -62,11 +67,16 @@ export function StudentsCard({ students, onAdd, onRename, onRemove, onSortByName
           <img src={`${CLASS_ASSETS}/teacher.svg`} alt="" className="size-[110px]" />
           <p className="m-0 text-[17px] font-black">Lớp chưa có học sinh</p>
           <p className="m-0 max-w-[400px] text-[14.5px] text-ink-muted">
-            Thêm tên các em để gọi tên, chia nhóm và thưởng sao trong các trò chơi.
+            Thêm tên các em (gõ, dán hoặc nhập từ file danh sách lớp) để gọi tên, chia nhóm và thưởng sao trong các trò chơi.
           </p>
-          <Button type="primary" shape="round" icon={<PlusIcon size={16} />} onClick={onAdd} className="mt-2">
-            Thêm học sinh
-          </Button>
+          <div className="mt-2 flex flex-wrap justify-center gap-2.5">
+            <Button shape="round" icon={<FileTextIcon size={16} />} onClick={onImport}>
+              Nhập từ file Excel / CSV
+            </Button>
+            <Button type="primary" shape="round" icon={<PlusIcon size={16} />} onClick={onAdd}>
+              Thêm học sinh
+            </Button>
+          </div>
         </div>
       ) : shown.length === 0 ? (
         <p className="mt-4 mb-0 rounded-2xl bg-surface-soft px-4 py-6 text-center text-[15px] text-ink-muted">

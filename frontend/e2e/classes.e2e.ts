@@ -158,3 +158,95 @@ test('the class picked on the home page plays the games, and its numbers count t
   await expect(page.getByText('Lớp đang dạy', { exact: true })).toBeVisible()
   await expect(page.getByText('1/1 trò chơi đến cuối')).toBeVisible()
 })
+
+const FIXTURES = 'src/utils/__fixtures__/class-lists'
+
+test('a class list exported from school software is imported, skipping names already in the class', async ({ page, backend }) => {
+  const name = uniqueName('E2E nhập')
+  const classroom = await backend.createClassroom(name, ['Trần Gia Huy'])
+  await page.goto(`/classes/${classroom.code}`)
+  await page.getByRole('button', { name: 'Nhập từ file' }).click()
+  const dialog = page.getByRole('dialog', { name: `Nhập danh sách Lớp ${name} từ file` })
+  await expect(dialog.getByRole('link', { name: 'Tải file mẫu' })).toHaveAttribute('href', '/assets/classes/mau-danh-sach-lop.xlsx')
+
+  await dialog.locator('input[type=file]').setInputFiles(`${FIXTURES}/vnedu.xlsx`)
+  await expect(dialog.getByText('vnedu.xlsx')).toBeVisible()
+  await expect(dialog.getByRole('combobox', { name: 'Cột họ tên học sinh' }).locator('..')).toContainText('Cột C: Họ và tên')
+  await expect(dialog.getByText('Tìm thấy 5 tên')).toBeVisible()
+  // Capitals and small letters are written the usual way; the teacher's signature is not a pupil.
+  await expect(dialog.getByRole('checkbox', { name: 'Nguyễn Minh Anh' })).toBeChecked()
+  await expect(dialog.getByRole('checkbox', { name: 'Tống Sơn Tùng' })).toBeChecked()
+  await expect(dialog.getByText('Nguyễn Thị Lan')).toBeHidden()
+  // Already in the class: shown, not ticked.
+  await expect(dialog.getByRole('checkbox', { name: 'Trần Gia Huy' })).not.toBeChecked()
+  await expect(dialog.getByText('Đã có trong lớp')).toBeVisible()
+
+  // The teacher leaves one pupil out.
+  await dialog.getByRole('checkbox', { name: 'Phạm Thu Hà' }).uncheck()
+  await dialog.getByRole('button', { name: 'Thêm 3 học sinh' }).click()
+  await expect(page.getByRole('heading', { name: 'Học sinh (4)' })).toBeVisible()
+  expect((await backend.classStudents(classroom.code)).map((s) => `${s.rollNumber}. ${s.displayName}`)).toEqual([
+    '1. Trần Gia Huy',
+    '2. Nguyễn Minh Anh',
+    '3. Tống Sơn Tùng',
+    '4. Lê Bảo Ngọc',
+  ])
+})
+
+test('a CSV without a header: the name column is found and can be changed; an old .xls is explained', async ({ page, backend }) => {
+  const classroom = await backend.createClassroom(uniqueName('E2E CSV'))
+  await page.goto(`/classes/${classroom.code}`)
+  await page.getByRole('button', { name: 'Nhập từ file' }).first().click()
+  const dialog = page.getByRole('dialog', { name: /^Nhập danh sách/ })
+
+  await dialog.locator('input[type=file]').setInputFiles({
+    name: 'lop.xls',
+    mimeType: 'application/vnd.ms-excel',
+    buffer: Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]),
+  })
+  await expect(dialog.getByRole('alert')).toContainText('file Excel đời cũ (.xls)')
+
+  // Excel on Windows: ";" between columns. The names column is found, and the teacher may pick another one.
+  await dialog.locator('input[type=file]').setInputFiles({
+    name: 'lop.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from('\uFEFF0101;Nguyễn An;Nam\n0102;Lê Bình;Nữ\n0103;Đỗ Chi;Nữ\n'),
+  })
+  await expect(dialog.getByText('lop.csv')).toBeVisible()
+  const column = dialog.getByRole('combobox', { name: 'Cột họ tên học sinh' })
+  await expect(column.locator('..')).toContainText('Cột B: Nguyễn An')
+  await column.click()
+  await page.locator('.ant-select-item-option[title="Cột A: 0101"]').click()
+  await expect(dialog.getByText('Cột này không có tên học sinh nào')).toBeVisible()
+  await expect(dialog.getByRole('button', { name: 'Thêm học sinh' })).toBeDisabled()
+  await column.click()
+  await page.locator('.ant-select-item-option[title="Cột B: Nguyễn An"]').click()
+  await expect(dialog.getByText('Tìm thấy 3 tên')).toBeVisible()
+  await dialog.getByRole('button', { name: 'Thêm 3 học sinh' }).click()
+  await expect(page.getByRole('heading', { name: 'Học sinh (3)' })).toBeVisible()
+  expect((await backend.classStudents(classroom.code)).map((s) => s.displayName)).toEqual(['Nguyễn An', 'Lê Bình', 'Đỗ Chi'])
+})
+
+test('"Tạo và nhập từ file" creates the class and opens the import, "Họ đệm" + "Tên" joined', async ({ page, backend }) => {
+  const name = uniqueName('E2E tạo nhập')
+  await page.goto('/classes')
+  await page.getByRole('button', { name: 'Tạo lớp học' }).first().click()
+  const form = page.getByRole('dialog', { name: 'Tạo lớp học mới' })
+  await form.getByLabel('Tên lớp').fill(name)
+  await form.getByRole('button', { name: 'Tạo và nhập từ file' }).click()
+
+  await expect(page).toHaveURL(/\/classes\/c-[a-z0-9]{8}$/)
+  const code = page.url().split('/').pop()!
+  backend.adoptClassroom(code)
+  const dialog = page.getByRole('dialog', { name: `Nhập danh sách Lớp ${name} từ file` })
+  await dialog.locator('input[type=file]').setInputFiles(`${FIXTURES}/split.xlsx`)
+  await expect(dialog.getByRole('combobox', { name: 'Cột họ tên học sinh' }).locator('..')).toContainText('Cột B + C: Họ đệm + Tên')
+  await dialog.getByRole('button', { name: 'Thêm 3 học sinh' }).click()
+  await expect(page.getByRole('heading', { name: 'Học sinh (3)' })).toBeVisible()
+  expect((await backend.classStudents(code)).map((s) => s.displayName)).toEqual(['Nguyễn Minh Anh', 'Trần Gia Huy', 'Võ An'])
+
+  // Reloading does not open the import again.
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Học sinh (3)' })).toBeVisible()
+  await expect(dialog).toBeHidden()
+})

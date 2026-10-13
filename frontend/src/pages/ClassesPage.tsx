@@ -36,10 +36,11 @@ export function ClassesPage() {
   const counts = useMemo(() => countByTab(classrooms), [classrooms])
   const canCreate = status === 'ready' && classrooms.length < MAX_CLASSROOMS
 
-  const create = async (request: CreateClassroomRequest) => {
+  const create = async (request: CreateClassroomRequest, importList: boolean) => {
     const created = await createClassroom(request)
     message.success(`Đã tạo ${classTitle(created.name)}. Cô thêm học sinh cho lớp nhé!`)
-    navigate(`/classes/${encodeURIComponent(created.code)}`)
+    // The class page opens the file import right away when asked.
+    navigate(`/classes/${encodeURIComponent(created.code)}`, { state: { importList } })
   }
 
   return (

@@ -40,6 +40,7 @@ chỉnh sửa câu hỏi / đáp án / giao diện / cài đặt, sau đó publi
 
 - `/classes`: danh sách lớp (lọc Tất cả / Đang hoạt động / Tạm ngưng, tìm theo tên lớp hoặc trường), số hoạt động và tỉ lệ hoàn thành của từng lớp, tạo lớp mới.
 - `/classes/:code`: thông tin lớp, sửa, tạm ngưng / kích hoạt lại, xóa (lưu trữ, sao và kết quả cũ vẫn giữ); danh sách học sinh: thêm (dán cả danh sách), đổi tên, xóa, xếp theo tên.
+- Nhập danh sách lớp từ file Excel (.xlsx) hoặc CSV, ngay khi tạo lớp ("Tạo và nhập từ file") hoặc ở trang lớp ("Nhập từ file"). File được đọc trên trình duyệt, chỉ lấy họ tên: tự tìm cột "Họ và tên" (hoặc ghép "Họ đệm" + "Tên"), bỏ dòng tiêu đề trường, dòng trống, phần chữ ký; đọc được CSV của Excel tiếng Việt (Windows-1258, dấu ";"). Cô xem trước, bỏ chọn tên trùng, rồi thêm. File mẫu: `public/assets/classes/mau-danh-sach-lop.xlsx` (tạo bằng `frontend/scripts/make_class_list_files.py`, cùng các file dùng cho test). File .xls đời cũ: hướng dẫn lưu lại dạng .xlsx.
 - "Lớp đang dạy" chọn ở trang chủ (nhớ trên máy): trò chơi, gọi tên và sao thưởng dùng danh sách lớp đó. Mỗi trò mở trên máy chiếu là một hoạt động, chơi đến màn kết quả là hoàn thành.
 - Ảnh (trường học, cô giáo, 8 con vật làm biểu tượng lớp) là vector, vẽ bằng `frontend/scripts/make_class_art.py`.
 

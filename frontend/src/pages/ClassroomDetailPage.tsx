@@ -1,11 +1,12 @@
 import { App, Button, Dropdown } from 'antd'
 import { useEffect, useState, type ReactNode } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useLocation, useNavigate, useParams } from 'react-router'
 import { BackLink } from '@/components/ui/BackLink'
 import { CheckIcon, GamepadIcon, MoreVerticalIcon, PencilIcon, PlayIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { ClassFormModal } from '@/pages/classes/ClassFormModal'
 import { AnimalAvatar, StatusChip } from '@/pages/classes/classUi'
+import { ImportStudentsModal } from '@/pages/classes/ImportStudentsModal'
 import { AddStudentsModal, RenameStudentModal } from '@/pages/classes/StudentModals'
 import { StudentsCard } from '@/pages/classes/StudentsCard'
 import { useClassroomDetail } from '@/pages/classes/useClassroomDetail'
@@ -33,6 +34,9 @@ export function ClassroomDetailPage() {
   const [editing, setEditing] = useState(false)
   const [adding, setAdding] = useState(false)
   const [renaming, setRenaming] = useState<StudentResponse>()
+  // "Tạo lớp và nhập danh sách": the new class opens with the import dialog.
+  const location = useLocation()
+  const [importing, setImporting] = useState(() => (location.state as { importList?: boolean } | null)?.importList === true)
 
   // Which class is being taught, and the other classes (names already taken), when the page is opened directly.
   useEffect(() => {
@@ -219,6 +223,7 @@ export function ClassroomDetailPage() {
       <StudentsCard
         students={students}
         onAdd={() => setAdding(true)}
+        onImport={() => setImporting(true)}
         onRename={setRenaming}
         onRemove={confirmRemove}
         onSortByName={confirmSort}
@@ -238,6 +243,17 @@ export function ClassroomDetailPage() {
         open={adding}
         studentCount={students.length}
         onClose={() => setAdding(false)}
+        onAdd={detail.addStudents}
+      />
+      <ImportStudentsModal
+        open={importing}
+        classTitle={title}
+        inClass={students.map((s) => s.displayName)}
+        onClose={() => {
+          setImporting(false)
+          // Do not open it again on reload or "back".
+          if (location.state) navigate(location.pathname, { replace: true, state: null })
+        }}
         onAdd={detail.addStudents}
       />
       <RenameStudentModal student={renaming} onClose={() => setRenaming(undefined)} onRename={detail.renameStudent} />
