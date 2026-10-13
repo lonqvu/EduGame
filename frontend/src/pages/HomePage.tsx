@@ -11,6 +11,7 @@ import { FeaturedGames, QuestionSets, TodayPanel } from '@/pages/home/RightColum
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
+import { useQuestionSetStore } from '@/store/questionSetStore'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { GameSummary, GameType } from '@/types/game'
 import { apiErrorMessage } from '@/utils/apiError'
@@ -51,12 +52,13 @@ export function HomePage() {
   const classGrade = useClassStore((s) => s.grade)
   const students = useClassStore((s) => s.students)
   const loadClass = useClassStore((s) => s.load)
+  const questionSets = useQuestionSetStore((s) => s.sets)
+  const loadQuestionSets = useQuestionSetStore((s) => s.load)
   const classrooms = useClassStore((s) => s.classrooms)
   const currentCode = useClassStore((s) => s.classroomCode)
   const selectClass = useClassStore((s) => s.select)
 
   const [allRecent, setAllRecent] = useState(false)
-  const [allSets, setAllSets] = useState(false)
   const [period, setPeriod] = useState<StarPeriod>('week')
   const [creating, setCreating] = useState(false)
 
@@ -65,11 +67,10 @@ export function HomePage() {
     void loadTemplates()
     void loadGames()
     void loadClass()
-  }, [loadTeacher, loadTemplates, loadGames, loadClass])
+    void loadQuestionSets()
+  }, [loadTeacher, loadTemplates, loadGames, loadClass, loadQuestionSets])
 
   const recent = allRecent ? games : games.slice(0, RECENT_LIMIT)
-  const questionGames = games.filter((g) => gameRegistry[g.type].usesQuestions)
-  const sets = allSets ? questionGames : questionGames.slice(0, SETS_LIMIT)
   const startTarget = games[0] ? playPath(games[0]) : '/games/new'
 
   const templateName = (game: GameSummary) => templates.find((t) => t.type === game.type)?.name ?? ''
@@ -166,13 +167,7 @@ export function HomePage() {
 
         <div className="flex min-w-0 flex-col gap-5">
           <FeaturedGames onStart={(type) => void startGame(type)} />
-          <QuestionSets
-            games={sets}
-            expanded={allSets}
-            onToggleExpanded={() => setAllSets((v) => !v)}
-            title={(g) => (g.subject ? `${g.subject} - ${g.title}` : g.title)}
-            count={countLabel}
-          />
+          <QuestionSets sets={questionSets.slice(0, SETS_LIMIT)} />
         </div>
       </div>
     </div>

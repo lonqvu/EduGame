@@ -220,3 +220,79 @@ export interface StudentResponse {
 
 /** Loading state of server data kept in a store. */
 export type LoadStatus = 'idle' | 'loading' | 'ready' | 'error'
+
+// --- Question sets ---------------------------------------------------------------------------------------------
+
+export type SubjectCode = 'TOAN' | 'TIENG_VIET' | 'TIENG_ANH' | 'TU_NHIEN_XA_HOI' | 'KHOA_HOC' | 'KHAC'
+
+/** MULTIPLE_CHOICE: "Trắc nghiệm"; SHORT_ANSWER: "Tự luận" (one answer, checked by the teacher). */
+export type QuestionType = 'MULTIPLE_CHOICE' | 'SHORT_ANSWER'
+
+export interface QuestionSetSummaryResponse {
+  code: string
+  title: string
+  description?: string
+  subject: SubjectCode
+  /** 1-12; absent: any grade */
+  grade?: number
+  questionCount: number
+  multipleChoiceCount: number
+  shortAnswerCount: number
+  /** Games made from the set */
+  useCount: number
+  /** Times those games were played with a class */
+  playCount: number
+  ownerName: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface QuestionResponse {
+  id: number
+  type: QuestionType
+  text: string
+  options?: string[]
+  correctOption?: number
+  answer?: string
+  explanation?: string
+}
+
+export interface QuestionSetGameResponse {
+  code: string
+  title: string
+  templateCode: string
+  createdAt: string
+}
+
+export interface QuestionSetResponse {
+  summary: QuestionSetSummaryResponse
+  questions: QuestionResponse[]
+  games: QuestionSetGameResponse[]
+}
+
+export interface QuestionSetRequest {
+  title: string
+  description?: string
+  subject: SubjectCode
+  /** Create: absent for any grade. Update: 0 clears it. */
+  grade?: number
+}
+
+export interface QuestionRequest {
+  type: QuestionType
+  text: string
+  options?: string[]
+  correctOption?: number
+  answer?: string
+  explanation?: string
+}
+
+/** Games a set can be used in. */
+export type QuestionGameCode = 'QUIZ' | 'GOLDEN_BELL' | 'BOAT_RACE' | 'GRID_BOARD'
+
+export interface UsedQuestionSetResponse {
+  gameCode: string
+  templateCode: QuestionGameCode
+  questionCount: number
+  skippedCount: number
+}

@@ -29,6 +29,13 @@ chỉnh sửa câu hỏi / đáp án / giao diện / cài đặt, sau đó publi
 
 Ảnh thẻ của mọi trò là vector (SVG), vẽ bằng `frontend/scripts/make_card_art.py`.
 
+## Bộ câu hỏi
+
+- `/question-sets`: ngân hàng câu hỏi của giáo viên. Tìm theo tên / mô tả / môn (không dấu cũng được), lọc theo môn, khối, loại câu; sắp xếp; thống kê nhanh, chủ đề phổ biến.
+- `/question-sets/:code`: soạn câu trắc nghiệm (2–6 đáp án, một đáp án đúng) hoặc tự luận (một câu trả lời), dán nhiều câu một lần (`Câu hỏi = Đáp án đúng | Sai | …`), sửa, đổi thứ tự, xóa; nhân bản, xóa bộ.
+- "Sử dụng": chép câu hỏi sang trò chơi mới. Trắc nghiệm, Rung chuông vàng, Đua thuyền dùng câu trắc nghiệm; Lật ô dùng mọi câu. Sửa bộ sau đó không làm đổi trò chơi.
+- Ảnh (môn học, banner, mẹo) là vector, vẽ bằng `frontend/scripts/make_question_art.py`.
+
 ## Quản lý lớp học
 
 - `/classes`: danh sách lớp (lọc Tất cả / Đang hoạt động / Tạm ngưng, tìm theo tên lớp hoặc trường), số hoạt động và tỉ lệ hoàn thành của từng lớp, tạo lớp mới.

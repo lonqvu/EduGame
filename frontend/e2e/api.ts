@@ -34,11 +34,30 @@ export interface Classroom {
   avatar?: string
 }
 
+export type QuestionInput =
+  | { type: 'MULTIPLE_CHOICE'; text: string; options: string[]; correctOption: number }
+  | { type: 'SHORT_ANSWER'; text: string; answer: string }
+
+export interface QuestionSet {
+  summary: { code: string; title: string; questionCount: number; useCount: number; subject: string; description?: string; grade?: number }
+  questions: ({ id: number } & Record<string, any>)[]
+  games: { code: string; templateCode: string }[]
+}
+
+export const choice = (text: string, options: string[], correctOption = 0): QuestionInput => ({
+  type: 'MULTIPLE_CHOICE',
+  text,
+  options,
+  correctOption,
+})
+export const shortAnswer = (text: string, answer: string): QuestionInput => ({ type: 'SHORT_ANSWER', text, answer })
+
 /** The backend, signed in as the same teacher as the browser (to set up games and check what was saved). */
 export class Backend {
   private readonly http: APIRequestContext
   private readonly created: string[] = []
   private readonly classrooms: string[] = []
+  private readonly questionSets: string[] = []
 
   private constructor(http: APIRequestContext) {
     this.http = http
@@ -119,7 +138,30 @@ export class Backend {
     this.classrooms.push(code)
   }
 
+  /** A question set made by the test (archived by `cleanUp`), with these questions. */
+  async createQuestionSet(title: string, questions: QuestionInput[] = [], subject = 'TOAN'): Promise<QuestionSet> {
+    const created = await this.call<QuestionSet>('post', 'question-sets', { title, subject, grade: 2 })
+    this.questionSets.push(created.summary.code)
+    return questions.length ? this.call<QuestionSet>('post', `question-sets/${created.summary.code}/questions`, { questions }) : created
+  }
+
+  questionSet(code: string) {
+    return this.call<QuestionSet>('get', `question-sets/${code}`)
+  }
+
+  questionSetList() {
+    return this.call<QuestionSet['summary'][]>('get', 'question-sets')
+  }
+
+  /** A set the test made in the browser, archived by `cleanUp`. */
+  adoptQuestionSet(code: string) {
+    this.questionSets.push(code)
+  }
+
   async cleanUp() {
+    for (const code of this.questionSets.splice(0)) {
+      await this.http.delete(`question-sets/${code}`)
+    }
     for (const code of this.classrooms.splice(0)) {
       await this.http.delete(`classrooms/${code}`)
     }

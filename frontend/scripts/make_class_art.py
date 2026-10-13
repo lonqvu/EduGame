@@ -8,6 +8,7 @@
 Vector, so they stay sharp at any size and pixel density.
 
 Usage: python3 scripts/make_class_art.py [out_dir]
+(make_question_art.py imports the drawing helpers.)
 """
 import sys
 
@@ -206,11 +207,12 @@ teacher = (
     '<path d="M176 120 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 z" fill="#FFFFFF"/>'
 )
 
-files = {f'avatar-{name}.svg': art for name, art in AVATARS.items()}
-files['banner-school.svg'] = svg(420, 150, school)
-files['teacher.svg'] = svg(200, 200, teacher)
+if __name__ == '__main__':
+    files = {f'avatar-{name}.svg': art for name, art in AVATARS.items()}
+    files['banner-school.svg'] = svg(420, 150, school)
+    files['teacher.svg'] = svg(200, 200, teacher)
 
-for name, content in files.items():
-    with open(f'{OUT}/{name}', 'w') as f:
-        f.write(content)
-print(len(files), 'files:', ', '.join(files))
+    for name, content in files.items():
+        with open(f'{OUT}/{name}', 'w') as f:
+            f.write(content)
+    print(len(files), 'files:', ', '.join(files))

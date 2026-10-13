@@ -1,17 +1,16 @@
-import { Dropdown } from 'antd'
 import { Link } from 'react-router'
 import {
   CalendarIcon,
   ChevronRightIcon,
   ClockIcon,
-  DocumentIcon,
-  MoreVerticalIcon,
   PlusIcon,
 } from '@/components/ui/icons'
-import { editPath, playPath } from '@/game-engine/registry'
-import { Art, Panel, PanelHeader, TextAction } from '@/pages/home/homeUi'
+import { playPath } from '@/game-engine/registry'
+import { Art, Panel, PanelHeader } from '@/pages/home/homeUi'
+import type { QuestionSetSummaryResponse } from '@/types/api'
 import type { GameSummary, GameType } from '@/types/game'
 import { dayLabel } from '@/utils/dateLabels'
+import { subjectArt, subjectInfo } from '@/utils/questionSets'
 
 interface TodayPanelProps {
   games: GameSummary[]
@@ -96,64 +95,41 @@ export function FeaturedGames({ onStart }: { onStart: (type: GameType) => void }
   )
 }
 
-const DOC_TINTS = [
-  'bg-[#ECEFFE] text-[#3D63E6]',
-  'bg-[#EFE9FD] text-[#7A55E0]',
-  'bg-[#E3F5EC] text-[#1E8C5A]',
-]
-
-interface QuestionSetsProps {
-  games: GameSummary[]
-  expanded: boolean
-  onToggleExpanded: () => void
-  /** "Toán lớp 3 - Bảng nhân" */
-  title: (game: GameSummary) => string
-  /** "10 câu hỏi" */
-  count: (game: GameSummary) => string
-}
-
-/** The teacher's question sets (games with questions), to edit or play. */
-export function QuestionSets({ games, expanded, onToggleExpanded, title, count }: QuestionSetsProps) {
+/** The teacher's last changed question sets, to open; "Xem tất cả" goes to the bank. */
+export function QuestionSets({ sets }: { sets: QuestionSetSummaryResponse[] }) {
   return (
     <Panel className="flex flex-col gap-[12px] px-[15px] pt-[17px] pb-[15px]">
       <PanelHeader
         icon={<Art name="icon-folder" className="h-[29px] w-[31px]" />}
-        title="Mẫu bộ câu hỏi"
-        action={games.length > 0 && <TextAction label={expanded ? 'Thu gọn' : 'Xem thêm'} onClick={onToggleExpanded} />}
+        title="Bộ câu hỏi"
+        action={
+          <Link to="/question-sets" className="text-[14px] font-bold text-primary hover:text-primary-ink">
+            Xem tất cả
+          </Link>
+        }
       />
       <div className="h-px" />
-      {games.length === 0 && <p className="m-0 px-1 text-[14px] text-ink-soft">Chưa có bộ câu hỏi nào.</p>}
+      {sets.length === 0 && (
+        <p className="m-0 px-1 text-[14px] text-ink-soft">
+          Chưa có bộ câu hỏi nào. <Link to="/question-sets">Tạo bộ câu hỏi</Link>
+        </p>
+      )}
       <ul className="m-0 flex list-none flex-col gap-[10px] p-0">
-        {games.map((game, i) => (
-          <li
-            key={game.id}
-            className="flex items-center gap-3.5 rounded-[13px] border border-[#EDF1F7] bg-white py-[11px] pr-1.5 pl-[11px] shadow-[0_1px_3px_rgba(31,42,68,0.04)]"
-          >
-            <span className={`flex size-[40px] shrink-0 items-center justify-center rounded-[11px] ${DOC_TINTS[i % DOC_TINTS.length]}`}>
-              <DocumentIcon size={23} />
-            </span>
-            <Link to={editPath(game.id)} className="flex min-w-0 flex-1 flex-col gap-[3px] text-ink hover:text-ink">
-              <span className="truncate text-[15px] font-bold">{title(game)}</span>
-              <span className="text-[13px] text-ink-soft">{count(game)}</span>
-            </Link>
-            <Dropdown
-              trigger={['click']}
-              placement="bottomRight"
-              menu={{
-                items: [
-                  { key: 'edit', label: <Link to={editPath(game.id)}>Soạn câu hỏi</Link> },
-                  { key: 'play', label: <Link to={playPath(game)}>Trình chiếu</Link> },
-                ],
-              }}
+        {sets.map((set) => (
+          <li key={set.code}>
+            <Link
+              to={`/question-sets/${encodeURIComponent(set.code)}`}
+              className="flex items-center gap-3.5 rounded-[13px] border border-[#EDF1F7] bg-white py-[9px] pr-2.5 pl-[9px] text-ink shadow-[0_1px_3px_rgba(31,42,68,0.04)] hover:border-[#C9D9F5] hover:text-ink"
             >
-              <button
-                type="button"
-                aria-label={`Tùy chọn cho ${game.title}`}
-                className="flex h-10 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-[#3F4B68] hover:bg-surface-soft"
-              >
-                <MoreVerticalIcon size={20} />
-              </button>
-            </Dropdown>
+              <img src={subjectArt(set.subject)} alt="" className="h-[40px] w-[46px] shrink-0 rounded-[11px] object-cover" />
+              <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+                <span className="truncate text-[15px] font-bold">{set.title}</span>
+                <span className="text-[13px] text-ink-soft">
+                  {set.questionCount} câu hỏi · {subjectInfo(set.subject).label}
+                </span>
+              </span>
+              <ChevronRightIcon size={18} className="shrink-0 text-ink-muted" />
+            </Link>
           </li>
         ))}
       </ul>

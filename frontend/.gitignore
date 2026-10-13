@@ -27,3 +27,4 @@ dist-ssr
 /e2e/.auth/
 /test-results/
 /playwright-report/
+__pycache__/

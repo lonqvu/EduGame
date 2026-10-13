@@ -9,6 +9,8 @@ import { GameEditorPage } from '@/pages/GameEditorPage'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { QuestionSetPage } from '@/pages/QuestionSetPage'
+import { QuestionSetsPage } from '@/pages/QuestionSetsPage'
 import { DicePage, TeamMakerPage, TimerPage } from '@/pages/play/ClassToolPages'
 import { GridBoardPage } from '@/pages/play/GridBoardPage'
 import { NamePickerPage } from '@/pages/play/NamePickerPage'
@@ -30,6 +32,8 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: 'games/new', element: <ChooseGamePage /> },
           { path: 'games/:gameId/edit', element: <GameEditorPage /> },
+          { path: 'question-sets', element: <QuestionSetsPage /> },
+          { path: 'question-sets/:code', element: <QuestionSetPage /> },
           { path: 'classes', element: <ClassesPage /> },
           { path: 'classes/:code', element: <ClassroomDetailPage /> },
           { path: '*', element: <NotFoundPage /> },
