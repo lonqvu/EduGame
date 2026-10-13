@@ -87,16 +87,16 @@ export function HomeHero({ greetingName, className, studentCount, classes, curre
       </div>
 
       {/*
-        The scene is drawn wider than any banner (scripts/extend_banners.py): it starts right after the greeting
-        and is anchored on the right, so it reaches the text whatever the screen width. The teacher and the pupils
-        take the right 520 x 234 px of it: when the space is narrower, the picture gets smaller (its height at most
-        38% of the space's width) so they always show whole, standing on the bottom edge.
+        The scene is drawn wider than any banner (scripts/extend_banners.py): it starts right after the greeting,
+        always as tall as the banner, anchored on the right so it reaches the text whatever the screen width.
+        When the space is too narrow for the whole group, the picture slides right instead of shrinking: the teacher
+        (1.28 picture heights from its right edge) stays in the middle of the space, the board is cut first.
       */}
-      <div className="@container pointer-events-none absolute inset-y-0 right-0 left-[50%] hidden overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_80px)] @min-[640px]:block @min-[980px]:left-[430px]">
+      <div className="pointer-events-none absolute inset-y-0 right-0 left-[50%] hidden overflow-hidden [container-type:size] [mask-image:linear-gradient(to_right,transparent,black_80px)] @min-[640px]:block @min-[980px]:left-[430px]">
         <img
           src={`${HOME_ASSETS}/hero-wide.png`}
           alt="Cô giáo và các bạn nhỏ bên bảng: Học vui, học tốt cùng EduGame!"
-          className="absolute right-0 bottom-0 h-[min(100%,38cqw)] w-auto max-w-none select-none [mask-image:linear-gradient(to_bottom,transparent,black_24px)]"
+          className="absolute right-[min(0px,calc(50cqw-128cqh))] bottom-0 h-full w-auto max-w-none select-none"
         />
       </div>
     </section>
