@@ -2,7 +2,7 @@
 
 * subject-<subject>.svg: the picture of a set, by subject, 120x104 on a pastel tile. The names follow the backend's
   subjects (TOAN -> toan, TU_NHIEN_XA_HOI -> tu-nhien-xa-hoi...).
-* banner.svg: the teacher reading with two pupils, a light bulb and stars, for the "Bộ câu hỏi" banner, 360x200.
+* banner.svg: the teacher reading with two pupils, a light bulb and stars, for the "Bộ câu hỏi" banner, 340x240.
 * tip.svg: a fox reading, for the "Mẹo nhỏ" card, 150x130.
 
 Vector, so they stay sharp at any size and pixel density. Reuses the drawing helpers of make_class_art.py.
@@ -12,7 +12,7 @@ Usage: python3 scripts/make_question_art.py [out_dir]
 import re
 import sys
 
-from make_class_art import AVATARS, INK, eyes, kid, svg, teacher
+from make_class_art import AVATARS, TEACHER_FIGURE, pupil, svg
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'public/assets/question-sets'
 FONT = 'Nunito, Arial Rounded MT Bold, Arial, sans-serif'
@@ -91,25 +91,27 @@ SUBJECTS = {
         + sparkle(22, 84, 7, '#FF8FAB') + sparkle(98, 86, 5, '#3563E9'))),
 }
 
-# Banner: the teacher reading, a pupil on each side, a light bulb, a chart and stars, on a transparent ground.
-teacher_scene = re.sub(r'<circle cx="104" cy="104" r="86"[^>]*/>', '', teacher)
+# Banner: the teacher reading in the middle, a pupil on each side, all cut by the bottom edge (they stand in front of
+# the banner, as in the design), with a star, a chart, a light bulb and a heart above. 340x240, drawn to fill the
+# banner's height on its right side.
 banner = (
-    '<circle cx="190" cy="110" r="92" fill="#FFFFFF" opacity="0.45"/>'
-    '<path d="M120 200 q70 -40 150 0 z" fill="#BFE6A6" opacity="0.7"/>'
-    + f'<g transform="translate(92 6)">{teacher_scene}</g>'
-    + f'<g transform="translate(-40 -88) scale(1.5)">{kid(84, 192, "#FFD9BE", "#3A2A20", "#F5A524", girl=True, wave=1)}</g>'
-    + f'<g transform="translate(-118 -88) scale(1.5)">{kid(280, 192, "#F6C9A4", "#2B2235", "#3E9BEA", girl=False, wave=-1)}</g>'
-    # light bulb
-    + '<g transform="translate(318 34)"><path d="M0 -20 a16 16 0 0 0 -9 29 c2 1.5 2.5 3.5 2.5 5.5 h13 c0 -2 .5 -4 2.5 -5.5 '
+    '<circle cx="190" cy="150" r="104" fill="#FFFFFF" opacity="0.45"/>'
+    '<circle cx="190" cy="150" r="76" fill="#FFFFFF" opacity="0.35"/>'
+    # props
+    + '<polygon points="40,26 47,41 63,42 51,52 55,68 40,59 25,68 29,52 17,42 33,41" fill="#FFD15C" stroke="#F5A524" '
+      'stroke-width="2" stroke-linejoin="round"/>'
+    + '<g transform="rotate(-10 86 92)"><rect x="64" y="72" width="44" height="40" rx="8" fill="#FFFFFF"/>'
+      '<rect x="72" y="94" width="7" height="10" rx="2" fill="#3563E9"/><rect x="82" y="86" width="7" height="18" rx="2" '
+      'fill="#22A06B"/><rect x="92" y="80" width="7" height="24" rx="2" fill="#F28C28"/></g>'
+    + '<g transform="translate(300 46)"><path d="M0 -20 a16 16 0 0 0 -9 29 c2 1.5 2.5 3.5 2.5 5.5 h13 c0 -2 .5 -4 2.5 -5.5 '
       'a16 16 0 0 0 -9 -29 z" fill="#FFD15C" stroke="#E3A008" stroke-width="2"/><path d="M-6 21 h12 M-4.5 26 h9" '
       'stroke="#8C8FA3" stroke-width="3" stroke-linecap="round"/></g>'
-    # star and a card with a chart
-    + '<polygon points="40,22 46,36 61,37 49,46 53,61 40,52 27,61 31,46 19,37 34,36" fill="#FFD15C" stroke="#F5A524" '
-      'stroke-width="2" stroke-linejoin="round"/>'
-    + '<g transform="rotate(-10 92 70)"><rect x="70" y="50" width="44" height="40" rx="8" fill="#FFFFFF"/>'
-      '<rect x="78" y="72" width="7" height="10" rx="2" fill="#3563E9"/><rect x="88" y="64" width="7" height="18" rx="2" '
-      'fill="#22A06B"/><rect x="98" y="58" width="7" height="24" rx="2" fill="#F28C28"/></g>'
-    + sparkle(150, 22, 7) + sparkle(250, 16, 5, '#FFD15C') + sparkle(344, 150, 6)
+    + '<path d="M262 74 c-5 -7 -15 -2 -10 7 l10 9 l10 -9 c5 -9 -5 -14 -10 -7 z" fill="#FFB547"/>'
+    # the teacher, then the pupils in front of her sides
+    + f'<g transform="translate(52.5 -8) scale(1.25)">{TEACHER_FIGURE}</g>'
+    + pupil(64, 266, 1.9, '#FFD9BE', '#3A2A20', '#F5A524', girl=True, wave=1)
+    + pupil(298, 266, 1.9, '#F6C9A4', '#2B2235', '#3E9BEA', girl=False, wave=-1)
+    + sparkle(150, 26, 7) + sparkle(236, 18, 5, '#FFD15C') + sparkle(326, 120, 6) + sparkle(18, 120, 5, '#B7A2F5')
 )
 
 # Tip: the fox reading a blue book.
@@ -126,7 +128,7 @@ tip = (
 
 if __name__ == '__main__':
     files = {f'subject-{name}.svg': art for name, art in SUBJECTS.items()}
-    files['banner.svg'] = svg(360, 200, banner)
+    files['banner.svg'] = svg(340, 240, banner)
     files['tip.svg'] = svg(150, 130, tip)
     for name, content in files.items():
         with open(f'{OUT}/{name}', 'w') as f:

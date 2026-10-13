@@ -124,12 +124,15 @@ def kid(x, y, skin, hair, shirt, girl=False, wave=1):
                   f'<circle cx="{x - 14}" cy="{y - 56}" r="5" fill="{hair}"/><circle cx="{x + 14}" cy="{y - 56}" r="5" fill="{hair}"/>'
                   if girl else
                   f'<path d="M{x - 12} {y - 52} q1 -14 12 -14 q11 0 12 14 q-6 -6 -12 -5 q-7 -1 -12 5 z" fill="{hair}"/>')
-    return (f'<path d="M{x - 11} {y - 2} v-12 M{x + 5} {y - 2} v-12" stroke="#3E4A6B" stroke-width="5.5" stroke-linecap="round"/>'
+    # Arms hanging at the sides: one when the other waves, both otherwise.
+    hanging = [-wave] if wave else [-1, 1]
+    return (f'<path d="M{x - 6} {y - 2} v-12 M{x + 6} {y - 2} v-12" stroke="#3E4A6B" stroke-width="5.5" stroke-linecap="round"/>'
             f'<path d="M{x - 13} {y - 12} q-1 -22 13 -24 q14 2 13 24 z" fill="{shirt}"/>'
             f'<path d="M{x - 6} {y - 35} l6 6 l6 -6" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linejoin="round"/>'
             + (f'<path d="{arm_up}" stroke="{skin}" stroke-width="5" stroke-linecap="round" fill="none"/>' if wave else '')
-            + f'<path d="M{x - 9 * (wave or 1)} {y - 33} q{-7 * (wave or 1)} 8 {-6 * (wave or 1)} 16" stroke="{skin}" stroke-width="5" stroke-linecap="round" fill="none"/>'
-            f'<circle cx="{x}" cy="{y - 48}" r="13" fill="{skin}"/>'
+            + ''.join(f'<path d="M{x + 9 * s} {y - 33} q{7 * s} 8 {6 * s} 16" stroke="{skin}" stroke-width="5" '
+                      f'stroke-linecap="round" fill="none"/>' for s in hanging)
+            + f'<circle cx="{x}" cy="{y - 48}" r="13" fill="{skin}"/>'
             + hair_shape
             + eyes(x - 4.5, x + 4.5, y - 47, 1.8)
             + f'<path d="M{x - 4} {y - 42} q4 3.5 8 0" fill="none" stroke="{INK}" stroke-width="1.8" stroke-linecap="round"/>'
@@ -141,12 +144,19 @@ def cloud(x, y, s, op=0.9):
             f'<circle cx="{x - 7 * s}" cy="{y - 6 * s}" r="{9 * s}"/><circle cx="{x + 7 * s}" cy="{y - 8 * s}" r="{11 * s}"/></g>')
 
 
+def pupil(x, y, scale, *args, **kwargs):
+    """A pupil (see kid) standing at (x, y), scaled."""
+    return f'<g transform="translate({x} {y}) scale({scale})">{kid(0, 0, *args, **kwargs)}</g>'
+
+
+# The school in the middle on a hill that slopes down to both bottom corners (no cut edge at the sides); the pupils
+# stand on the grass in front of the side walls, below the windows; trees outside them.
 school = (
     # sky details and the hill
-    cloud(70, 34, 1.1) + cloud(330, 26, 0.9) + cloud(205, 14, 0.6, 0.7)
-    + '<circle cx="380" cy="38" r="15" fill="#FFE07A"/><circle cx="380" cy="38" r="21" fill="#FFE07A" opacity="0.35"/>'
-    + '<path d="M0 150 Q90 112 210 120 Q330 110 420 140 L420 150 Z" fill="#BFE6A6"/>'
-    + '<path d="M0 150 Q120 128 230 134 Q330 128 420 150 Z" fill="#9ED486"/>'
+    cloud(62, 32, 1.1) + cloud(330, 26, 0.9) + cloud(148, 18, 0.6, 0.7)
+    + '<circle cx="388" cy="34" r="15" fill="#FFE07A"/><circle cx="388" cy="34" r="21" fill="#FFE07A" opacity="0.35"/>'
+    + '<path d="M0 150 C40 132 110 116 210 118 C310 116 380 132 420 150 Z" fill="#BFE6A6"/>'
+    + '<path d="M0 150 C60 138 140 130 210 132 C290 130 360 138 420 150 Z" fill="#9ED486"/>'
     # school: wings, centre with roof, door, windows, clock, flag
     + '<rect x="128" y="74" width="164" height="56" rx="4" fill="#FFF4E0"/>'
     + '<path d="M120 78 L210 42 L300 78 Z" fill="#F07F5E"/><path d="M120 78 L300 78 L296 84 L124 84 Z" fill="#D9654A"/>'
@@ -157,30 +167,24 @@ school = (
     + '<path d="M210 34 v-24" stroke="#8C8FA3" stroke-width="2.2"/><path d="M210 10 h18 l-4 6 l4 6 h-18 z" fill="#E5484D"/>'
     + '<polygon points="217,13 218.2,16 221.4,16 218.8,17.9 219.8,21 217,19.2 214.2,21 215.2,17.9 212.6,16 215.8,16" fill="#FFD15C"/>'
     + '<path d="M198 130 v-28 a12 12 0 0 1 24 0 v28 z" fill="#5B8DEF"/><path d="M210 90 v40" stroke="#4673D6" stroke-width="2"/>'
-    + ''.join(f'<rect x="{x}" y="{y}" width="18" height="16" rx="3" fill="#8EC5FF" stroke="#FFFFFF" stroke-width="2"/>'
-              for x, y in [(138, 92), (138, 110), (264, 92), (264, 110), (183, 70), (219, 70)])
+    + ''.join(f'<rect x="{x}" y="{y}" width="18" height="{h}" rx="3" fill="#8EC5FF" stroke="#FFFFFF" stroke-width="2"/>'
+              for x, y, h in [(135, 86, 11), (155, 86, 11), (247, 86, 11), (267, 86, 11), (183, 70, 14), (219, 70, 14)])
     + '<rect x="122" y="128" width="176" height="6" rx="3" fill="#E9D7B8"/>'
-    + tree(98, 128, 1.15, '#7CCB5B', '#5DB244') + tree(330, 130, 1.05, '#7CCB5B', '#5DB244')
-    + tree(36, 136, 0.9, '#94D873', '#74C25A') + tree(392, 138, 0.85, '#94D873', '#74C25A')
-    + '<circle cx="56" cy="140" r="6" fill="#FF9EB0"/><circle cx="64" cy="143" r="5" fill="#FFD15C"/>'
-    + '<circle cx="358" cy="143" r="5.5" fill="#FF9EB0"/><circle cx="366" cy="140" r="5" fill="#B7A2F5"/>'
-    # pupils in front
-    + kid(150, 148, '#FFD9BE', '#3A2A20', '#F5A524', girl=False, wave=-1)
-    + kid(258, 148, '#FFD3B0', '#4A2E1E', '#E85D75', girl=True, wave=1)
-    + kid(292, 148, '#F6C9A4', '#2B2235', '#3E9BEA', girl=False, wave=0)
+    + tree(86, 130, 1.1, '#7CCB5B', '#5DB244') + tree(338, 132, 1.05, '#7CCB5B', '#5DB244')
+    + tree(30, 140, 0.85, '#94D873', '#74C25A') + tree(394, 142, 0.8, '#94D873', '#74C25A')
+    + '<circle cx="54" cy="142" r="6" fill="#FF9EB0"/><circle cx="62" cy="145" r="5" fill="#FFD15C"/>'
+    + '<circle cx="364" cy="145" r="5.5" fill="#FF9EB0"/><circle cx="372" cy="142" r="5" fill="#B7A2F5"/>'
+    # pupils on the grass in front of the side walls
+    + pupil(152, 147, 0.78, '#FFD9BE', '#3A2A20', '#F5A524', girl=False, wave=-1)
+    + pupil(258, 147, 0.78, '#FFD3B0', '#4A2E1E', '#E85D75', girl=True, wave=1)
+    + pupil(284, 147, 0.78, '#F6C9A4', '#2B2235', '#3E9BEA', girl=False, wave=0)
 )
 
-# --- Teacher reading a book, a plant and a heart. ---
-teacher = (
-    '<circle cx="104" cy="104" r="86" fill="#DCEBFF" opacity="0.7"/>'
-    # plant
-    '<path d="M28 186 q-2 -30 10 -46 M38 186 q4 -26 22 -36 M30 186 q-14 -18 -16 -36" stroke="#4FA36B" stroke-width="3" fill="none" stroke-linecap="round"/>'
-    '<ellipse cx="38" cy="140" rx="9" ry="5" transform="rotate(-50 38 140)" fill="#6CC24A"/>'
-    '<ellipse cx="60" cy="150" rx="10" ry="5" transform="rotate(-20 60 150)" fill="#6CC24A"/>'
-    '<ellipse cx="14" cy="150" rx="9" ry="4.6" transform="rotate(60 14 150)" fill="#6CC24A"/>'
-    '<path d="M18 186 h34 l-4 12 h-26 z" fill="#F2A65A"/>'
+# --- Teacher reading a book: the figure (200x200 frame, cut at the bottom edge), then her card scene. ---
+# Her hair ends in rounded locks resting on the shoulders (not cut straight above them).
+TEACHER_FIGURE = (
     # hair back
-    '<path d="M70 92 q-6 -52 40 -54 q46 2 40 54 q2 36 -8 50 h-64 q-10 -14 -8 -50 z" fill="#5A3622"/>'
+    '<path d="M70 92 q-6 -52 40 -54 q46 2 40 54 q2 30 -4 50 q-4 8 -12 8 h-48 q-8 0 -12 -8 q-6 -20 -4 -50 z" fill="#5A3622"/>'
     '<circle cx="110" cy="36" r="13" fill="#5A3622"/>'
     # body
     '<path d="M60 200 q0 -52 50 -58 q50 6 50 58 z" fill="#5B8DEF"/>'
@@ -201,9 +205,22 @@ teacher = (
     '<path d="M146 172 q-18 -10 -36 -6 v14 q18 -4 36 4 z" fill="#F3F7FF"/>'
     '<path d="M82 172 q10 -5 22 -4 M82 177 q10 -5 22 -4 M116 168 q12 -1 22 4 M116 173 q12 -1 22 4" stroke="#B9C9EE" stroke-width="1.6" fill="none"/>'
     '<circle cx="74" cy="178" r="7" fill="#FFD9BE"/><circle cx="146" cy="178" r="7" fill="#FFD9BE"/>'
-    # heart and sparkles
-    '<path d="M168 52 c-6 -8 -18 -2 -12 8 l12 11 l12 -11 c6 -10 -6 -16 -12 -8 z" fill="#FFB547"/>'
-    '<path d="M46 52 l3 7 l7 3 l-7 3 l-3 7 l-3 -7 l-7 -3 l7 -3 z" fill="#FFFFFF"/>'
+)
+
+PLANT = (
+    '<path d="M28 186 q-2 -30 10 -46 M38 186 q4 -26 22 -36 M30 186 q-14 -18 -16 -36" stroke="#4FA36B" stroke-width="3" fill="none" stroke-linecap="round"/>'
+    '<ellipse cx="38" cy="140" rx="9" ry="5" transform="rotate(-50 38 140)" fill="#6CC24A"/>'
+    '<ellipse cx="60" cy="150" rx="10" ry="5" transform="rotate(-20 60 150)" fill="#6CC24A"/>'
+    '<ellipse cx="14" cy="150" rx="9" ry="4.6" transform="rotate(60 14 150)" fill="#6CC24A"/>'
+    '<path d="M18 186 h34 l-4 12 h-26 z" fill="#F2A65A"/>'
+)
+
+HEART = '<path d="M168 52 c-6 -8 -18 -2 -12 8 l12 11 l12 -11 c6 -10 -6 -16 -12 -8 z" fill="#FFB547"/>'
+
+teacher = (
+    '<circle cx="104" cy="104" r="86" fill="#DCEBFF" opacity="0.7"/>'
+    + PLANT + TEACHER_FIGURE + HEART
+    + '<path d="M46 52 l3 7 l7 3 l-7 3 l-3 7 l-3 -7 l-7 -3 l7 -3 z" fill="#FFFFFF"/>'
     '<path d="M176 120 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 z" fill="#FFFFFF"/>'
 )
 

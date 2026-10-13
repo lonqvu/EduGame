@@ -15,23 +15,26 @@ export function ClassesBanner({ onCreate, canCreate }: { onCreate: () => void; c
             <h1 className="m-0 text-[27px] leading-tight font-black tracking-[-0.01em] whitespace-nowrap text-[#1A2440] @min-[700px]:text-[32px]">
               Quản lý lớp học
             </h1>
-            <p className="m-0 text-[15px] text-ink-soft @min-[700px]:text-[16px] @min-[880px]:max-w-[330px]">
+            <p className="m-0 text-[15px] text-ink-soft @min-[700px]:text-[16px] @min-[880px]:max-w-[330px] @min-[1300px]:max-w-[440px]">
               Tạo lớp, quản lý học sinh và theo dõi tiến độ học tập dễ dàng.
             </p>
           </div>
         </div>
 
-        <img
-          src={`${CLASS_ASSETS}/banner-school.svg`}
-          alt=""
-          aria-hidden="true"
-          className="hidden h-[150px] min-w-0 flex-1 self-end object-contain object-bottom select-none @min-[880px]:block"
-        />
-        <p className="relative m-0 hidden max-w-[178px] shrink-0 rounded-[18px] bg-white px-4 py-3 text-[14px] leading-snug font-bold text-ink shadow-[0_4px_14px_rgba(53,99,233,0.08)] @min-[1180px]:block">
-          {/* The bubble's tail points at the pupils. */}
-          <span aria-hidden="true" className="absolute top-1/2 -left-[7px] size-3.5 -translate-y-1/2 rotate-45 bg-white" />
-          Mỗi lớp học là một hành trình khám phá đầy niềm vui!
-        </p>
+        {/* The scene right after the title, the pupils' speech bubble next to them; spare room goes before the button. */}
+        <div className="hidden min-w-0 flex-1 items-center gap-3 self-stretch @min-[880px]:flex">
+          <img
+            src={`${CLASS_ASSETS}/banner-school.svg`}
+            alt=""
+            aria-hidden="true"
+            className="h-[150px] max-h-full min-w-0 shrink self-end object-contain object-[left_bottom] select-none"
+          />
+          <p className="relative m-0 hidden max-w-[178px] shrink-0 rounded-[18px] bg-white px-4 py-3 text-[14px] leading-snug font-bold text-ink shadow-[0_4px_14px_rgba(53,99,233,0.08)] @min-[1180px]:block">
+            {/* The bubble's tail points at the pupils. */}
+            <span aria-hidden="true" className="absolute top-1/2 -left-[7px] size-3.5 -translate-y-1/2 rotate-45 bg-white" />
+            Mỗi lớp học là một hành trình khám phá đầy niềm vui!
+          </p>
+        </div>
 
         <Button
           type="primary"
