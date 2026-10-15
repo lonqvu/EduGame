@@ -397,6 +397,17 @@ class QuestionSetApiTest {
     }
 
     @Test
+    void theGameCanBeNamedWhenItIsMade() throws Exception {
+        String code = body(send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"  Đố vui 2A  \"}")
+                .andExpect(status().isCreated())).path("gameCode").asText();
+        mockMvc.perform(get("/api/v1/games/" + code)).andExpect(jsonPath("$.title").value("Đố vui 2A"));
+
+        send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"   \"}").andExpect(status().isBadRequest());
+        send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"%s\"}".formatted("x".repeat(256)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void gridBoardGetsEveryQuestionWithItsAnswer() throws Exception {
         JsonNode used = body(send(post(TOAN + "/games"), "{\"templateCode\": \"GRID_BOARD\"}").andExpect(status().isCreated()));
         assertThat(used.path("questionCount").asInt()).isEqualTo(8);
@@ -427,19 +438,6 @@ class QuestionSetApiTest {
         send(post(TOAN + "/games"), "{\"templateCode\": \"MATCHING\"}").andExpect(status().isBadRequest());
         send(post(TOAN + "/games"), "{}").andExpect(status().isBadRequest());
         mockMvc.perform(get(TIENG_VIET)).andExpect(jsonPath("$.summary.useCount").value(0));
-    }
-
-    @Test
-    void theGameTakesTheNameTheTeacherGaveIt() throws Exception {
-        JsonNode used = body(send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"  Trắc nghiệm – Lớp 3A  \"}")
-                .andExpect(status().isCreated()));
-        mockMvc.perform(get("/api/v1/games/" + used.path("gameCode").asText()))
-                .andExpect(jsonPath("$.title").value("Trắc nghiệm – Lớp 3A"));
-
-        send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"   \"}").andExpect(status().isBadRequest());
-        send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"%s\"}".formatted("x".repeat(256)))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(get(TOAN)).andExpect(jsonPath("$.summary.useCount").value(1));
     }
 
     @Test

@@ -213,7 +213,7 @@ function MadeGames({ games, canUse, onUse }: { games: QuestionSetGameResponse[];
                 to={editPath(g.code)}
                 className="flex items-center gap-3 rounded-[14px] border border-line-soft p-2 pr-3 text-ink transition hover:border-[#C9D9F5] hover:text-ink"
               >
-                {isGameType(g.templateCode) && <img src={gameThumb(g.templateCode)} alt="" className="h-11 w-16 rounded-[10px] object-cover" />}
+                {isGameType(g.templateCode) && <img src={gameThumb(g.templateCode)} alt="" className="aspect-[2/1] w-[88px] shrink-0 rounded-[10px]" />}
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate text-[14.5px] font-bold">{gameName(g.templateCode)}</span>
                   <span className="truncate text-[12.5px] text-ink-muted">Tạo {relativeTimeLabel(g.createdAt)}</span>

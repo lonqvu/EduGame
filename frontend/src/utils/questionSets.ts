@@ -149,6 +149,9 @@ export interface UseGame {
   description: string
 }
 
+/** Navigation state that opens the "new set" form of /question-sets on arrival. */
+export const OPEN_CREATE_SET = { createSet: true }
+
 export const USE_GAMES: UseGame[] = [
   { code: 'QUIZ', name: 'Trắc nghiệm', description: 'Các đội chọn đáp án đúng, cướp lượt khi đội trước sai.' },
   { code: 'GOLDEN_BELL', name: 'Rung chuông vàng', description: 'Cả lớp cùng trả lời, sai thì ra ngoài, ai trụ lại cuối cùng?' },

@@ -3,46 +3,47 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
 import * as questionSetApi from '@/api/questionSetApi'
 import { CheckIcon, FileTextIcon, SearchIcon } from '@/components/ui/icons'
-import { editPath } from '@/game-engine/registry'
+import { editPath, startPath } from '@/game-engine/registry'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
 import { useQuestionSetStore } from '@/store/questionSetStore'
-import type { GameType } from '@/types/game'
+import type { GameTemplate } from '@/types/game'
 import { apiErrorMessage } from '@/utils/apiError'
-import { isSetGame, KIND_LABELS, kindOf, type QuestionKind, setChoices, subjectArt } from '@/utils/questionSets'
+import type { QuestionGameCode } from '@/types/api'
+import { isSetGame, KIND_LABELS, kindOf, type QuestionKind, setChoices, subjectArt, usableCount } from '@/utils/questionSets'
 
 /** Longest game name the dialog takes. */
 export const MAX_GAME_NAME = 50
 const ART = '/assets/question-sets/create-game.svg'
 
-export interface NewGame {
-  type: GameType
-  /** "Trắc nghiệm" */
-  name: string
-}
-
-interface CreateGameDialogProps {
-  /** The game being created; none when closed. */
-  game?: NewGame
-  /** "Lớp 3A": suggested in the game's name (empty without a class) */
-  className: string
+interface NewGameModalProps {
+  /** The game chosen; none: closed. */
+  template: GameTemplate | null
+  /** Grade new games are for (the class being taught). */
   grade?: number
+  /** "Lớp 3A": suggested in the game's name. */
+  className?: string
   onClose: () => void
 }
 
 /**
- * "Tạo trò chơi mới": the teacher names the game and chooses how to start, from a question set ("Dùng bộ câu hỏi có
- * sẵn", only for games that play sets) or with new content in the editor. Picking a set is the dialog's second step.
+ * After "Chọn trò chơi", "Tạo trò chơi mới": the teacher names the game and chooses how to start, from a question set
+ * of the bank ("Dùng bộ câu hỏi có sẵn", only shown for games that play sets) or with new content in the editor.
+ * Picking the set is the dialog's second step ("Chọn bộ câu hỏi"); a game made from a set opens its start page.
+ * Nothing is created until the teacher confirms, so leaving here leaves no empty game behind.
  */
-export function CreateGameDialog(props: CreateGameDialogProps) {
+export function NewGameModal(props: NewGameModalProps) {
   // Each opening starts afresh.
-  return props.game ? <Dialog {...props} game={props.game} /> : null
+  return props.template ? <Dialog {...props} template={props.template} /> : null
 }
 
 type Start = 'set' | 'new'
 const KIND_TABS: (QuestionKind | 'ALL')[] = ['ALL', 'MULTIPLE_CHOICE', 'SHORT_ANSWER', 'MIXED']
 const TAB_LABELS: Record<QuestionKind | 'ALL', string> = { ...KIND_LABELS, ALL: 'Tất cả', MIXED: 'Hỗn hợp' }
 
-function Dialog({ game, className, grade, onClose }: CreateGameDialogProps & { game: NewGame }) {
+function Dialog({ template, className, grade, onClose }: NewGameModalProps & { template: GameTemplate }) {
+  const game = { type: template.type, name: template.name }
+  /** The game as a set game, when it plays question sets. */
+  const setGame: QuestionGameCode | undefined = isSetGame(game.type) ? game.type : undefined
   const navigate = useNavigate()
   const { message } = App.useApp()
   const createGame = useGameLibraryStore((s) => s.createGame)
@@ -50,9 +51,8 @@ function Dialog({ game, className, grade, onClose }: CreateGameDialogProps & { g
   const setsStatus = useQuestionSetStore((s) => s.status)
   const loadSets = useQuestionSetStore((s) => s.load)
 
-  const canUseSet = isSetGame(game.type)
   const [title, setTitle] = useState(`${game.name}${className ? ` – ${className}` : ''}`.slice(0, MAX_GAME_NAME))
-  const [start, setStart] = useState<Start>(canUseSet ? 'set' : 'new')
+  const [picking, setPicking] = useState<Start>()
   const [step, setStep] = useState<'start' | 'set'>('start')
   const [search, setSearch] = useState('')
   const [kind, setKind] = useState<QuestionKind | 'ALL'>('ALL')
@@ -60,14 +60,14 @@ function Dialog({ game, className, grade, onClose }: CreateGameDialogProps & { g
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    if (canUseSet) void loadSets()
-  }, [canUseSet, loadSets])
+    if (setGame) void loadSets()
+  }, [setGame, loadSets])
 
   const name = title.trim()
-  const choices = useMemo(
-    () => (isSetGame(game.type) ? setChoices(sets, game.type, search, kind) : []),
-    [sets, game.type, search, kind],
-  )
+  // From the bank when it has a set this game can play, else new content; until the teacher picks.
+  const fitting = !!setGame && sets.some((set) => usableCount(set, setGame) > 0)
+  const start: Start = picking ?? (fitting ? 'set' : 'new')
+  const choices = useMemo(() => (setGame ? setChoices(sets, setGame, search, kind) : []), [sets, setGame, search, kind])
   // The set picked, else (none yet, or filtered out) the first one the game can play.
   const chosen = choices.find((c) => c.set.code === picked && c.usable > 0) ?? choices.find((c) => c.usable > 0)
 
@@ -83,14 +83,14 @@ function Dialog({ game, className, grade, onClose }: CreateGameDialogProps & { g
   }
 
   const createFromSet = async () => {
-    if (!chosen || !isSetGame(game.type)) return
+    if (!chosen || !setGame) return
     setBusy(true)
     try {
-      const used = await questionSetApi.useQuestionSet(chosen.set.code, game.type, name)
+      const used = await questionSetApi.useQuestionSet(chosen.set.code, setGame, name)
       const skipped = used.skippedCount ? ` (bỏ qua ${used.skippedCount} câu tự luận)` : ''
-      message.success(`Đã tạo “${name}” với ${used.questionCount} câu hỏi${skipped}. Cô xem lại rồi bấm Chơi nhé!`)
-      void loadSets()
-      navigate(editPath(used.gameCode))
+      message.success(`Đã tạo “${name}” với ${used.questionCount} câu hỏi${skipped}.`)
+      void loadSets() // the set's use count changed
+      navigate(startPath({ id: used.gameCode, type: game.type }))
       onClose()
     } catch (error) {
       message.error(apiErrorMessage(error))
@@ -171,17 +171,17 @@ function Dialog({ game, className, grade, onClose }: CreateGameDialogProps & { g
             <fieldset className="m-0 flex flex-col gap-2.5 border-0 p-0">
               <legend className="mb-2.5 p-0 text-[14px] font-bold text-ink-soft">Cô muốn bắt đầu như thế nào?</legend>
               <div role="radiogroup" aria-label="Cách bắt đầu" className="flex flex-col gap-2.5">
-                {canUseSet && (
+                {setGame && (
                   <StartOption
                     checked={start === 'set'}
-                    onSelect={() => setStart('set')}
+                    onSelect={() => setPicking('set')}
                     title="Dùng bộ câu hỏi có sẵn"
                     text="Chọn bộ câu hỏi phù hợp với trò chơi."
                   />
                 )}
                 <StartOption
                   checked={start === 'new'}
-                  onSelect={() => setStart('new')}
+                  onSelect={() => setPicking('new')}
                   title="Soạn nội dung mới"
                   text="Tạo câu hỏi trực tiếp trong trình soạn."
                 />

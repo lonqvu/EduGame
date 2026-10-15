@@ -97,7 +97,10 @@ test('a quiz can be played as Rung chuông vàng or Đua thuyền from the edito
   await page.goto(`/games/${game.code}/edit`)
   await page.getByRole('button', { name: 'Chơi kiểu khác' }).click()
   await page.getByRole('link', { name: 'Rung chuông vàng' }).click()
-  await expect(page).toHaveURL(new RegExp(`/play/${game.code}\\?as=GOLDEN_BELL$`))
+  // The start page comes first, and keeps the chosen way of playing.
+  await expect(page).toHaveURL(new RegExp(`/games/${game.code}/start\\?as=GOLDEN_BELL$`))
+  await page.getByRole('link', { name: 'Bắt đầu trò chơi' }).click()
+  await expect(page).toHaveURL(new RegExp(`/play/${game.code}\\?as=GOLDEN_BELL`))
   await expect(page.getByText('Còn 28 / 28 bạn')).toBeVisible()
 
   await page.goto(`/play/${game.code}?as=BOAT_RACE`)

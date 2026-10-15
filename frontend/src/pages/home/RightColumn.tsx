@@ -5,7 +5,7 @@ import {
   ClockIcon,
   PlusIcon,
 } from '@/components/ui/icons'
-import { playPath } from '@/game-engine/registry'
+import { startPath } from '@/game-engine/registry'
 import { Art, Panel, PanelHeader } from '@/pages/home/homeUi'
 import type { QuestionSetSummaryResponse } from '@/types/api'
 import type { GameSummary, GameType } from '@/types/game'
@@ -33,7 +33,7 @@ export function TodayPanel({ games, subtitle }: TodayPanelProps) {
       {games.map((game, i) => (
         <Link
           key={game.id}
-          to={playPath(game)}
+          to={startPath(game)}
           className={`flex items-center gap-3.5 rounded-[13px] px-3.5 py-[12px] text-ink hover:text-ink hover:brightness-[0.98] ${
             i === 0 ? 'bg-[#FEF3DF]' : 'bg-[#F4F6FA]'
           }`}

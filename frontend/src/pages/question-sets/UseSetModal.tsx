@@ -110,7 +110,7 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
                       checked ? 'border-primary shadow-[0_6px_16px_rgba(53,99,233,0.18)]' : 'border-line-soft enabled:hover:border-[#C9D9F5]'
                     }`}
                   >
-                    <img src={gameThumb(g.code)} alt="" className="h-[78px] w-full object-cover" />
+                    <img src={gameThumb(g.code)} alt="" className="aspect-[5/2] w-full object-cover" />
                     {checked && (
                       <span className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-primary text-white">
                         <CheckIcon size={14} />

@@ -4,7 +4,7 @@ import { ChevronRightIcon, EyeIcon } from '@/components/ui/icons'
 import { arrivedTeam, boatStep } from '@/game-engine/boat-race/boatRace'
 import { Countdown, QuizOption } from '@/game-engine/quiz/QuizParts'
 import { initialQuizRound, playableQuizQuestions, questionFontSize, quizReducer } from '@/game-engine/quiz/quizRound'
-import { readPlaySettings } from '@/game-engine/shared/gameSettings'
+import { PLAY_DEFAULTS, readPlaySettings } from '@/game-engine/shared/gameSettings'
 import { NothingToPlay, PlayFrame, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import type { TeamScore } from '@/game-engine/shared/teamScore'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
@@ -28,7 +28,7 @@ interface BoatRaceScreenProps {
  * moves the team's boat one stage down the river. The first boat to reach the finish wins.
  */
 export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProps) {
-  const rules = readPlaySettings(settings, { teams: 4, points: 1, allowSteal: true, timeLimitSec: 20, raceSteps: 5 })
+  const rules = readPlaySettings(settings, PLAY_DEFAULTS.BOAT_RACE)
   const deal = () => playableQuizQuestions(questions, { shuffleItems: rules.shuffleItems, shuffleOptions: rules.shuffleOptions })
   const [playable, setPlayable] = useState(deal)
   const [round, setRound] = useState(0)

@@ -2,8 +2,8 @@ import { App } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
-import { CreateGameDialog, type NewGame } from '@/components/create-game/CreateGameDialog'
-import { gameRegistry, playPath, toolPath } from '@/game-engine/registry'
+import { gameRegistry, toolPath } from '@/game-engine/registry'
+import { NewGameModal } from '@/pages/choose-game/NewGameModal'
 import { ActionCards } from '@/pages/home/ActionCards'
 import { HomeHero } from '@/pages/home/HomeHero'
 import { PraiseCorner, type StarPeriod } from '@/pages/home/PraiseCorner'
@@ -14,11 +14,12 @@ import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
 import { useQuestionSetStore } from '@/store/questionSetStore'
 import { useTeacherStore } from '@/store/teacherStore'
-import type { GameSummary, GameType } from '@/types/game'
+import type { GameSummary, GameTemplate, GameType } from '@/types/game'
 import { apiErrorMessage } from '@/utils/apiError'
 import { classTitle } from '@/utils/classrooms'
 import { relativeTimeLabel } from '@/utils/dateLabels'
 import { gradeLabel } from '@/utils/gameMapping'
+import { OPEN_CREATE_SET } from '@/utils/questionSets'
 
 const RECENT_LIMIT = 4
 const TODAY_LIMIT = 2
@@ -60,7 +61,7 @@ export function HomePage() {
 
   const [allRecent, setAllRecent] = useState(false)
   const [period, setPeriod] = useState<StarPeriod>('week')
-  const [newGame, setNewGame] = useState<NewGame>()
+  const [newGame, setNewGame] = useState<GameTemplate | null>(null)
 
   useEffect(() => {
     void loadTeacher()
@@ -71,7 +72,6 @@ export function HomePage() {
   }, [loadTeacher, loadTemplates, loadGames, loadClass, loadQuestionSets])
 
   const recent = allRecent ? games : games.slice(0, RECENT_LIMIT)
-  const startTarget = games[0] ? playPath(games[0]) : '/games/new'
 
   const templateName = (game: GameSummary) => templates.find((t) => t.type === game.type)?.name ?? ''
   /** "Lớp 3A" when the game is for the class being taught, else "Lớp 3". */
@@ -95,8 +95,10 @@ export function HomePage() {
       navigate(toolPath(type))
       return
     }
-    setNewGame({ type, name: templates.find((t) => t.type === type)?.name ?? 'Trò chơi mới' })
+    // Name it and pick how to start, as from the game chooser.
+    setNewGame(templates.find((t) => t.type === type) ?? null)
   }
+
 
   const confirmArchive = (game: GameSummary) =>
     modal.confirm({
@@ -142,7 +144,7 @@ export function HomePage() {
 
       <div className={`${columns} items-start`}>
         <div className="@container flex min-w-0 flex-col gap-5">
-          <ActionCards startTarget={startTarget} onCreate={() => navigate('/games/new')} onOpenClass={() => navigate(currentCode ? `/classes/${encodeURIComponent(currentCode)}` : '/classes')} />
+          <ActionCards startTarget="/games/new" onCreate={() => navigate('/question-sets', { state: OPEN_CREATE_SET })}onOpenClass={() => navigate(currentCode ? `/classes/${encodeURIComponent(currentCode)}` : '/classes')} />
           <div className="grid grid-cols-1 items-start gap-5 @min-[900px]:grid-cols-[minmax(0,1fr)_356px]">
             <RecentActivity
               games={recent}
@@ -164,7 +166,7 @@ export function HomePage() {
         </div>
       </div>
 
-      <CreateGameDialog game={newGame} className={className} grade={classGrade} onClose={() => setNewGame(undefined)} />
+      <NewGameModal template={newGame} grade={classGrade} className={className || undefined} onClose={() => setNewGame(null)} />
     </div>
   )
 }

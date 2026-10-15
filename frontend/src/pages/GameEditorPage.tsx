@@ -6,7 +6,7 @@ import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { BulkPasteModal } from '@/editor/BulkPasteModal'
 import { EDITOR_DEFINITIONS } from '@/editor/editorDefinitions'
 import { QuestionList } from '@/editor/QuestionList'
-import { gameRegistry, isQuizFamily, playPath, QUIZ_FAMILY } from '@/game-engine/registry'
+import { gameRegistry, isQuizFamily, QUIZ_FAMILY, startPath } from '@/game-engine/registry'
 import { useCatalogStore, useTemplateName } from '@/store/catalogStore'
 import { useGameLibraryStore, type SaveState } from '@/store/gameLibraryStore'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -148,7 +148,7 @@ export function GameEditorPage() {
                 items: QUIZ_FAMILY.filter((t) => t !== game.type).map((t) => ({
                   key: t,
                   label: (
-                    <Link to={`${playPath(game)}?as=${t}`} className="text-base font-bold">
+                    <Link to={startPath(game, t)} className="text-base font-bold">
                       {templates.find((tpl) => tpl.type === t)?.name ?? t}
                     </Link>
                   ),
@@ -167,7 +167,7 @@ export function GameEditorPage() {
           <Tooltip title={playable ? undefined : 'Màn chiếu cho trò này đang được hoàn thiện'}>
             {playable ? (
               <Link
-                to={playPath(game)}
+                to={startPath(game)}
                 className="flex min-h-[52px] items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-extrabold text-white hover:text-white hover:brightness-110"
               >
                 Xong, chơi thử

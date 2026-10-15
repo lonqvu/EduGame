@@ -8,7 +8,7 @@ import {
   playableMemorySets,
   type MemoryCard,
 } from '@/game-engine/memory/memoryRound'
-import { readPlaySettings } from '@/game-engine/shared/gameSettings'
+import { PLAY_DEFAULTS, readPlaySettings } from '@/game-engine/shared/gameSettings'
 import { NothingToPlay, PlayFrame, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import { TeamBar } from '@/game-engine/shared/TeamBar'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
@@ -33,7 +33,7 @@ const rowsFor = (cards: number) => (cards <= 4 ? 1 : cards <= 8 ? 2 : cards <= 1
  * otherwise the cards turn back and the next team plays.
  */
 export function MemoryScreen({ game, sets, settings }: MemoryScreenProps) {
-  const rules = readPlaySettings(settings, { teams: 2, points: 10 })
+  const rules = readPlaySettings(settings, PLAY_DEFAULTS.MEMORY)
   const deal = () => playableMemorySets(sets)
   const [playable, setPlayable] = useState(deal)
   const [state, dispatch] = useReducer(memoryReducer, rules.teams, initialMemoryRound)

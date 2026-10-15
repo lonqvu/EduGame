@@ -8,7 +8,7 @@ import { goldenBellReducer, initialGoldenBell, stillIn } from '@/game-engine/gol
 import { Confetti } from '@/game-engine/name-picker/effects'
 import { Countdown, QuizOption } from '@/game-engine/quiz/QuizParts'
 import { playableQuizQuestions, questionFontSize } from '@/game-engine/quiz/quizRound'
-import { readPlaySettings } from '@/game-engine/shared/gameSettings'
+import { PLAY_DEFAULTS, readPlaySettings } from '@/game-engine/shared/gameSettings'
 import { NothingToPlay, PlayFrame, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import { useFinishPlaySession } from '@/game-engine/shared/usePlaySession'
 import { editPath } from '@/game-engine/registry'
@@ -30,7 +30,7 @@ interface GoldenBellScreenProps {
  * "Hiện đáp án" the teacher taps who answered wrong; they leave the board at the next question.
  */
 export function GoldenBellScreen({ game, questions, settings }: GoldenBellScreenProps) {
-  const rules = readPlaySettings(settings, { timeLimitSec: 15, rescues: 1 })
+  const rules = readPlaySettings(settings, PLAY_DEFAULTS.GOLDEN_BELL)
   const students = useClassStore((s) => s.students)
   const classStatus = useClassStore((s) => s.status)
   const loadClass = useClassStore((s) => s.load)

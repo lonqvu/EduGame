@@ -6,6 +6,7 @@ import { ClassesPage } from '@/pages/ClassesPage'
 import { ClassroomDetailPage } from '@/pages/ClassroomDetailPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { GameEditorPage } from '@/pages/GameEditorPage'
+import { GameStartPage } from '@/pages/GameStartPage'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: 'games/new', element: <ChooseGamePage /> },
           { path: 'games/:gameId/edit', element: <GameEditorPage /> },
+          { path: 'games/:gameId/start', element: <GameStartPage /> },
           { path: 'question-sets', element: <QuestionSetsPage /> },
           { path: 'question-sets/:code', element: <QuestionSetPage /> },
           { path: 'classes', element: <ClassesPage /> },

@@ -35,9 +35,10 @@ interface GameLibraryState {
   /** Waits for pending saves first, so what is loaded includes the latest edits. */
   loadGame: (gameId: string, mode: 'play' | 'edit') => Promise<void>
   /** Creates a game with one empty item; resolves with its id. */
-  /** A new game with one empty item, named `title` (the template's default name when absent). */
   createGame: (type: GameType, grade?: number, title?: string) => Promise<string>
   renameGame: (gameId: string, title: string) => void
+  /** Replaces the game's settings (rules, time limit...): applied at once, saved shortly after. */
+  updateSettings: (gameId: string, settings: Record<string, unknown>) => void
   /** Soft-deletes the game: it leaves the library. */
   archiveGame: (gameId: string) => Promise<void>
   /** Resolves with the created items (they need server ids, so this waits for the backend). */
@@ -218,6 +219,12 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
         // A blank title is rejected by the backend: keep the last saved one until the teacher types a name.
         if (latest) await gameApi.updateGame(gameId, { title: latest })
       })
+    },
+
+    updateSettings: (gameId, settings) => {
+      edited(gameId)
+      set((s) => ({ settings: { ...s.settings, [gameId]: settings } }))
+      schedule(`settings:${gameId}`, gameId, () => gameApi.updateGame(gameId, { settings: get().settings[gameId] }))
     },
 
     archiveGame: async (gameId) => {

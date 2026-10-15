@@ -1,7 +1,7 @@
 import { Dropdown } from 'antd'
 import { Link } from 'react-router'
 import { ClockIcon, MoreVerticalIcon } from '@/components/ui/icons'
-import { editPath, gameRegistry, playPath } from '@/game-engine/registry'
+import { editPath, gameRegistry, startPath } from '@/game-engine/registry'
 import { gameThumb } from '@/pages/home/homeAssets'
 import { Panel, PanelHeader, SubjectTag, TextAction } from '@/pages/home/homeUi'
 import type { GameSummary } from '@/types/game'
@@ -74,7 +74,7 @@ export function RecentActivity({
               <img
                 src={gameThumb(game.type)}
                 alt=""
-                className="hidden h-[74px] w-[119px] shrink-0 rounded-[10px] object-cover @min-[480px]:block"
+                className="hidden aspect-[2/1] w-[132px] shrink-0 rounded-[10px] @min-[480px]:block"
               />
               <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
                 <div className="flex min-w-0 flex-wrap items-center gap-x-[11px] gap-y-1">
@@ -93,7 +93,7 @@ export function RecentActivity({
                 </Link>
               ) : (
                 <Link
-                  to={playPath(game)}
+                  to={startPath(game)}
                   className="flex h-[38px] w-[85px] shrink-0 items-center justify-center rounded-full bg-primary text-[15px] font-extrabold text-white hover:text-white hover:brightness-110"
                 >
                   Chơi lại
@@ -105,7 +105,7 @@ export function RecentActivity({
                 menu={{
                   items: [
                     ...(usesQuestions ? [{ key: 'edit', label: <Link to={editPath(game.id)}>Soạn câu hỏi</Link> }] : []),
-                    { key: 'play', label: <Link to={playPath(game)}>Trình chiếu</Link> },
+                    { key: 'play', label: <Link to={startPath(game)}>Trình chiếu</Link> },
                     { type: 'divider' as const },
                     { key: 'archive', danger: true, label: 'Xóa khỏi thư viện', onClick: () => onArchive(game) },
                   ],

@@ -20,9 +20,9 @@ test.beforeEach(async ({ page, context }) => {
 })
 
 const unique = (prefix: string) => `${prefix} ${Date.now().toString(36).slice(-5)}`
-const gameCode = (url: string) => url.match(/\/games\/(g-[a-z0-9]+)\/edit$/)![1]
+const gameCode = (url: string) => url.match(/\/games\/(g-[a-z0-9]+)\/(edit|start)$/)![1]
 
-test('a game made from a question set: named, the set picked among those it can play', async ({ page, backend }) => {
+test('a game made from a question set: named, the set picked among those it can play, then its start page', async ({ page, backend }) => {
   const title = unique('E2E Bộ đua')
   await backend.createQuestionSet(title, [choice('2 + 2 = ?', ['4', '5']), choice('3 + 3 = ?', ['6', '7']), shortAnswer('Thủ đô?', 'Hà Nội')])
   const onlyShort = unique('E2E Chỉ tự luận')
@@ -60,10 +60,11 @@ test('a game made from a question set: named, the set picked among those it can 
   await expect(ours).toHaveAttribute('aria-checked', 'true')
   await picker.getByRole('button', { name: 'Tạo game' }).click()
 
-  await page.waitForURL(/\/games\/g-[a-z0-9]+\/edit$/)
+  // A game made from a set is ready to play: its start page opens.
+  await page.waitForURL(/\/games\/g-[a-z0-9]+\/start$/)
   const code = gameCode(page.url())
   backend.adopt(code)
-  await expect(page.getByText('Đã tạo “Đua thuyền – Ôn tập” với 2 câu hỏi (bỏ qua 1 câu tự luận)')).toBeVisible()
+  await expect(page.getByText('Đã tạo “Đua thuyền – Ôn tập” với 2 câu hỏi (bỏ qua 1 câu tự luận).')).toBeVisible()
   const game = await backend.game(code)
   expect(game.title).toBe('Đua thuyền – Ôn tập')
   expect(game.items.map((i) => i.content.text)).toEqual(['2 + 2 = ?', '3 + 3 = ?'])
