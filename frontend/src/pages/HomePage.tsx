@@ -2,7 +2,8 @@ import { App } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
-import { editPath, gameRegistry, playPath, toolPath } from '@/game-engine/registry'
+import { CreateGameDialog, type NewGame } from '@/components/create-game/CreateGameDialog'
+import { gameRegistry, playPath, toolPath } from '@/game-engine/registry'
 import { ActionCards } from '@/pages/home/ActionCards'
 import { HomeHero } from '@/pages/home/HomeHero'
 import { PraiseCorner, type StarPeriod } from '@/pages/home/PraiseCorner'
@@ -46,7 +47,6 @@ export function HomePage() {
   const games = useGameLibraryStore((s) => s.games)
   const gamesStatus = useGameLibraryStore((s) => s.gamesStatus)
   const loadGames = useGameLibraryStore((s) => s.loadGames)
-  const createGame = useGameLibraryStore((s) => s.createGame)
   const archiveGame = useGameLibraryStore((s) => s.archiveGame)
   const className = useClassStore((s) => s.className)
   const classGrade = useClassStore((s) => s.grade)
@@ -60,7 +60,7 @@ export function HomePage() {
 
   const [allRecent, setAllRecent] = useState(false)
   const [period, setPeriod] = useState<StarPeriod>('week')
-  const [creating, setCreating] = useState(false)
+  const [newGame, setNewGame] = useState<NewGame>()
 
   useEffect(() => {
     void loadTeacher()
@@ -90,19 +90,12 @@ export function HomePage() {
     }
   }
 
-  const startGame = async (type: GameType) => {
+  const startGame = (type: GameType) => {
     if (!gameRegistry[type].usesQuestions) {
       navigate(toolPath(type))
       return
     }
-    if (creating) return
-    setCreating(true)
-    try {
-      navigate(editPath(await createGame(type, classGrade)))
-    } catch (error) {
-      message.error(apiErrorMessage(error))
-      setCreating(false)
-    }
+    setNewGame({ type, name: templates.find((t) => t.type === type)?.name ?? 'Trò chơi mới' })
   }
 
   const confirmArchive = (game: GameSummary) =>
@@ -166,10 +159,12 @@ export function HomePage() {
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">
-          <FeaturedGames onStart={(type) => void startGame(type)} />
+          <FeaturedGames onStart={startGame} />
           <QuestionSets sets={questionSets.slice(0, SETS_LIMIT)} />
         </div>
       </div>
+
+      <CreateGameDialog game={newGame} className={className} grade={classGrade} onClose={() => setNewGame(undefined)} />
     </div>
   )
 }

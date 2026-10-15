@@ -274,3 +274,27 @@ export function parsePastedQuestions(text: string): PastedLine[] {
   })
   return result
 }
+
+/** Games a question set can be used in (the others are written in their own editor). */
+export const isSetGame = (type: string): type is QuestionGameCode => USE_GAMES.some((g) => g.code === type)
+
+export interface SetChoice {
+  set: QuestionSetSummaryResponse
+  /** Questions of the set the game plays */
+  usable: number
+}
+
+/**
+ * The sets to pick from for a game: the ones it can play first (newest first), then the others, which are shown but
+ * cannot be picked. The search looks in the title, description and subject; `kind` keeps one kind of set.
+ */
+export function setChoices(
+  sets: QuestionSetSummaryResponse[],
+  game: QuestionGameCode,
+  search: string,
+  kind: QuestionKind | 'ALL',
+): SetChoice[] {
+  return filterSets(sets, { ...NO_FILTERS, search, kind })
+    .map((set) => ({ set, usable: usableCount(set, game) }))
+    .sort((a, b) => Number(b.usable > 0) - Number(a.usable > 0))
+}

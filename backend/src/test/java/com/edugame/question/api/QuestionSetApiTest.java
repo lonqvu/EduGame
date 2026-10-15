@@ -430,6 +430,19 @@ class QuestionSetApiTest {
     }
 
     @Test
+    void theGameTakesTheNameTheTeacherGaveIt() throws Exception {
+        JsonNode used = body(send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"  Trắc nghiệm – Lớp 3A  \"}")
+                .andExpect(status().isCreated()));
+        mockMvc.perform(get("/api/v1/games/" + used.path("gameCode").asText()))
+                .andExpect(jsonPath("$.title").value("Trắc nghiệm – Lớp 3A"));
+
+        send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"   \"}").andExpect(status().isBadRequest());
+        send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"%s\"}".formatted("x".repeat(256)))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(get(TOAN)).andExpect(jsonPath("$.summary.useCount").value(1));
+    }
+
+    @Test
     void aSetForUpperGradesMakesAGameWithoutAGrade() throws Exception {
         send(patch(TOAN), "{\"grade\": 7}").andExpect(status().isOk());
         String code = use(TOAN, "BOAT_RACE");

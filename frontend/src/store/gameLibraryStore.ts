@@ -35,7 +35,8 @@ interface GameLibraryState {
   /** Waits for pending saves first, so what is loaded includes the latest edits. */
   loadGame: (gameId: string, mode: 'play' | 'edit') => Promise<void>
   /** Creates a game with one empty item; resolves with its id. */
-  createGame: (type: GameType, grade?: number) => Promise<string>
+  /** A new game with one empty item, named `title` (the template's default name when absent). */
+  createGame: (type: GameType, grade?: number, title?: string) => Promise<string>
   renameGame: (gameId: string, title: string) => void
   /** Soft-deletes the game: it leaves the library. */
   archiveGame: (gameId: string) => Promise<void>
@@ -194,8 +195,8 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
       }
     },
 
-    createGame: async (type, grade) => {
-      const created = await gameApi.createGame({ templateCode: type, grade })
+    createGame: async (type, grade, title) => {
+      const created = await gameApi.createGame({ templateCode: type, grade, title })
       const codec = itemCodec(type)
       if (!codec) throw new Error(`${type} has no items`)
       try {

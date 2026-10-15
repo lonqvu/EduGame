@@ -11,13 +11,13 @@ import {
 } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { PICK_MODES, type PickMode } from '@/game-engine/name-picker/modes'
-import { editPath, gameRegistry, playPath, toolPath, type GameBadge } from '@/game-engine/registry'
+import { CreateGameDialog, type NewGame } from '@/components/create-game/CreateGameDialog'
+import { gameRegistry, playPath, toolPath, type GameBadge } from '@/game-engine/registry'
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { GameCategory, GameSummary, GameTemplate, GameType } from '@/types/game'
-import { apiErrorMessage } from '@/utils/apiError'
 import { relativeTimeLabel } from '@/utils/dateLabels'
 import { gradeLabel } from '@/utils/gameMapping'
 
@@ -97,9 +97,8 @@ export function ChooseGamePage() {
   const loadClass = useClassStore((s) => s.load)
   const games = useGameLibraryStore((s) => s.games)
   const loadGames = useGameLibraryStore((s) => s.loadGames)
-  const createGame = useGameLibraryStore((s) => s.createGame)
 
-  const [creating, setCreating] = useState(false)
+  const [newGame, setNewGame] = useState<NewGame>()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('ALL')
   const [sort, setSort] = useState<Sort>('popular')
@@ -112,7 +111,7 @@ export function ChooseGamePage() {
     void loadGames()
   }, [loadTemplates, loadClass, loadTeacher, loadGames])
 
-  const choose = async ({ template, pickMode }: Entry) => {
+  const choose = ({ template, pickMode }: Entry) => {
     if (pickMode) {
       navigate(`/tools/pick/${pickMode}`)
       return
@@ -129,15 +128,8 @@ export function ChooseGamePage() {
       message.info(`Trò "${template.name}" đang được hoàn thiện.`)
       return
     }
-    if (creating) return
-    setCreating(true)
-    try {
-      // New games are for the teacher's class grade (there is one class for now).
-      navigate(editPath(await createGame(template.type, grade)))
-    } catch (error) {
-      message.error(apiErrorMessage(error))
-      setCreating(false)
-    }
+    // Named and started (from a question set or new content) in the dialog.
+    setNewGame({ type: template.type, name: template.name })
   }
 
   if (status === 'error') return <LoadError onRetry={() => void loadTemplates()} />
@@ -306,12 +298,14 @@ export function ChooseGamePage() {
           <ul className="m-0 mt-[12px] grid list-none grid-cols-1 gap-4 p-0 @min-[520px]:grid-cols-2 @min-[820px]:grid-cols-3 @min-[1080px]:grid-cols-4">
             {shown.map((entry) => (
               <li key={entry.key} className="@min-[520px]:aspect-square">
-                <GameCard entry={entry} disabled={creating} onChoose={() => void choose(entry)} />
+                <GameCard entry={entry} disabled={!!newGame} onChoose={() => choose(entry)} />
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      <CreateGameDialog game={newGame} className={className} grade={grade} onClose={() => setNewGame(undefined)} />
     </div>
   )
 }

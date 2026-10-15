@@ -258,6 +258,9 @@ test('the editor autosaves edits and they are there after a reload', async ({ pa
 test('a new game made from the chooser shows up in the library', async ({ page, backend }) => {
   await page.goto('/games/new')
   await page.getByRole('button', { name: /Trắc nghiệm/ }).first().click()
+  const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
+  await dialog.getByRole('radio', { name: /Soạn nội dung mới/ }).click()
+  await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
   await page.waitForURL(/\/games\/(g-[a-z0-9]+)\/edit$/)
   const code = page.url().match(/(g-[a-z0-9]+)\/edit$/)![1]
   backend.adopt(code)

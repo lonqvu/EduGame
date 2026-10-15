@@ -8,9 +8,11 @@ import {
   emptyDraft,
   filterSets,
   hasFilters,
+  isSetGame,
   kindOf,
   NO_FILTERS,
   parsePastedQuestions,
+  setChoices,
   subjectArt,
   totalsOf,
   usableCount,
@@ -188,5 +190,36 @@ describe('pasted questions', () => {
       [6, 'Thiếu đáp án sau dấu “=”'],
     ])
     expect(lines.every((l) => !l.question)).toBe(true)
+  })
+})
+
+describe('picking a set for a new game', () => {
+  it('only question games take a set', () => {
+    expect(['QUIZ', 'GOLDEN_BELL', 'BOAT_RACE', 'GRID_BOARD'].every(isSetGame)).toBe(true)
+    expect(['MATCHING', 'CROSSWORD', 'SPIN_WHEEL', 'TIMER'].some(isSetGame)).toBe(false)
+  })
+
+  it('lists the sets the game can play first, newest first, then the others', () => {
+    // A quiz plays multiple choice: the short answer set and the empty one come last.
+    expect(setChoices(ALL, 'QUIZ', '', 'ALL').map((c) => [c.set.code, c.usable])).toEqual([
+      ['cong', 7],
+      ['anh', 7],
+      ['doc', 0],
+      ['trong', 0],
+    ])
+    // Lật ô plays every question.
+    expect(setChoices(ALL, 'GRID_BOARD', '', 'ALL').map((c) => [c.set.code, c.usable])).toEqual([
+      ['cong', 8],
+      ['doc', 6],
+      ['anh', 7],
+      ['trong', 0],
+    ])
+  })
+
+  it('searches and filters by kind', () => {
+    expect(setChoices(ALL, 'QUIZ', 'doc hieu', 'ALL').map((c) => c.set.code)).toEqual(['doc'])
+    expect(setChoices(ALL, 'QUIZ', '', 'SHORT_ANSWER').map((c) => c.set.code)).toEqual(['doc'])
+    expect(setChoices(ALL, 'QUIZ', '', 'MIXED').map((c) => c.set.code)).toEqual(['cong'])
+    expect(setChoices([], 'QUIZ', '', 'ALL')).toEqual([])
   })
 })

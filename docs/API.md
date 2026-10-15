@@ -489,7 +489,7 @@ Bộ đã xóa, hoặc của giáo viên khác → `404`.
 
 Field của loại câu kia bị bỏ qua. Câu không chơi được → `400 INVALID_QUESTION`, `message` nêu câu số mấy.
 
-**Sử dụng trong trò chơi.** `POST /question-sets/{code}/games {"templateCode": "QUIZ"}` → `201`
+**Sử dụng trong trò chơi.** `POST /question-sets/{code}/games {"templateCode": "QUIZ", "title"?: "Trắc nghiệm – Lớp 3A"}` → `201`
 `{"gameCode", "templateCode", "questionCount", "skippedCount"}`.
 
 | Trò chơi | Câu được dùng |
@@ -497,7 +497,7 @@ Field của loại câu kia bị bỏ qua. Câu không chơi được → `400 I
 | `QUIZ`, `GOLDEN_BELL`, `BOAT_RACE` | Các câu trắc nghiệm (thành `SINGLE_CHOICE`); câu tự luận bị bỏ qua (`skippedCount`) |
 | `GRID_BOARD` (Lật ô) | Mọi câu (thành `OPEN_QUESTION`, 10 điểm); đáp án là đáp án đúng hoặc câu trả lời tự luận |
 
-Trò chơi mang tên, mô tả, môn và khối của bộ (khối 6–12 thì để trống, game là tiểu học). Câu hỏi được chép sang game:
+Trò chơi mang tên `title` (không gửi thì lấy tên bộ), mô tả, môn và khối của bộ (khối 6–12 thì để trống, game là tiểu học). Câu hỏi được chép sang game:
 sửa bộ sau đó không đổi game, và ngược lại. Không có câu nào dùng được → `409 NO_USABLE_QUESTIONS`.
 
 ---

@@ -4,6 +4,8 @@
   subjects (TOAN -> toan, TU_NHIEN_XA_HOI -> tu-nhien-xa-hoi...).
 * banner.svg: the teacher reading with two pupils, a light bulb and stars, for the "Bộ câu hỏi" banner, 340x240.
 * tip.svg: a fox reading, for the "Mẹo nhỏ" card, 150x130.
+* create-game.svg: the teacher with a tablet, a picture card and a checklist, for the "Tạo trò chơi mới" dialog,
+  220x200.
 
 Vector, so they stay sharp at any size and pixel density. Reuses the drawing helpers of make_class_art.py.
 
@@ -12,7 +14,7 @@ Usage: python3 scripts/make_question_art.py [out_dir]
 import re
 import sys
 
-from make_class_art import AVATARS, TEACHER_FIGURE, pupil, svg
+from make_class_art import AVATARS, TEACHER_BODY, TEACHER_FIGURE, pupil, svg
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'public/assets/question-sets'
 FONT = 'Nunito, Arial Rounded MT Bold, Arial, sans-serif'
@@ -126,10 +128,45 @@ tip = (
     + sparkle(18, 40, 6, '#FF8FAB') + sparkle(136, 64, 5, '#3563E9') + sparkle(20, 100, 4, '#F5A524')
 )
 
+# Create game: the teacher holds a tablet; beside her a picture card and a checklist (the game's content being
+# prepared), a light bulb above. Her figure is cut by the bottom edge, as in the dialog's design.
+create_game = (
+    '<circle cx="118" cy="104" r="88" fill="#DCEBFF"/>'
+    '<circle cx="62" cy="58" r="26" fill="#C9DEFC" opacity="0.7"/>'
+    # picture card (behind) and checklist card (in front), right of the teacher
+    + '<g transform="rotate(6 180 70)"><rect x="152" y="40" width="54" height="58" rx="10" fill="#FFFFFF"/>'
+      '<rect x="160" y="48" width="38" height="32" rx="6" fill="#DCEBFF"/>'
+      '<path d="M162 78 l10 -12 l8 8 l6 -6 l10 10 z" fill="#9CC2F7"/><circle cx="188" cy="57" r="4" fill="#FFD15C"/></g>'
+    + '<rect x="150" y="108" width="64" height="70" rx="11" fill="#FFFFFF" stroke="#D5E4FA" stroke-width="2"/>'
+    + ''.join(
+        f'<rect x="158" y="{y}" width="11" height="11" rx="3" fill="{c}"/>'
+        f'<rect x="174" y="{y + 2}" width="32" height="3.4" rx="1.7" fill="#C9D8F2"/>'
+        f'<rect x="174" y="{y + 7}" width="22" height="3" rx="1.5" fill="#E1E9F7"/>'
+        for y, c in [(118, '#22A06B'), (138, '#3563E9'), (158, '#3563E9')])
+    + '<path d="M160.5 123.5 l2.5 2.5 l4.5 -5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" '
+      'stroke-linejoin="round"/>'
+    # light bulb
+    + '<g transform="translate(34 40)"><path d="M0 -16 a13 13 0 0 0 -7.5 23.5 c1.6 1.2 2 2.8 2 4.5 h11 c0 -1.7 .4 -3.3 2 -4.5 '
+      'a13 13 0 0 0 -7.5 -23.5 z" fill="#FFD15C" stroke="#E3A008" stroke-width="2"/><path d="M-5 17 h10 M-3.5 21 h7" '
+      'stroke="#8C8FA3" stroke-width="2.6" stroke-linecap="round"/>'
+      + ''.join(f'<path d="M{13 * c:.1f} {-4 + 13 * s:.1f} L{19 * c:.1f} {-4 + 19 * s:.1f}" stroke="#FFC233" '
+                f'stroke-width="2.4" stroke-linecap="round"/>' for c, s in [(-1, 0), (1, 0), (-.7, -.7), (.7, -.7)])
+      + '</g>'
+    # the teacher, holding the tablet in both hands
+    + f'<g transform="translate(-6 0)">{TEACHER_BODY}'
+      '<rect x="84" y="150" width="52" height="38" rx="6" fill="#2F3443" transform="rotate(-6 110 169)"/>'
+      '<rect x="89" y="155" width="42" height="28" rx="3" fill="#8EC5FF" transform="rotate(-6 110 169)"/>'
+      '<path d="M96 172 l6 -7 l5 5 l4 -4 l8 8" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round" '
+      'transform="rotate(-6 110 169)"/>'
+      '<circle cx="84" cy="176" r="7" fill="#FFD9BE"/><circle cx="138" cy="170" r="7" fill="#FFD9BE"/></g>'
+    + sparkle(206, 24, 6, '#FFFFFF') + sparkle(20, 120, 5, '#B7A2F5') + sparkle(140, 18, 5, '#FFD15C')
+)
+
 if __name__ == '__main__':
     files = {f'subject-{name}.svg': art for name, art in SUBJECTS.items()}
     files['banner.svg'] = svg(340, 240, banner)
     files['tip.svg'] = svg(150, 130, tip)
+    files['create-game.svg'] = svg(220, 200, create_game)
     for name, content in files.items():
         with open(f'{OUT}/{name}', 'w') as f:
             f.write(content)

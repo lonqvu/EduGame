@@ -71,8 +71,8 @@ export async function reorderQuestions(code: string, questionIds: number[]): Pro
 
 // --- Use in a game --------------------------------------------------------------------------------------------
 
-/** Makes a game from the set (its questions are copied into it). */
-export async function useQuestionSet(code: string, templateCode: QuestionGameCode): Promise<UsedQuestionSetResponse> {
-  const { data } = await httpClient.post<UsedQuestionSetResponse>(`${setPath(code)}/games`, { templateCode })
+/** Makes a game from the set (its questions are copied into it), named `title` or after the set. */
+export async function useQuestionSet(code: string, templateCode: QuestionGameCode, title?: string): Promise<UsedQuestionSetResponse> {
+  const { data } = await httpClient.post<UsedQuestionSetResponse>(`${setPath(code)}/games`, { templateCode, title })
   return data
 }

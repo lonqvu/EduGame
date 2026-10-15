@@ -182,7 +182,7 @@ school = (
 
 # --- Teacher reading a book: the figure (200x200 frame, cut at the bottom edge), then her card scene. ---
 # Her hair ends in rounded locks resting on the shoulders (not cut straight above them).
-TEACHER_FIGURE = (
+TEACHER_BODY = (
     # hair back
     '<path d="M70 92 q-6 -52 40 -54 q46 2 40 54 q2 30 -4 50 q-4 8 -12 8 h-48 q-8 0 -12 -8 q-6 -20 -4 -50 z" fill="#5A3622"/>'
     '<circle cx="110" cy="36" r="13" fill="#5A3622"/>'
@@ -199,13 +199,18 @@ TEACHER_FIGURE = (
     + eyes(98, 122, 95, 2.6)
     + '<path d="M103 108 q7 6 14 0" fill="none" stroke="#B5523B" stroke-width="2.4" stroke-linecap="round"/>'
     '<circle cx="88" cy="104" r="4" fill="#FF9EB0" opacity="0.6"/><circle cx="132" cy="104" r="4" fill="#FF9EB0" opacity="0.6"/>'
-    # open book held in both hands
+)
+
+# An open book held in both hands, in front of TEACHER_BODY.
+BOOK = (
     '<path d="M70 176 l40 -14 l40 14 v8 l-40 -12 l-40 12 z" fill="#2F5FD0"/>'
     '<path d="M74 172 q18 -10 36 -6 v14 q-18 -4 -36 4 z" fill="#FFFFFF"/>'
     '<path d="M146 172 q-18 -10 -36 -6 v14 q18 -4 36 4 z" fill="#F3F7FF"/>'
     '<path d="M82 172 q10 -5 22 -4 M82 177 q10 -5 22 -4 M116 168 q12 -1 22 4 M116 173 q12 -1 22 4" stroke="#B9C9EE" stroke-width="1.6" fill="none"/>'
     '<circle cx="74" cy="178" r="7" fill="#FFD9BE"/><circle cx="146" cy="178" r="7" fill="#FFD9BE"/>'
 )
+
+TEACHER_FIGURE = TEACHER_BODY + BOOK
 
 PLANT = (
     '<path d="M28 186 q-2 -30 10 -46 M38 186 q4 -26 22 -36 M30 186 q-14 -18 -16 -36" stroke="#4FA36B" stroke-width="3" fill="none" stroke-linecap="round"/>'
