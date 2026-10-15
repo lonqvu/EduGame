@@ -1,3 +1,5 @@
+import type { GameType } from '@/types/game'
+
 /** Reads the `settings` JSON of a game version (template default_config + teacher changes), with safe defaults. */
 export interface PlaySettings {
   teams: number
@@ -38,4 +40,49 @@ export function readPlaySettings(settings: Record<string, unknown> | undefined, 
     raceSteps: num(obj(rules.win).steps, defaults.raceSteps ?? 5, 2, 20),
     keywordPoints: num(scoring.keywordPoints, defaults.keywordPoints ?? 40, 0, 1000),
   }
+}
+
+/** Question games whose projector reads its rules from `settings` (Lật ô has fixed teams and points per tile). */
+export type RulesGameType = Exclude<GameType, 'GRID_BOARD' | 'SPIN_WHEEL' | 'NAME_RACE' | 'TEAM_MAKER' | 'TIMER' | 'DICE'>
+
+/** What each projector plays with when `settings` leaves a rule out. */
+export const PLAY_DEFAULTS: Record<RulesGameType, Partial<PlaySettings>> = {
+  QUIZ: { teams: 4, points: 10, allowSteal: true, timeLimitSec: 30 },
+  GOLDEN_BELL: { timeLimitSec: 15, rescues: 1 },
+  BOAT_RACE: { teams: 4, points: 1, allowSteal: true, timeLimitSec: 20, raceSteps: 5 },
+  MATCHING: { teams: 2, points: 10 },
+  MEMORY: { teams: 2, points: 10 },
+  CROSSWORD: { teams: 4, points: 10, allowSteal: true, keywordPoints: 40 },
+  ORDERING: { teams: 2, points: 10, allowSteal: true },
+  SORTING: { teams: 2, points: 10 },
+}
+
+/** Where each rule lives in the `settings` JSON (the shape readPlaySettings reads). */
+const PATHS: Record<keyof PlaySettings, string[]> = {
+  teams: ['rules', 'participants', 'teams'],
+  points: ['rules', 'scoring', 'points'],
+  allowSteal: ['rules', 'scoring', 'allowSteal'],
+  timeLimitSec: ['timeLimitSec'],
+  shuffleItems: ['shuffleItems'],
+  shuffleOptions: ['shuffleOptions'],
+  flipBackDelayMs: ['flipBackDelayMs'],
+  rescues: ['rules', 'rescue', 'count'],
+  raceSteps: ['rules', 'win', 'steps'],
+  keywordPoints: ['rules', 'scoring', 'keywordPoints'],
+}
+
+/** `settings` with the given rules changed; everything else (other keys, rule types...) is kept. */
+export function writePlaySettings(settings: Record<string, unknown> | undefined, patch: Partial<PlaySettings>): Record<string, unknown> {
+  const next: Record<string, unknown> = structuredClone(obj(settings))
+  for (const [key, value] of Object.entries(patch) as [keyof PlaySettings, unknown][]) {
+    if (value === undefined) continue
+    const path = PATHS[key]
+    let node = next
+    for (const part of path.slice(0, -1)) {
+      node[part] = { ...obj(node[part]) }
+      node = node[part] as Record<string, unknown>
+    }
+    node[path.at(-1)!] = value
+  }
+  return next
 }

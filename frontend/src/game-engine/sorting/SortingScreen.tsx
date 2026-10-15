@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useReducer, useState } from 'react'
 import { CheckIcon, ChevronRightIcon } from '@/components/ui/icons'
-import { readPlaySettings } from '@/game-engine/shared/gameSettings'
+import { PLAY_DEFAULTS, readPlaySettings } from '@/game-engine/shared/gameSettings'
 import { NothingToPlay, PlayFrame, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import { TeamBar } from '@/game-engine/shared/TeamBar'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
@@ -24,7 +24,7 @@ interface SortingScreenProps {
  * every card.
  */
 export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
-  const rules = readPlaySettings(settings, { teams: 2, points: 10 })
+  const rules = readPlaySettings(settings, PLAY_DEFAULTS.SORTING)
   const deal = () => playableSortSets(sets)
   const [playable, setPlayable] = useState(deal)
   const [state, dispatch] = useReducer(

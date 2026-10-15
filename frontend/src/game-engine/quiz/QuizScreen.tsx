@@ -2,7 +2,7 @@ import { useReducer, useState } from 'react'
 import { ChevronRightIcon, EyeIcon } from '@/components/ui/icons'
 import { Countdown, QuizOption } from '@/game-engine/quiz/QuizParts'
 import { initialQuizRound, playableQuizQuestions, questionFontSize, quizReducer } from '@/game-engine/quiz/quizRound'
-import { readPlaySettings } from '@/game-engine/shared/gameSettings'
+import { PLAY_DEFAULTS, readPlaySettings } from '@/game-engine/shared/gameSettings'
 import { NothingToPlay, PlayFrame, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import { TeamBar } from '@/game-engine/shared/TeamBar'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
@@ -20,7 +20,7 @@ interface QuizScreenProps {
  * the team said. Right → points; wrong → another team may steal while some have not tried.
  */
 export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
-  const rules = readPlaySettings(settings, { teams: 4, points: 10, allowSteal: true, timeLimitSec: 30 })
+  const rules = readPlaySettings(settings, PLAY_DEFAULTS.QUIZ)
   const deal = () => playableQuizQuestions(questions, { shuffleItems: rules.shuffleItems, shuffleOptions: rules.shuffleOptions })
   // Shuffled once per round: "Chơi lại" deals again.
   const [playable, setPlayable] = useState(deal)

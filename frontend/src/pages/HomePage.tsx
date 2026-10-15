@@ -2,7 +2,7 @@ import { App } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
-import { editPath, gameRegistry, playPath, toolPath } from '@/game-engine/registry'
+import { editPath, gameRegistry, toolPath } from '@/game-engine/registry'
 import { ActionCards } from '@/pages/home/ActionCards'
 import { HomeHero } from '@/pages/home/HomeHero'
 import { PraiseCorner, type StarPeriod } from '@/pages/home/PraiseCorner'
@@ -18,6 +18,7 @@ import { apiErrorMessage } from '@/utils/apiError'
 import { classTitle } from '@/utils/classrooms'
 import { relativeTimeLabel } from '@/utils/dateLabels'
 import { gradeLabel } from '@/utils/gameMapping'
+import { OPEN_CREATE_SET } from '@/utils/questionSets'
 
 const RECENT_LIMIT = 4
 const TODAY_LIMIT = 2
@@ -71,7 +72,6 @@ export function HomePage() {
   }, [loadTeacher, loadTemplates, loadGames, loadClass, loadQuestionSets])
 
   const recent = allRecent ? games : games.slice(0, RECENT_LIMIT)
-  const startTarget = games[0] ? playPath(games[0]) : '/games/new'
 
   const templateName = (game: GameSummary) => templates.find((t) => t.type === game.type)?.name ?? ''
   /** "Lớp 3A" when the game is for the class being taught, else "Lớp 3". */
@@ -149,7 +149,7 @@ export function HomePage() {
 
       <div className={`${columns} items-start`}>
         <div className="@container flex min-w-0 flex-col gap-5">
-          <ActionCards startTarget={startTarget} onCreate={() => navigate('/games/new')} onOpenClass={() => navigate(currentCode ? `/classes/${encodeURIComponent(currentCode)}` : '/classes')} />
+          <ActionCards startTarget="/games/new" onCreate={() => navigate('/question-sets', { state: OPEN_CREATE_SET })}onOpenClass={() => navigate(currentCode ? `/classes/${encodeURIComponent(currentCode)}` : '/classes')} />
           <div className="grid grid-cols-1 items-start gap-5 @min-[900px]:grid-cols-[minmax(0,1fr)_356px]">
             <RecentActivity
               games={recent}

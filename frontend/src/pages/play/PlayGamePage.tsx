@@ -2,20 +2,14 @@ import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'react-router'
 import { PROJECTOR_BOARD_BG, ProjectorStage } from '@/components/projector/ProjectorStage'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
-import { BoatRaceScreen } from '@/game-engine/boat-race/BoatRaceScreen'
-import { CrosswordScreen } from '@/game-engine/crossword/CrosswordScreen'
-import { GoldenBellScreen } from '@/game-engine/golden-bell/GoldenBellScreen'
-import { MatchingScreen } from '@/game-engine/matching/MatchingScreen'
-import { MemoryScreen } from '@/game-engine/memory/MemoryScreen'
-import { OrderingScreen } from '@/game-engine/ordering/OrderingScreen'
-import { QuizScreen } from '@/game-engine/quiz/QuizScreen'
+import { isGuideGame } from '@/game-engine/gameGuide'
 import { useBeginPlaySession } from '@/game-engine/shared/usePlaySession'
-import { SortingScreen } from '@/game-engine/sorting/SortingScreen'
-import { isGameType, isQuizFamily } from '@/game-engine/registry'
+import { playMode } from '@/game-engine/registry'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { GameScreen } from '@/pages/play/GameScreen'
 import { GridBoardPage } from '@/pages/play/GridBoardPage'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
-import type { CrosswordRow, GameItem, OrderSet, PairSet, QuizQuestion, SortSet } from '@/types/game'
+import type { GameItem } from '@/types/game'
 
 const EMPTY: GameItem[] = []
 const NO_SETTINGS: Record<string, unknown> = {}
@@ -44,61 +38,14 @@ export function PlayGamePage() {
   if (loadState === 'error') return <LoadError onRetry={() => void loadGame(gameId, 'play')} />
   if (!game || (loadState !== 'play' && loadState !== 'edit')) return <PageLoading />
 
-  const as = params.get('as') ?? ''
-  const mode = isQuizFamily(game.type) && isGameType(as) && isQuizFamily(as) ? as : game.type
+  const mode = playMode(game.type, params.get('as'))
+  if (!isGuideGame(mode)) return <NotFoundPage message="Trò này không có màn chiếu câu hỏi." />
+  // Lật ô has its own routes for a tile and the results.
+  if (mode === 'GRID_BOARD') return <GridBoardPage screen="board" />
 
-  switch (mode) {
-    case 'GRID_BOARD':
-      return <GridBoardPage screen="board" />
-    case 'QUIZ':
-      return (
-        <ProjectorStage background={PROJECTOR_BOARD_BG}>
-          <QuizScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
-        </ProjectorStage>
-      )
-    case 'GOLDEN_BELL':
-      return (
-        <ProjectorStage background={PROJECTOR_BOARD_BG}>
-          <GoldenBellScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
-        </ProjectorStage>
-      )
-    case 'BOAT_RACE':
-      return (
-        <ProjectorStage background={PROJECTOR_BOARD_BG}>
-          <BoatRaceScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
-        </ProjectorStage>
-      )
-    case 'MATCHING':
-      return (
-        <ProjectorStage background={PROJECTOR_BOARD_BG}>
-          <MatchingScreen key={game.id} game={game} sets={items as PairSet[]} settings={settings} />
-        </ProjectorStage>
-      )
-    case 'MEMORY':
-      return (
-        <ProjectorStage background={PROJECTOR_BOARD_BG}>
-          <MemoryScreen key={game.id} game={game} sets={items as PairSet[]} settings={settings} />
-        </ProjectorStage>
-      )
-    case 'CROSSWORD':
-      return (
-        <ProjectorStage background={PROJECTOR_BOARD_BG}>
-          <CrosswordScreen key={game.id} game={game} rows={items as CrosswordRow[]} settings={settings} />
-        </ProjectorStage>
-      )
-    case 'ORDERING':
-      return (
-        <ProjectorStage background={PROJECTOR_BOARD_BG}>
-          <OrderingScreen key={game.id} game={game} sets={items as OrderSet[]} settings={settings} />
-        </ProjectorStage>
-      )
-    case 'SORTING':
-      return (
-        <ProjectorStage background={PROJECTOR_BOARD_BG}>
-          <SortingScreen key={game.id} game={game} sets={items as SortSet[]} settings={settings} />
-        </ProjectorStage>
-      )
-    default:
-      return <NotFoundPage message="Trò này không có màn chiếu câu hỏi." />
-  }
+  return (
+    <ProjectorStage background={PROJECTOR_BOARD_BG}>
+      <GameScreen mode={mode} game={game} items={items} settings={settings} />
+    </ProjectorStage>
+  )
 }

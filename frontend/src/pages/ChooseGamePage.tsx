@@ -11,13 +11,13 @@ import {
 } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { PICK_MODES, type PickMode } from '@/game-engine/name-picker/modes'
-import { editPath, gameRegistry, playPath, toolPath, type GameBadge } from '@/game-engine/registry'
+import { gameRegistry, startPath, toolPath, type GameBadge } from '@/game-engine/registry'
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
+import { NewGameModal } from '@/pages/choose-game/NewGameModal'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { GameCategory, GameSummary, GameTemplate, GameType } from '@/types/game'
-import { apiErrorMessage } from '@/utils/apiError'
 import { relativeTimeLabel } from '@/utils/dateLabels'
 import { gradeLabel } from '@/utils/gameMapping'
 
@@ -97,9 +97,8 @@ export function ChooseGamePage() {
   const loadClass = useClassStore((s) => s.load)
   const games = useGameLibraryStore((s) => s.games)
   const loadGames = useGameLibraryStore((s) => s.loadGames)
-  const createGame = useGameLibraryStore((s) => s.createGame)
 
-  const [creating, setCreating] = useState(false)
+  const [newGame, setNewGame] = useState<GameTemplate | null>(null)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('ALL')
   const [sort, setSort] = useState<Sort>('popular')
@@ -112,7 +111,7 @@ export function ChooseGamePage() {
     void loadGames()
   }, [loadTemplates, loadClass, loadTeacher, loadGames])
 
-  const choose = async ({ template, pickMode }: Entry) => {
+  const choose = ({ template, pickMode }: Entry) => {
     if (pickMode) {
       navigate(`/tools/pick/${pickMode}`)
       return
@@ -129,15 +128,8 @@ export function ChooseGamePage() {
       message.info(`Trò "${template.name}" đang được hoàn thiện.`)
       return
     }
-    if (creating) return
-    setCreating(true)
-    try {
-      // New games are for the teacher's class grade (there is one class for now).
-      navigate(editPath(await createGame(template.type, grade)))
-    } catch (error) {
-      message.error(apiErrorMessage(error))
-      setCreating(false)
-    }
+    // Name it and pick how to start; the game is made only once the teacher confirms.
+    setNewGame(template)
   }
 
   if (status === 'error') return <LoadError onRetry={() => void loadTemplates()} />
@@ -268,10 +260,10 @@ export function ChooseGamePage() {
             {recent.map((game) => (
               <li key={game.id}>
                 <Link
-                  to={playPath(game)}
+                  to={startPath(game)}
                   className="flex items-center gap-4 rounded-[14px] bg-white p-[14px] pr-[16px] text-ink shadow-[0_1px_3px_rgba(31,42,68,0.05)] hover:text-ink hover:shadow-[0_6px_18px_rgba(31,42,68,0.08)]"
                 >
-                  <img src={cardArt(game.type)} alt="" className="h-[73px] w-[104px] shrink-0 rounded-[10px] object-cover" />
+                  <img src={cardArt(game.type)} alt="" className="aspect-[2/1] w-[124px] shrink-0 rounded-[10px]" />
                   <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
                     <span className="truncate text-[15px] font-black">{templateName(game.type)}</span>
                     <span className="truncate text-[13.5px] text-ink-soft" title={game.title}>
@@ -305,31 +297,37 @@ export function ChooseGamePage() {
         ) : (
           <ul className="m-0 mt-[12px] grid list-none grid-cols-1 gap-4 p-0 @min-[520px]:grid-cols-2 @min-[820px]:grid-cols-3 @min-[1080px]:grid-cols-4">
             {shown.map((entry) => (
-              <li key={entry.key} className="@min-[520px]:aspect-square">
-                <GameCard entry={entry} disabled={creating} onChoose={() => void choose(entry)} />
+              <li key={entry.key}>
+                <GameCard entry={entry} onChoose={() => choose(entry)} />
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      <NewGameModal
+        template={newGame}
+        grade={grade ?? undefined}
+        className={className || undefined}
+        onClose={() => setNewGame(null)}
+      />
     </div>
   )
 }
 
 interface GameCardProps {
   entry: Entry
-  disabled: boolean
   onChoose: () => void
 }
 
-function GameCard({ entry, disabled, onChoose }: GameCardProps) {
+function GameCard({ entry, onChoose }: GameCardProps) {
   const def = gameRegistry[entry.template.type]
   const badge = def.badge && BADGES[def.badge]
   return (
-    // Fills its square list item; the picture takes whatever height the text leaves. The whole card is clickable
-    // (the button's ::after covers it).
-    <article className="group relative flex h-full min-h-0 flex-col rounded-[16px] border border-[#E6EBF3] bg-white p-[6px] pb-[10px] shadow-[0_1px_3px_rgba(31,42,68,0.05)] transition-[box-shadow,transform,border-color] duration-200 focus-within:border-primary hover:-translate-y-1 hover:border-[#C9D6F5] hover:shadow-[0_12px_28px_rgba(31,42,68,0.12)]">
-      <div className="relative flex min-h-[96px] flex-1 overflow-hidden rounded-[12px]">
+    // The picture keeps the 2:1 shape the card art is drawn in, so it is never cropped or blown up. The whole card is
+    // clickable (the button's ::after covers it).
+    <article className="group relative flex h-full flex-col rounded-[16px] border border-[#E6EBF3] bg-white p-[6px] pb-[10px] shadow-[0_1px_3px_rgba(31,42,68,0.05)] transition-[box-shadow,transform,border-color] duration-200 focus-within:border-primary hover:-translate-y-1 hover:border-[#C9D6F5] hover:shadow-[0_12px_28px_rgba(31,42,68,0.12)]">
+      <div className="relative aspect-[2/1] shrink-0 overflow-hidden rounded-[12px]">
         <img
           src={entry.art}
           alt=""
@@ -358,9 +356,8 @@ function GameCard({ entry, disabled, onChoose }: GameCardProps) {
           <button
             type="button"
             onClick={onChoose}
-            disabled={disabled}
             aria-label={`Chọn trò chơi ${entry.name}`}
-            className="flex h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border-0 bg-primary font-[inherit] text-[14.5px] font-semibold text-white outline-none after:absolute after:inset-0 after:rounded-[16px] group-hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
+            className="flex h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border-0 bg-primary font-[inherit] text-[14.5px] font-semibold text-white outline-none after:absolute after:inset-0 after:rounded-[16px] group-hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Chọn trò chơi
             <ArrowRightIcon size={16} strokeWidth={2.4} className="transition-transform duration-200 group-hover:translate-x-0.5" />

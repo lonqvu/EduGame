@@ -397,6 +397,17 @@ class QuestionSetApiTest {
     }
 
     @Test
+    void theGameCanBeNamedWhenItIsMade() throws Exception {
+        String code = body(send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"  Đố vui 2A  \"}")
+                .andExpect(status().isCreated())).path("gameCode").asText();
+        mockMvc.perform(get("/api/v1/games/" + code)).andExpect(jsonPath("$.title").value("Đố vui 2A"));
+
+        send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"   \"}").andExpect(status().isBadRequest());
+        send(post(TOAN + "/games"), "{\"templateCode\": \"QUIZ\", \"title\": \"%s\"}".formatted("x".repeat(256)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void gridBoardGetsEveryQuestionWithItsAnswer() throws Exception {
         JsonNode used = body(send(post(TOAN + "/games"), "{\"templateCode\": \"GRID_BOARD\"}").andExpect(status().isCreated()));
         assertThat(used.path("questionCount").asInt()).isEqualTo(8);

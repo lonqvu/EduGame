@@ -74,7 +74,8 @@ public class QuestionSetUseService {
 
         // Games are for primary school (grades 1-5): a set for another grade makes a game without one.
         Short grade = set.getGrade() != null && set.getGrade() <= 5 ? set.getGrade() : null;
-        GameResponse game = gameService.create(new CreateGameRequest(request.templateCode(), set.getTitle(), grade));
+        String title = request.title() != null ? request.title().strip() : set.getTitle();
+        GameResponse game = gameService.create(new CreateGameRequest(request.templateCode(), title, grade));
         gameService.update(game.code(), new UpdateGameRequest(null, set.getDescription(), set.getSubject().label(), null, null));
         gameItemService.addItems(game.code(), new AddGameItemsRequest(items));
         questionSetUseRepository.save(QuestionSetUse.of(set, gameService.getOwnedGame(game.code())));

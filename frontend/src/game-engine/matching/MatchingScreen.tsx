@@ -8,7 +8,7 @@ import {
   matchingReducer,
   playableMatchingSets,
 } from '@/game-engine/matching/matchingRound'
-import { readPlaySettings } from '@/game-engine/shared/gameSettings'
+import { PLAY_DEFAULTS, readPlaySettings } from '@/game-engine/shared/gameSettings'
 import { NothingToPlay, PlayFrame, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import { TeamBar } from '@/game-engine/shared/TeamBar'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
@@ -30,7 +30,7 @@ type Side = 'left' | 'right'
 
 /** Projector: teams take turns joining an entry of the left column to its partner in the shuffled right column. */
 export function MatchingScreen({ game, sets, settings }: MatchingScreenProps) {
-  const rules = readPlaySettings(settings, { teams: 2, points: 10 })
+  const rules = readPlaySettings(settings, PLAY_DEFAULTS.MATCHING)
   const deal = () => playableMatchingSets(sets)
   const [playable, setPlayable] = useState(deal)
   const [state, dispatch] = useReducer(matchingReducer, rules.teams, initialMatchingRound)

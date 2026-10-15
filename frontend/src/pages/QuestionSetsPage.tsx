@@ -1,6 +1,6 @@
 import { App } from 'antd'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
 import { QuestionSetFormModal } from '@/pages/question-sets/QuestionSetFormModal'
 import { QuestionSetList } from '@/pages/question-sets/QuestionSetList'
@@ -10,7 +10,15 @@ import { useSetActions } from '@/pages/question-sets/useSetActions'
 import { useQuestionSetStore } from '@/store/questionSetStore'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { QuestionSetRequest } from '@/types/api'
-import { countBySubject, filterSets, MAX_SETS, NO_FILTERS, type SetFilters, totalsOf } from '@/utils/questionSets'
+import {
+  countBySubject,
+  filterSets,
+  MAX_SETS,
+  NO_FILTERS,
+  OPEN_CREATE_SET,
+  type SetFilters,
+  totalsOf,
+} from '@/utils/questionSets'
 
 /** Rows shown at first, and added by "Xem thêm". */
 const PAGE = 10
@@ -18,6 +26,7 @@ const PAGE = 10
 /** /question-sets — the teacher's question bank: find, create, use, edit, copy, delete sets. */
 export function QuestionSetsPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { message } = App.useApp()
   const teacher = useTeacherStore((s) => s.teacher)
   const loadTeacher = useTeacherStore((s) => s.load)
@@ -29,7 +38,7 @@ export function QuestionSetsPage() {
 
   const [filters, setFilters] = useState<SetFilters>(NO_FILTERS)
   const [shown, setShown] = useState(PAGE)
-  const [creating, setCreating] = useState(false)
+  const [creating, setCreating] = useState(() => (location.state as typeof OPEN_CREATE_SET | null)?.createSet === true)
   const searchRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -37,6 +46,11 @@ export function QuestionSetsPage() {
     void loadTeacher()
     void load()
   }, [loadTeacher, load])
+
+  // The form opened from the state once; drop it so going back or reloading does not open it again.
+  useEffect(() => {
+    if (location.state) navigate(location.pathname, { replace: true, state: null })
+  }, [location.state, location.pathname, navigate])
 
   const matching = useMemo(() => filterSets(sets, filters), [sets, filters])
   const subjectCounts = useMemo(() => countBySubject(sets), [sets])

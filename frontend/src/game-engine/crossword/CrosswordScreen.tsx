@@ -11,7 +11,7 @@ import {
   type PlayableRow,
   type RowResult,
 } from '@/game-engine/crossword/crosswordRound'
-import { readPlaySettings } from '@/game-engine/shared/gameSettings'
+import { PLAY_DEFAULTS, readPlaySettings } from '@/game-engine/shared/gameSettings'
 import { NothingToPlay, PlayFrame, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import { TeamBar } from '@/game-engine/shared/TeamBar'
 import type { TeamScore } from '@/game-engine/shared/teamScore'
@@ -36,7 +36,7 @@ interface CrosswordScreenProps {
  * keyword between rows; guessing it early is worth more.
  */
 export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) {
-  const rules = readPlaySettings(settings, { teams: 4, points: 10, allowSteal: true, keywordPoints: 40 })
+  const rules = readPlaySettings(settings, PLAY_DEFAULTS.CROSSWORD)
   const [playable] = useState(() => playableRows(rows))
   const [state, dispatch] = useReducer(crosswordReducer, rules.teams, initialCrossword)
   const backTo = editPath(game.id)

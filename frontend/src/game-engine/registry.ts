@@ -56,4 +56,17 @@ export function playPath(game: { id: string; type: GameType }): string {
   return gameRegistry[game.type].usesQuestions ? `/play/${game.id}` : toolPath(game.type)
 }
 
+/**
+ * Route of the page shown before a game starts (rules, preview, quick settings); tools have none and open directly.
+ * `as` plays quiz questions the way of another quiz game.
+ */
+export function startPath(game: { id: string; type: GameType }, as?: GameType): string {
+  if (!gameRegistry[game.type].usesQuestions) return toolPath(game.type)
+  return `/games/${game.id}/start${as ? `?as=${as}` : ''}`
+}
+
+/** The game the projector plays: the game's own type, or another quiz game asked for with `?as=`. */
+export const playMode = (type: GameType, as: string | null): GameType =>
+  isQuizFamily(type) && as && isGameType(as) && isQuizFamily(as) ? as : type
+
 export const editPath = (gameId: string) => `/games/${gameId}/edit`

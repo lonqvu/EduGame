@@ -2,7 +2,7 @@ import { motion } from 'motion/react'
 import { useEffect, useReducer, useState } from 'react'
 import { CheckIcon, ChevronRightIcon, EyeIcon } from '@/components/ui/icons'
 import { initialOrdering, isSetDone, orderingReducer, playableOrderSets } from '@/game-engine/ordering/orderingRound'
-import { readPlaySettings } from '@/game-engine/shared/gameSettings'
+import { PLAY_DEFAULTS, readPlaySettings } from '@/game-engine/shared/gameSettings'
 import { NothingToPlay, PlayFrame, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import { TeamBar } from '@/game-engine/shared/TeamBar'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
@@ -24,7 +24,7 @@ interface OrderingScreenProps {
  * team. The team that completes the order scores.
  */
 export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
-  const rules = readPlaySettings(settings, { teams: 2, points: 10, allowSteal: true })
+  const rules = readPlaySettings(settings, PLAY_DEFAULTS.ORDERING)
   const deal = () => playableOrderSets(sets)
   const [playable, setPlayable] = useState(deal)
   const [state, dispatch] = useReducer(orderingReducer, { teamCount: rules.teams, size: playable[0]?.entries.length ?? 0 }, initialOrdering)
