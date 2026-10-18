@@ -16,6 +16,9 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
@@ -67,8 +70,16 @@ public class GlobalExceptionHandler {
                 "%s is not supported here".formatted(ex.getMethod()), request, List.of());
     }
 
-    /** A path or query value of the wrong type, e.g. a student id that is not a number. */
-    @ExceptionHandler({MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class})
+    /** An upload bigger than {@code spring.servlet.multipart.max-file-size}. */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiError> handleUploadTooLarge(MaxUploadSizeExceededException ex,
+                                                         HttpServletRequest request) {
+        return build(HttpStatus.PAYLOAD_TOO_LARGE, "FILE_TOO_LARGE", "The file is too large", request, List.of());
+    }
+
+    /** A path or query value of the wrong type, e.g. a student id that is not a number; or a missing upload. */
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class,
+            MissingServletRequestPartException.class, MultipartException.class})
     public ResponseEntity<ApiError> handleBadParameter(Exception ex, HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, "INVALID_PARAMETER", "Invalid or missing request parameter", request,
                 List.of());

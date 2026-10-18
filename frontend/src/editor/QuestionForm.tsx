@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type DragEvent } from 'react'
+import { useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { ImagePicker } from '@/editor/ImagePicker'
 import type { Question } from '@/types/game'
 
 const POINT_OPTIONS = [10, 20, 30] as const
@@ -7,6 +8,8 @@ const POINT_OPTIONS = [10, 20, 30] as const
 type QuestionValues = Omit<Question, 'id'>
 
 interface QuestionFormProps {
+  /** Code of the game, for image uploads. */
+  gameId: string
   question: Question
   number: number
   isLast: boolean
@@ -20,7 +23,7 @@ export const fieldClass =
   'w-full rounded-[18px] border-2 border-line bg-white font-[inherit] font-bold text-ink outline-none focus:border-primary'
 
 /** Edit form of one question. Mount with `key={question.id}` so it resets when switching questions. */
-export function QuestionForm({ question, number, isLast, onChange, onDelete, onNext }: QuestionFormProps) {
+export function QuestionForm({ gameId, question, number, isLast, onChange, onDelete, onNext }: QuestionFormProps) {
   const { register, control, subscribe } = useForm<QuestionValues>({
     defaultValues: { text: question.text, answer: question.answer, imageUrl: question.imageUrl, points: question.points },
   })
@@ -62,7 +65,7 @@ export function QuestionForm({ question, number, isLast, onChange, onDelete, onN
       <Controller
         control={control}
         name="imageUrl"
-        render={({ field }) => <ImagePicker value={field.value} onChange={field.onChange} />}
+        render={({ field }) => <ImagePicker gameId={gameId} value={field.value} onChange={field.onChange} />}
       />
 
       <div className="flex flex-col gap-2">
@@ -118,84 +121,5 @@ export function QuestionForm({ question, number, isLast, onChange, onDelete, onN
         </button>
       </div>
     </form>
-  )
-}
-
-interface ImagePickerProps {
-  value?: string
-  onChange: (url: string | undefined) => void
-}
-
-/**
- * Local preview only: the image is kept as an object URL until the asset upload API exists.
- */
-export function ImagePicker({ value, onChange }: ImagePickerProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [dragging, setDragging] = useState(false)
-
-  const pick = (file: File | undefined) => {
-    if (file?.type.startsWith('image/')) onChange(URL.createObjectURL(file))
-  }
-
-  const onDrop = (e: DragEvent) => {
-    e.preventDefault()
-    setDragging(false)
-    pick(e.dataTransfer.files[0])
-  }
-
-  return (
-    <div className="flex flex-col gap-2">
-      <span className="font-extrabold">
-        Hình ảnh <span className="font-semibold text-ink-soft">(không bắt buộc)</span>
-      </span>
-      <div
-        onDragOver={(e) => {
-          e.preventDefault()
-          setDragging(true)
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        className={`flex flex-wrap items-center gap-[18px] rounded-[18px] border-2 border-dashed p-[22px] ${
-          dragging ? 'border-primary bg-primary-soft' : 'border-line-strong bg-[#FAFBFE]'
-        }`}
-      >
-        {value ? (
-          <img src={value} alt="Hình của câu hỏi" className="h-[90px] w-[120px] rounded-[14px] object-cover" />
-        ) : (
-          <div className="flex h-[90px] w-[120px] items-center justify-center rounded-[14px] bg-[#FFE3D8] text-center text-sm font-bold text-[#8A3A16]">
-            Chưa có hình
-          </div>
-        )}
-        <div className="flex flex-col gap-2">
-          <span className="text-ink-soft">Kéo ảnh vào đây hoặc</span>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              className="min-h-12 cursor-pointer self-start rounded-full border-2 border-line bg-white px-5 py-2.5 font-[inherit] font-extrabold text-ink hover:border-primary"
-            >
-              Chọn ảnh từ máy
-            </button>
-            {value && (
-              <button
-                type="button"
-                onClick={() => onChange(undefined)}
-                className="min-h-12 cursor-pointer border-0 bg-transparent px-3 font-[inherit] font-bold text-danger hover:underline"
-              >
-                Bỏ hình
-              </button>
-            )}
-          </div>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            hidden
-            aria-label="Chọn ảnh từ máy"
-            onChange={(e) => pick(e.target.files?.[0])}
-          />
-        </div>
-      </div>
-    </div>
   )
 }

@@ -106,6 +106,9 @@ app:
     log-codes: false
   # Used for "this week" star totals.
   time-zone: ${APP_TIME_ZONE:Asia/Ho_Chi_Minh}
+  # Images teachers upload for their questions, served back at /api/v1/assets/{key}.
+  assets:
+    dir: ${ASSET_DIR:./data/assets}
 
 logging:
   level:

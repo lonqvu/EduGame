@@ -10,6 +10,7 @@ import type { TeamScore } from '@/game-engine/shared/teamScore'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
 import { editPath } from '@/game-engine/registry'
 import type { GameSummary, QuizQuestion } from '@/types/game'
+import { assetSrc } from '@/utils/images'
 
 const RIVER_WIDTH = 1208
 const RIVER_HEIGHT = 236
@@ -74,7 +75,7 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
       />
 
       <div className="flex min-h-[86px] flex-1 items-center gap-5 rounded-[28px] bg-white px-7 py-3">
-        {question.imageUrl && <img src={question.imageUrl} alt="" className="h-[80px] w-[110px] shrink-0 rounded-2xl object-cover" />}
+        {question.imageUrl && <img src={assetSrc(question.imageUrl)} alt="" className="h-[80px] w-[110px] shrink-0 rounded-2xl object-cover" />}
         <span className="font-display leading-[1.1] font-extrabold" style={{ fontSize: questionFontSize(question.text, 38) }}>
           {question.text}
         </span>

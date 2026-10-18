@@ -11,6 +11,8 @@ import type { CrosswordRow, GameItem, GameType, ItemDraft, OrderSet, PairSet, Qu
 import { emptyCrosswordRow, emptyOrderSet, emptyPairSet, emptyQuizQuestion, emptySortSet } from '@/utils/gameItems'
 
 export interface ItemFormProps {
+  /** Code of the game (image uploads go to it). */
+  gameId: string
   item: GameItem
   /** Every item of the game (the crossword shows the keyword they spell). */
   items: GameItem[]

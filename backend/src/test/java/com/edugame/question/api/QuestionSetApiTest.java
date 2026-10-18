@@ -39,8 +39,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The question bank against PostgreSQL: sets, their questions, and games made from them. Cô Lan has seven seeded
- * sets, among them qs-toan2-cong100 (7 multiple choice + 1 short answer) and qs-tv1-doc-hieu (6 short answers).
+ * The question bank against PostgreSQL: sets, their questions, and games made from them. Cô Lan has 13 seeded
+ * sets, among them qs-toan2-cong100 (7 multiple choice + 1 short answer) and qs-tv1-doc-hieu (6 short answers);
+ * six of them (qs-test-*) are data to try the games with.
  * Every test is rolled back.
  */
 @SpringBootTest
@@ -52,6 +53,7 @@ class QuestionSetApiTest {
     private static final String SETS = "/api/v1/question-sets";
     private static final String TOAN = SETS + "/qs-toan2-cong100";
     private static final String TIENG_VIET = SETS + "/qs-tv1-doc-hieu";
+    private static final int SEEDED_SETS = 13;
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,18 +74,25 @@ class QuestionSetApiTest {
 
     @Test
     void listsTheTeachersSetsLastChangedFirstWithTheirCounts() throws Exception {
+        // Seeded times depend on when each part of the seed ran, so the expected order is read from the table.
+        List<String> lastChangedFirst = jdbcTemplate.queryForList("""
+                SELECT s.code FROM question_set s JOIN users u ON u.id = s.owner_id
+                WHERE u.code = 'u-lan' AND s.status = 'ACTIVE' ORDER BY s.updated_at DESC
+                """, String.class);
+        String toan = "$[?(@.code == 'qs-toan2-cong100')]";
+
         mockMvc.perform(get(SETS)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(7))
-                .andExpect(jsonPath("$[0].code").value("qs-toan2-cong100"))
-                .andExpect(jsonPath("$[0].subject").value("TOAN"))
-                .andExpect(jsonPath("$[0].grade").value(2))
-                .andExpect(jsonPath("$[0].questionCount").value(8))
-                .andExpect(jsonPath("$[0].multipleChoiceCount").value(7))
-                .andExpect(jsonPath("$[0].shortAnswerCount").value(1))
-                .andExpect(jsonPath("$[0].useCount").value(0))
-                .andExpect(jsonPath("$[0].ownerName").value("Cô Lan"))
-                .andExpect(jsonPath("$[1].code").value("qs-tv1-doc-hieu"))
-                .andExpect(jsonPath("$[1].multipleChoiceCount").value(0));
+                .andExpect(jsonPath("$.length()").value(SEEDED_SETS))
+                .andExpect(jsonPath("$[*].code").value(contains(lastChangedFirst.toArray())))
+                .andExpect(jsonPath(toan + ".subject").value(contains("TOAN")))
+                .andExpect(jsonPath(toan + ".grade").value(contains(2)))
+                .andExpect(jsonPath(toan + ".questionCount").value(contains(8)))
+                .andExpect(jsonPath(toan + ".multipleChoiceCount").value(contains(7)))
+                .andExpect(jsonPath(toan + ".shortAnswerCount").value(contains(1)))
+                .andExpect(jsonPath(toan + ".useCount").value(contains(0)))
+                .andExpect(jsonPath(toan + ".ownerName").value(contains("Cô Lan")))
+                .andExpect(jsonPath("$[?(@.code == 'qs-tv1-doc-hieu')].multipleChoiceCount").value(contains(0)))
+                .andExpect(jsonPath("$[?(@.code == 'qs-test-trong')].questionCount").value(contains(0)));
     }
 
     @Test
@@ -118,7 +127,7 @@ class QuestionSetApiTest {
         send(post(SETS), "{\"title\": \"Bộ mới\", \"subject\": \"TOAN\", \"grade\": 13}").andExpect(status().isBadRequest());
         send(post(SETS), "{\"title\": \"Bộ mới\", \"subject\": \"TOAN\", \"description\": \"%s\"}".formatted("x".repeat(501)))
                 .andExpect(status().isBadRequest());
-        assertThat(setCount()).isEqualTo(7);
+        assertThat(setCount()).isEqualTo(SEEDED_SETS);
     }
 
     @Test
@@ -147,7 +156,7 @@ class QuestionSetApiTest {
 
         mockMvc.perform(delete(TOAN)).andExpect(status().isNoContent());
 
-        mockMvc.perform(get(SETS)).andExpect(jsonPath("$.length()").value(6));
+        mockMvc.perform(get(SETS)).andExpect(jsonPath("$.length()").value(SEEDED_SETS - 1));
         mockMvc.perform(get(TOAN)).andExpect(status().isNotFound());
         send(patch(TOAN), "{\"grade\": 1}").andExpect(status().isNotFound());
         mockMvc.perform(delete(TOAN)).andExpect(status().isNotFound());
@@ -188,8 +197,8 @@ class QuestionSetApiTest {
         jdbcTemplate.update("""
                 INSERT INTO question_set (code, owner_id, title, subject)
                 SELECT 'qs-fill-' || n, (SELECT id FROM users WHERE code = 'u-lan'), 'Bộ ' || n, 'KHAC'
-                FROM generate_series(1, 193) AS n
-                """);
+                FROM generate_series(1, ?) AS n
+                """, 200 - SEEDED_SETS);
         send(post(SETS), "{\"title\": \"Bộ 201\", \"subject\": \"TOAN\"}").andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("TOO_MANY_QUESTION_SETS"));
         mockMvc.perform(post(TOAN + "/copy")).andExpect(status().isConflict());

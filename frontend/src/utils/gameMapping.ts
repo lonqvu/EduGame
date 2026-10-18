@@ -56,7 +56,7 @@ export function toQuestion(item: GameItemResponse): Question {
 
 /** Content + solution of a question, as stored on the backend. An empty answer is stored as "no solution". */
 export function toItemFields(q: Omit<Question, 'id'>): Pick<CreateGameItemRequest, 'content' | 'solution'> {
-  // Images are only previewed locally (object URLs) until the asset upload API exists: never persist those.
+  // An object URL (local preview) is never saved; uploaded images are `/api/v1/assets/…` URLs.
   const image = q.imageUrl && !q.imageUrl.startsWith('blob:') ? q.imageUrl : undefined
   return {
     content: { text: q.text, points: q.points, ...(image ? { image } : {}) },

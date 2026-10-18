@@ -44,7 +44,7 @@ test('the bank lists the sets with their numbers, and filters them', async ({ pa
   const doc = row(page, 'Tiếng Việt - Luyện đọc hiểu')
 
   // Subject tab, then search, kind and grade filters.
-  await page.getByRole('tab', { name: 'Tiếng Việt (1)' }).click()
+  await page.getByRole('tab', { name: /^Tiếng Việt \(\d+\)$/ }).click()
   await expect(doc).toBeVisible()
   await expect(cong).toBeHidden()
   await page.getByRole('tab', { name: /^Tất cả/ }).click()
@@ -64,7 +64,7 @@ test('the bank lists the sets with their numbers, and filters them', async ({ pa
 
   // "Chủ đề phổ biến" filters by subject too.
   await page.getByRole('button', { name: /^Khoa học/ }).click()
-  await expect(page.getByRole('tab', { name: 'Khoa học (1)' })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('tab', { name: /^Khoa học \(\d+\)$/ })).toHaveAttribute('aria-selected', 'true')
   await expect(row(page, 'Khoa học - Cơ thể người và sức khỏe')).toBeVisible()
   await expect(cong).toBeHidden()
 
@@ -210,9 +210,10 @@ test('"Sử dụng" makes a game from the set and opens it in the editor', async
   await dialog.getByRole('button', { name: 'Hủy' }).click()
 })
 
-test('the home page shows the last changed sets and leads to the bank', async ({ page }) => {
+test('the home page shows the last changed sets and leads to the bank', async ({ page, backend }) => {
+  const [last] = await backend.questionSetList()
   await page.goto('/')
-  await expect(page.getByRole('link', { name: /Toán lớp 2 - Phép cộng trong phạm vi 100/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: last.title })).toBeVisible()
   await page.getByRole('link', { name: 'Xem tất cả' }).last().click()
   await expect(page).toHaveURL(/\/question-sets$/)
 })
