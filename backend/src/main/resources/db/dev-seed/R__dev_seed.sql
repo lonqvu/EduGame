@@ -549,9 +549,15 @@ SELECT pg_temp.seed_question_set('qs-kh4-co-the', 'Khoa học - Cơ thể ngư�
 ]');
 
 -- ⑦ Data to try every game ---------------------------------------------------------
--- Sets for the games played from the bank (Trắc nghiệm, Rung chuông vàng, Đua thuyền, Lật ô), each with a case to
--- check: a long quiz, an elimination round, short answers, the largest content the screens take, an empty set.
--- Then games for the other kinds, from the smallest to the largest content their editors allow.
+-- A second teacher, Cô Thu (cothu / 123456), so Cô Lan's data stays what the API tests expect. Her sets are for the
+-- games played from the bank (Trắc nghiệm, Rung chuông vàng, Đua thuyền, Lật ô), each with a case to check: a long
+-- quiz, an elimination round, short answers, the largest content the screens take, an empty set. Then games for the
+-- other kinds, from the smallest to the largest content their editors allow, and a class 3B to play them with.
+-- The helpers above make everything for Cô Lan; it is handed over to Cô Thu at the end of this block.
+
+INSERT INTO users (code, username, password_hash, display_name, email, role)
+VALUES ('u-thu', 'cothu', '{noop}123456', 'Cô Thu', 'cothu@edugame.local', 'TEACHER')
+ON CONFLICT (username) DO NOTHING;
 
 SELECT pg_temp.seed_question_set('qs-test-quiz20', 'Đố vui tổng hợp lớp 3 (20 câu)',
     'Dữ liệu thử: 20 câu trắc nghiệm, có câu Đúng/Sai và câu nhiều đáp án. Dùng cho Trắc nghiệm, Đua thuyền, Rung chuông vàng.',
@@ -750,3 +756,16 @@ SELECT pg_temp.seed_game('g-test-sort', 'SORTING', 'Phân loại: 2, 3 và 4 gi�
          [["Bút chì", 1], ["Cái nồi", 2], ["Quả bóng", 3], ["Áo khoác", 4], ["Thước kẻ", 1], ["Cái chảo", 2], ["Búp bê", 3], ["Cái mũ", 4],
           ["Cục tẩy", 1], ["Đôi đũa", 2], ["Con diều", 3], ["Đôi tất", 4], ["Quyển vở", 1], ["Cái bát", 2], ["Xếp hình", 3], ["Quần đùi", 4]]]
     ]'::jsonb) WITH ORDINALITY AS s (value, ord)));
+
+SELECT pg_temp.seed_classroom('c-thu-3b', '3B', 3, 'Tiểu học Kim Đồng', 'owl', 'ACTIVE', '[
+    "Hoàng An", "Minh Anh", "Gia Bảo", "Ngọc Châu", "Tiến Dũng", "Thùy Linh", "Bảo Nam", "Hà Phương",
+    "Nguyễn Thị Thu Hương", "Vũ Xuân Long", "Đỗ Hoàng Minh Khôi", "Trần Ngọc Bảo Trâm"
+]');
+
+-- Hand the test data over to Cô Thu (also when an earlier run of this file made it for Cô Lan).
+UPDATE question_set SET owner_id = (SELECT id FROM users WHERE code = 'u-thu')
+WHERE code LIKE 'qs-test-%' AND owner_id <> (SELECT id FROM users WHERE code = 'u-thu');
+UPDATE game SET owner_id = (SELECT id FROM users WHERE code = 'u-thu')
+WHERE code LIKE 'g-test-%' AND owner_id <> (SELECT id FROM users WHERE code = 'u-thu');
+UPDATE classroom SET teacher_id = (SELECT id FROM users WHERE code = 'u-thu')
+WHERE code = 'c-thu-3b' AND teacher_id <> (SELECT id FROM users WHERE code = 'u-thu');

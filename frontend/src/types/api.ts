@@ -72,6 +72,32 @@ export interface UserResponse {
   role: 'ADMIN' | 'TEACHER'
 }
 
+/** GET /me/profile: "Hồ sơ của tôi". */
+export interface ProfileResponse extends UserResponse {
+  /** Digits only, e.g. "0987654321". */
+  phone?: string
+  /** One of AVATARS (utils/profile), or 'upload'; none: the default teacher picture. */
+  avatar?: string
+  /** Address of the uploaded picture, '/api/v1/avatars/...' (with avatar 'upload'). */
+  avatarUrl?: string
+  emailVerified: boolean
+  /** ISO time the account was made. */
+  memberSince: string
+  stats: { classrooms: number; students: number; questionSets: number; activities: number }
+}
+
+/** PATCH /me/profile: every field is sent; blank phone / avatar removes it. */
+export interface UpdateProfileRequest {
+  displayName: string
+  phone: string
+  avatar: string
+}
+
+/** POST /me/password and /me/sessions/sign-out-others. */
+export interface SignedOutResponse {
+  otherSessions: number
+}
+
 export interface GameTemplateResponse {
   code: string
   categoryCode: string

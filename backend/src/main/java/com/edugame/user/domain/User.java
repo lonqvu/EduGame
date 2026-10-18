@@ -44,6 +44,14 @@ public class User extends AuditableEntity {
     @Column(name = "status", nullable = false, length = 20)
     private UserStatus status = UserStatus.ACTIVE;
 
+    /** Digits only, maybe with a leading "+" (see ProfileRules#normalizePhone); {@code null} when not given. */
+    @Column(name = "phone", length = 20)
+    private String phone;
+
+    /** Picture of the account (ProfileRules#AVATARS); {@code null}: the default teacher picture. */
+    @Column(name = "avatar", length = 30)
+    private String avatar;
+
     @Column(name = "last_login_at")
     private Instant lastLoginAt;
 

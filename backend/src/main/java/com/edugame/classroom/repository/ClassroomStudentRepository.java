@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.edugame.classroom.domain.Classroom;
 import com.edugame.classroom.domain.ClassroomStudent;
 import com.edugame.classroom.domain.ClassroomStudentStatus;
+import com.edugame.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -20,6 +21,15 @@ public interface ClassroomStudentRepository extends JpaRepository<ClassroomStude
             Long id, Classroom classroom, ClassroomStudentStatus status);
 
     long countByClassroomAndStatus(Classroom classroom, ClassroomStudentStatus status);
+
+    /** Students in a teacher's classes (archived classes and students who left are not counted). */
+    @Query("""
+            select count(s) from ClassroomStudent s
+            where s.classroom.teacher = :teacher
+              and s.classroom.status <> com.edugame.classroom.domain.ClassroomStatus.ARCHIVED
+              and s.status = com.edugame.classroom.domain.ClassroomStudentStatus.ACTIVE
+            """)
+    long countActiveOfTeacher(User teacher);
 
     /** Highest roll number of the students still in the class, 0 when there is none. */
     @Query("""

@@ -117,6 +117,17 @@ public class UserSessionService {
         return sessionRepository.revokeAllOfUser(userId, reason, Instant.now());
     }
 
+    /**
+     * Ends the user's open sessions but {@code keepSid} (the one making the request; {@code null} keeps none).
+     * Returns how many ended.
+     */
+    @Transactional
+    public int revokeOthers(Long userId, UUID keepSid, SessionRevokeReason reason) {
+        return keepSid == null
+                ? sessionRepository.revokeAllOfUser(userId, reason, Instant.now())
+                : sessionRepository.revokeOthersOfUser(userId, keepSid, reason, Instant.now());
+    }
+
     /** Whether access tokens of this session are still honored. */
     @Transactional(readOnly = true)
     public boolean isActive(UUID sid) {

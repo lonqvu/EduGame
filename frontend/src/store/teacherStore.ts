@@ -26,6 +26,8 @@ interface TeacherState {
   teacher: Teacher | null
   status: LoadStatus
   load: () => Promise<void>
+  /** After the profile was saved: the greeting and the top bar use the new name at once. */
+  rename: (displayName: string) => void
 }
 
 export const useTeacherStore = create<TeacherState>()((set, get) => ({
@@ -41,4 +43,5 @@ export const useTeacherStore = create<TeacherState>()((set, get) => ({
       set({ status: 'error' })
     }
   },
+  rename: (displayName) => set({ teacher: toTeacher(displayName), status: 'ready' }),
 }))

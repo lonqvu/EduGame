@@ -61,6 +61,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/register/verify", "/api/v1/auth/password/forgot",
                                 "/api/v1/auth/password/reset").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/game-templates/**").permitAll()
+                        // Uploaded profile pictures: shown by <img>, which sends no token (random addresses).
+                        .requestMatchers(HttpMethod.GET, "/api/v1/avatars/*").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())

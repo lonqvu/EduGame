@@ -9,5 +9,9 @@ public enum SessionRevokeReason {
     /** The account was locked or deleted. */
     USER_INACTIVE,
     /** The password was reset: every session that existed before ends. */
-    PASSWORD_RESET
+    PASSWORD_RESET,
+    /** The user changed the password: every session but the one they changed it in ends. */
+    PASSWORD_CHANGE,
+    /** The user signed out of every other device. */
+    SIGNED_OUT_ELSEWHERE
 }

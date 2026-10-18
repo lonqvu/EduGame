@@ -337,3 +337,29 @@ export const HeartFilledIcon = ({ size = 24, ...rest }: IconProps) => (
     <path d="M12 21s-7.5-4.6-9.5-9.3C1 8 3.3 4 7.2 4c2 0 3.6 1 4.8 2.6C13.2 5 14.8 4 16.8 4 20.7 4 23 8 21.5 11.7 19.5 16.4 12 21 12 21z" />
   </svg>
 )
+
+export const PhoneIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={1.8} {...p}>
+    <path d="M6.6 3.5h2.6l1.4 4-2 1.5a12 12 0 0 0 6.4 6.4l1.5-2 4 1.4v2.6a2 2 0 0 1-2.2 2A17 17 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z" />
+  </StrokeIcon>
+)
+
+export const GlobeIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={1.8} {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3 12h18M12 3c2.5 2.7 3.6 5.7 3.6 9s-1.1 6.3-3.6 9c-2.5-2.7-3.6-5.7-3.6-9S9.5 5.7 12 3z" />
+  </StrokeIcon>
+)
+
+export const LogoutIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={2} {...p}>
+    <path d="M14 4h3.5A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5H14M10 16l-4-4 4-4M6 12h10" />
+  </StrokeIcon>
+)
+
+export const ShieldIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={1.8} {...p}>
+    <path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z" />
+    <path d="M9 12l2.2 2.2L15.5 10" />
+  </StrokeIcon>
+)

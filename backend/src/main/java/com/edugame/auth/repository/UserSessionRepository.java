@@ -37,6 +37,17 @@ public interface UserSessionRepository extends JpaRepository<UserSession, Long> 
                         @Param("reason") SessionRevokeReason reason,
                         @Param("now") Instant now);
 
+    /** Revokes the user's open sessions except {@code keepSid}. */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+            update UserSession s set s.revokedAt = :now, s.revokeReason = :reason
+            where s.userId = :userId and s.revokedAt is null and s.expiresAt > :now and s.sid <> :keepSid
+            """)
+    int revokeOthersOfUser(@Param("userId") Long userId,
+                           @Param("keepSid") UUID keepSid,
+                           @Param("reason") SessionRevokeReason reason,
+                           @Param("now") Instant now);
+
     @Modifying
     @Query("delete from UserSession s where s.expiresAt < :before or s.revokedAt < :before")
     int deleteEndedBefore(@Param("before") Instant before);
