@@ -24,6 +24,7 @@ public class PasswordChangeService {
     private final CurrentUserService currentUserService;
     private final PasswordEncoder passwordEncoder;
     private final UserSessionService userSessionService;
+    private final SignInAlerts signInAlerts;
 
     /**
      * Sets a new password once the current one is right; returns how many other sessions ended.
@@ -41,6 +42,7 @@ public class PasswordChangeService {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "SAME_PASSWORD", "The new password is the current one");
         }
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        signInAlerts.passwordChanged(user.getId());
         return userSessionService.revokeOthers(user.getId(), currentSid, SessionRevokeReason.PASSWORD_CHANGE);
     }
 

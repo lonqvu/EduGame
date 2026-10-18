@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { login as loginRequest, logout as logoutRequest, resetPassword, verifyEmail } from '@/api/authApi'
 import { endSession, refreshSession, startSession } from '@/api/session'
+import { forgetCachedDisplay } from '@/utils/settings'
 
 /**
  * Whether a teacher is signed in. `unknown` until the refresh token cookie has been tried: the access token lives
@@ -48,6 +49,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       // Offline or server down: still forget the session here.
     }
     endSession()
+    forgetCachedDisplay()
     window.location.assign('/login')
   },
 }))

@@ -20,6 +20,7 @@ export interface Game {
   code: string
   title: string
   items: Item[]
+  settings: Record<string, any>
 }
 
 export interface Classroom {
@@ -32,6 +33,12 @@ export interface Classroom {
   completionRate: number
   schoolName?: string
   avatar?: string
+}
+
+export interface Settings {
+  display: { reduceMotion: boolean; fullscreenOnStart: boolean }
+  games: { teams?: number | null; timeLimitSec?: number | null; allowSteal?: boolean | null; shuffleItems?: boolean | null }
+  notifications: { newSignInEmail: boolean; passwordChangedEmail: boolean }
 }
 
 export type QuestionInput =
@@ -58,6 +65,7 @@ export class Backend {
   private readonly created: string[] = []
   private readonly classrooms: string[] = []
   private readonly questionSets: string[] = []
+  private keptSettings?: Settings
 
   private constructor(http: APIRequestContext) {
     this.http = http
@@ -72,7 +80,7 @@ export class Backend {
     return new Backend(await request.newContext({ baseURL: API_URL, extraHTTPHeaders: { Authorization: `Bearer ${accessToken}` } }))
   }
 
-  private async call<T>(method: 'get' | 'post' | 'patch' | 'delete', path: string, data?: unknown): Promise<T> {
+  private async call<T>(method: 'get' | 'post' | 'put' | 'patch' | 'delete', path: string, data?: unknown): Promise<T> {
     const res = await this.http[method](path, data === undefined ? {} : { data })
     if (!res.ok()) throw new Error(`${method.toUpperCase()} ${path}: ${res.status()} ${await res.text()}`)
     return res.status() === 204 ? (undefined as T) : res.json()
@@ -158,7 +166,22 @@ export class Backend {
     this.questionSets.push(code)
   }
 
+  settings() {
+    return this.call<Settings>('get', 'me/settings')
+  }
+
+  saveSettings(settings: Settings) {
+    return this.call<Settings>('put', 'me/settings', settings)
+  }
+
+  /** The teacher's settings now, put back by `cleanUp` whatever the test changes (in the browser or here). */
+  async keepSettings(): Promise<Settings> {
+    this.keptSettings = await this.settings()
+    return this.keptSettings
+  }
+
   async cleanUp() {
+    if (this.keptSettings) await this.saveSettings(this.keptSettings)
     for (const code of this.questionSets.splice(0)) {
       await this.http.delete(`question-sets/${code}`)
     }

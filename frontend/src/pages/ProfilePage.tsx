@@ -1,6 +1,6 @@
 import { App } from 'antd'
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
 import { BellIcon, ChevronRightIcon, GlobeIcon, HelpIcon, HomeIcon, SettingsIcon, ShieldIcon, UserIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
@@ -16,7 +16,8 @@ type Dialog = 'edit' | 'security' | 'help' | null
 
 /** /profile — "Hồ sơ của tôi": the teacher's account, what they have done, and its settings. */
 export function ProfilePage() {
-  const { message, modal } = App.useApp()
+  const { modal } = App.useApp()
+  const navigate = useNavigate()
   const profile = useProfileStore((s) => s.profile)
   const status = useProfileStore((s) => s.status)
   const load = useProfileStore((s) => s.load)
@@ -30,7 +31,6 @@ export function ProfilePage() {
     void loadTeacher()
   }, [load, loadTeacher])
 
-  const soon = (what: string) => () => message.info(`${what} đang được hoàn thiện, cô quay lại sau nhé.`)
   const confirmLogout = () =>
     modal.confirm({
       title: 'Đăng xuất khỏi EduGame?',
@@ -61,18 +61,16 @@ export function ProfilePage() {
       icon: <BellIcon size={22} />,
       tint: 'bg-[#EDE4FF] text-[#7448D6]',
       title: 'Thông báo',
-      text: 'Quản lý các thông báo nhận được',
-      soon: true,
-      onClick: soon('Cài đặt thông báo'),
+      text: 'Email khi đăng nhập trên thiết bị mới, khi đổi mật khẩu',
+      onClick: () => navigate('/settings#notifications'),
     },
     {
       key: 'language',
       icon: <GlobeIcon size={22} />,
       tint: 'bg-[#DDF2F7] text-[#1B7A8C]',
       title: 'Ngôn ngữ & hiển thị',
-      text: 'Chọn ngôn ngữ, chế độ hiển thị',
-      soon: true,
-      onClick: soon('Cài đặt ngôn ngữ và hiển thị'),
+      text: 'Hiệu ứng chuyển động, toàn màn hình khi trình chiếu',
+      onClick: () => navigate('/settings#display'),
     },
     {
       key: 'help',

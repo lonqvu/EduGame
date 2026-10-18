@@ -39,9 +39,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The question bank against PostgreSQL: sets, their questions, and games made from them. Cô Lan has 13 seeded
- * sets, among them qs-toan2-cong100 (7 multiple choice + 1 short answer) and qs-tv1-doc-hieu (6 short answers);
- * six of them (qs-test-*) are data to try the games with.
+ * The question bank against PostgreSQL: sets, their questions, and games made from them. Cô Lan has seven seeded
+ * sets, among them qs-toan2-cong100 (7 multiple choice + 1 short answer) and qs-tv1-doc-hieu (6 short answers); the
+ * sets to try the games with (qs-test-*) are Cô Thu's.
  * Every test is rolled back.
  */
 @SpringBootTest
@@ -53,7 +53,7 @@ class QuestionSetApiTest {
     private static final String SETS = "/api/v1/question-sets";
     private static final String TOAN = SETS + "/qs-toan2-cong100";
     private static final String TIENG_VIET = SETS + "/qs-tv1-doc-hieu";
-    private static final int SEEDED_SETS = 13;
+    private static final int SEEDED_SETS = 7;
 
     @Autowired
     private MockMvc mockMvc;
@@ -74,7 +74,7 @@ class QuestionSetApiTest {
 
     @Test
     void listsTheTeachersSetsLastChangedFirstWithTheirCounts() throws Exception {
-        // Seeded times depend on when each part of the seed ran, so the expected order is read from the table.
+        // Seeded times are relative to when the seed ran, so the expected order is read from the table.
         List<String> lastChangedFirst = jdbcTemplate.queryForList("""
                 SELECT s.code FROM question_set s JOIN users u ON u.id = s.owner_id
                 WHERE u.code = 'u-lan' AND s.status = 'ACTIVE' ORDER BY s.updated_at DESC
@@ -92,7 +92,7 @@ class QuestionSetApiTest {
                 .andExpect(jsonPath(toan + ".useCount").value(contains(0)))
                 .andExpect(jsonPath(toan + ".ownerName").value(contains("Cô Lan")))
                 .andExpect(jsonPath("$[?(@.code == 'qs-tv1-doc-hieu')].multipleChoiceCount").value(contains(0)))
-                .andExpect(jsonPath("$[?(@.code == 'qs-test-trong')].questionCount").value(contains(0)));
+                .andExpect(jsonPath("$[?(@.code == 'qs-test-trong')]").isEmpty());
     }
 
     @Test

@@ -31,7 +31,7 @@ const MAIN_NAV: NavItem[] = [
 ]
 
 const FOOTER_NAV: NavItem[] = [
-  { label: 'Cài đặt', icon: <SettingsIcon size={22} /> },
+  { label: 'Cài đặt', icon: <SettingsIcon size={22} />, to: '/settings', match: (p) => p.startsWith('/settings') },
   { label: 'Trợ giúp', icon: <HelpIcon size={22} /> },
 ]
 

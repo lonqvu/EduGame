@@ -12,8 +12,10 @@ import { RulesShow } from '@/pages/game-start/RulesShow'
 import { GameInfoCard, PreviewCard, QuickSettingsCard, RulesCard, StepsCard, TeacherTipsCard } from '@/pages/game-start/StartParts'
 import { useCatalogStore } from '@/store/catalogStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
+import { useSettingsStore } from '@/store/settingsStore'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { GameItem } from '@/types/game'
+import { enterFullscreen } from '@/utils/fullscreen'
 
 const EMPTY: GameItem[] = []
 const NO_SETTINGS: Record<string, unknown> = {}
@@ -28,6 +30,7 @@ export function GameStartPage() {
   const { gameId = '' } = useParams()
   const [params] = useSearchParams()
   const navigate = useNavigate()
+  const fullscreenOnStart = useSettingsStore((s) => s.settings.display.fullscreenOnStart)
   const location = useLocation()
   const loadState = useGameLibraryStore((s) => s.gameStatus[gameId])
   const loadGame = useGameLibraryStore((s) => s.loadGame)
@@ -144,6 +147,9 @@ export function GameStartPage() {
           {playable > 0 ? (
             <Link
               to={playUrl}
+              onClick={() => {
+                if (fullscreenOnStart) enterFullscreen()
+              }}
               className="flex h-[46px] items-center gap-2 rounded-[12px] bg-primary px-6 text-[15px] font-bold text-white hover:text-white hover:brightness-110"
             >
               Bắt đầu trò chơi

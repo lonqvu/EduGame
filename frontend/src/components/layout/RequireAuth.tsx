@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router'
+import { DisplayPreferences } from '@/components/layout/DisplayPreferences'
 import { PageLoading } from '@/components/ui/LoadState'
 import { useAuthStore } from '@/store/authStore'
 
@@ -23,5 +24,9 @@ export function RequireAuth() {
   if (status === 'signedOut') {
     return <Navigate to={`/login?from=${encodeURIComponent(pathname + search)}`} replace />
   }
-  return <Outlet />
+  return (
+    <DisplayPreferences>
+      <Outlet />
+    </DisplayPreferences>
+  )
 }

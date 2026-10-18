@@ -1,6 +1,9 @@
 package com.edugame.auth.mail;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import com.edugame.auth.domain.VerificationPurpose;
 import com.edugame.common.config.AppProperties;
@@ -50,6 +53,14 @@ public class AuthMailer {
                 case AuthMail.AccountExists exists -> {
                     helper.setSubject("Bạn đã có tài khoản EduGame");
                     helper.setText(accountExistsText(exists), accountExistsHtml(exists));
+                }
+                case AuthMail.NewSignIn signIn -> {
+                    helper.setSubject("Đăng nhập mới vào EduGame: " + signIn.device());
+                    helper.setText(newSignInText(signIn), newSignInHtml(signIn));
+                }
+                case AuthMail.PasswordChanged changed -> {
+                    helper.setSubject("Mật khẩu EduGame của bạn vừa được đổi");
+                    helper.setText(passwordChangedText(changed), passwordChangedHtml(changed));
                 }
             }
             mailSender.send(message);
@@ -115,6 +126,62 @@ public class AuthMailer {
                 bị thay đổi.</p>
                 """.formatted(HtmlUtils.htmlEscape(mail.email())));
     }
+
+    private static final String TURN_OFF = "Bạn có thể tắt email này trong Cài đặt → Thông báo.";
+
+    private String newSignInText(AuthMail.NewSignIn mail) {
+        return """
+                Xin chào,
+
+                Tài khoản EduGame của bạn vừa đăng nhập trên %s lúc %s.
+                Nếu đó là bạn, không cần làm gì thêm.
+                Nếu không phải bạn, hãy đổi mật khẩu ngay (Hồ sơ của tôi → Bảo mật tài khoản) hoặc dùng "Quên mật khẩu?"
+                ở trang đăng nhập.
+
+                %s
+                """.formatted(mail.device(), when(mail.at()), TURN_OFF);
+    }
+
+    private String newSignInHtml(AuthMail.NewSignIn mail) {
+        return layout("""
+                <p style="margin:0 0 16px">Xin chào,</p>
+                <p style="margin:0 0 12px">Tài khoản EduGame của bạn vừa đăng nhập trên <b>%s</b> lúc <b>%s</b>.</p>
+                <p style="margin:0 0 12px">Nếu đó là bạn, không cần làm gì thêm.</p>
+                <p style="margin:0 0 12px">Nếu không phải bạn, hãy đổi mật khẩu ngay (Hồ sơ của tôi → Bảo mật tài khoản)
+                hoặc dùng “Quên mật khẩu?” ở trang đăng nhập.</p>
+                <p style="margin:0;color:#5A6788">%s</p>
+                """.formatted(HtmlUtils.htmlEscape(mail.device()), when(mail.at()), TURN_OFF));
+    }
+
+    private String passwordChangedText(AuthMail.PasswordChanged mail) {
+        return """
+                Xin chào,
+
+                Mật khẩu EduGame của bạn vừa được đổi lúc %s. Các thiết bị khác đã được đăng xuất.
+                Nếu không phải bạn, hãy dùng "Quên mật khẩu?" ở trang đăng nhập ngay để lấy lại tài khoản.
+
+                %s
+                """.formatted(when(mail.at()), TURN_OFF);
+    }
+
+    private String passwordChangedHtml(AuthMail.PasswordChanged mail) {
+        return layout("""
+                <p style="margin:0 0 16px">Xin chào,</p>
+                <p style="margin:0 0 12px">Mật khẩu EduGame của bạn vừa được đổi lúc <b>%s</b>. Các thiết bị khác đã
+                được đăng xuất.</p>
+                <p style="margin:0 0 12px">Nếu không phải bạn, hãy dùng “Quên mật khẩu?” ở trang đăng nhập ngay để lấy
+                lại tài khoản.</p>
+                <p style="margin:0;color:#5A6788">%s</p>
+                """.formatted(when(mail.at()), TURN_OFF));
+    }
+
+    /** "14:05 ngày 18/10/2026", in the school's time zone. */
+    private String when(Instant at) {
+        ZoneId zone = appProperties.timeZone() != null ? appProperties.timeZone() : ZoneId.of("Asia/Ho_Chi_Minh");
+        return WHEN.format(at.atZone(zone));
+    }
+
+    private static final DateTimeFormatter WHEN = DateTimeFormatter.ofPattern("HH:mm 'ngày' dd/MM/yyyy");
 
     private static String layout(String body) {
         return """

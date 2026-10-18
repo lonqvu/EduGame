@@ -26,6 +26,9 @@ import com.edugame.game.repository.GameVersionRepository;
 import com.edugame.game.repository.GameVersionRepository.GameItemCount;
 import com.edugame.user.domain.User;
 import com.edugame.user.service.CurrentUserService;
+import com.edugame.user.service.UserSettingsService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -51,6 +54,7 @@ public class GameService {
     private final GameItemRepository gameItemRepository;
     private final GameTemplateService gameTemplateService;
     private final CurrentUserService currentUserService;
+    private final UserSettingsService userSettingsService;
     private final GameMapper gameMapper;
 
     @Transactional(readOnly = true)
@@ -78,8 +82,11 @@ public class GameService {
         requireGradeFits(game, request.grade());
         gameRepository.save(game);
 
-        GameVersion draft = gameVersionRepository.save(GameVersion.draft(
-                game, 1, template.getSchemaVersion(), template.getDefaultConfig().deepCopy()));
+        JsonNode config = template.getDefaultConfig().deepCopy();
+        if (config instanceof ObjectNode settings) {
+            GameDefaults.apply(settings, userSettingsService.settingsOf(owner).games());
+        }
+        GameVersion draft = gameVersionRepository.save(GameVersion.draft(game, 1, template.getSchemaVersion(), config));
         game.setCurrentVersion(draft);
         return toResponse(game, draft);
     }

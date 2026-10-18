@@ -26,6 +26,7 @@ public class AuthService {
     private final UserSessionService userSessionService;
     private final UserAccountService userAccountService;
     private final LoginThrottle loginThrottle;
+    private final SignInAlerts signInAlerts;
 
     /**
      * An access token for the response body and, when it changed, the refresh token for the cookie.
@@ -61,13 +62,22 @@ public class AuthService {
                     "Wrong username or password");
         }
         loginThrottle.clear(request.username());
-        return signIn((UserAccount) authentication.getPrincipal(), request.rememberMe(), userAgent);
+        return signIn((UserAccount) authentication.getPrincipal(), request.rememberMe(), userAgent, true);
     }
 
     /** Opens a sign-in session for an account whose identity has been proven (password, email code). */
     public SignedIn signIn(UserAccount account, boolean remember, String userAgent) {
+        return signIn(account, remember, userAgent, false);
+    }
+
+    /**
+     * @param alertIfNewDevice a password sign-in: mail the user when the browser is new to the account (the email
+     *                         code paths prove the mailbox, so they need no alert)
+     */
+    private SignedIn signIn(UserAccount account, boolean remember, String userAgent, boolean alertIfNewDevice) {
         userAccountService.recordLogin(account.code());
         UserSessionService.OpenedSession session = userSessionService.open(account, remember, userAgent);
+        signInAlerts.afterSignIn(account.id(), userAgent, alertIfNewDevice);
         return new SignedIn(accessTokenService.issue(account, session.sid()), session.refreshToken(), remember);
     }
 

@@ -332,3 +332,23 @@ export interface AssetResponse {
   mimeType: string
   sizeBytes: number
 }
+
+/** GET/PUT /me/settings: "Cài đặt". Under `games`, a missing value keeps each game's own default. */
+export interface UserSettings {
+  display: {
+    /** Animations off. */
+    reduceMotion: boolean
+    /** "Bắt đầu trò chơi" also enters full screen. */
+    fullscreenOnStart: boolean
+  }
+  games: {
+    teams?: number | null
+    timeLimitSec?: number | null
+    allowSteal?: boolean | null
+    shuffleItems?: boolean | null
+  }
+  notifications: {
+    newSignInEmail: boolean
+    passwordChangedEmail: boolean
+  }
+}

@@ -55,3 +55,24 @@ body {
   font-family: var(--font-sans);
   font-size: 18px;
 }
+
+/* "Cài đặt" → Giảm hiệu ứng chuyển động: CSS animations and transitions end at once (events still fire). */
+html[data-reduce-motion] *,
+html[data-reduce-motion] *::before,
+html[data-reduce-motion] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* A settings section opened from a link (/settings#notifications) is outlined for a moment. */
+@keyframes settings-flash {
+  0%,
+  40% {
+    box-shadow: 0 0 0 4px rgb(53 99 233 / 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgb(53 99 233 / 0);
+  }
+}

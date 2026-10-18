@@ -57,6 +57,8 @@ Cột **Backend**: controller · service. Cột **Frontend**: hàm trong `api/` 
 | 26 | POST | `/question-sets/{code}/games` | "Sử dụng": tạo trò chơi từ bộ (chép câu hỏi sang game) | [QuestionSetController.use](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
 | 27 | POST | `/games/{code}/assets` | Tải ảnh cho câu hỏi (multipart, field `file`) → URL để lưu vào `content.image` | [GameAssetController.upload](../backend/src/main/java/com/edugame/asset/api/GameAssetController.java) · [GameAssetService](../backend/src/main/java/com/edugame/asset/service/GameAssetService.java) | [assetApi.ts](../frontend/src/api/assetApi.ts) · [ImagePicker](../frontend/src/editor/ImagePicker.tsx) · QuestionForm (Lật ô), QuizForm (Trắc nghiệm, Rung chuông vàng, Đua thuyền) |
 | 28 | GET | `/assets/{key}` | File ảnh đã tải (công khai, không cần đăng nhập) | [GameAssetController.file](../backend/src/main/java/com/edugame/asset/api/GameAssetController.java) | `assetSrc()` trong [images.ts](../frontend/src/utils/images.ts) · `<img>` ở trình soạn và màn chiếu |
+| 29 | GET | `/me/settings` | Cài đặt của giáo viên (hiển thị, mặc định trò chơi mới, email thông báo) | [MeController.getSettings](../backend/src/main/java/com/edugame/user/api/MeController.java) · [UserSettingsService](../backend/src/main/java/com/edugame/user/service/UserSettingsService.java) | [settingsApi.ts](../frontend/src/api/settingsApi.ts) · [settingsStore](../frontend/src/store/settingsStore.ts) · SettingsPage, DisplayPreferences |
+| 30 | PUT | `/me/settings` | Lưu cả bộ cài đặt | [MeController.updateSettings](../backend/src/main/java/com/edugame/user/api/MeController.java) | [settingsApi.ts](../frontend/src/api/settingsApi.ts) · settingsStore.update (lưu ngay mỗi thay đổi) · SettingsPage |
 
 Logic dùng chung (không phải endpoint):
 
@@ -523,6 +525,33 @@ POST /api/v1/games/g-quiz-vn/assets          (multipart/form-data, field "file")
 - File nằm trên đĩa máy chủ, thư mục `app.assets.dir` (biến môi trường `ASSET_DIR`, mặc định `./data/assets`); khi chạy nhiều
   máy chủ cần thư mục dùng chung hoặc chuyển sang object storage (thay `LocalAssetStorage`). Ảnh không còn câu nào dùng
   chưa được dọn tự động.
+
+---
+
+### 29–30. Cài đặt (`/me/settings`)
+
+```json
+{
+  "display": {"reduceMotion": false, "fullscreenOnStart": true},
+  "games": {"teams": 3, "timeLimitSec": 20},
+  "notifications": {"newSignInEmail": true, "passwordChangedEmail": true}
+}
+```
+
+- `PUT` gửi **cả bộ**; thiếu `display` / `notifications` hoặc một công tắc trong đó → `400 VALIDATION_FAILED`.
+  `games.teams` 2–4, `games.timeLimitSec` 0–600 (0 = không giới hạn); key lạ bị bỏ qua.
+- Trong `games`, bỏ trống (hoặc `null`) = **theo từng trò** (mặc định của template). Mặc định chỉ áp khi **tạo trò
+  chơi mới** (`POST /games`, "Sử dụng" bộ câu hỏi), và chỉ vào luật trò đó có: số đội cho trò chia đội ngẫu nhiên
+  (không Lật ô, không Rung chuông vàng), thời gian cho trò có `timeLimitSec`, giành quyền cho trò có
+  `rules.scoring.allowSteal`, xáo trộn cho trò có `shuffleItems`. Trò chơi đã có giữ nguyên.
+- `display` dùng ở trình duyệt: `reduceMotion` tắt hiệu ứng (Motion, antd, CSS); `fullscreenOnStart` mở toàn màn hình
+  khi bấm "Bắt đầu trò chơi" và thoát khi quay lại màn hình giáo viên. Frontend giữ bản sao trong `localStorage`
+  (`edugame.display`) để áp dụng ngay khi tải trang, xoá khi đăng xuất.
+- `notifications`: email cảnh báo khi **đăng nhập bằng mật khẩu** trên trình duyệt chưa từng dùng (so theo tên
+  "Chrome trên Windows", nên cập nhật trình duyệt không bị coi là thiết bị mới; lần đăng nhập đầu tiên không cảnh
+  báo; bảng `user_known_device`), và khi **đổi mật khẩu** trong hồ sơ. Gửi sau khi request commit, lỗi gửi chỉ ghi log.
+- Cài đặt lưu trong `users.settings` (JSONB). Key chưa từng lưu nhận giá trị mặc định khi đọc; giá trị lưu sai kiểu
+  (dữ liệu cũ) → đọc ra mặc định thay vì lỗi.
 
 ---
 

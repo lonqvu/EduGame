@@ -82,6 +82,7 @@ Quy ước chung:
 | ① | `users` | Tài khoản giáo viên, admin |
 | ① | `user_session` | Phiên đăng nhập trên một trình duyệt + refresh token (đã băm) |
 | ① | `email_verification` | Mã xác nhận email (đăng ký, quên mật khẩu) |
+| ① | `user_known_device` | Trình duyệt giáo viên đã đăng nhập (cảnh báo đăng nhập mới) |
 | ① | `login_throttle` | Đếm lần đăng nhập sai theo tên đăng nhập / IP, khoá tạm khi quá nhiều |
 | ② | `game_category` | Nhóm game trên menu |
 | ② | `game_template` | Loại game, chỉ định engine, schema và luật mặc định |
@@ -313,7 +314,20 @@ Chỉ giáo viên và admin có tài khoản. Học sinh không có tài khoản
 | `status` | VARCHAR(20) | ✓ | `ACTIVE`, `LOCKED` (bị khóa), `DELETED` (xóa mềm, giữ lịch sử) |
 | `last_login_at` | TIMESTAMPTZ | | Lần đăng nhập gần nhất |
 | `email_verified_at` | TIMESTAMPTZ | | Lúc xác nhận email bằng mã (V4). `NULL`: tài khoản seed / do admin tạo |
+| `settings` | JSONB | ✓, mặc định `{}` | "Cài đặt" (V13): `display`, `games`, `notifications`. Key thiếu = giá trị mặc định (xem API mục 29–30) |
 | `created_at` / `updated_at` | TIMESTAMPTZ | ✓ | Thời điểm tạo / sửa (trigger tự cập nhật) |
+
+### `user_known_device` — Thiết bị đã đăng nhập (V13)
+
+Tên trình duyệt + hệ điều hành ("Chrome trên Windows") mỗi lần giáo viên đăng nhập. Đăng nhập bằng mật khẩu trên một
+tên chưa có → email cảnh báo (nếu bật trong Cài đặt). Tách khỏi `user_session` vì phiên đã kết thúc bị xoá sau 7 ngày:
+máy ở trường dùng mỗi tuần một lần vẫn phải được nhớ.
+
+| Trường | Kiểu | Bắt buộc | Mục đích |
+|---|---|---|---|
+| `user_id` | BIGINT | ✓, PK, FK `users` (CASCADE) | Chủ thiết bị |
+| `device` | VARCHAR(100) | ✓, PK | Ví dụ "Safari trên iPhone" |
+| `first_seen_at` / `last_seen_at` | TIMESTAMPTZ | ✓ | Lần đầu / gần nhất đăng nhập từ thiết bị |
 
 ### `user_session` — Phiên đăng nhập (V3)
 

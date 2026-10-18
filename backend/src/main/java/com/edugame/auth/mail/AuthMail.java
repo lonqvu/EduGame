@@ -1,5 +1,7 @@
 package com.edugame.auth.mail;
 
+import java.time.Instant;
+
 import com.edugame.auth.domain.VerificationPurpose;
 
 /**
@@ -23,5 +25,13 @@ public sealed interface AuthMail {
 
     /** Someone tried to sign up with an address that already has an account. */
     record AccountExists(String email) implements AuthMail {
+    }
+
+    /** The account signed in with its password on a browser it had not used ("Cài đặt" → Thông báo). */
+    record NewSignIn(String email, String device, Instant at) implements AuthMail {
+    }
+
+    /** The password was changed from the profile ("Cài đặt" → Thông báo). */
+    record PasswordChanged(String email, Instant at) implements AuthMail {
     }
 }

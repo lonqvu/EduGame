@@ -31,7 +31,9 @@ class PasswordChangeServiceTest {
     private final PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     private final CurrentUserService currentUserService = mock(CurrentUserService.class);
     private final UserSessionService sessions = mock(UserSessionService.class);
-    private final PasswordChangeService service = new PasswordChangeService(currentUserService, passwordEncoder, sessions);
+    private final SignInAlerts alerts = mock(SignInAlerts.class);
+    private final PasswordChangeService service =
+            new PasswordChangeService(currentUserService, passwordEncoder, sessions, alerts);
 
     private User teacher;
 
