@@ -5,6 +5,7 @@ import { CheckIcon, ChevronLeftIcon, CloseIcon, EyeIcon } from '@/components/ui/
 import { useGridBoardRound } from '@/game-engine/grid-board/useGridBoardRound'
 import { useGridBoardStore } from '@/store/gridBoardStore'
 import { assetSrc } from '@/utils/images'
+import { useSound } from '@/sound/useSound'
 
 interface GridQuestionScreenProps {
   gameId: string
@@ -19,6 +20,7 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
   const turn = useGridBoardStore((s) => s.turn)
   const opened = useGridBoardStore((s) => s.openedTiles.includes(tileNo))
   const answer = useGridBoardStore((s) => s.answer)
+  const sound = useSound()
 
   // Another team can steal the question; start from the team whose turn it is.
   const [stealOffset, setStealOffset] = useState(0)
@@ -32,6 +34,7 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
   const team = teams[(turn + stealOffset) % teams.length]
 
   const mark = (correct: boolean) => {
+    sound.play(correct ? 'correct' : 'wrong')
     answer(tileNo, team.id, correct, question.points)
     navigate(boardPath)
   }
@@ -84,7 +87,10 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
                 key="reveal"
                 type="button"
                 exit={{ opacity: 0 }}
-                onClick={() => setRevealed(true)}
+                onClick={() => {
+                  sound.play('reveal')
+                  setRevealed(true)
+                }}
                 className="flex h-[76px] cursor-pointer items-center gap-3 self-start rounded-[22px] border-0 bg-sun-soft px-[26px] font-[inherit] text-2xl font-extrabold text-ink hover:brightness-95"
               >
                 <EyeIcon size={28} />
@@ -98,7 +104,10 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
       <div className="flex items-center justify-between gap-4">
         <button
           type="button"
-          onClick={() => setStealOffset((o) => (o + 1) % teams.length)}
+          onClick={() => {
+            sound.play('pop')
+            setStealOffset((o) => (o + 1) % teams.length)
+          }}
           className="h-14 cursor-pointer rounded-full border-0 bg-white px-[22px] font-[inherit] text-lg font-extrabold text-ink hover:text-primary-ink"
         >
           Đội khác giành quyền

@@ -14,6 +14,8 @@ import { TeamBar } from '@/game-engine/shared/TeamBar'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
 import { editPath } from '@/game-engine/registry'
 import type { GameSummary, PairSet } from '@/types/game'
+import { useSound } from '@/sound/useSound'
+import { streakRate } from '@/sound/streak'
 
 const WRONG_SHOWN_MS = 900
 /** Height left for the two columns on the 720px stage. */
@@ -34,6 +36,7 @@ export function MatchingScreen({ game, sets, settings }: MatchingScreenProps) {
   const deal = () => playableMatchingSets(sets)
   const [playable, setPlayable] = useState(deal)
   const [state, dispatch] = useReducer(matchingReducer, rules.teams, initialMatchingRound)
+  const sound = useSound()
   const [selected, setSelected] = useState<{ left?: string; right?: string }>({})
   const backTo = editPath(game.id)
 
@@ -68,20 +71,25 @@ export function MatchingScreen({ game, sets, settings }: MatchingScreenProps) {
     if (state.lastWrong) return
     const next = { ...selected, [side]: selected[side] === id ? undefined : id }
     if (next.left && next.right) {
+      const correct = isMatch(set, next.left, next.right)
+      if (correct) sound.play('match', { rate: streakRate(team.streak) })
+      else sound.play('wrong')
       dispatch({
         type: 'attempt',
         leftId: next.left,
         rightId: next.right,
-        correct: isMatch(set, next.left, next.right),
+        correct,
         points: rules.points,
       })
       setSelected({})
     } else {
+      if (next[side]) sound.play('pop')
       setSelected(next)
     }
   }
 
   const goNext = () => {
+    sound.play('whoosh')
     dispatch({ type: 'nextSet', total: playable.length })
     setSelected({})
   }

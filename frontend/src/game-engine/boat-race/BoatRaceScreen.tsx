@@ -11,6 +11,8 @@ import { TeamResults } from '@/game-engine/shared/TeamResults'
 import { editPath } from '@/game-engine/registry'
 import type { GameSummary, QuizQuestion } from '@/types/game'
 import { assetSrc } from '@/utils/images'
+import { useSound } from '@/sound/useSound'
+import { streakRate } from '@/sound/streak'
 
 const RIVER_WIDTH = 1208
 const RIVER_HEIGHT = 236
@@ -34,6 +36,7 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
   const [playable, setPlayable] = useState(deal)
   const [round, setRound] = useState(0)
   const [state, dispatch] = useReducer(quizReducer, rules.teams, initialQuizRound)
+  const sound = useSound()
   const backTo = editPath(game.id)
   const steps = rules.raceSteps
 
@@ -71,7 +74,10 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
         steps={steps}
         answeringId={state.answeringTeamId}
         triedIds={state.revealed ? state.teams.map((t) => t.id) : state.triedTeams}
-        onPick={(teamId) => dispatch({ type: 'pickTeam', teamId })}
+        onPick={(teamId) => {
+          sound.play('pop')
+          dispatch({ type: 'pickTeam', teamId })
+        }}
       />
 
       <div className="flex min-h-[86px] flex-1 items-center gap-5 rounded-[28px] bg-white px-7 py-3">
@@ -94,7 +100,17 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
               compact
               look={state.revealed && right ? 'right' : tried === false ? 'wrong' : state.revealed ? 'dim' : 'idle'}
               disabled={!answering || state.revealed || tried !== undefined}
-              onClick={() =>
+              onClick={() => {
+                if (option.id === question.correctId) {
+                  // Right: the boat moves on with a splash (and a cheer when it reaches the finish).
+                  sound.play('correct', { rate: streakRate(answering?.streak ?? 0) })
+                  setTimeout(() => sound.play('splash'), 250)
+                  if (answering && boatStep({ ...answering, correct: answering.correct + 1 }, steps) >= steps) {
+                    setTimeout(() => sound.play('applause'), 700)
+                  }
+                } else {
+                  sound.play('wrong')
+                }
                 dispatch({
                   type: 'choose',
                   optionId: option.id,
@@ -102,7 +118,7 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
                   points: rules.points,
                   allowSteal: rules.allowSteal,
                 })
-              }
+              }}
             />
           )
         })}
@@ -120,7 +136,14 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
         </span>
         <div className="flex shrink-0 gap-3">
           {!state.revealed && (
-            <button type="button" onClick={() => dispatch({ type: 'reveal' })} className={`${playButtonClass} bg-sun-soft text-ink`}>
+            <button
+              type="button"
+              onClick={() => {
+                sound.play('reveal')
+                dispatch({ type: 'reveal' })
+              }}
+              className={`${playButtonClass} bg-sun-soft text-ink`}
+            >
               <EyeIcon size={22} />
               Hiện đáp án
             </button>
@@ -131,7 +154,10 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
           <button
             type="button"
             disabled={!state.revealed}
-            onClick={() => dispatch(arrived ? { type: 'finish' } : { type: 'next', total: playable.length })}
+            onClick={() => {
+              if (!arrived) sound.play('whoosh')
+              dispatch(arrived ? { type: 'finish' } : { type: 'next', total: playable.length })
+            }}
             className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
           >
             {ends ? 'Xem kết quả' : 'Câu tiếp theo'}

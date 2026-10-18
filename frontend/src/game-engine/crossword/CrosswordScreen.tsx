@@ -18,6 +18,7 @@ import type { TeamScore } from '@/game-engine/shared/teamScore'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
 import { editPath } from '@/game-engine/registry'
 import type { CrosswordRow, GameSummary } from '@/types/game'
+import { useSound } from '@/sound/useSound'
 
 const BOARD_HEIGHT = 372
 const BOARD_WIDTH = 1208
@@ -39,6 +40,7 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
   const rules = readPlaySettings(settings, PLAY_DEFAULTS.CROSSWORD)
   const [playable] = useState(() => playableRows(rows))
   const [state, dispatch] = useReducer(crosswordReducer, rules.teams, initialCrossword)
+  const sound = useSound()
   const backTo = editPath(game.id)
 
   if (playable.length === 0) {
@@ -85,7 +87,10 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
         currentRow={state.current}
         showAll={!!keywordTeam}
         canOpen={state.current === null && !state.guessing && !keywordTeam}
-        onOpen={(row) => dispatch({ type: 'openRow', row })}
+        onOpen={(row) => {
+          sound.play('pop')
+          dispatch({ type: 'openRow', row })
+        }}
       />
 
       <div className="flex min-h-[112px] items-center gap-5 rounded-[26px] bg-white px-6 py-3">
@@ -109,10 +114,25 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
               <span className="font-display text-[28px] leading-tight font-extrabold">{current.clue}</span>
             </div>
             <MarkButtons
-              onWrong={() => dispatch({ type: 'markRow', correct: false, points: rules.points, allowSteal: rules.allowSteal })}
-              onRight={() => dispatch({ type: 'markRow', correct: true, points: rules.points, allowSteal: rules.allowSteal })}
+              onWrong={() => {
+                sound.play('wrong')
+                dispatch({ type: 'markRow', correct: false, points: rules.points, allowSteal: rules.allowSteal })
+              }}
+              onRight={() => {
+                // The letters flip in one by one.
+                sound.play('correct')
+                setTimeout(() => sound.play('reveal'), 250)
+                dispatch({ type: 'markRow', correct: true, points: rules.points, allowSteal: rules.allowSteal })
+              }}
               extra={
-                <button type="button" onClick={() => dispatch({ type: 'closeRow' })} className={`${playButtonClass} bg-line-soft text-ink`}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.play('whoosh')
+                    dispatch({ type: 'closeRow' })
+                  }}
+                  className={`${playButtonClass} bg-line-soft text-ink`}
+                >
                   Bỏ qua
                 </button>
               }
@@ -125,8 +145,16 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
             </span>
             {guesser ? (
               <MarkButtons
-                onWrong={() => dispatch({ type: 'markGuess', correct: false, points: prize })}
-                onRight={() => dispatch({ type: 'markGuess', correct: true, points: prize })}
+                onWrong={() => {
+                  sound.play('wrong')
+                  dispatch({ type: 'markGuess', correct: false, points: prize })
+                }}
+                onRight={() => {
+                  // The keyword: the whole grid opens, the class cheers.
+                  sound.play('star')
+                  setTimeout(() => sound.play('applause'), 400)
+                  dispatch({ type: 'markGuess', correct: true, points: prize })
+                }}
                 rightLabel={`Đúng (+${prize})`}
               />
             ) : (
@@ -142,7 +170,14 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
                 ? 'Đã mở hết các hàng. Đội nào đoán được từ khóa?'
                 : `${turnTeam.name} chọn một hàng ngang (bấm số hàng). Đoán đúng từ khóa bây giờ được ${prize} điểm.`}
             </span>
-            <button type="button" onClick={() => dispatch({ type: 'startGuess' })} className={`${playButtonClass} bg-sun text-ink`}>
+            <button
+              type="button"
+              onClick={() => {
+                sound.play('whoosh')
+                dispatch({ type: 'startGuess' })
+              }}
+              className={`${playButtonClass} bg-sun text-ink`}
+            >
               Đoán từ khóa
             </button>
             <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} bg-line-soft text-ink`}>

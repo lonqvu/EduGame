@@ -1,11 +1,12 @@
 import { App } from 'antd'
 import { motion } from 'motion/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { BoltIcon, FilledStarIcon, MedalIcon } from '@/components/ui/icons'
 import { bestBy, podiumHeight, podiumOrder, rankTeams } from '@/game-engine/grid-board/ranking'
 import type { TeamScore } from '@/game-engine/shared/teamScore'
 import { useFinishPlaySession } from '@/game-engine/shared/usePlaySession'
+import { useSound } from '@/sound/useSound'
 
 const WINNER_STARS = 3
 
@@ -27,7 +28,12 @@ export function TeamResults({
 }: TeamResultsProps) {
   const { message } = App.useApp()
   const [starsGiven, setStarsGiven] = useState(false)
-  const playAgain = useFinishPlaySession(onPlayAgain, { teams: teams.map((t) => ({ name: t.name, score: t.score, correct: t.correct })) })
+  const sound = useSound()
+  const playAgain = useFinishPlaySession(() => {
+    sound.play('start')
+    sound.startMusic()
+    onPlayAgain()
+  }, { teams: teams.map((t) => ({ name: t.name, score: t.score, correct: t.correct })) })
 
   const ranked = rankTeams(teams)
   const winners = ranked.filter((t) => t.rank === 1 && t.score > 0)
@@ -35,11 +41,22 @@ export function TeamResults({
   const headline =
     winners.length === 0 ? 'Cả lớp đã cố gắng!' : winners.length === 1 ? `${winnerNames} chiến thắng!` : `${winnerNames} cùng thắng!`
 
+  // The music gives way to a fanfare for the winners (applause only when nobody scored), then the class claps.
+  const someoneWon = winners.length > 0
+  useEffect(() => {
+    sound.stopMusic()
+    sound.play(someoneWon ? 'fanfare' : 'applause')
+    if (!someoneWon) return
+    const timer = setTimeout(() => sound.play('applause'), 900)
+    return () => clearTimeout(timer)
+  }, [someoneWon, sound])
+
   const mostCorrect = bestBy(teams, (t) => t.correct)
   const longestStreak = bestBy(teams, (t) => t.bestStreak)
 
   const giveStars = () => {
     setStarsGiven(true)
+    sound.play('star')
     message.success(`Đã thưởng ${WINNER_STARS} sao cho ${winnerNames}`)
   }
 

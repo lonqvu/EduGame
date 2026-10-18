@@ -1,6 +1,6 @@
 import { App } from 'antd'
 import { AnimatePresence, motion } from 'motion/react'
-import { useState, type ComponentType, type ReactNode } from 'react'
+import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { Avatar } from '@/components/ui/Avatar'
 import { ChevronLeftIcon, FilledStarIcon, RefreshIcon } from '@/components/ui/icons'
@@ -16,6 +16,7 @@ import { RocketScene } from '@/game-engine/name-picker/scenes/RocketScene'
 import { usePickRound } from '@/game-engine/name-picker/usePickRound'
 import { useClassStore } from '@/store/classStore'
 import { usePickerStore } from '@/store/pickerStore'
+import { useSound } from '@/sound/useSound'
 
 const SCENES: Record<PickMode, ComponentType<PickSceneProps>> = {
   horse: HorseRaceScene,
@@ -39,6 +40,12 @@ export function PickerScreen({ mode }: { mode: PickMode }) {
   const resetCalled = usePickerStore((s) => s.resetCalled)
 
   const round = usePickRound(config.slots)
+  const sound = useSound()
+  // The winner is announced with a fanfare.
+  const announced = round.phase === 'done'
+  useEffect(() => {
+    if (announced) sound.play('fanfare')
+  }, [announced, round.runId, sound])
   const [starred, setStarred] = useState(false)
 
   const start = () => {
@@ -50,6 +57,7 @@ export function PickerScreen({ mode }: { mode: PickMode }) {
     if (!round.winner || starred) return
     const { name } = round.winner
     setStarred(true)
+    sound.play('star')
     message.success(`Đã thưởng 1 sao cho ${name}`)
     awardStars(round.winner.id, 1).catch(() => {
       setStarred(false)

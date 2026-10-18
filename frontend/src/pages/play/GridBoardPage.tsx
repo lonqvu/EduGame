@@ -32,7 +32,7 @@ export function GridBoardPage({ screen }: { screen: Screen }) {
   }
 
   return (
-    <ProjectorStage background={screen === 'results' ? PROJECTOR_RESULTS_BG : PROJECTOR_BOARD_BG}>
+    <ProjectorStage background={screen === 'results' ? PROJECTOR_RESULTS_BG : PROJECTOR_BOARD_BG} music={screen !== 'results'}>
       {screen === 'board' && <GridBoardScreen gameId={gameId} />}
       {screen === 'question' && <GridQuestionScreen gameId={gameId} tileNo={Number(tileNo)} />}
       {screen === 'results' && <GridResultsScreen gameId={gameId} />}

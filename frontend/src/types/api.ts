@@ -351,6 +351,13 @@ export interface UserSettings {
     newSignInEmail: boolean
     passwordChangedEmail: boolean
   }
+  /** Sounds of the projector games. */
+  sound: {
+    enabled: boolean
+    /** 0–100 */
+    volume: number
+    music: boolean
+  }
 }
 
 /** What a results screen showed, sent when a game ends: team points, or the students who won. */

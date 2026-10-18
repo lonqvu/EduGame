@@ -11,14 +11,22 @@ import jakarta.validation.constraints.NotNull;
  * @param display       how the app looks and behaves on this teacher's screens
  * @param games         rules every new game starts with; {@code null} keeps the game's own default
  * @param notifications security mails the teacher wants
+ * @param sound         sounds of the projector games; may be left out of a PUT (an app opened before sounds existed),
+ *                      the saved one is then kept
  */
 public record UserSettings(@NotNull @Valid Display display, @NotNull @Valid GameDefaults games,
-                           @NotNull @Valid Notifications notifications) {
+                           @NotNull @Valid Notifications notifications, @Valid Sound sound) {
 
     public static final UserSettings DEFAULTS = new UserSettings(
             new Display(false, false),
             new GameDefaults(null, null, null, null),
-            new Notifications(true, true));
+            new Notifications(true, true),
+            new Sound(true, 80, true));
+
+    /** The same settings with another sound section. */
+    public UserSettings withSound(Sound newSound) {
+        return new UserSettings(display, games, notifications, newSound);
+    }
 
     /**
      * @param reduceMotion      animations off (slow projector computers, children sensitive to motion)
@@ -45,5 +53,13 @@ public record UserSettings(@NotNull @Valid Display display, @NotNull @Valid Game
      * @param passwordChangedEmail mail when the password is changed from the profile
      */
     public record Notifications(@NotNull Boolean newSignInEmail, @NotNull Boolean passwordChangedEmail) {
+    }
+
+    /**
+     * @param enabled effects (and music) on the projector; the projector's speaker button turns it off and on
+     * @param volume  0–100, of everything
+     * @param music   the background music of the games
+     */
+    public record Sound(@NotNull Boolean enabled, @NotNull @Min(0) @Max(100) Integer volume, @NotNull Boolean music) {
     }
 }

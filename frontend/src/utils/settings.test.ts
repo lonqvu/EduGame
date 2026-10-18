@@ -50,6 +50,7 @@ describe('withDefaults', () => {
       display: { reduceMotion: false, fullscreenOnStart: false },
       games: {},
       notifications: { newSignInEmail: true, passwordChangedEmail: true },
+      sound: { enabled: true, volume: 80, music: true },
     })
     expect(withDefaults({ notifications: { newSignInEmail: false } as never }).notifications).toEqual({
       newSignInEmail: false,

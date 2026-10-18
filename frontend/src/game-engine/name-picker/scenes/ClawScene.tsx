@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { BLEED_W, BLEED_X, SceneSvg, Twinkle } from '@/game-engine/name-picker/effects'
 import { EASE_IN_OUT, fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
+import { useSound } from '@/sound/useSound'
 
 /** Capsule centres inside the glass box (top row last so the claw can reach them). */
 const SPOTS = [
@@ -18,6 +19,7 @@ const ARM_IDLE = 10
 const ARM_CLOSED = -6
 
 export function ClawScene({ slots, winnerSlot, phase, onFinish }: PickSceneProps) {
+  const sound = useSound()
   const running = phase === 'run'
   const done = phase === 'done'
   const target = SPOTS[winnerSlot] ?? SPOTS[0]
@@ -37,10 +39,10 @@ export function ClawScene({ slots, winnerSlot, phase, onFinish }: PickSceneProps
     [150, () => setPressed(false)],
     [300, () => { setCx({ x: offset, s: 1.3 }); setJoy(18 * dir) }],
     [1650, () => { setJoy(0); setRope({ y: target.y - 286, s: 1, ease: 'easeIn' }) }],
-    [2700, () => { setArms(ARM_CLOSED); setShake(true) }],
+    [2700, () => { sound.play('pop'); setArms(ARM_CLOSED); setShake(true) }],
     [3050, () => { setHolding(true); setShake(false); setRope({ y: REST_ROPE, s: 1.1, ease: 'easeOut' }) }],
     [4200, () => { setCx({ x: 0, s: 1.2 }); setJoy(-18 * dir) }],
-    [5450, () => { setJoy(0); setArms(ARM_OPEN); setHolding(false); setFlying(true) }],
+    [5450, () => { sound.play('drop'); setJoy(0); setArms(ARM_OPEN); setHolding(false); setFlying(true) }],
     [6400, () => { setArms(ARM_IDLE); onFinish() }],
   ])
 

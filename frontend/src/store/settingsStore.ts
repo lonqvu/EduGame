@@ -33,6 +33,7 @@ function merge(settings: UserSettings, patch: SettingsPatch): UserSettings {
     display: { ...settings.display, ...patch.display },
     games: { ...settings.games, ...patch.games },
     notifications: { ...settings.notifications, ...patch.notifications },
+    sound: { ...settings.sound, ...patch.sound },
   }
 }
 

@@ -18,6 +18,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "antd": "^6.6.5",
     "axios": "^1.20.0",
+    "howler": "^2.2.4",
     "motion": "^13.5.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/howler": "^2.2.12",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

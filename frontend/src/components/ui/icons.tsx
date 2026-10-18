@@ -363,3 +363,17 @@ export const ShieldIcon = (p: IconProps) => (
     <path d="M9 12l2.2 2.2L15.5 10" />
   </StrokeIcon>
 )
+
+export const SpeakerIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={2} {...p}>
+    <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+    <path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11" />
+  </StrokeIcon>
+)
+
+export const SpeakerOffIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={2} {...p}>
+    <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+    <path d="M16 9.5l5 5M21 9.5l-5 5" />
+  </StrokeIcon>
+)

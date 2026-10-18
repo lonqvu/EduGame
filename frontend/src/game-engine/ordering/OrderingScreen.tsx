@@ -8,6 +8,7 @@ import { TeamBar } from '@/game-engine/shared/TeamBar'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
 import { editPath } from '@/game-engine/registry'
 import type { GameSummary, OrderSet } from '@/types/game'
+import { useSound } from '@/sound/useSound'
 
 const WRONG_SHOWN_MS = 900
 const CARD_COLORS = ['#3563E9', '#F28C28', '#2E9E6A', '#8B5CF6', '#E5484D', '#0E9AA7', '#D99A12', '#C2417B']
@@ -28,6 +29,7 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
   const deal = () => playableOrderSets(sets)
   const [playable, setPlayable] = useState(deal)
   const [state, dispatch] = useReducer(orderingReducer, { teamCount: rules.teams, size: playable[0]?.entries.length ?? 0 }, initialOrdering)
+  const sound = useSound()
   const backTo = editPath(game.id)
 
   useEffect(() => {
@@ -80,7 +82,10 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
               <motion.button
                 type="button"
                 disabled={!entry || locked || done}
-                onClick={() => dispatch({ type: 'unplace', slot: i })}
+                onClick={() => {
+                  sound.play('pop')
+                  dispatch({ type: 'unplace', slot: i })
+                }}
                 aria-label={entry ? `Ô ${i + 1}: ${entry.text}` : `Ô ${i + 1} trống`}
                 animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : {}}
                 transition={{ duration: 0.45 }}
@@ -113,7 +118,10 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
               layout
               type="button"
               disabled={done}
-              onClick={() => dispatch({ type: 'place', entryId: id })}
+              onClick={() => {
+                sound.play('drop')
+                dispatch({ type: 'place', entryId: id })
+              }}
               className="flex h-[72px] cursor-pointer items-center justify-center rounded-[20px] border-0 px-3 text-center font-[inherit] font-display leading-tight font-extrabold text-white shadow-[0_4px_0_rgba(31,42,68,0.18)] hover:brightness-110"
               style={{ minWidth: slotWidth, fontSize, background: colorOf(id) }}
             >
@@ -143,7 +151,14 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
         </span>
         <div className="flex shrink-0 gap-3">
           {!done && (
-            <button type="button" onClick={() => dispatch({ type: 'reveal', order })} className={`${playButtonClass} bg-sun-soft text-ink`}>
+            <button
+              type="button"
+              onClick={() => {
+                sound.play('reveal')
+                dispatch({ type: 'reveal', order })
+              }}
+              className={`${playButtonClass} bg-sun-soft text-ink`}
+            >
               <EyeIcon size={22} />
               Hiện đáp án
             </button>
@@ -154,7 +169,10 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
           {done ? (
             <button
               type="button"
-              onClick={() => dispatch({ type: 'nextSet', total: playable.length, size: playable[state.setIndex + 1]?.entries.length ?? 0 })}
+              onClick={() => {
+                sound.play('whoosh')
+                dispatch({ type: 'nextSet', total: playable.length, size: playable[state.setIndex + 1]?.entries.length ?? 0 })
+              }}
               className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
             >
               {isLast ? 'Xem kết quả' : 'Bài tiếp theo'}
@@ -164,7 +182,10 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
             <button
               type="button"
               disabled={!full}
-              onClick={() => dispatch({ type: 'check', order, points: rules.points, allowSteal: rules.allowSteal })}
+              onClick={() => {
+                sound.play(state.slots.every((id, i) => id === order[i]) ? 'correct' : 'wrong')
+                dispatch({ type: 'check', order, points: rules.points, allowSteal: rules.allowSteal })
+              }}
               className={`${playButtonClass} bg-success text-white hover:brightness-110`}
             >
               <CheckIcon size={22} />

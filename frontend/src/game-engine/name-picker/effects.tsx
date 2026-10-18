@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState, type ReactNode } from 'react'
+import { useSound } from '@/sound/useSound'
 
 /** How far scene backgrounds extend past each side of the 1280-wide stage, for screens wider than 16:9. */
 export const BLEED = 640
@@ -60,6 +61,13 @@ interface CountdownProps {
 /** "3, 2, 1, Go!" bubble; each step pops in and shrinks away. */
 export function Countdown({ steps, stepMs, left, top, accent, ink }: CountdownProps) {
   const [index, setIndex] = useState(0)
+  const sound = useSound()
+
+  // A tick for each number, the start jingle for "Go!".
+  useEffect(() => {
+    if (index >= steps.length) return
+    sound.play(index === steps.length - 1 ? 'start' : 'tickHigh')
+  }, [index, steps.length, sound])
 
   useEffect(() => {
     if (index >= steps.length) return

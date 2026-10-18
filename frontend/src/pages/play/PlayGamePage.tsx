@@ -44,7 +44,7 @@ export function PlayGamePage() {
   if (mode === 'GRID_BOARD') return <GridBoardPage screen="board" />
 
   return (
-    <ProjectorStage background={PROJECTOR_BOARD_BG}>
+    <ProjectorStage background={PROJECTOR_BOARD_BG} music>
       <GameScreen mode={mode} game={game} items={items} settings={settings} />
     </ProjectorStage>
   )

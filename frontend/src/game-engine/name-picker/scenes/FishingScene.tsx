@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { BLEED, BLEED_W, BLEED_X, Cloud, SceneSvg } from '@/game-engine/name-picker/effects'
 import { fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
+import { useSound } from '@/sound/useSound'
 
 /** Where each fish swims (centre of its 260px lane) and which way it faces first. */
 const SCHOOL = [
@@ -27,6 +28,7 @@ const DOCK_PLANKS = Array.from({ length: (300 + BLEED) / 50 - 1 }, (_, i) => BLE
 type Step = 'cast' | 'approach' | 'bite' | 'reel'
 
 export function FishingScene({ slots, winnerSlot, phase, onFinish }: PickSceneProps) {
+  const sound = useSound()
   const running = phase === 'run'
   const done = phase === 'done'
   const [step, setStep] = useState<Step | null>(running ? 'cast' : null)
@@ -39,11 +41,11 @@ export function FishingScene({ slots, winnerSlot, phase, onFinish }: PickScenePr
   const mouthX = face === 1 ? HOOK_X - 60 : HOOK_X + 60
 
   useSceneTimeline(running, [
-    [350, () => { setRod({ deg: 0, s: 0.5 }); setLine({ len: LINE_DEEP, s: 1 }) }],
+    [350, () => { sound.play('whoosh'); setRod({ deg: 0, s: 0.5 }); setLine({ len: LINE_DEEP, s: 1 }) }],
     [900, () => setStep('approach')],
-    [3150, () => { setStep('bite'); setRod({ deg: 14, s: 0.15 }) }],
+    [3150, () => { sound.play('pop'); setStep('bite'); setRod({ deg: 14, s: 0.15 }) }],
     [3550, () => { setStep('reel'); setLine({ len: LINE_REELED, s: 1.2 }); setRod({ deg: -10, s: 1 }) }],
-    [4150, () => setSplash(true)],
+    [4150, () => { sound.play('splash'); setSplash(true) }],
     [5000, () => { setSplash(false); setRod({ deg: -6, s: 0.4 }); onFinish() }],
   ])
 

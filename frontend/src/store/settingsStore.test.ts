@@ -40,6 +40,7 @@ const SERVER: UserSettings = {
   display: { reduceMotion: false, fullscreenOnStart: true },
   games: { teams: 3 },
   notifications: { newSignInEmail: true, passwordChangedEmail: false },
+  sound: { enabled: true, volume: 60, music: false },
 }
 
 type Store = typeof import('@/store/settingsStore').useSettingsStore
@@ -88,6 +89,7 @@ describe('load', () => {
       display: { reduceMotion: true, fullscreenOnStart: false },
       games: {},
       notifications: { newSignInEmail: true, passwordChangedEmail: true },
+      sound: { enabled: true, volume: 80, music: true },
     })
   })
 

@@ -535,7 +535,8 @@ POST /api/v1/games/g-quiz-vn/assets          (multipart/form-data, field "file")
 {
   "display": {"reduceMotion": false, "fullscreenOnStart": true},
   "games": {"teams": 3, "timeLimitSec": 20},
-  "notifications": {"newSignInEmail": true, "passwordChangedEmail": true}
+  "notifications": {"newSignInEmail": true, "passwordChangedEmail": true},
+  "sound": {"enabled": true, "volume": 80, "music": true}
 }
 ```
 
@@ -551,6 +552,8 @@ POST /api/v1/games/g-quiz-vn/assets          (multipart/form-data, field "file")
 - `notifications`: email cảnh báo khi **đăng nhập bằng mật khẩu** trên trình duyệt chưa từng dùng (so theo tên
   "Chrome trên Windows", nên cập nhật trình duyệt không bị coi là thiết bị mới; lần đăng nhập đầu tiên không cảnh
   báo; bảng `user_known_device`), và khi **đổi mật khẩu** trong hồ sơ. Gửi sau khi request commit, lỗi gửi chỉ ghi log.
+- `sound`: âm thanh trên màn chiếu (bật/tắt, âm lượng 0–100, nhạc nền), xem [SOUNDS.md](SOUNDS.md). PUT không có
+  `sound` (ứng dụng mở từ trước khi có âm thanh) giữ nguyên giá trị đã lưu.
 - Cài đặt lưu trong `users.settings` (JSONB). Key chưa từng lưu nhận giá trị mặc định khi đọc; giá trị lưu sai kiểu
   (dữ liệu cũ) → đọc ra mặc định thay vì lỗi.
 

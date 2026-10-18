@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { MAX_DICE, rollDice } from '@/game-engine/tools/classTools'
 import { ToolFrame, toolButtonClass } from '@/game-engine/tools/ToolFrame'
+import { useSound } from '@/sound/useSound'
 
 const ROLL_MS = 900
 const FLICKER_MS = 80
@@ -36,8 +37,11 @@ export function DiceScreen() {
   const [rolling, setRolling] = useState(false)
   const [history, setHistory] = useState<number[][]>([])
 
+  const sound = useSound()
+
   useEffect(() => {
     if (!rolling) return
+    sound.play('dice')
     const flicker = setInterval(() => setFaces(rollDice(count)), FLICKER_MS)
     const stop = setTimeout(() => {
       clearInterval(flicker)
@@ -50,7 +54,7 @@ export function DiceScreen() {
       clearInterval(flicker)
       clearTimeout(stop)
     }
-  }, [rolling, count])
+  }, [rolling, count, sound])
 
   const choose = (n: number) => {
     setCount(n)

@@ -9,6 +9,7 @@ import { GROUP_COLORS } from '@/game-engine/sorting/groupColors'
 import { initialSorting, playableSortSets, sortingReducer } from '@/game-engine/sorting/sortingRound'
 import { editPath } from '@/game-engine/registry'
 import type { GameSummary, SortSet } from '@/types/game'
+import { useSound } from '@/sound/useSound'
 
 const WRONG_SHOWN_MS = 900
 
@@ -32,6 +33,7 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
     { teamCount: rules.teams, deck: playable[0]?.cards.map((c) => c.id) ?? [] },
     initialSorting,
   )
+  const sound = useSound()
   const backTo = editPath(game.id)
 
   useEffect(() => {
@@ -106,7 +108,17 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
               key={group.id}
               type="button"
               disabled={complete || !!state.lastWrong}
-              onClick={() => card && dispatch({ type: 'drop', groupId: group.id, rightGroupId: byId.get(state.deck[0])!.groupId, points: rules.points })}
+              onClick={() => {
+                if (!card) return
+                const rightGroupId = byId.get(state.deck[0])!.groupId
+                if (group.id === rightGroupId) {
+                  sound.play('drop')
+                  sound.play('correct', { volume: 0.8 })
+                } else {
+                  sound.play('wrong')
+                }
+                dispatch({ type: 'drop', groupId: group.id, rightGroupId, points: rules.points })
+              }}
               animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : {}}
               transition={{ duration: 0.45 }}
               aria-label={`Giỏ ${group.text}`}
@@ -158,7 +170,10 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
           <button
             type="button"
             disabled={!complete}
-            onClick={() => dispatch({ type: 'nextSet', total: playable.length, deck: playable[state.setIndex + 1]?.cards.map((c) => c.id) ?? [] })}
+            onClick={() => {
+              sound.play('whoosh')
+              dispatch({ type: 'nextSet', total: playable.length, deck: playable[state.setIndex + 1]?.cards.map((c) => c.id) ?? [] })
+            }}
             className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
           >
             {isLast ? 'Xem kết quả' : 'Bộ tiếp theo'}

@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { SoundStage } from '@/sound/SoundStage'
 
 const STAGE_WIDTH = 1280
 const STAGE_HEIGHT = 720
@@ -6,6 +7,8 @@ const STAGE_HEIGHT = 720
 interface ProjectorStageProps {
   /** Background image of the stage, e.g. a projector SVG; omit when the screen draws its own. */
   background?: string
+  /** Background music while the screen is open (games; not the classroom tools). */
+  music?: boolean
   children: ReactNode
 }
 
@@ -17,9 +20,9 @@ function fitScale() {
  * Fixed 1280×720 canvas scaled to fit the window, so projector screens keep
  * the same layout on any classroom screen. The canvas does not clip: the
  * background covers the whole window and scenes may paint past the canvas
- * edges (see SceneSvg), so screens wider than 16:9 have no empty bars.
+ * edges (see SceneSvg), so screens wider than 16:9 have no empty bars. Sounds are heard on the stage only.
  */
-export function ProjectorStage({ background, children }: ProjectorStageProps) {
+export function ProjectorStage({ background, music, children }: ProjectorStageProps) {
   const [scale, setScale] = useState(fitScale)
 
   useEffect(() => {
@@ -41,7 +44,7 @@ export function ProjectorStage({ background, children }: ProjectorStageProps) {
           transform: `translate(-50%, -50%) scale(${scale})`,
         }}
       >
-        {children}
+        <SoundStage music={music}>{children}</SoundStage>
       </div>
     </div>
   )

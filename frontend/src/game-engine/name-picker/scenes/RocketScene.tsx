@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { BLEED, BLEED_W, BLEED_X, Countdown, SceneSvg, Twinkle } from '@/game-engine/name-picker/effects'
 import { EASE_IN, EASE_OUT, fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
+import { useSound } from '@/sound/useSound'
 
 const PADS = [560, 760, 960, 1160]
 const COLORS = ['#7FB2FF', '#FFD15C', '#8BD3A8', '#C5A8FF']
@@ -22,6 +23,7 @@ const STARS = Array.from({ length: 66 }, (_, i) => ({
 }))
 
 export function RocketScene({ slots, winnerSlot, phase, onFinish }: PickSceneProps) {
+  const sound = useSound()
   const running = phase === 'run'
   const done = phase === 'done'
   const [step, setStep] = useState<Step | null>(running ? 'count' : null)
@@ -29,8 +31,8 @@ export function RocketScene({ slots, winnerSlot, phase, onFinish }: PickScenePro
 
   useSceneTimeline(running, [
     [COUNT_MS * 2, () => setStep('ignite')],
-    [COUNT_MS * 3, () => setStep('fly')],
-    [4000, () => setStep('chute')],
+    [COUNT_MS * 3, () => { sound.play('whoosh'); setStep('fly') }],
+    [4000, () => { sound.play('pop'); setStep('chute') }],
     [5400, () => setStep('arrived')],
     [5700, onFinish],
   ])

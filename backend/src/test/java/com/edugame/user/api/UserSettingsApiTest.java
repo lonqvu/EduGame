@@ -93,7 +93,8 @@ class UserSettingsApiTest {
         assertThat(settings).isEqualTo(objectMapper.readTree("""
                 {"display": {"reduceMotion": false, "fullscreenOnStart": false},
                  "games": {},
-                 "notifications": {"newSignInEmail": true, "passwordChangedEmail": true}}
+                 "notifications": {"newSignInEmail": true, "passwordChangedEmail": true},
+                 "sound": {"enabled": true, "volume": 80, "music": true}}
                 """));
     }
 
@@ -145,6 +146,32 @@ class UserSettingsApiTest {
                 .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
 
         send(get(SETTINGS), hoa, null).andExpect(jsonPath("$.display.reduceMotion").value(false));
+    }
+
+    @Test
+    void soundIsSavedAndAnOlderAppThatLeavesItOutKeepsIt() throws Exception {
+        Map<String, Object> quiet = new HashMap<>(settings(false, false, null, null, null, null, true, true));
+        quiet.put("sound", Map.of("enabled", true, "volume", 35, "music", false));
+        send(put(SETTINGS), hoa, quiet).andExpect(status().isOk())
+                .andExpect(jsonPath("$.sound.volume").value(35))
+                .andExpect(jsonPath("$.sound.music").value(false));
+
+        // Saved by an app opened before sounds existed: no sound section, the saved one stays.
+        Map<String, Object> older = new HashMap<>(settings(true, false, null, null, null, null, true, true));
+        older.remove("sound");
+        send(put(SETTINGS), hoa, older).andExpect(status().isOk())
+                .andExpect(jsonPath("$.display.reduceMotion").value(true))
+                .andExpect(jsonPath("$.sound.volume").value(35));
+
+        for (Map<String, Object> bad : List.<Map<String, Object>>of(
+                Map.of("enabled", true, "volume", 101, "music", true),
+                Map.of("enabled", true, "volume", -1, "music", true),
+                Map.of("enabled", true, "music", true))) {
+            Map<String, Object> body = new HashMap<>(older);
+            body.put("sound", bad);
+            send(put(SETTINGS), hoa, body).andExpect(status().isBadRequest());
+        }
+        send(get(SETTINGS), hoa, null).andExpect(jsonPath("$.sound.volume").value(35));
     }
 
     @Test
@@ -339,7 +366,8 @@ class UserSettingsApiTest {
         Map<String, Object> notifications = new HashMap<>();
         notifications.put("newSignInEmail", signInMail);
         notifications.put("passwordChangedEmail", passwordMail);
-        return Map.of("display", display, "games", games, "notifications", notifications);
+        return Map.of("display", display, "games", games, "notifications", notifications,
+                "sound", Map.of("enabled", true, "volume", 80, "music", true));
     }
 
     private JsonNode newGame(String template) throws Exception {

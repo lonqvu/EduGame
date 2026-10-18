@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import type { TeamScore } from '@/game-engine/shared/teamScore'
+import { useSound } from '@/sound/useSound'
 
 interface TeamBarProps {
   teams: TeamScore[]
@@ -15,6 +16,7 @@ interface TeamBarProps {
 
 /** Projector: one card per team with its score. */
 export function TeamBar({ teams, activeId, activeLabel = 'Đến lượt', onPick, disabledIds = [] }: TeamBarProps) {
+  const sound = useSound()
   return (
     <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${teams.length}, minmax(0, 1fr))` }}>
       {teams.map((team) => {
@@ -48,7 +50,10 @@ export function TeamBar({ teams, activeId, activeLabel = 'Đến lượt', onPic
             type="button"
             aria-pressed={active}
             disabled={disabled}
-            onClick={() => onPick(team.id)}
+            onClick={() => {
+              sound.play('pop')
+              onPick(team.id)
+            }}
             className={`${className} cursor-pointer hover:brightness-95 disabled:cursor-not-allowed`}
             style={style}
           >

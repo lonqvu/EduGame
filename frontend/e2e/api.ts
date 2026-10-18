@@ -39,6 +39,7 @@ export interface Settings {
   display: { reduceMotion: boolean; fullscreenOnStart: boolean }
   games: { teams?: number | null; timeLimitSec?: number | null; allowSteal?: boolean | null; shuffleItems?: boolean | null }
   notifications: { newSignInEmail: boolean; passwordChangedEmail: boolean }
+  sound?: { enabled: boolean; volume: number; music: boolean }
 }
 
 export type QuestionInput =

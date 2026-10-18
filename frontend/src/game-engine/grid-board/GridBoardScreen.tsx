@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { CheckIcon, UndoIcon } from '@/components/ui/icons'
 import { useGridBoardRound } from '@/game-engine/grid-board/useGridBoardRound'
 import { useGridBoardStore } from '@/store/gridBoardStore'
+import { useSound } from '@/sound/useSound'
 
 /** Projector: team scores + numbered tiles. */
 export function GridBoardScreen({ gameId }: { gameId: string }) {
@@ -12,6 +13,7 @@ export function GridBoardScreen({ gameId }: { gameId: string }) {
   const openedTiles = useGridBoardStore((s) => s.openedTiles)
   const canUndo = useGridBoardStore((s) => s.history.length > 0)
   const undo = useGridBoardStore((s) => s.undo)
+  const sound = useSound()
 
   const remaining = questions.length - openedTiles.length
 
@@ -67,6 +69,7 @@ export function GridBoardScreen({ gameId }: { gameId: string }) {
             <Link
               key={q.id}
               to={`/play/${gameId}/tiles/${tileNo}`}
+              onClick={() => sound.play('flip')}
               className="flex items-center justify-center rounded-[20px] bg-white font-display text-[44px] font-extrabold text-primary-ink shadow-[0_4px_0_#C3D3EE] transition-transform hover:-translate-y-1 hover:text-primary-ink"
             >
               {tileNo}
@@ -78,7 +81,10 @@ export function GridBoardScreen({ gameId }: { gameId: string }) {
       <div className="flex items-center justify-between">
         <button
           type="button"
-          onClick={undo}
+          onClick={() => {
+            sound.play('pop')
+            undo()
+          }}
           disabled={!canUndo}
           className="flex h-12 cursor-pointer items-center gap-2 rounded-full border-0 bg-white px-5 font-[inherit] text-[17px] font-extrabold text-ink disabled:cursor-not-allowed disabled:opacity-50"
         >

@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { CheckIcon, CloseIcon } from '@/components/ui/icons'
 import type { ChoiceOption } from '@/types/game'
+import { useSound } from '@/sound/useSound'
 
 const OPTION_COLORS = ['#3563E9', '#F28C28', '#2E9E6A', '#8B5CF6', '#E5484D', '#0E9AA7']
 const LETTERS = 'ABCDEF'
@@ -57,12 +58,29 @@ export function QuizOption({ option, index, trueFalse, look, disabled, onClick, 
 /** Seconds left to answer; "Hết giờ!" at zero (answers are still accepted). */
 export function Countdown({ seconds, paused }: { seconds: number; paused: boolean }) {
   const [left, setLeft] = useState(seconds)
+  const sound = useSound()
 
   useEffect(() => {
     if (paused || left <= 0) return
     const timer = setTimeout(() => setLeft((s) => s - 1), 1000)
     return () => clearTimeout(timer)
   }, [left, paused])
+
+  // Heard as the time runs out (not when the question appears): a tick, sharper in the last 5 s, then time's up.
+  useEffect(() => {
+    if (paused || left === seconds) return
+    if (left === 0) sound.play('timeUp')
+    else if (left <= 5) sound.play('tickHigh')
+    else if (left <= 10) sound.play('tick')
+  }, [left, seconds, paused, sound])
+
+  // The music hurries in the last 10 seconds, and calms down for the next question.
+  const hurry = !paused && left > 0 && left <= 10
+  useEffect(() => {
+    if (!hurry) return
+    sound.setMusicMood('tense')
+    return () => sound.setMusicMood('calm')
+  }, [hurry, sound])
 
   const urgent = left <= 5
   return (

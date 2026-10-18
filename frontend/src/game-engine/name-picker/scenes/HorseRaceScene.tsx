@@ -1,8 +1,9 @@
 import { motion } from 'motion/react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BLEED, BLEED_W, BLEED_X, Cloud, Countdown, Crown, SceneSvg } from '@/game-engine/name-picker/effects'
 import { fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
+import { useSound } from '@/sound/useSound'
 
 const COAT_COLORS = ['#C98B5A', '#F2C27A', '#8C6A55', '#E8E1D6', '#B5643C']
 const LANE_TOP = 166
@@ -43,6 +44,11 @@ export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickScene
     [GO_AT, () => setGo(true)],
     [GO_AT + RACE_S * 1000 + 150, onFinish],
   ])
+
+  // Hooves while the horses run.
+  const sound = useSound()
+  const galloping = go && running
+  useEffect(() => (galloping ? sound.loop('gallop') : undefined), [galloping, sound])
 
   const moving = go || done
 

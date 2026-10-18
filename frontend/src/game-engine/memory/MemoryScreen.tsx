@@ -14,6 +14,8 @@ import { TeamBar } from '@/game-engine/shared/TeamBar'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
 import { editPath } from '@/game-engine/registry'
 import type { GameSummary, PairSet } from '@/types/game'
+import { useSound } from '@/sound/useSound'
+import { streakRate } from '@/sound/streak'
 
 /** Height left for the cards on the 720px stage. */
 const GRID_HEIGHT = 432
@@ -37,6 +39,7 @@ export function MemoryScreen({ game, sets, settings }: MemoryScreenProps) {
   const deal = () => playableMemorySets(sets)
   const [playable, setPlayable] = useState(deal)
   const [state, dispatch] = useReducer(memoryReducer, rules.teams, initialMemoryRound)
+  const sound = useSound()
   const backTo = editPath(game.id)
   const showingMiss = isShowingMiss(state)
 
@@ -70,7 +73,17 @@ export function MemoryScreen({ game, sets, settings }: MemoryScreenProps) {
   const longest = Math.max(...set.cards.map((c) => c.text.length))
   const fontSize = Math.min(cardHeight * 0.3, longest > 14 ? 22 : longest > 8 ? 28 : 36)
 
-  const flip = (card: MemoryCard) => dispatch({ type: 'flip', card, deck: set.cards, points: rules.points })
+  const flip = (card: MemoryCard) => {
+    if (isShowingMiss(state) || card.key in state.matched || state.faceUp.includes(card.key)) return
+    sound.play('flip')
+    // The second card: a pair (the team keeps the turn) or a miss, heard once it has turned over.
+    if (state.faceUp.length === 1) {
+      const first = set.cards.find((c) => c.key === state.faceUp[0])
+      const pair = first?.pairId === card.pairId
+      setTimeout(() => (pair ? sound.play('match', { rate: streakRate(team.streak) }) : sound.play('wrong', { volume: 0.7 })), 350)
+    }
+    dispatch({ type: 'flip', card, deck: set.cards, points: rules.points })
+  }
 
   return (
     <PlayFrame title={game.title} progress={`Bộ ${state.setIndex + 1} / ${playable.length}`} backTo={backTo}>
@@ -143,7 +156,10 @@ export function MemoryScreen({ game, sets, settings }: MemoryScreenProps) {
           <button
             type="button"
             disabled={!complete}
-            onClick={() => dispatch({ type: 'nextSet', total: playable.length })}
+            onClick={() => {
+              sound.play('whoosh')
+              dispatch({ type: 'nextSet', total: playable.length })
+            }}
             className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
           >
             {isLast ? 'Xem kết quả' : 'Bộ tiếp theo'}

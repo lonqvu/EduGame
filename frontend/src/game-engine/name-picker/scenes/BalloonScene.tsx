@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { BLEED, BLEED_W, BLEED_X, Cloud, Countdown, Crown, SceneSvg, Twinkle } from '@/game-engine/name-picker/effects'
 import { EASE_IN_OUT, fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
+import { useSound } from '@/sound/useSound'
 
 const COLUMNS = [160, 300, 440, 640, 860, 1000, 1140]
 const COLORS = ['#7FB2FF', '#FF9C86', '#8BD3A8', '#FFD15C', '#C5A8FF', '#FF8FB1', '#7FD3E0']
@@ -19,6 +20,7 @@ interface Flight {
 }
 
 export function BalloonScene({ slots, winnerSlot, phase, onFinish }: PickSceneProps) {
+  const sound = useSound()
   const running = phase === 'run'
   const done = phase === 'done'
   const [go, setGo] = useState(false)
@@ -36,11 +38,20 @@ export function BalloonScene({ slots, winnerSlot, phase, onFinish }: PickScenePr
   })
 
   useSceneTimeline(running, [
-    [GO_AT, () => setGo(true)],
+    [GO_AT, () => {
+      sound.play('whoosh')
+      setGo(true)
+    }],
     ...slots
       .map((_, i) => i)
       .filter((i) => i !== winnerSlot)
-      .map((i): [number, () => void] => [GO_AT + flights[i].seconds * 1000, () => setPopped((p) => [...p, i])]),
+      .map((i): [number, () => void] => [
+        GO_AT + flights[i].seconds * 1000,
+        () => {
+          sound.play('pop')
+          setPopped((p) => [...p, i])
+        },
+      ]),
     [GO_AT + (WIN_S + 0.3) * 1000, onFinish],
   ])
 

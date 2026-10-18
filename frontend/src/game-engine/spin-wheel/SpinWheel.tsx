@@ -1,4 +1,6 @@
 import { motion } from 'motion/react'
+import { useRef } from 'react'
+import { useSound } from '@/sound/useSound'
 
 const SEGMENT_COLORS = ['#FFD15C', '#BFD3FF', '#FFC3A8', '#BDEBD3', '#E3D5FF', '#FFE6A3', '#CFE3FF', '#FFD0D8']
 const C = 250
@@ -22,6 +24,22 @@ export function SpinWheel({ labels, rotation, onSpinEnd }: SpinWheelProps) {
   const count = Math.max(labels.length, 1)
   const seg = 360 / count
   const fontSize = count <= 8 ? 22 : Math.max(11, Math.round((22 * 8) / count))
+  const sound = useSound()
+  // The pointer flicks a peg each time a segment passes it: fast clicks that slow down with the wheel.
+  const peg = useRef({ segment: Math.floor(rotation / seg), at: 0 })
+
+  const onUpdate = (latest: { rotate?: unknown }) => {
+    const angle = Number(latest.rotate)
+    if (!Number.isFinite(angle)) return
+    const segment = Math.floor(angle / seg)
+    if (segment === peg.current.segment) return
+    peg.current.segment = segment
+    const now = performance.now()
+    // At full speed many pegs pass in one frame: at most one click every 45 ms.
+    if (now - peg.current.at < 45) return
+    peg.current.at = now
+    sound.play('wheelTick')
+  }
 
   return (
     <div className="relative h-[600px] w-[560px] shrink-0">
@@ -30,6 +48,7 @@ export function SpinWheel({ labels, rotation, onSpinEnd }: SpinWheelProps) {
         initial={false}
         animate={{ rotate: rotation }}
         transition={{ duration: SPIN_DURATION_S, ease: [0.12, 0.8, 0.2, 1] }}
+        onUpdate={onUpdate}
         onAnimationComplete={onSpinEnd}
       >
         <svg width="540" height="540" viewBox="0 0 500 500" aria-hidden="true">

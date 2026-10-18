@@ -4,6 +4,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   display: { reduceMotion: false, fullscreenOnStart: false },
   games: {},
   notifications: { newSignInEmail: true, passwordChangedEmail: true },
+  sound: { enabled: true, volume: 80, music: true },
 }
 
 export type GameDefaults = UserSettings['games']
@@ -55,6 +56,7 @@ export function withDefaults(settings: Partial<UserSettings> | null | undefined)
     display: { ...DEFAULT_SETTINGS.display, ...settings?.display },
     games: { ...settings?.games },
     notifications: { ...DEFAULT_SETTINGS.notifications, ...settings?.notifications },
+    sound: { ...DEFAULT_SETTINGS.sound, ...settings?.sound },
   }
 }
 

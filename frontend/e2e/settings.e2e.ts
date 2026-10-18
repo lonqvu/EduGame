@@ -11,6 +11,7 @@ const test = base.extend<{ backend: Backend }>({
       display: { reduceMotion: false, fullscreenOnStart: false },
       games: {},
       notifications: { newSignInEmail: true, passwordChangedEmail: true },
+      sound: { enabled: true, volume: 80, music: true },
     })
     await provide(backend)
     await backend.cleanUp()
@@ -52,6 +53,7 @@ test('"Cài đặt" in the menu opens the settings, and every change is saved by
       display: { reduceMotion: false, fullscreenOnStart: true },
       games: { timeLimitSec: 45, allowSteal: false },
       notifications: { newSignInEmail: true, passwordChangedEmail: false },
+      sound: { enabled: true, volume: 80, music: true },
     })
 
   await page.reload()

@@ -2,34 +2,12 @@ import { motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { formatClock, MAX_TIMER_SECONDS, secondsLeft } from '@/game-engine/tools/classTools'
 import { ToolFrame, toolButtonClass } from '@/game-engine/tools/ToolFrame'
+import { useSound } from '@/sound/useSound'
 
 const PRESETS = [1, 2, 3, 5, 10, 15]
 const RING = 2 * Math.PI * 200
 
-/** Short school-bell chime with the Web Audio API (silently skipped where audio is not available). */
-function ring() {
-  try {
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
-    if (!Ctx) return
-    const ctx = new Ctx()
-    ;[0, 0.35, 0.7].forEach((at, i) => {
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.frequency.value = i === 2 ? 1046 : 880
-      gain.gain.setValueAtTime(0.0001, ctx.currentTime + at)
-      gain.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + at + 0.02)
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + at + 0.32)
-      osc.connect(gain).connect(ctx.destination)
-      osc.start(ctx.currentTime + at)
-      osc.stop(ctx.currentTime + at + 0.34)
-    })
-    setTimeout(() => void ctx.close(), 1500)
-  } catch {
-    // No sound: the screen still says time is up.
-  }
-}
-
-/** Projector: a big countdown for work or group time; it rings at zero. */
+/** Projector: a big countdown for work or group time; the last seconds tick and it rings at zero. */
 export function TimerScreen() {
   const [duration, setDuration] = useState(5 * 60)
   /** When it ends (ms since epoch) while running; null when stopped. */
@@ -40,10 +18,17 @@ export function TimerScreen() {
   /** Started since the last reset (so a paused countdown reads "Chạy tiếp"). */
   const [started, setStarted] = useState(false)
   const rang = useRef(false)
+  const sound = useSound()
 
   const running = endsAt !== null
   const remaining = running ? secondsLeft(endsAt, now) : left
   const done = remaining <= 0
+
+  // The last five seconds tick.
+  const wholeSeconds = Math.ceil(remaining)
+  useEffect(() => {
+    if (running && wholeSeconds > 0 && wholeSeconds <= 5) sound.play('tickHigh')
+  }, [running, wholeSeconds, sound])
 
   useEffect(() => {
     if (!running) return
@@ -54,11 +39,11 @@ export function TimerScreen() {
   useEffect(() => {
     if (running && done && !rang.current) {
       rang.current = true
-      ring()
+      sound.play('timeUp')
       setEndsAt(null)
       setLeft(0)
     }
-  }, [running, done])
+  }, [running, done, sound])
 
   const choose = (seconds: number) => {
     const s = Math.min(Math.max(seconds, 10), MAX_TIMER_SECONDS)

@@ -5,6 +5,7 @@ import { makeGroups, MAX_GROUPS, MIN_GROUPS } from '@/game-engine/tools/classToo
 import { ToolFrame, toolButtonClass } from '@/game-engine/tools/ToolFrame'
 import { useClassStore } from '@/store/classStore'
 import type { Student } from '@/types/game'
+import { useSound } from '@/sound/useSound'
 
 const GROUP_COLORS = ['#F28C28', '#3563E9', '#2E9E6A', '#8B5CF6', '#E5484D', '#0E9AA7', '#D99A12', '#C2417B']
 
@@ -15,9 +16,11 @@ export function TeamMakerScreen() {
   const [count, setCount] = useState(4)
   const [groups, setGroups] = useState<Student[][] | null>(null)
   const [round, setRound] = useState(0)
+  const sound = useSound()
 
   const max = Math.min(MAX_GROUPS, students.length)
   const split = () => {
+    sound.play('shuffle')
     setGroups(makeGroups(students, count))
     setRound((r) => r + 1)
   }

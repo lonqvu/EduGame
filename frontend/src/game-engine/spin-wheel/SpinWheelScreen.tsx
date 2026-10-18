@@ -10,6 +10,7 @@ import { PickModeMenu } from '@/game-engine/name-picker/PickModeMenu'
 import { useClassStore } from '@/store/classStore'
 import { usePickerStore } from '@/store/pickerStore'
 import type { Student } from '@/types/game'
+import { useSound } from '@/sound/useSound'
 
 /** Projector: spin to call a random student from the class list. */
 export function SpinWheelScreen() {
@@ -19,6 +20,7 @@ export function SpinWheelScreen() {
   const className = useClassStore((s) => s.className)
   const students = useClassStore((s) => s.students)
   const awardStars = useClassStore((s) => s.awardStars)
+  const sound = useSound()
 
   // Shared with the other name-picking tools, so switching tools keeps who was called.
   const noRepeat = usePickerStore((s) => s.noRepeat)
@@ -48,6 +50,7 @@ export function SpinWheelScreen() {
 
   const onSpinEnd = () => {
     if (!pending) return
+    sound.play('start')
     setPicked(pending)
     setStarred(false)
     markCalled(pending.id)
@@ -59,6 +62,7 @@ export function SpinWheelScreen() {
     if (!picked) return
     const { name } = picked
     setStarred(true)
+    sound.play('star')
     message.success(`Đã thưởng 1 sao cho ${name}`)
     awardStars(picked.id, 1).catch(() => {
       setStarred(false)

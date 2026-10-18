@@ -15,6 +15,7 @@ import { editPath } from '@/game-engine/registry'
 import { useClassStore } from '@/store/classStore'
 import type { GameSummary, QuizQuestion, Student } from '@/types/game'
 import { assetSrc } from '@/utils/images'
+import { useSound } from '@/sound/useSound'
 
 const WINNER_STARS = 2
 /** Height of the class board next to the question. */
@@ -39,6 +40,7 @@ export function GoldenBellScreen({ game, questions, settings }: GoldenBellScreen
   const [playable, setPlayable] = useState(deal)
   const [round, setRound] = useState(0)
   const [state, dispatch] = useReducer(goldenBellReducer, rules.rescues, initialGoldenBell)
+  const sound = useSound()
   const backTo = editPath(game.id)
 
   useEffect(() => {
@@ -135,7 +137,10 @@ export function GoldenBellScreen({ game, questions, settings }: GoldenBellScreen
                 outAt={state.out[student.id]}
                 wrong={state.wrongNow.includes(student.id)}
                 canMark={state.revealed}
-                onToggle={() => dispatch({ type: 'toggleWrong', studentId: student.id })}
+                onToggle={() => {
+                  sound.play('pop')
+                  dispatch({ type: 'toggleWrong', studentId: student.id })
+                }}
               />
             ))}
           </div>
@@ -156,13 +161,27 @@ export function GoldenBellScreen({ game, questions, settings }: GoldenBellScreen
         </span>
         <div className="flex shrink-0 gap-3">
           {canRescue && (
-            <button type="button" onClick={() => dispatch({ type: 'rescue' })} className={`${playButtonClass} bg-sun text-ink`}>
+            <button
+              type="button"
+              onClick={() => {
+                sound.play('star')
+                dispatch({ type: 'rescue' })
+              }}
+              className={`${playButtonClass} bg-sun text-ink`}
+            >
               <RefreshIcon size={22} />
               Cứu trợ ({state.rescuesLeft})
             </button>
           )}
           {!state.revealed && (
-            <button type="button" onClick={() => dispatch({ type: 'reveal' })} className={`${playButtonClass} bg-sun-soft text-ink`}>
+            <button
+              type="button"
+              onClick={() => {
+                sound.play('reveal')
+                dispatch({ type: 'reveal' })
+              }}
+              className={`${playButtonClass} bg-sun-soft text-ink`}
+            >
               <EyeIcon size={22} />
               Hiện đáp án
             </button>
@@ -173,7 +192,11 @@ export function GoldenBellScreen({ game, questions, settings }: GoldenBellScreen
           <button
             type="button"
             disabled={!state.revealed}
-            onClick={() => dispatch({ type: 'next', total: playable.length, studentIds: ids })}
+            onClick={() => {
+              // Students marked wrong go out (unless the whole class was wrong).
+              sound.play(wrongCount > 0 && wrongCount < inGame.length ? 'out' : 'whoosh')
+              dispatch({ type: 'next', total: playable.length, studentIds: ids })
+            }}
             className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
           >
             {isLast ? 'Xem kết quả' : 'Câu tiếp theo'}
@@ -229,13 +252,27 @@ function BellResults({ winners, total, onPlayAgain }: BellResultsProps) {
   const { message } = App.useApp()
   const awardStars = useClassStore((s) => s.awardStars)
   const [starred, setStarred] = useState(false)
-  const playAgain = useFinishPlaySession(onPlayAgain, { winners: winners.map((w) => w.name), players: total })
+  const sound = useSound()
+  const playAgain = useFinishPlaySession(() => {
+    sound.play('start')
+    sound.startMusic()
+    onPlayAgain()
+  }, { winners: winners.map((w) => w.name), players: total })
+
+  // The golden bell rings for the winners, then the class claps.
+  useEffect(() => {
+    sound.stopMusic()
+    sound.play('bell')
+    const timer = setTimeout(() => sound.play('applause'), 1300)
+    return () => clearTimeout(timer)
+  }, [sound])
   const names = winners.map((w) => w.name)
   const headline =
     winners.length === 1 ? `${names[0]} rung chuông vàng!` : `${winners.length} bạn cùng rung chuông vàng!`
 
   const giveStars = async () => {
     setStarred(true)
+    sound.play('star')
     const results = await Promise.allSettled(winners.map((w) => awardStars(w.id, WINNER_STARS)))
     const failed = results.filter((r) => r.status === 'rejected').length
     if (failed) {

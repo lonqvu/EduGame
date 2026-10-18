@@ -1,10 +1,11 @@
-import { App } from 'antd'
-import { useEffect } from 'react'
+import { App, Slider } from 'antd'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
-import { BellIcon, ChevronRightIcon, GamepadIcon, GlobeIcon, HomeIcon } from '@/components/ui/icons'
+import { BellIcon, ChevronRightIcon, GamepadIcon, GlobeIcon, HomeIcon, SpeakerIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { SaveState, SettingItem, SettingSelect, SettingsSection, SettingSwitch } from '@/pages/settings/SettingsParts'
+import { playSound } from '@/sound/soundEngine'
 import { useProfileStore } from '@/store/profileStore'
 import { useSettingsStore, type SettingsPatch } from '@/store/settingsStore'
 import { useTeacherStore } from '@/store/teacherStore'
@@ -47,7 +48,8 @@ export function SettingsPage() {
   const change = (patch: SettingsPatch) =>
     update(patch).catch((e: unknown) => message.error(`Chưa lưu được cài đặt. ${apiErrorMessage(e)}`))
 
-  const { display, games, notifications } = settings
+  const { display, games, notifications, sound } = settings
+  const [volumeDraft, setVolumeDraft] = useState<number | null>(null)
   const highlighted = (id: string) => hash === `#${id}`
 
   return (
@@ -148,6 +150,57 @@ export function SettingsPage() {
                 }
               />
             ))}
+          </SettingsSection>
+
+          <SettingsSection
+            id="sound"
+            icon={<SpeakerIcon size={17} />}
+            title="Âm thanh"
+            text="Âm thanh của các trò chơi trên màn chiếu. Trên màn chiếu, nút loa ở góc dưới (hoặc phím M) tắt và bật nhanh."
+            highlighted={highlighted('sound')}
+          >
+            <SettingItem
+              id="set-sound"
+              label="Âm thanh trong trò chơi"
+              hint="Tiếng trả lời đúng, sai, đếm giờ, chuông, vỗ tay khi thắng…"
+              control={<SettingSwitch labelledBy="set-sound" checked={sound.enabled} onChange={(enabled) => void change({ sound: { enabled } })} />}
+            />
+            <SettingItem
+              id="set-volume"
+              label="Âm lượng"
+              hint="Thả tay để nghe thử."
+              control={
+                <div className="flex w-[220px] items-center gap-3">
+                  <Slider
+                    className="flex-1"
+                    min={0}
+                    max={100}
+                    step={5}
+                    disabled={!sound.enabled}
+                    value={volumeDraft ?? sound.volume}
+                    onChange={setVolumeDraft}
+                    onChangeComplete={(volume: number) => {
+                      setVolumeDraft(null)
+                      void change({ sound: { volume } }).then(() => playSound('correct'))
+                    }}
+                    ariaLabelForHandle="Âm lượng"
+                  />
+                  <span className="w-10 text-right text-[14px] font-bold tabular-nums">{volumeDraft ?? sound.volume}%</span>
+                </div>
+              }
+            />
+            <SettingItem
+              id="set-music"
+              label="Nhạc nền"
+              hint="Nhạc vui nhẹ khi chơi, dồn dập hơn ở những giây cuối."
+              control={
+                <SettingSwitch
+                  labelledBy="set-music"
+                  checked={sound.music}
+                  onChange={(music) => void change({ sound: { music } })}
+                />
+              }
+            />
           </SettingsSection>
 
           <SettingsSection
