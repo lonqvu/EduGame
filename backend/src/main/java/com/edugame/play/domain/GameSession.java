@@ -10,6 +10,7 @@ import com.edugame.game.domain.GameVersion;
 import com.edugame.user.domain.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -92,11 +93,19 @@ public class GameSession extends AuditableEntity {
         return session;
     }
 
-    /** The class reached the results screen. Ending twice keeps the first end time. */
-    public void end(Instant now) {
+    /**
+     * The class reached the results screen. Ending twice keeps the first end time, and the first results given
+     * ({@code null}: none to keep).
+     */
+    public void end(Instant now, JsonNode results) {
         if (status == GameSessionStatus.IN_PROGRESS) {
             status = GameSessionStatus.ENDED;
             endedAt = now;
+        }
+        if (results != null && status == GameSessionStatus.ENDED && !state.has("results")) {
+            ObjectNode next = state.isObject() ? ((ObjectNode) state).deepCopy() : JsonNodeFactory.instance.objectNode();
+            next.set("results", results);
+            state = next;
         }
     }
 }

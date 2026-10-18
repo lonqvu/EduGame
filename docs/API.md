@@ -59,6 +59,7 @@ Cột **Backend**: controller · service. Cột **Frontend**: hàm trong `api/` 
 | 28 | GET | `/assets/{key}` | File ảnh đã tải (công khai, không cần đăng nhập) | [GameAssetController.file](../backend/src/main/java/com/edugame/asset/api/GameAssetController.java) | `assetSrc()` trong [images.ts](../frontend/src/utils/images.ts) · `<img>` ở trình soạn và màn chiếu |
 | 29 | GET | `/me/settings` | Cài đặt của giáo viên (hiển thị, mặc định trò chơi mới, email thông báo) | [MeController.getSettings](../backend/src/main/java/com/edugame/user/api/MeController.java) · [UserSettingsService](../backend/src/main/java/com/edugame/user/service/UserSettingsService.java) | [settingsApi.ts](../frontend/src/api/settingsApi.ts) · [settingsStore](../frontend/src/store/settingsStore.ts) · SettingsPage, DisplayPreferences |
 | 30 | PUT | `/me/settings` | Lưu cả bộ cài đặt | [MeController.updateSettings](../backend/src/main/java/com/edugame/user/api/MeController.java) | [settingsApi.ts](../frontend/src/api/settingsApi.ts) · settingsStore.update (lưu ngay mỗi thay đổi) · SettingsPage |
+| 31 | GET | `/reports/classrooms/{code}?from=&to=` | Báo cáo của lớp theo khoảng ngày (mặc định 30 ngày gần nhất) | [ReportController](../backend/src/main/java/com/edugame/result/api/ReportController.java) · [ReportService](../backend/src/main/java/com/edugame/result/service/ReportService.java) | [reportApi.ts](../frontend/src/api/reportApi.ts) · ReportsPage |
 
 Logic dùng chung (không phải endpoint):
 
@@ -425,7 +426,7 @@ Một giáo viên có tối đa 30 lớp chưa xóa (`409 TOO_MANY_CLASSROOMS`).
 | Method | Path | Mô tả |
 |---|---|---|
 | POST | `/classrooms/{code}/sessions` → `201` | `{ "gameCode": "g-quiz-vn" }`: màn chiếu mở trò cho lớp (tính là một hoạt động). Lớp tạm ngưng → `409 CLASSROOM_PAUSED` |
-| POST | `/classrooms/{code}/sessions/{id}/end` | Lớp chơi tới màn kết quả (tính là hoàn thành); gọi lại nhiều lần không sao |
+| POST | `/classrooms/{code}/sessions/{id}/end` | Lớp chơi tới màn kết quả (tính là hoàn thành); gọi lại nhiều lần không sao. Body (không bắt buộc) `{"results": {...}}`: kết quả màn hình hiện, giữ cho báo cáo (xem mục 31) |
 
 ### 14. `GET /classrooms/{code}/students` — Danh sách học sinh
 
@@ -555,6 +556,40 @@ POST /api/v1/games/g-quiz-vn/assets          (multipart/form-data, field "file")
 
 ---
 
+### 31. Báo cáo của lớp (`GET /reports/classrooms/{code}`)
+
+`from`, `to`: ngày dạng `2026-10-18`, tính trọn ngày theo múi giờ của trường (`app.time-zone`). Không gửi `to` →
+hôm nay; không gửi `from` → 30 ngày tính đến `to`. `from` sau `to`, hoặc quá 366 ngày → `400 INVALID_RANGE`; ngày sai
+dạng → `400 INVALID_PARAMETER`. Lớp của giáo viên khác → `404`.
+
+```json
+{
+  "classroom": {"code": "c-3a", "name": "3A", "grade": 3, "studentCount": 28},
+  "from": "2026-09-19", "to": "2026-10-18",
+  "summary":  {"activities": 12, "completed": 9, "playMinutes": 145, "stars": 31, "correctAnswers": 40, "games": 5},
+  "previous": {"activities": 8,  "completed": 6, "playMinutes": 90,  "stars": 20, "correctAnswers": 0,  "games": 4},
+  "daily": [{"date": "2026-09-19", "activities": 0, "completed": 0}, "..."],
+  "byTemplate": [{"templateCode": "QUIZ", "templateName": "Trắc nghiệm", "activities": 6}],
+  "topGames": [{"gameCode": "g-quiz-vn", "title": "Đố vui Tiếng Việt", "templateCode": "QUIZ", "activities": 4}],
+  "students": [{"id": 12, "displayName": "Minh Anh", "rollNumber": 3, "stars": 5}],
+  "sessions": [{"id": 90, "gameCode": "g-quiz-vn", "gameTitle": "Đố vui Tiếng Việt", "templateCode": "QUIZ",
+                "templateName": "Trắc nghiệm", "status": "ENDED", "startedAt": "...", "endedAt": "...", "minutes": 25,
+                "results": {"teams": [{"name": "Đội Đỏ", "score": 40, "correct": 4}]}}]
+}
+```
+
+- `activities`: trò chơi đã mở cho lớp (bắt đầu trong kỳ, không tính bị huỷ); `completed`: số đã tới màn kết quả.
+- `playMinutes`: tổng thời gian các trò đã hoàn thành, mỗi trò tính tối đa 2 giờ (máy chiếu để quên qua đêm).
+- `stars`: sao thưởng trong kỳ trừ sao thu lại; `students` liệt kê **mọi** học sinh còn trong lớp (kể cả 0 sao),
+  nhiều sao trước.
+- `correctAnswers`: tổng câu đúng của các đội, chỉ từ các trò đã giữ kết quả.
+- `previous`: cùng số liệu cho kỳ dài bằng ngay trước đó (để so sánh).
+- `daily`: mỗi ngày một dòng, kể cả ngày không chơi. `sessions`: mới nhất trước, tối đa 200.
+- `results` của một trò chơi: lúc kết thúc, màn kết quả gửi `teams` (tên, điểm, số câu đúng, tối đa 8 đội) hoặc
+  `winners` + `players` (Rung chuông vàng). Chỉ giữ lần gửi đầu tiên; thiếu (trò cũ, công cụ) thì không có `results`.
+
+---
+
 ## Mã lỗi
 
 Mọi lỗi trả về dạng:
@@ -577,6 +612,7 @@ Mọi lỗi trả về dạng:
 | 409 | `TOO_MANY_QUESTION_SETS`, `TOO_MANY_QUESTIONS` | Quá 200 bộ / quá 200 câu một bộ | 17, 21, 22 |
 | 409 | `NO_USABLE_QUESTIONS` | Bộ không có câu nào trò chơi này chơi được | 26 |
 | 409 | `CLASSROOM_PAUSED` | Mở trò chơi cho lớp đang tạm ngưng | `POST /classrooms/{code}/sessions` |
+| 400 | `INVALID_RANGE` | Khoảng ngày của báo cáo: bắt đầu sau kết thúc, hoặc quá 366 ngày | 31 |
 | 400 | `INVALID_PARAMETER` | Tham số trên URL sai kiểu hoặc thiếu (vd. id không phải số), hoặc thiếu file tải lên | Mọi API |
 | 400 | `EMPTY_FILE` | File tải lên rỗng | 27 |
 | 413 | `FILE_TOO_LARGE` | Ảnh quá 5 MB | 27 |

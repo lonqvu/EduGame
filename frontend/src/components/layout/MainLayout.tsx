@@ -27,7 +27,7 @@ const MAIN_NAV: NavItem[] = [
   { label: 'Trò chơi', icon: <GamepadIcon size={22} />, to: '/games/new', match: (p) => p.startsWith('/games') },
   { label: 'Bộ câu hỏi', icon: <FileTextIcon size={22} />, to: '/question-sets', match: (p) => p.startsWith('/question-sets') },
   { label: 'Lớp học', icon: <UsersIcon size={22} strokeWidth={1.8} />, to: '/classes', match: (p) => p.startsWith('/classes') },
-  { label: 'Báo cáo', icon: <ChartIcon size={22} /> },
+  { label: 'Báo cáo', icon: <ChartIcon size={22} />, to: '/reports', match: (p) => p.startsWith('/reports') },
 ]
 
 const FOOTER_NAV: NavItem[] = [

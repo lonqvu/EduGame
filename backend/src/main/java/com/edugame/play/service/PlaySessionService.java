@@ -13,8 +13,11 @@ import com.edugame.common.exception.ResourceNotFoundException;
 import com.edugame.game.domain.Game;
 import com.edugame.game.service.GameService;
 import com.edugame.play.domain.GameSession;
+import com.edugame.play.dto.EndSessionRequest;
+import com.edugame.play.dto.GameResults;
 import com.edugame.play.repository.GameSessionRepository;
 import com.edugame.user.service.CurrentUserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,7 @@ public class PlaySessionService {
     private final GameService gameService;
     private final GameSessionRepository gameSessionRepository;
     private final CurrentUserService currentUserService;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public SessionResponse start(String classroomCode, StartSessionRequest request) {
@@ -46,13 +50,14 @@ public class PlaySessionService {
         return toResponse(session);
     }
 
-    /** The class reached the results screen; ending twice is harmless. */
+    /** The class reached the results screen, which showed {@code request.results()}; ending twice is harmless. */
     @Transactional
-    public SessionResponse end(String classroomCode, Long sessionId) {
+    public SessionResponse end(String classroomCode, Long sessionId, EndSessionRequest request) {
         Classroom classroom = classroomService.getOwnedClassroom(classroomCode);
         GameSession session = gameSessionRepository.findByIdAndClassroom(sessionId, classroom)
                 .orElseThrow(() -> new ResourceNotFoundException("Session", sessionId));
-        session.end(now());
+        GameResults results = request == null ? null : request.results();
+        session.end(now(), results == null ? null : objectMapper.valueToTree(results));
         return toResponse(session);
     }
 

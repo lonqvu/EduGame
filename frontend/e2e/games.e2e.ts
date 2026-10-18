@@ -83,6 +83,8 @@ test('Trắc nghiệm: teams steal wrong answers and the scores add up', async (
     quizItem('5 x 6 = ?', ['30', '35', '11', '56'], 0),
     quizItem('Con vật nào biết bay?', ['Cá', 'Chó', 'Chim'], 2),
   ])
+  // The end of the game is recorded for the class, with the scores the results show (for "Báo cáo").
+  const ended = page.waitForRequest((r) => r.method() === 'POST' && /\/sessions\/\d+\/end$/.test(r.url()))
   await page.goto(`/play/${game.code}`)
   const option = (text: string) => page.locator('button').filter({ has: page.locator('span', { hasText: exact(text) }) })
   const teams = ['Đội Cam', 'Đội Biển']
@@ -103,6 +105,9 @@ test('Trắc nghiệm: teams steal wrong answers and the scores add up', async (
     await page.getByRole('button', { name: i === 2 ? 'Xem kết quả' : 'Câu tiếp theo' }).click()
   }
   expect(await podium(page)).toContain('Đội Biển chiến thắng')
+  const { results } = (await ended).postDataJSON()
+  expect(results.teams).toContainEqual({ name: 'Đội Biển', score: 30, correct: 3 })
+  expect(results.teams).toContainEqual({ name: 'Đội Cam', score: 0, correct: 0 })
 })
 
 /** The item whose question text is on screen (the game may shuffle its questions). */

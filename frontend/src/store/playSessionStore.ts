@@ -1,5 +1,6 @@
 import * as classroomApi from '@/api/classroomApi'
 import { useClassStore } from '@/store/classStore'
+import type { GameResults } from '@/types/api'
 
 /**
  * Games played with the current class, for its "Hoạt động" / "Hoàn thành" counts: a session starts when a game opens
@@ -63,12 +64,12 @@ export function beginPlaySession(gameCode: string): Promise<OpenSession | undefi
   return start
 }
 
-/** The class reached the results of this game: its open session is completed. */
-export async function finishPlaySession(gameCode: string): Promise<void> {
+/** The class reached the results of this game: its open session is completed, with what the results showed. */
+export async function finishPlaySession(gameCode: string, results?: GameResults): Promise<void> {
   const session = readOpen()[gameCode] ?? (await starting.get(gameCode))
   if (!session) return
   const open = readOpen()
   delete open[gameCode]
   writeOpen(open)
-  await classroomApi.endSession(session.classroomCode, session.sessionId).catch(() => undefined)
+  await classroomApi.endSession(session.classroomCode, session.sessionId, results).catch(() => undefined)
 }

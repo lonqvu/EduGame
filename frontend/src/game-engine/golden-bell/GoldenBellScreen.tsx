@@ -229,7 +229,7 @@ function BellResults({ winners, total, onPlayAgain }: BellResultsProps) {
   const { message } = App.useApp()
   const awardStars = useClassStore((s) => s.awardStars)
   const [starred, setStarred] = useState(false)
-  const playAgain = useFinishPlaySession(onPlayAgain)
+  const playAgain = useFinishPlaySession(onPlayAgain, { winners: winners.map((w) => w.name), players: total })
   const names = winners.map((w) => w.name)
   const headline =
     winners.length === 1 ? `${names[0]} rung chuông vàng!` : `${winners.length} bạn cùng rung chuông vàng!`

@@ -14,6 +14,7 @@ import com.edugame.classroom.dto.StudentResponse;
 import com.edugame.classroom.dto.UpdateClassroomRequest;
 import com.edugame.classroom.dto.UpdateStudentRequest;
 import com.edugame.classroom.service.ClassroomService;
+import com.edugame.play.dto.EndSessionRequest;
 import com.edugame.play.service.PlaySessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -130,7 +131,8 @@ public class ClassroomController {
 
     @Operation(summary = "The class reached the results screen (counts as completed)")
     @PostMapping("/{code}/sessions/{sessionId}/end")
-    public SessionResponse endSession(@PathVariable String code, @PathVariable Long sessionId) {
-        return playSessionService.end(code, sessionId);
+    public SessionResponse endSession(@PathVariable String code, @PathVariable Long sessionId,
+                                      @Valid @RequestBody(required = false) EndSessionRequest request) {
+        return playSessionService.end(code, sessionId, request);
     }
 }

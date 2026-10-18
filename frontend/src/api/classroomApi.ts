@@ -3,6 +3,7 @@ import type {
   ClassroomResponse,
   ClassroomStatus,
   CreateClassroomRequest,
+  GameResults,
   NewStudentRequest,
   PlaySessionResponse,
   StudentResponse,
@@ -95,7 +96,11 @@ export async function startSession(classroomCode: string, gameCode: string): Pro
 }
 
 /** The class reached the results (the activity is completed). */
-export async function endSession(classroomCode: string, sessionId: number): Promise<PlaySessionResponse> {
-  const { data } = await httpClient.post<PlaySessionResponse>(`${classroomPath(classroomCode)}/sessions/${sessionId}/end`)
+/** The class reached the results screen, which showed `results` (kept for the reports). */
+export async function endSession(classroomCode: string, sessionId: number, results?: GameResults): Promise<PlaySessionResponse> {
+  const { data } = await httpClient.post<PlaySessionResponse>(
+    `${classroomPath(classroomCode)}/sessions/${sessionId}/end`,
+    results ? { results } : undefined,
+  )
   return data
 }

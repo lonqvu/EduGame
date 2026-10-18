@@ -570,7 +570,7 @@ Mỗi lần giáo viên mở một game trong tiết học là một session.
 | `mode` | VARCHAR(20) | ✓ | `CLASSROOM`: giáo viên vận hành (giai đoạn này). `LIVE` / `SELF_PACED`: học sinh tự chơi trên thiết bị, để mở rộng sau, bắt buộc có PIN |
 | `status` | VARCHAR(20) | ✓ | `WAITING`: đang chia đội, chuẩn bị. `IN_PROGRESS`: đang chơi. `ENDED`: kết thúc. `CANCELLED`: hủy |
 | `settings` | JSONB | ✓ | Ghi đè settings của version cho riêng buổi này, ví dụ hôm nay chơi 3 đội thay vì 4 |
-| `state` | JSONB | ✓ | **Trạng thái hiện tại của buổi chơi** do engine quản lý: lượt của ai, thứ tự giơ tay, bàn chơi, ô đã lật... Giúp mở lại đúng chỗ nếu trình duyệt bị tắt |
+| `state` | JSONB | ✓ | **Trạng thái hiện tại của buổi chơi** do engine quản lý: lượt của ai, thứ tự giơ tay, bàn chơi, ô đã lật... Giúp mở lại đúng chỗ nếu trình duyệt bị tắt. Khi trò chơi kết thúc, `state.results` giữ kết quả màn hình hiện (điểm các đội / người thắng) cho báo cáo |
 | `current_item_id` | BIGINT | FK → game_item | Câu đang hiển thị |
 | `started_at` / `ended_at` | TIMESTAMPTZ | | Thời điểm bắt đầu / kết thúc |
 | `created_at` / `updated_at` | TIMESTAMPTZ | ✓ | |

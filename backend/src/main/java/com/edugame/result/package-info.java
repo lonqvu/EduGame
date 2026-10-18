@@ -1,8 +1,6 @@
 /**
  * Module: result.
  * <p>
- * Student answers, scores and reports per session.
- * <p>
- * Not implemented yet. Follow the module layout described in docs/ARCHITECTURE.md.
+ * Reports ("Báo cáo") of a class: games played, how they ended, time spent and stars given, over a period.
  */
 package com.edugame.result;

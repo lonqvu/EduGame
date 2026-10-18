@@ -141,6 +141,17 @@ export class Backend {
     return this.classroom(classroom.code)
   }
 
+  /** A game played with a class, ended with these results unless `ended` is false; returns the session id. */
+  async playSession(classroomCode: string, gameCode: string, { ended = true, results }: { ended?: boolean; results?: unknown } = {}) {
+    const session = await this.call<{ id: number }>('post', `classrooms/${classroomCode}/sessions`, { gameCode })
+    if (ended) await this.call('post', `classrooms/${classroomCode}/sessions/${session.id}/end`, results ? { results } : undefined)
+    return session.id
+  }
+
+  awardStars(classroomCode: string, studentId: number, points: number) {
+    return this.call('post', `classrooms/${classroomCode}/students/${studentId}/points`, { points, reason: 'E2E' })
+  }
+
   /** A class the test made in the browser, archived by `cleanUp`. */
   adoptClassroom(code: string) {
     this.classrooms.push(code)

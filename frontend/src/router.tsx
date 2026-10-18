@@ -19,6 +19,7 @@ import { NamePickerPage } from '@/pages/play/NamePickerPage'
 import { PlayGamePage } from '@/pages/play/PlayGamePage'
 import { SpinWheelPage } from '@/pages/play/SpinWheelPage'
 import { RegisterPage } from '@/pages/RegisterPage'
+import { ReportsPage } from '@/pages/ReportsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 
 export const router = createBrowserRouter([
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
           { path: 'classes', element: <ClassesPage /> },
           { path: 'profile', element: <ProfilePage /> },
           { path: 'settings', element: <SettingsPage /> },
+          { path: 'reports', element: <ReportsPage /> },
           { path: 'classes/:code', element: <ClassroomDetailPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],

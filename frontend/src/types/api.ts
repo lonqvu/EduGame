@@ -352,3 +352,51 @@ export interface UserSettings {
     passwordChangedEmail: boolean
   }
 }
+
+/** What a results screen showed, sent when a game ends: team points, or the students who won. */
+export interface GameResults {
+  teams?: { name: string; score: number; correct: number }[]
+  winners?: string[]
+  players?: number
+}
+
+/** GET /reports/classrooms/{code}: "Báo cáo" of a class over whole days (`from`, `to` as YYYY-MM-DD). */
+export interface ClassReport {
+  classroom: { code: string; name: string; grade: number; studentCount: number }
+  from: string
+  to: string
+  summary: ReportSummary
+  /** The same figures over the period of the same length just before. */
+  previous: ReportSummary
+  daily: { date: string; activities: number; completed: number }[]
+  byTemplate: { templateCode: string; templateName: string; activities: number }[]
+  topGames: { gameCode: string; title: string; templateCode: string; activities: number }[]
+  /** Every student still in the class, most stars first. */
+  students: { id: number; displayName: string; rollNumber?: number; stars: number }[]
+  /** Newest first, at most 200. */
+  sessions: ReportSession[]
+}
+
+export interface ReportSummary {
+  activities: number
+  completed: number
+  playMinutes: number
+  stars: number
+  correctAnswers: number
+  games: number
+}
+
+export interface ReportSession {
+  id: number
+  gameCode: string
+  gameTitle: string
+  templateCode: string
+  templateName: string
+  status: 'IN_PROGRESS' | 'ENDED'
+  startedAt: string
+  endedAt?: string
+  /** Missing while the game has not ended. */
+  minutes?: number
+  /** Missing when the results were not kept (older games). */
+  results?: GameResults
+}

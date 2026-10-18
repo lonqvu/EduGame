@@ -58,6 +58,13 @@ describe('play sessions of the current class', () => {
     expect(fake.api.endSession).toHaveBeenCalledTimes(1)
   })
 
+  it('sends what the results screen showed, for the reports', async () => {
+    await recorder.beginPlaySession('g-quiz')
+    const results = { teams: [{ name: 'Đội Đỏ', score: 40, correct: 4 }] }
+    await recorder.finishPlaySession('g-quiz', results)
+    expect(fake.api.endSession).toHaveBeenCalledWith('c-3a', 1, results)
+  })
+
   it('opening the game twice at once (StrictMode, reload) starts one session', async () => {
     const [a, b] = await Promise.all([recorder.beginPlaySession('g-quiz'), recorder.beginPlaySession('g-quiz')])
     expect(a).toEqual(b)

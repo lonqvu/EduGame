@@ -27,7 +27,7 @@ export function TeamResults({
 }: TeamResultsProps) {
   const { message } = App.useApp()
   const [starsGiven, setStarsGiven] = useState(false)
-  const playAgain = useFinishPlaySession(onPlayAgain)
+  const playAgain = useFinishPlaySession(onPlayAgain, { teams: teams.map((t) => ({ name: t.name, score: t.score, correct: t.correct })) })
 
   const ranked = rankTeams(teams)
   const winners = ranked.filter((t) => t.rank === 1 && t.score > 0)
