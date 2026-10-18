@@ -14,6 +14,7 @@ import { useFinishPlaySession } from '@/game-engine/shared/usePlaySession'
 import { editPath } from '@/game-engine/registry'
 import { useClassStore } from '@/store/classStore'
 import type { GameSummary, QuizQuestion, Student } from '@/types/game'
+import { assetSrc } from '@/utils/images'
 
 const WINNER_STARS = 2
 /** Height of the class board next to the question. */
@@ -94,7 +95,7 @@ export function GoldenBellScreen({ game, questions, settings }: GoldenBellScreen
         <div className="flex min-w-0 flex-1 flex-col gap-3.5">
           <div className="flex min-h-0 flex-1 items-center gap-6 rounded-[32px] bg-white px-8 py-5">
             {question.imageUrl && (
-              <img src={question.imageUrl} alt="" className="h-[160px] w-[200px] shrink-0 rounded-3xl object-cover" />
+              <img src={assetSrc(question.imageUrl)} alt="" className="h-[160px] w-[200px] shrink-0 rounded-3xl object-cover" />
             )}
             <span className="font-display leading-[1.1] font-extrabold" style={{ fontSize: questionFontSize(question.text, 46) }}>
               {question.text}

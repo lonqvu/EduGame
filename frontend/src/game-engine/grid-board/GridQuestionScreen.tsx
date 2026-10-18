@@ -4,6 +4,7 @@ import { Link, Navigate, useNavigate } from 'react-router'
 import { CheckIcon, ChevronLeftIcon, CloseIcon, EyeIcon } from '@/components/ui/icons'
 import { useGridBoardRound } from '@/game-engine/grid-board/useGridBoardRound'
 import { useGridBoardStore } from '@/store/gridBoardStore'
+import { assetSrc } from '@/utils/images'
 
 interface GridQuestionScreenProps {
   gameId: string
@@ -61,7 +62,7 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
 
       <div className="flex flex-1 items-center gap-11 rounded-[36px] bg-white px-11 py-9">
         {question.imageUrl && (
-          <img src={question.imageUrl} alt="" className="h-[300px] w-[360px] shrink-0 rounded-[28px] object-cover" />
+          <img src={assetSrc(question.imageUrl)} alt="" className="h-[300px] w-[360px] shrink-0 rounded-[28px] object-cover" />
         )}
         <div className="flex flex-1 flex-col gap-7">
           <span className="font-display text-[64px] leading-[1.1] font-extrabold">{question.text}</span>

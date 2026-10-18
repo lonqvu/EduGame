@@ -205,6 +205,7 @@ export function GameEditorPage() {
           {selected ? (
             <div key={selected.id} className="contents">
               {definition.form({
+                gameId,
                 item: selected,
                 items,
                 number: selectedIndex + 1,

@@ -2,3 +2,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 *.class
 HELP.md
+
+# Uploaded images (app.assets.dir) of a local run
+data/

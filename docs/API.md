@@ -55,6 +55,8 @@ Cột **Backend**: controller · service. Cột **Frontend**: hàm trong `api/` 
 | 24 | DELETE | `/question-sets/{code}/questions/{id}` | Xóa một câu, các câu sau dồn lên | [QuestionSetController.deleteQuestion](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
 | 25 | PUT | `/question-sets/{code}/questions/order` | Sắp xếp lại thứ tự câu | [QuestionSetController.reorderQuestions](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
 | 26 | POST | `/question-sets/{code}/games` | "Sử dụng": tạo trò chơi từ bộ (chép câu hỏi sang game) | [QuestionSetController.use](../backend/src/main/java/com/edugame/question/api/QuestionSetController.java) | [questionSetApi.ts](../frontend/src/api/questionSetApi.ts) · questionSetStore · QuestionSetsPage, QuestionSetPage |
+| 27 | POST | `/games/{code}/assets` | Tải ảnh cho câu hỏi (multipart, field `file`) → URL để lưu vào `content.image` | [GameAssetController.upload](../backend/src/main/java/com/edugame/asset/api/GameAssetController.java) · [GameAssetService](../backend/src/main/java/com/edugame/asset/service/GameAssetService.java) | [assetApi.ts](../frontend/src/api/assetApi.ts) · [ImagePicker](../frontend/src/editor/ImagePicker.tsx) · QuestionForm (Lật ô), QuizForm (Trắc nghiệm, Rung chuông vàng, Đua thuyền) |
+| 28 | GET | `/assets/{key}` | File ảnh đã tải (công khai, không cần đăng nhập) | [GameAssetController.file](../backend/src/main/java/com/edugame/asset/api/GameAssetController.java) | `assetSrc()` trong [images.ts](../frontend/src/utils/images.ts) · `<img>` ở trình soạn và màn chiếu |
 
 Logic dùng chung (không phải endpoint):
 
@@ -500,6 +502,28 @@ Field của loại câu kia bị bỏ qua. Câu không chơi được → `400 I
 Trò chơi mang tên `title` (không gửi thì lấy tên bộ), mô tả, môn và khối của bộ (khối 6–12 thì để trống, game là tiểu học). Câu hỏi được chép sang game:
 sửa bộ sau đó không đổi game, và ngược lại. Không có câu nào dùng được → `409 NO_USABLE_QUESTIONS`.
 
+### 27–28. Ảnh của câu hỏi (`/games/{code}/assets`, `/assets/{key}`)
+
+```
+POST /api/v1/games/g-quiz-vn/assets          (multipart/form-data, field "file")
+→ 201 {"id": 12, "url": "/api/v1/assets/CkkWpIxNtljkHXgLyk4LVA.png", "name": "con-meo.png",
+       "type": "IMAGE", "mimeType": "image/png", "sizeBytes": 48211}
+```
+
+- Chỉ nhận PNG, JPEG, GIF, WebP, nhận biết theo **byte đầu file** (không tin tên file hay `Content-Type` trình duyệt gửi).
+  SVG, HEIC, PDF... → `415 UNSUPPORTED_IMAGE`; file rỗng → `400 EMPTY_FILE`; quá 5 MB → `413 FILE_TOO_LARGE`.
+- Mỗi game tối đa 500 file (ảnh đã thay vẫn được giữ) → `409 TOO_MANY_ASSETS`. Game của người khác / đã lưu trữ → `404`.
+- Lưu `url` vào `content.image` của câu hỏi (`PATCH /games/{code}/items/{id}`). `url` là đường dẫn trên máy chủ API,
+  frontend ghép với host API khi hiển thị (`assetSrc()`).
+- Trình soạn thu nhỏ ảnh trước khi tải (cạnh dài nhất 1600 px, sang WebP), nên ảnh chụp điện thoại vài MB chỉ còn vài trăm KB.
+  GIF được gửi nguyên (giữ ảnh động).
+- `GET /api/v1/assets/{key}` **không cần đăng nhập** để thẻ `<img>` và màn chiếu tải được; khoá là 128 bit ngẫu nhiên, không
+  liệt kê ở đâu. Trả kèm `Cache-Control: max-age=31536000, public, immutable` (file không bao giờ đổi dưới một khoá),
+  `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'; sandbox`. Khoá không đúng dạng hoặc không có → `404`.
+- File nằm trên đĩa máy chủ, thư mục `app.assets.dir` (biến môi trường `ASSET_DIR`, mặc định `./data/assets`); khi chạy nhiều
+  máy chủ cần thư mục dùng chung hoặc chuyển sang object storage (thay `LocalAssetStorage`). Ảnh không còn câu nào dùng
+  chưa được dọn tự động.
+
 ---
 
 ## Mã lỗi
@@ -524,7 +548,11 @@ Mọi lỗi trả về dạng:
 | 409 | `TOO_MANY_QUESTION_SETS`, `TOO_MANY_QUESTIONS` | Quá 200 bộ / quá 200 câu một bộ | 17, 21, 22 |
 | 409 | `NO_USABLE_QUESTIONS` | Bộ không có câu nào trò chơi này chơi được | 26 |
 | 409 | `CLASSROOM_PAUSED` | Mở trò chơi cho lớp đang tạm ngưng | `POST /classrooms/{code}/sessions` |
-| 400 | `INVALID_PARAMETER` | Tham số trên URL sai kiểu hoặc thiếu (vd. id không phải số) | Mọi API |
+| 400 | `INVALID_PARAMETER` | Tham số trên URL sai kiểu hoặc thiếu (vd. id không phải số), hoặc thiếu file tải lên | Mọi API |
+| 400 | `EMPTY_FILE` | File tải lên rỗng | 27 |
+| 413 | `FILE_TOO_LARGE` | Ảnh quá 5 MB | 27 |
+| 415 | `UNSUPPORTED_IMAGE` | File không phải ảnh PNG / JPEG / GIF / WebP | 27 |
+| 409 | `TOO_MANY_ASSETS` | Game đã có 500 file tải lên | 27 |
 | 404 | `NOT_FOUND` | Không có API ở đường dẫn này | Mọi đường dẫn |
 | 405 | `METHOD_NOT_ALLOWED` | Đường dẫn có, nhưng không nhận phương thức HTTP này | Mọi API |
 | 400 | `INVALID_GRADE` | Khối lớp không hợp với cấp học | 4, 6 |
@@ -554,4 +582,4 @@ Mọi lỗi trả về dạng:
 |---|---|
 | Đổi mật khẩu khi đang đăng nhập, đăng nhập Google, danh sách thiết bị + đăng xuất mọi thiết bị, giới hạn số lần thử đăng nhập / đăng ký theo IP, CAPTCHA | Phần còn lại của đăng nhập |
 | `POST /game-sessions`, `POST /game-sessions/{id}/events`, `POST /game-sessions/{id}/undo`, `GET /game-sessions/{id}`, `POST /game-sessions/{id}/end` | Một ván chơi: điểm đội Lật ô, Undo, khôi phục khi F5 (bảng `game_session`, `player`, `session_event`) |
-| `/games/{code}/assets` | Upload ảnh, âm thanh cho câu hỏi |
+| `/games/{code}/assets` cho âm thanh, dọn file không còn dùng | Âm thanh cho câu hỏi; job xoá ảnh đã thay |

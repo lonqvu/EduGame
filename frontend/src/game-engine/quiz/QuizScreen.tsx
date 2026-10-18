@@ -8,6 +8,7 @@ import { TeamBar } from '@/game-engine/shared/TeamBar'
 import { TeamResults } from '@/game-engine/shared/TeamResults'
 import { editPath } from '@/game-engine/registry'
 import type { GameSummary, QuizQuestion } from '@/types/game'
+import { assetSrc } from '@/utils/images'
 
 interface QuizScreenProps {
   game: GameSummary
@@ -67,7 +68,7 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
 
       <div className="flex min-h-0 flex-1 items-center gap-8 rounded-[32px] bg-white px-9 py-5">
         {question.imageUrl && (
-          <img src={question.imageUrl} alt="" className="h-[200px] w-[260px] shrink-0 rounded-3xl object-cover" />
+          <img src={assetSrc(question.imageUrl)} alt="" className="h-[200px] w-[260px] shrink-0 rounded-3xl object-cover" />
         )}
         <span
           className="font-display leading-[1.1] font-extrabold"

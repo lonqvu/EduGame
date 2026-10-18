@@ -41,4 +41,16 @@ public class GameAsset extends CreatedEntity {
 
     @Column(name = "size_bytes")
     private Long sizeBytes;
+
+    public static GameAsset create(Game game, GameAssetType type, String name, String url, String mimeType,
+                                   long sizeBytes) {
+        GameAsset asset = new GameAsset();
+        asset.game = game;
+        asset.type = type;
+        asset.name = name;
+        asset.url = url;
+        asset.mimeType = mimeType;
+        asset.sizeBytes = sizeBytes;
+        return asset;
+    }
 }

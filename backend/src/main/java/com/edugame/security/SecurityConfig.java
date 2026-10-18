@@ -63,6 +63,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/game-templates/**").permitAll()
                         // Uploaded profile pictures: shown by <img>, which sends no token (random addresses).
                         .requestMatchers(HttpMethod.GET, "/api/v1/avatars/*").permitAll()
+                        // Uploaded images, shown by <img> tags that send no token (the URLs are unguessable).
+                        .requestMatchers(HttpMethod.GET, "/api/v1/assets/*").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())

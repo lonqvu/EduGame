@@ -1,9 +1,12 @@
 import { CheckIcon, CloseIcon, PlusIcon } from '@/components/ui/icons'
-import { fieldClass, ImagePicker } from '@/editor/QuestionForm'
+import { ImagePicker } from '@/editor/ImagePicker'
+import { fieldClass } from '@/editor/QuestionForm'
 import type { Draft, QuizQuestion } from '@/types/game'
 import { MAX_OPTIONS, MIN_OPTIONS, nextOptionId, OPTION_LETTERS } from '@/utils/gameItems'
 
 interface QuizFormProps {
+  /** Code of the game, for image uploads. */
+  gameId: string
   question: QuizQuestion
   number: number
   isLast: boolean
@@ -14,7 +17,7 @@ interface QuizFormProps {
 }
 
 /** Edit form of one quiz question: text, image, options and which option is right. */
-export function QuizForm({ question, number, isLast, onChange, onDelete, onNext }: QuizFormProps) {
+export function QuizForm({ gameId, question, number, isLast, onChange, onDelete, onNext }: QuizFormProps) {
   const { options, correctId } = question
 
   const setOptionText = (id: string, text: string) =>
@@ -51,7 +54,7 @@ export function QuizForm({ question, number, isLast, onChange, onDelete, onNext 
         />
       </div>
 
-      <ImagePicker value={question.imageUrl} onChange={(imageUrl) => onChange({ imageUrl })} />
+      <ImagePicker gameId={gameId} value={question.imageUrl} onChange={(imageUrl) => onChange({ imageUrl })} />
 
       {question.trueFalse ? (
         <fieldset className="m-0 flex flex-col gap-2.5 border-0 p-0">

@@ -322,3 +322,13 @@ export interface UsedQuestionSetResponse {
   questionCount: number
   skippedCount: number
 }
+
+/** An uploaded file. `url` is relative to the API host (`/api/v1/assets/…`): show it with `assetSrc()`. */
+export interface AssetResponse {
+  id: number
+  url: string
+  name: string
+  type: 'IMAGE'
+  mimeType: string
+  sizeBytes: number
+}
