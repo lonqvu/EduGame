@@ -1,5 +1,6 @@
 import { Collapse, Modal } from 'antd'
 import { Link } from 'react-router'
+import { useFeedbackStore } from '@/store/feedbackStore'
 
 const QUESTIONS = [
   {
@@ -37,6 +38,7 @@ const QUESTIONS = [
 
 /** "Trợ giúp": answers to what teachers ask most, with a link to the page each one is about. */
 export function HelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const openFeedback = useFeedbackStore((s) => s.openFeedback)
   return (
     <Modal open={open} title="Trợ giúp" footer={null} onCancel={onClose} width={620}>
       <p className="mt-1 mb-3 text-[14px] text-ink-soft">Những câu hỏi thường gặp khi dùng EduGame.</p>
@@ -58,6 +60,19 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
           ),
         }))}
       />
+      <p className="m-0 mt-4 text-[14px] text-ink-soft">
+        Chưa thấy câu trả lời?{' '}
+        <button
+          type="button"
+          onClick={() => {
+            onClose()
+            openFeedback('OTHER')
+          }}
+          className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] font-bold text-primary hover:underline"
+        >
+          Gửi góp ý cho đội EduGame
+        </button>
+      </p>
     </Modal>
   )
 }

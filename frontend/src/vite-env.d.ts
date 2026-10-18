@@ -7,3 +7,6 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+/** The build, e.g. "2026-10-18 224ad08" (vite.config.ts). */
+declare const __APP_VERSION__: string

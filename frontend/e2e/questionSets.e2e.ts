@@ -25,7 +25,12 @@ const unique = (prefix: string) => `${prefix} ${Date.now().toString(36).slice(-5
 /** Picks an option of an antd select by its label. */
 async function pick(page: Page, select: string, option: string) {
   await page.getByRole('combobox', { name: select }).click()
-  await page.locator(`.ant-select-item-option[title="${option}"]`).click()
+  const item = page.locator(`.ant-select-item-option[title="${option}"]`)
+  // A click while the list is still opening can be lost: click until the list closes on the choice.
+  await expect(async () => {
+    if (await item.isVisible()) await item.click()
+    await expect(item).toBeHidden({ timeout: 1000 })
+  }).toPass()
 }
 
 const row = (page: Page, title: string) => page.getByRole('listitem').filter({ has: page.getByRole('link', { name: title, exact: true }) })

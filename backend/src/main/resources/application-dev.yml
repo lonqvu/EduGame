@@ -14,6 +14,9 @@ app:
     jwt:
       # Local only. Never reuse this value anywhere else.
       secret: ${JWT_SECRET:dev-only-jwt-secret-do-not-use-elsewhere-0123456789}
+  # Feedback mails land in Mailpit too.
+  feedback:
+    notify-to: ${FEEDBACK_NOTIFY_TO:gopy@edugame.local}
   mail:
     # Also print verification codes in the log, in case Mailpit (docker compose) is not running.
     log-codes: true

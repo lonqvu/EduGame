@@ -7,7 +7,7 @@ import java.util.Locale;
  * "Chrome trên Windows" from a browser's User-Agent. Sign-in alerts compare these names rather than the raw
  * header, which changes with every browser update and would make each update look like a new device.
  */
-final class DeviceNames {
+public final class DeviceNames {
 
     private record Match(String token, String name) {
     }
@@ -38,7 +38,7 @@ final class DeviceNames {
     }
 
     /** The device name, or {@code null} without a User-Agent (API clients). */
-    static String of(String userAgent) {
+    public static String of(String userAgent) {
         if (userAgent == null || userAgent.isBlank()) {
             return null;
         }

@@ -109,6 +109,9 @@ app:
   # Images teachers upload for their questions, served back at /api/v1/assets/{key}.
   assets:
     dir: ${ASSET_DIR:./data/assets}
+  # "Góp ý": addresses every new feedback is mailed to, comma separated. Empty: only stored (admin API).
+  feedback:
+    notify-to: ${FEEDBACK_NOTIFY_TO:}
 
 logging:
   level:

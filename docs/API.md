@@ -591,6 +591,37 @@ dạng → `400 INVALID_PARAMETER`. Lớp của giáo viên khác → `404`.
 - `results` của một trò chơi: lúc kết thúc, màn kết quả gửi `teams` (tên, điểm, số câu đúng, tối đa 8 đội) hoặc
   `winners` + `players` (Rung chuông vàng). Chỉ giữ lần gửi đầu tiên; thiếu (trò cũ, công cụ) thì không có `results`.
 
+### 32. Góp ý (`POST /feedback`) → `201`
+
+Nút **Góp ý** luôn hiện ở góc dưới bên phải các màn của giáo viên (không có trên màn chiếu). Request `multipart/form-data`:
+
+| Phần | Kiểu | |
+|---|---|---|
+| `feedback` | `application/json` | `{"kind": "BUG" \| "IDEA" \| "PRAISE" \| "OTHER", "rating": 1-5 (không bắt buộc), "message": "…" (1-2000 ký tự), "page": "/games/g-abc/edit" (≤ 500), "viewport": "1366x768" (≤ 20), "appVersion": "2026-10-18 224ad08" (≤ 40), "contactOk": true}` |
+| `screenshot` | ảnh, không bắt buộc | PNG, JPEG hoặc WebP (đọc từ nội dung file), tối đa 3 MB. App tự thu nhỏ còn 1600 px |
+
+Trả `{"code": "fb-…", "createdAt": "…"}`. Backend lấy thêm `User-Agent` để biết trình duyệt.
+
+- Mỗi giáo viên gửi tối đa **10 góp ý / giờ** → quá thì `429 TOO_MANY_FEEDBACK`.
+- Sai dữ liệu → `400 VALIDATION_FAILED`; ảnh không phải PNG/JPEG/WebP → `400 INVALID_IMAGE`; quá 3 MB →
+  `400 IMAGE_TOO_LARGE`.
+- Sau khi lưu, mỗi góp ý được **gửi email** (chạy nền, có ảnh đính kèm) tới các địa chỉ trong `FEEDBACK_NOTIFY_TO`
+  (`app.feedback.notify-to`, cách nhau bởi dấu phẩy; để trống thì chỉ lưu). Khi giáo viên đồng ý (`contactOk`), email
+  có `Reply-To` là email của giáo viên: bấm Trả lời là viết thẳng cho giáo viên. Gửi email lỗi chỉ ghi log, góp ý
+  vẫn được lưu.
+
+### 33–36. Đọc góp ý (`/admin/feedback`, chỉ vai trò `ADMIN`)
+
+| API | |
+|---|---|
+| `GET /admin/feedback?status=NEW&status=SEEN&page=0&size=50` | Mới nhất trước, `size` tối đa 200: `{"items": [...], "total": 12}`. Mỗi mục: `code, kind, rating, message, page, viewport, appVersion, device ("Chrome trên Windows"), contactOk, status, createdAt, teacher {code, displayName, email}, screenshotUrl` |
+| `GET /admin/feedback/export?status=…` | File CSV (UTF-8 có BOM, mở thẳng bằng Excel), tối đa 10 000 góp ý mới nhất |
+| `GET /admin/feedback/{code}/screenshot` | Ảnh đính kèm (cần token admin) |
+| `PATCH /admin/feedback/{code}` | `{"status": "NEW" \| "SEEN" \| "DONE"}`: đánh dấu đã xem / đã xử lý |
+
+Giáo viên gọi các API này → `403 FORBIDDEN`. Cấp quyền admin cho một tài khoản của đội EduGame bằng SQL:
+`UPDATE users SET role = 'ADMIN' WHERE email = 'ten@edugame.vn';` (đăng nhập lại để token mang vai trò mới).
+
 ---
 
 ## Mã lỗi
@@ -639,7 +670,8 @@ Mọi lỗi trả về dạng:
 | 429 | `TOO_MANY_CODES` | Đã gửi 5 mã trong 1 giờ tới email này | 0d, 0e, 0g |
 | 401 | `UNAUTHENTICATED` | Không gửi access token, hoặc tài khoản đã bị khóa / xóa sau khi đăng nhập | Tất cả trừ 0, 2 |
 | 401 | `INVALID_TOKEN` | Access token sai định dạng, sai chữ ký, hết hạn, hoặc phiên đăng nhập của nó đã kết thúc (kèm header `WWW-Authenticate`) | Tất cả trừ 0, 2 |
-| 403 | `FORBIDDEN` | Đã đăng nhập nhưng vai trò không được phép | (chưa API nào giới hạn theo vai trò) |
+| 403 | `FORBIDDEN` | Đã đăng nhập nhưng vai trò không được phép | 33–36 |
+| 429 | `TOO_MANY_FEEDBACK` | Đã gửi 10 góp ý trong 1 giờ | 32 |
 | 404 | `RESOURCE_NOT_FOUND` | Không tồn tại, không phải của mình, hoặc đã lưu trữ | Các API có `{code}` / `{id}`, 4 (template) |
 | 409 | `NOTHING_TO_PUBLISH` | Không có bản nháp để publish | 8 |
 | 500 | `INTERNAL_ERROR` | Lỗi không lường trước (xem log backend) | |

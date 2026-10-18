@@ -1,6 +1,8 @@
 import { App, Drawer } from 'antd'
 import { useState, type ReactNode } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
+import { FeedbackButton } from '@/components/feedback/FeedbackButton'
+import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
 import {
   ChartIcon,
   FileTextIcon,
@@ -35,7 +37,7 @@ const FOOTER_NAV: NavItem[] = [
   { label: 'Trợ giúp', icon: <HelpIcon size={22} /> },
 ]
 
-/** Teacher screens: sidebar navigation (a drawer on small screens) and the page. */
+/** Teacher screens: sidebar navigation (a drawer on small screens), the page, and "Góp ý" always at hand. */
 export function MainLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname } = useLocation()
@@ -62,11 +64,11 @@ export function MainLayout() {
         </div>
 
         {fullWidth ? (
-          <main className="min-w-0 flex-1 px-4 pt-3 pb-6 lg:pr-5 lg:pl-[17px]">
+          <main className="min-w-0 flex-1 px-4 pt-3 pb-20 lg:pr-5 lg:pl-[17px]">
             <Outlet />
           </main>
         ) : (
-          <main className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-1 flex-col px-4 pt-7 pb-12 sm:px-8">
+          <main className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-1 flex-col px-4 pt-7 pb-20 sm:px-8">
             <Outlet />
           </main>
         )}
@@ -82,6 +84,9 @@ export function MainLayout() {
       >
         <Sidebar onNavigate={() => setMenuOpen(false)} />
       </Drawer>
+
+      <FeedbackButton />
+      <FeedbackDialog />
     </div>
   )
 }

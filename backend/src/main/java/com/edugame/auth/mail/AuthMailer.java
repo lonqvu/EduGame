@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 import com.edugame.auth.domain.VerificationPurpose;
 import com.edugame.common.config.AppProperties;
+import com.edugame.common.mail.MailLayout;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -184,14 +185,6 @@ public class AuthMailer {
     private static final DateTimeFormatter WHEN = DateTimeFormatter.ofPattern("HH:mm 'ngày' dd/MM/yyyy");
 
     private static String layout(String body) {
-        return """
-                <div style="background:#F3F9FE;padding:32px 16px;font-family:Nunito,'Segoe UI',Arial,sans-serif;\
-                color:#1F2A44;font-size:16px;line-height:1.5">
-                  <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:20px;padding:32px">
-                    <p style="margin:0 0 24px;font-size:22px;font-weight:900">⭐ EduGame</p>
-                    %s
-                  </div>
-                </div>
-                """.formatted(body);
+        return MailLayout.wrap(body);
     }
 }

@@ -407,3 +407,27 @@ export interface ReportSession {
   /** Missing when the results were not kept (older games). */
   results?: GameResults
 }
+
+/** "Góp ý": what the teacher writes about. */
+export type FeedbackKind = 'BUG' | 'IDEA' | 'PRAISE' | 'OTHER'
+
+/** POST /feedback, JSON part "feedback" (the screenshot is the part "screenshot"). */
+export interface FeedbackRequest {
+  kind: FeedbackKind
+  /** 1–5. */
+  rating?: number
+  message: string
+  /** Path and query of the page the teacher was on. */
+  page?: string
+  /** Browser window, "1366x768". */
+  viewport?: string
+  appVersion?: string
+  /** The EduGame team may write back to the teacher's email. */
+  contactOk: boolean
+}
+
+export interface FeedbackResponse {
+  /** "fb-…", to quote when writing about it. */
+  code: string
+  createdAt: string
+}
