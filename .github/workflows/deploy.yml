@@ -5,6 +5,7 @@
 #   VPS_HOST     IP or domain of the server
 #   VPS_USER     the SSH user (deploy, in the docker group)
 #   VPS_SSH_KEY  private key whose public half is in ~deploy/.ssh/authorized_keys
+#   VPS_PORT     optional, the SSH port when it is not 22
 # The VPS keeps its own /opt/edugame/.env (see deploy/.env.prod.example).
 name: CI/CD
 
@@ -121,28 +122,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up SSH
+        timeout-minutes: 2
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
+          # Secrets pasted with a trailing space or newline.
+          VPS_HOST=$(printf '%s' "$VPS_HOST" | tr -d '[:space:]')
+          VPS_PORT=$(printf '%s' "$VPS_PORT" | tr -d '[:space:]')
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_deploy
+          printf '%s\n' "$VPS_SSH_KEY" | tr -d '\r' > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
-          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          if ! timeout 20 bash -c "</dev/tcp/$VPS_HOST/$VPS_PORT" 2>/dev/null; then
+            echo "::error::Cannot reach $VPS_HOST:$VPS_PORT from GitHub. Check VPS_HOST, the SSH port (secret VPS_PORT) and the provider's firewall."
+            exit 1
+          fi
+          ssh-keyscan -T 15 -p "$VPS_PORT" -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host vps
+            HostName $VPS_HOST
+            Port $VPS_PORT
+            User $VPS_USER
+            IdentityFile ~/.ssh/id_deploy
+            IdentitiesOnly yes
+            ConnectTimeout 15
+            ServerAliveInterval 30
+          EOF
+          ssh -o BatchMode=yes vps true || {
+            echo "::error::$VPS_USER@$VPS_HOST refused the key: VPS_SSH_KEY must be the private key whose .pub line is in ~$VPS_USER/.ssh/authorized_keys."
+            exit 1
+          }
       - name: Copy the compose file
-        env:
-          TARGET: ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
-        run: scp -i ~/.ssh/id_deploy deploy/docker-compose.prod.yml "$TARGET:/opt/edugame/docker-compose.yml"
+        timeout-minutes: 2
+        run: scp deploy/docker-compose.prod.yml vps:/opt/edugame/docker-compose.yml
       - name: Roll onto the new images
+        timeout-minutes: 15
         env:
-          TARGET: ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
           TAG: ${{ needs.images.outputs.tag }}
           ACTOR: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # The job token only lives as long as this job: log in, pull, log out.
-          printf '%s' "$TOKEN" | ssh -i ~/.ssh/id_deploy "$TARGET" "docker login ghcr.io -u '$ACTOR' --password-stdin"
-          ssh -i ~/.ssh/id_deploy "$TARGET" "TAG='$TAG' bash -s" <<'EOF'
+          printf '%s' "$TOKEN" | ssh vps "docker login ghcr.io -u '$ACTOR' --password-stdin"
+          ssh vps "TAG='$TAG' bash -s" <<'EOF'
           set -e
           cd /opt/edugame
           trap 'docker logout ghcr.io >/dev/null' EXIT
