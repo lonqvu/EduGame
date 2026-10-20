@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "Feedback", description = "\"Góp ý\": teachers write to the EduGame team")
+@Tag(name = "Feedback", description = "\"Góp ý\": teachers write to the Lớp vui team")
 @RestController
 @RequiredArgsConstructor
 public class FeedbackController {

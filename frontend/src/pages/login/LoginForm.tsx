@@ -38,7 +38,7 @@ export function LoginForm({ onSignedIn }: { onSignedIn: () => void }) {
   })
 
   return (
-    <AuthCard title="Đăng nhập" subtitle="Chào mừng bạn quay trở lại EduGame!">
+    <AuthCard title="Đăng nhập" subtitle="Chào mừng bạn quay trở lại Lớp vui!">
       <form noValidate onSubmit={onSubmit} className="mt-[clamp(16px,3.6vh,34px)] flex flex-col">
         <Field label="Email" htmlFor="login-username" icon={<MailIcon size={22} />} error={errors.username?.message}>
           <input

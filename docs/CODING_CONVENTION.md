@@ -1,4 +1,4 @@
-# Coding Convention — EduGame Platform
+# Coding Convention — Lớp vui
 
 Nguyên tắc chung: **clean code, dễ bảo trì, không over-engineering**. Viết code giống code xung quanh.
 Không thêm dependency khi chưa thực sự cần — nếu cần, ghi rõ lý do trong PR.

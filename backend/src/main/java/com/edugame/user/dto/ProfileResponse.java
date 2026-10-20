@@ -5,7 +5,7 @@ import java.time.Instant;
 import com.edugame.user.domain.UserRole;
 
 /**
- * "Hồ sơ của tôi": the account and what the teacher has done with EduGame.
+ * "Hồ sơ của tôi": the account and what the teacher has done with Lớp vui.
  *
  * @param phone         digits only; {@code null} when not given
  * @param avatar        one of {@link ProfileRules#AVATARS}, or {@link ProfileRules#UPLOADED}; {@code null}: the default

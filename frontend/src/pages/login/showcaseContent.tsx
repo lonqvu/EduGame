@@ -37,7 +37,7 @@ const PRODUCT_FEATURES: ShowcaseFeature[] = [
 
 const PRODUCT_PITCH = (
   <>
-    EduGame giúp giáo viên tạo ra những
+    Lớp vui giúp giáo viên tạo ra những
     <br />
     trò chơi học tập thú vị, dễ dàng và hiệu quả.
   </>
@@ -127,7 +127,7 @@ export const FORGOT_SHOWCASE: ShowcaseContent = {
       icon: <HeartFilledIcon size={28} className="text-[#F0507A]" />,
       badge: 'bg-[#FFE4EA]',
       title: 'Luôn đồng hành',
-      text: 'EduGame luôn sẵn sàng hỗ trợ bạn',
+      text: 'Lớp vui luôn sẵn sàng hỗ trợ bạn',
     },
   ],
   image: {

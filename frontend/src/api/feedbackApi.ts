@@ -1,7 +1,7 @@
 import { httpClient } from '@/api/httpClient'
 import type { FeedbackRequest, FeedbackResponse } from '@/types/api'
 
-/** Sends a feedback to the EduGame team, with a screenshot if there is one. */
+/** Sends a feedback to the Lớp vui team, with a screenshot if there is one. */
 export async function sendFeedback(feedback: FeedbackRequest, screenshot?: File | null): Promise<FeedbackResponse> {
   const form = new FormData()
   form.append('feedback', new Blob([JSON.stringify(feedback)], { type: 'application/json' }))

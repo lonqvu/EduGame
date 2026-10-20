@@ -33,7 +33,7 @@ export function ProfilePage() {
 
   const confirmLogout = () =>
     modal.confirm({
-      title: 'Đăng xuất khỏi EduGame?',
+      title: 'Đăng xuất khỏi Lớp vui?',
       okText: 'Đăng xuất',
       cancelText: 'Ở lại',
       onOk: () => logout(),
@@ -97,7 +97,7 @@ export function ProfilePage() {
             <span className="font-semibold text-ink">Hồ sơ của tôi</span>
           </nav>
           <h1 className="m-0 mt-5 text-[32px] leading-[1.1] font-black tracking-[-0.01em] text-[#1A2440]">Hồ sơ của tôi</h1>
-          <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">Quản lý thông tin cá nhân và tài khoản EduGame của bạn.</p>
+          <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">Quản lý thông tin cá nhân và tài khoản Lớp vui của bạn.</p>
         </div>
         <div className="order-first ml-auto sm:order-none">
           <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />

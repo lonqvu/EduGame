@@ -1,10 +1,12 @@
 package com.edugame.feedback.mail;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import com.edugame.common.config.AppProperties;
+import com.edugame.common.mail.MailAddresses;
 import com.edugame.common.mail.MailLayout;
 import com.edugame.feedback.FeedbackProperties;
 import jakarta.mail.MessagingException;
@@ -46,7 +48,7 @@ public class FeedbackMailer {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
-            helper.setFrom(appProperties.mail().from());
+            helper.setFrom(MailAddresses.sender(appProperties.mail().from()));
             helper.setTo(feedbackProperties.notifyTo().toArray(String[]::new));
             if (mail.teacherEmail() != null) {
                 helper.setReplyTo(mail.teacherEmail());
@@ -58,16 +60,16 @@ public class FeedbackMailer {
                         new ByteArrayResource(mail.screenshot()), mail.screenshotType());
             }
             mailSender.send(message);
-        } catch (MessagingException | RuntimeException ex) {
+        } catch (MessagingException | UnsupportedEncodingException | RuntimeException ex) {
             log.error("Could not mail feedback {}", mail.code(), ex);
         }
     }
 
-    /** "[Góp ý EduGame] Báo lỗi – Cô Lan: Không lưu được câu hỏi khi…". */
+    /** "[Góp ý Lớp vui] Báo lỗi – Cô Lan: Không lưu được câu hỏi khi…". */
     static String subject(FeedbackMail mail) {
         String firstLine = mail.message().lines().findFirst().orElse("").strip();
         String excerpt = firstLine.length() <= SUBJECT_EXCERPT ? firstLine : firstLine.substring(0, SUBJECT_EXCERPT) + "…";
-        return "[Góp ý EduGame] %s – %s: %s".formatted(mail.kind().label(), teacher(mail), excerpt);
+        return "[Góp ý Lớp vui] %s – %s: %s".formatted(mail.kind().label(), teacher(mail), excerpt);
     }
 
     private String text(FeedbackMail mail) {

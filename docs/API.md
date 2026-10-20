@@ -1,4 +1,4 @@
-# EduGame Platform – REST API
+# Lớp vui – REST API
 
 Danh sách toàn bộ API backend: mục đích, vị trí code backend và nơi frontend gọi.
 Swagger UI (chạy thử trực tiếp): <http://localhost:8080/swagger-ui.html> · OpenAPI JSON: `/v3/api-docs`.
@@ -160,8 +160,8 @@ Ai có email cũng đăng ký được. Tài khoản **chỉ được tạo khi 
 { "email": "co.hoa@truong.edu.vn", "expiresIn": 600, "resendAfter": 60 }
 ```
 
-Lưu tạm tên + mật khẩu (đã băm BCrypt) cùng mã, gửi mail "Mã xác nhận EduGame: 123456". Email đã có tài khoản →
-**vẫn trả đúng câu trả lời trên** (không lộ email nào đã đăng ký), nhưng mail gửi tới là "Bạn đã có tài khoản EduGame".
+Lưu tạm tên + mật khẩu (đã băm BCrypt) cùng mã, gửi mail "Mã xác nhận Lớp vui: 123456". Email đã có tài khoản →
+**vẫn trả đúng câu trả lời trên** (không lộ email nào đã đăng ký), nhưng mail gửi tới là "Bạn đã có tài khoản Lớp vui".
 Mật khẩu ≥ 8 ký tự và **≤ 72 byte UTF-8** (giới hạn của BCrypt; chữ có dấu chiếm 2–3 byte, nên mật khẩu tiếng Việt
 có dấu khoảng 24–36 ký tự là tối đa). Email được chuẩn hoá chữ thường, bỏ khoảng trắng.
 
@@ -619,7 +619,7 @@ Trả `{"code": "fb-…", "createdAt": "…"}`. Backend lấy thêm `User-Agent`
 | `GET /admin/feedback/{code}/screenshot` | Ảnh đính kèm (cần token admin) |
 | `PATCH /admin/feedback/{code}` | `{"status": "NEW" \| "SEEN" \| "DONE"}`: đánh dấu đã xem / đã xử lý |
 
-Giáo viên gọi các API này → `403 FORBIDDEN`. Cấp quyền admin cho một tài khoản của đội EduGame bằng SQL:
+Giáo viên gọi các API này → `403 FORBIDDEN`. Cấp quyền admin cho một tài khoản của đội Lớp vui bằng SQL:
 `UPDATE users SET role = 'ADMIN' WHERE email = 'ten@edugame.vn';` (đăng nhập lại để token mang vai trò mới).
 
 ---

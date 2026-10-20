@@ -28,8 +28,8 @@ test.beforeEach(async ({ context, page }) => {
   })
 })
 
-const feedbackButton = (page: Page) => page.getByRole('button', { name: 'Góp ý cho EduGame' })
-const dialog = (page: Page) => page.getByRole('dialog', { name: 'Góp ý cho EduGame' })
+const feedbackButton = (page: Page) => page.getByRole('button', { name: 'Góp ý cho Lớp vui' })
+const dialog = (page: Page) => page.getByRole('dialog', { name: 'Góp ý cho Lớp vui' })
 const message = (page: Page) => dialog(page).getByRole('textbox', { name: 'Nội dung' })
 
 /** Sending is answered here instead of by the backend (which allows 10 a teacher an hour). */
@@ -94,7 +94,7 @@ test('a teacher sends feedback with a screenshot of the page, and is thanked', a
   await dialog(page).getByRole('radio', { name: 'Hài lòng', exact: true }).check({ force: true })
   await expect(dialog(page)).toContainText('Hài lòng')
   await message(page).fill('Cô muốn có thêm trò Bingo cho lớp 3.')
-  await expect(dialog(page).getByText(/Đội EduGame có thể trả lời cô qua email/)).toBeVisible()
+  await expect(dialog(page).getByText(/Đội Lớp vui có thể trả lời cô qua email/)).toBeVisible()
 
   await dialog(page).getByRole('button', { name: 'Chụp màn hình trang này' }).click()
   await expect(dialog(page).getByRole('img', { name: 'Ảnh màn hình đính kèm' })).toBeVisible({ timeout: 20_000 })
@@ -177,19 +177,19 @@ test('a refused feedback stays in the dialog, with why', async ({ page }) => {
   await page.goto('/')
   await feedbackButton(page).click()
   await dialog(page).locator('label').filter({ hasText: 'Khen' }).click()
-  await message(page).fill('EduGame rất hay!')
+  await message(page).fill('Lớp vui rất hay!')
   await dialog(page).getByRole('button', { name: 'Gửi góp ý' }).click()
 
   await expect(page.getByText(/Cô đã gửi nhiều góp ý trong một giờ qua/)).toBeVisible()
   await expect(dialog(page)).toBeVisible()
-  await expect(message(page)).toHaveValue('EduGame rất hay!')
+  await expect(message(page)).toHaveValue('Lớp vui rất hay!')
   await expect(dialog(page).getByRole('radio', { name: /Khen/ })).toBeChecked()
 })
 
 test('"Trợ giúp" leads to "Góp ý" when the answer is not there', async ({ page }) => {
   await page.goto('/profile')
   await page.getByRole('main').getByRole('button', { name: /^Trợ giúp/ }).click()
-  await page.getByRole('button', { name: 'Gửi góp ý cho đội EduGame' }).click()
+  await page.getByRole('button', { name: 'Gửi góp ý cho đội Lớp vui' }).click()
   await expect(dialog(page)).toBeVisible()
   await expect(dialog(page).getByRole('radio', { name: /Khác/ })).toBeChecked()
   await expect(message(page)).toBeFocused()

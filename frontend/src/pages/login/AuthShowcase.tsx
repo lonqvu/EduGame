@@ -55,7 +55,7 @@ export function AuthShowcase({ content }: { content: ShowcaseContent }) {
   const { title, titleClass, subtitle, features, image, stats, ground } = content
   return (
     <section
-      aria-label="Giới thiệu EduGame"
+      aria-label="Giới thiệu Lớp vui"
       className="relative hidden min-h-dvh w-[59%] shrink-0 flex-col overflow-hidden bg-[linear-gradient(180deg,#E6F4FE_0%,#F0F8FE_42%,#EAF5FD_72%,#D9EEFB_100%)] xl:flex"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">

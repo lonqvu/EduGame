@@ -1,4 +1,4 @@
-# EduGame Platform — Tổng quan dự án
+# Lớp vui — Tổng quan dự án
 
 ## 1. Mục tiêu
 

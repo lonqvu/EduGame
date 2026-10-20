@@ -1,4 +1,4 @@
-# EduGame Platform
+# Lớp vui
 
 Nền tảng web cho phép **giáo viên** tạo và tùy chỉnh trò chơi giáo dục cho **học sinh tiểu học**: tạo game từ template,
 chỉnh sửa câu hỏi / đáp án / giao diện / cài đặt, sau đó publish để học sinh tham gia chơi.

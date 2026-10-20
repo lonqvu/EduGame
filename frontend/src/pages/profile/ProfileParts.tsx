@@ -63,7 +63,7 @@ export function ProfileCard({ profile, onEdit }: { profile: ProfileResponse; onE
             </span>
             Tài khoản đang hoạt động
           </span>
-          {profile.memberSince && <span className="text-[13px] text-ink-muted">Tham gia EduGame từ: {joinedLabel(profile.memberSince)}</span>}
+          {profile.memberSince && <span className="text-[13px] text-ink-muted">Tham gia Lớp vui từ: {joinedLabel(profile.memberSince)}</span>}
         </div>
         <button
           type="button"

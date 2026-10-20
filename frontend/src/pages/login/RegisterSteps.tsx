@@ -85,7 +85,7 @@ export function SignUpForm({ initial, onCodeSent }: {
   }
 
   return (
-    <AuthCard compact title="Đăng ký tài khoản" subtitle="Bắt đầu hành trình đồng hành cùng EduGame!" headerAction={<SignInLink />}>
+    <AuthCard compact title="Đăng ký tài khoản" subtitle="Bắt đầu hành trình đồng hành cùng Lớp vui!" headerAction={<SignInLink />}>
       <form noValidate onSubmit={onSubmit} className="@container mt-[clamp(14px,2.8vh,26px)] flex flex-col">
         <Field label="Họ và tên" htmlFor="signup-name" icon={<UserIcon size={22} />} required error={errors.displayName?.message}>
           <input
@@ -181,7 +181,7 @@ export function SignUpForm({ initial, onCodeSent }: {
               <a href="#" onClick={openDocument('Chính sách bảo mật')} className="font-bold text-primary hover:text-primary-ink">
                 Chính sách bảo mật
               </a>{' '}
-              của EduGame
+              của Lớp vui
             </span>
           </Checkbox>
           {errors.acceptTerms && (

@@ -95,7 +95,7 @@ export function HomeHero({ greetingName, className, studentCount, classes, curre
       <div className="pointer-events-none absolute inset-y-0 right-0 left-[50%] hidden overflow-hidden [container-type:size] [mask-image:linear-gradient(to_right,transparent,black_80px)] @min-[640px]:block @min-[980px]:left-[430px]">
         <img
           src={`${HOME_ASSETS}/hero-wide.png`}
-          alt="Cô giáo và các bạn nhỏ bên bảng: Học vui, học tốt cùng EduGame!"
+          alt="Cô giáo và các bạn nhỏ bên bảng: Học vui, học tốt cùng Lớp vui!"
           className="absolute right-[min(0px,calc(50cqw-128cqh))] bottom-0 h-full w-auto max-w-none select-none"
         />
       </div>

@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** What teachers sent from "Góp ý", for the EduGame team (role ADMIN). */
+/** What teachers sent from "Góp ý", for the Lớp vui team (role ADMIN). */
 @Tag(name = "Feedback (admin)", description = "Read and follow up teachers' feedback")
 @RestController
 @RequestMapping("/api/v1/admin/feedback")

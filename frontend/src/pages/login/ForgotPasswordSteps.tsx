@@ -65,7 +65,7 @@ export function ForgotPasswordForm({ initialEmail, onCodeSent }: {
       <div className="mt-[clamp(18px,3.4vh,30px)] flex gap-3.5 rounded-[14px] bg-[#F2F7FF] px-[clamp(16px,2vw,24px)] py-[clamp(14px,2.4vh,22px)] text-[15px] leading-relaxed font-semibold text-ink-soft">
         <InfoFilledIcon size={22} className="mt-0.5 shrink-0 text-primary" />
         <p className="m-0">
-          Nếu email của bạn đã đăng ký tài khoản EduGame, chúng tôi sẽ gửi mã đặt lại mật khẩu trong vài phút. Vui lòng
+          Nếu email của bạn đã đăng ký tài khoản Lớp vui, chúng tôi sẽ gửi mã đặt lại mật khẩu trong vài phút. Vui lòng
           kiểm tra cả hộp thư đến và thư rác.
         </p>
       </div>

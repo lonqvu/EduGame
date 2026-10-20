@@ -10,7 +10,7 @@ import { FEEDBACK_KINDS, feedbackRequest, MAX_FEEDBACK_MESSAGE, prepareScreensho
 import { captureScreen } from '@/utils/screenshot'
 
 /**
- * "Góp ý cho EduGame": what about (bug, idea, praise), how happy the teacher is, their words, a screenshot (taken of
+ * "Góp ý cho Lớp vui": what about (bug, idea, praise), how happy the teacher is, their words, a screenshot (taken of
  * the page, picked, pasted or dropped) and whether the team may write back. The page, browser window and app build
  * go with it. What is typed stays when the dialog closes, until it is sent.
  */
@@ -116,7 +116,7 @@ export function FeedbackDialog() {
   return (
     <Modal
       open={open}
-      title="Góp ý cho EduGame"
+      title="Góp ý cho Lớp vui"
       onCancel={close}
       closable={!sending}
       mask={{ closable: !sending }}
@@ -132,13 +132,13 @@ export function FeedbackDialog() {
           </span>
           <h3 className="m-0 mt-4 text-[22px] font-black text-ink">Cảm ơn cô đã góp ý!</h3>
           <p className="m-0 mt-2 max-w-[400px] text-[15px] leading-[1.55] text-ink-soft">
-            Đội EduGame đọc mọi góp ý để làm EduGame tốt hơn mỗi ngày
+            Đội Lớp vui đọc mọi góp ý để làm Lớp vui tốt hơn mỗi ngày
             {sent.willReply ? '. Khi cần, đội sẽ trả lời cô qua email.' : '.'}
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-4 pt-1" onPaste={onPaste} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
-          <p className="m-0 text-[14.5px] text-ink-soft">Cô gặp lỗi, có ý tưởng hay muốn khen? Đội EduGame đọc mọi góp ý.</p>
+          <p className="m-0 text-[14.5px] text-ink-soft">Cô gặp lỗi, có ý tưởng hay muốn khen? Đội Lớp vui đọc mọi góp ý.</p>
 
           <fieldset className="m-0 border-0 p-0">
             <legend className="mb-2 p-0 text-[14.5px] font-bold text-ink">Cô muốn</legend>
@@ -162,7 +162,7 @@ export function FeedbackDialog() {
 
           <fieldset className="m-0 border-0 p-0">
             <legend className="mb-2 p-0 text-[14.5px] font-bold text-ink">
-              Cô thấy EduGame thế nào? <span className="font-semibold text-ink-muted">(không bắt buộc)</span>
+              Cô thấy Lớp vui thế nào? <span className="font-semibold text-ink-muted">(không bắt buộc)</span>
             </legend>
             <div className="flex flex-wrap items-center gap-2">
               {RATINGS.map((r) => (
@@ -267,11 +267,11 @@ export function FeedbackDialog() {
           {email ? (
             <Checkbox checked={draft.contactOk} onChange={(e) => change({ contactOk: e.target.checked })}>
               <span className="text-[14.5px]">
-                Đội EduGame có thể trả lời cô qua email <b>{email}</b>
+                Đội Lớp vui có thể trả lời cô qua email <b>{email}</b>
               </span>
             </Checkbox>
           ) : (
-            profile && <p className="m-0 text-[13.5px] text-ink-muted">Tài khoản chưa có email nên đội EduGame chưa trả lời lại cô được.</p>
+            profile && <p className="m-0 text-[13.5px] text-ink-muted">Tài khoản chưa có email nên đội Lớp vui chưa trả lời lại cô được.</p>
           )}
           <p className="m-0 -mt-2 text-[13px] text-ink-muted">Kèm theo trang cô đang mở và loại trình duyệt, để đội dễ tìm lỗi.</p>
         </div>

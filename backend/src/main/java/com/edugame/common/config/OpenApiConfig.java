@@ -18,7 +18,7 @@ public class OpenApiConfig {
     public OpenAPI eduGameOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("EduGame Platform API")
+                        .title("Lớp vui API")
                         .description("REST API for creating and playing educational games for primary school students")
                         .version("v1"))
                 .components(new Components().addSecuritySchemes(BEARER_AUTH, new SecurityScheme()
