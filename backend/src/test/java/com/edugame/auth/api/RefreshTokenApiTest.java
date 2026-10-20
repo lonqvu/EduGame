@@ -65,6 +65,17 @@ class RefreshTokenApiTest {
     }
 
     @Test
+    void theCookieIsSecureOverHttpsButStillSetOnAPlainHttpSite() throws Exception {
+        // https://lopvui.vn behind the proxy.
+        assertThat(loginAt("lopvui.vn", true).getHeader(HttpHeaders.SET_COOKIE)).contains("Secure");
+        // http://<server IP> before the domain has HTTPS: a Secure cookie would be dropped by the browser.
+        String plain = loginAt("203.0.113.7", false).getHeader(HttpHeaders.SET_COOKIE);
+        assertThat(plain).contains("HttpOnly", "SameSite=Strict").doesNotContain("Secure");
+        // And it works: the next refresh over plain HTTP renews the session.
+        refresh(refreshCookie(loginAt("203.0.113.7", false))).andExpect(status().isOk());
+    }
+
+    @Test
     void refreshRotatesTheCookieAndGivesAWorkingAccessToken() throws Exception {
         String first = refreshCookie(login(false));
 
@@ -152,6 +163,18 @@ class RefreshTokenApiTest {
         String body = objectMapper.writeValueAsString(
                 Map.of("username", "colan", "password", "123456", "remember", remember));
         return mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andReturn().getResponse();
+    }
+
+    /** Sign-in to the site at this host, over HTTPS or plain HTTP. */
+    private MockHttpServletResponse loginAt(String host, boolean https) throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of("username", "colan", "password", "123456", "remember", true));
+        return mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(body)
+                        .secure(https).with(request -> {
+                            request.setServerName(host);
+                            return request;
+                        }))
                 .andExpect(status().isOk())
                 .andReturn().getResponse();
     }
