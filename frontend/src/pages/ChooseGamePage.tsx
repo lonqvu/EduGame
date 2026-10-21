@@ -15,6 +15,7 @@ import { editPath, gameRegistry, playPath, toolPath, type GameBadge } from '@/ga
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
+import { HowToPlayDrawer } from '@/pages/choose-game/HowToPlayDrawer'
 import { NewGameModal } from '@/pages/choose-game/NewGameModal'
 import { usePlayNow } from '@/pages/choose-game/usePlayNow'
 import { useTeacherStore } from '@/store/teacherStore'
@@ -105,6 +106,8 @@ export function ChooseGamePage() {
   const [sort, setSort] = useState<Sort>('popular')
   const [allRecent, setAllRecent] = useState(false)
   const { playNow, busy } = usePlayNow()
+  /** The card whose "Cách chơi" is open. */
+  const [guideOf, setGuideOf] = useState<Entry | null>(null)
 
   useEffect(() => {
     void loadTemplates()
@@ -329,12 +332,25 @@ export function ChooseGamePage() {
                   opening={busy === entry.template.type && !entry.pickMode}
                   onPlay={() => play(entry)}
                   onChoose={() => choose(entry)}
+                  onGuide={() => setGuideOf(entry)}
                 />
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      <HowToPlayDrawer
+        game={guideOf && { type: guideOf.template.type, name: guideOf.name, description: guideOf.description, art: guideOf.art }}
+        opening={!!guideOf && busy === guideOf.template.type}
+        onClose={() => setGuideOf(null)}
+        onPlay={() => guideOf && play(guideOf)}
+        onWrite={() => {
+          if (!guideOf) return
+          choose(guideOf)
+          setGuideOf(null)
+        }}
+      />
 
       <NewGameModal
         template={newGame}
@@ -352,9 +368,11 @@ interface GameCardProps {
   opening: boolean
   onPlay: () => void
   onChoose: () => void
+  /** "Cách chơi" */
+  onGuide: () => void
 }
 
-function GameCard({ entry, opening, onPlay, onChoose }: GameCardProps) {
+function GameCard({ entry, opening, onPlay, onChoose, onGuide }: GameCardProps) {
   const def = gameRegistry[entry.template.type]
   const badge = def.badge && BADGES[def.badge]
   const ownContent = def.usesQuestions && !entry.pickMode
@@ -399,18 +417,24 @@ function GameCard({ entry, opening, onPlay, onChoose }: GameCardProps) {
             <PlayTriangle />
             {opening ? 'Đang mở…' : 'Chơi ngay'}
           </button>
-          <div className="relative z-[1] flex h-[30px] items-center justify-center pt-[6px]">
-            {ownContent ? (
-              <button
-                type="button"
-                onClick={onChoose}
-                aria-label={`Dùng câu hỏi của cô cho ${entry.name}`}
-                className="cursor-pointer rounded-[8px] border-0 bg-transparent px-2 py-1 font-[inherit] text-[13.5px] font-bold text-primary hover:bg-primary-soft hover:text-primary-ink focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                ✎ Dùng câu hỏi của cô
-              </button>
-            ) : (
-              <span className="text-[13px] text-ink-muted">{def.usesQuestions ? '' : 'Mở ngay, không cần chuẩn bị'}</span>
+          <div className="relative z-[1] flex h-[30px] items-center justify-center gap-1 pt-[6px]">
+            <button
+              type="button"
+              onClick={onGuide}
+              aria-label={`Cách chơi ${entry.name}`}
+              className={CARD_LINK}
+            >
+              ⓘ Cách chơi
+            </button>
+            {ownContent && (
+              <>
+                <span aria-hidden="true" className="text-line-strong">
+                  ·
+                </span>
+                <button type="button" onClick={onChoose} aria-label={`Dùng câu hỏi của cô cho ${entry.name}`} className={CARD_LINK}>
+                  ✎ Dùng câu hỏi của cô
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -418,6 +442,9 @@ function GameCard({ entry, opening, onPlay, onChoose }: GameCardProps) {
     </article>
   )
 }
+
+const CARD_LINK =
+  'cursor-pointer rounded-[8px] border-0 bg-transparent px-1.5 py-1 font-[inherit] text-[13px] font-bold text-primary hover:bg-primary-soft hover:text-primary-ink focus-visible:ring-2 focus-visible:ring-primary'
 
 function PlayTriangle() {
   return (

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
 import { gameRegistry } from '@/game-engine/registry'
 import { usePlayNow } from '@/pages/choose-game/usePlayNow'
+import { WelcomeTry } from '@/pages/home/WelcomeTry'
 import { ActionCards } from '@/pages/home/ActionCards'
 import { HomeHero } from '@/pages/home/HomeHero'
 import { PraiseCorner, type StarPeriod } from '@/pages/home/PraiseCorner'
@@ -61,7 +62,7 @@ export function HomePage() {
 
   const [allRecent, setAllRecent] = useState(false)
   const [period, setPeriod] = useState<StarPeriod>('week')
-  const { playNow } = usePlayNow()
+  const { playNow, busy } = usePlayNow()
 
   useEffect(() => {
     void loadTeacher()
@@ -119,6 +120,8 @@ export function HomePage() {
       <div className="flex justify-end">
         <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
       </div>
+
+      {gamesStatus === 'ready' && games.length === 0 && <WelcomeTry busy={busy} onPlay={startGame} />}
 
       <div className={columns}>
         <HomeHero

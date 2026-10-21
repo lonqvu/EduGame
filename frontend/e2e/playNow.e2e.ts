@@ -8,20 +8,24 @@ const API_URL = process.env.E2E_API_URL ?? 'http://localhost:8080/api/v1/'
  * sample games are archived after each test, so every test starts from nothing.
  */
 const test = base.extend<{ api: APIRequestContext }>({
-  // oxlint-disable-next-line no-empty-pattern
-  api: async ({}, provide) => {
-    const anonymous = await request.newContext({ baseURL: API_URL })
-    const { accessToken } = await (await anonymous.post('auth/login', { data: ADMIN })).json()
-    await anonymous.dispose()
-    const api = await request.newContext({ baseURL: API_URL, extraHTTPHeaders: { Authorization: `Bearer ${accessToken}` } })
-    const archiveAll = async () => {
-      for (const g of (await (await api.get('games')).json()) as { code: string }[]) await api.delete(`games/${g.code}`)
-    }
-    await archiveAll()
-    await provide(api)
-    await archiveAll()
-    await api.dispose()
-  },
+  api: [
+    // oxlint-disable-next-line no-empty-pattern
+    async ({}, provide) => {
+      const anonymous = await request.newContext({ baseURL: API_URL })
+      const { accessToken } = await (await anonymous.post('auth/login', { data: ADMIN })).json()
+      await anonymous.dispose()
+      const api = await request.newContext({ baseURL: API_URL, extraHTTPHeaders: { Authorization: `Bearer ${accessToken}` } })
+      const archiveAll = async () => {
+        for (const g of (await (await api.get('games')).json()) as { code: string }[]) await api.delete(`games/${g.code}`)
+      }
+      await archiveAll()
+      await provide(api)
+      await archiveAll()
+      await api.dispose()
+    },
+    // Every test, used or not, starts and ends with no game.
+    { auto: true },
+  ],
 })
 
 test.beforeEach(async ({ context, page }) => {
@@ -113,4 +117,41 @@ test('without a class, the name tools ask for names on the spot, or roll numbers
   await expect(page.getByText('Chia 5 bạn thành')).toBeVisible()
   await page.getByRole('button', { name: 'Chia nhóm' }).click()
   await expect(page.getByText('Số 5', { exact: true })).toBeVisible()
+})
+
+test('"Cách chơi" on a card explains the game, then plays it with sample questions or opens the editor', async ({ page }) => {
+  await page.goto('/games/new')
+  await page.getByRole('button', { name: 'Cách chơi Trắc nghiệm' }).click()
+  const guide = page.getByRole('dialog', { name: 'Cách chơi: Trắc nghiệm' })
+  await expect(guide).toBeVisible()
+  await expect(guide.getByRole('list', { name: 'Các bước chơi' }).getByRole('listitem').first()).toBeVisible()
+  await expect(guide.getByRole('button', { name: '✎ Dùng câu hỏi của cô' })).toBeVisible()
+  await guide.getByRole('button', { name: '▶ Chơi thử với câu hỏi mẫu' }).click()
+  await expect(page).toHaveURL(/\/play\/g-/)
+  await expect(intro(page)).toContainText('Trắc nghiệm mẫu')
+
+  // A tool has no questions: one button that plays it.
+  await page.goto('/games/new')
+  await page.getByRole('button', { name: 'Cách chơi Đồng hồ đếm ngược' }).click()
+  const tool = page.getByRole('dialog', { name: 'Cách chơi: Đồng hồ đếm ngược' })
+  await expect(tool.getByRole('list', { name: 'Các bước chơi' }).getByRole('listitem')).toHaveCount(3)
+  await expect(tool.getByRole('button', { name: '✎ Dùng câu hỏi của cô' })).toHaveCount(0)
+  await expect(tool.getByRole('button', { name: '▶ Chơi ngay' })).toBeVisible()
+})
+
+test('a teacher without games is welcomed on the home page with games to try, until it is hidden', async ({ page }) => {
+  await page.goto('/')
+  const welcome = page.getByRole('region', { name: 'Thử ngay một trò chơi' })
+  await expect(welcome).toBeVisible()
+  await welcome.getByRole('button', { name: 'Ẩn gợi ý' }).click()
+  await expect(welcome).toBeHidden()
+  await page.reload()
+  await expect(page.getByRole('button', { name: /Lật ô thi đua/ }).first()).toBeVisible()
+  await expect(welcome).toBeHidden()
+
+  await page.evaluate(() => localStorage.removeItem('edugame.welcomeDismissed'))
+  await page.reload()
+  await welcome.getByRole('button', { name: 'Thử Trắc nghiệm' }).click()
+  await expect(page).toHaveURL(/\/play\/g-/)
+  await expect(intro(page)).toContainText('Trắc nghiệm mẫu')
 })
