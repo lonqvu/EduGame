@@ -66,16 +66,38 @@ export function StatTile({
   )
 }
 
+/** What the two figures of a chart column are called (the columns show the first). */
+export interface ChartLabels {
+  /** "Hoạt động": the caption and the column header. */
+  title: string
+  /** "hoạt động", after a number. */
+  main: string
+  /** "hoàn thành", the second figure after a number. */
+  second: string
+  /** "Hoàn thành", its column header. */
+  secondTitle: string
+}
+
+const ACTIVITY_LABELS: ChartLabels = { title: 'Hoạt động', main: 'hoạt động', second: 'hoàn thành', secondTitle: 'Hoàn thành' }
+
 /**
  * Games per day (or week): one column each, the completed share in the tooltip. Every column is focusable and
  * names its figures, and a table carries the same numbers for screen readers.
  */
-export function ActivityChart({ buckets, unit }: { buckets: ChartBucket[]; unit: 'day' | 'week' }) {
+export function ActivityChart({
+  buckets,
+  unit,
+  labels = ACTIVITY_LABELS,
+}: {
+  buckets: ChartBucket[]
+  unit: 'day' | 'week'
+  labels?: ChartLabels
+}) {
   const [hovered, setHovered] = useState<number | null>(null)
   const top = niceMax(Math.max(0, ...buckets.map((b) => b.activities)))
   const labelled = new Set(axisLabelIndexes(buckets.length))
   const name = (b: ChartBucket) => (unit === 'day' ? weekdayDate(b.start) : `Tuần ${shortDate(b.start)} – ${shortDate(b.end)}`)
-  const describe = (b: ChartBucket) => `${name(b)}: ${b.activities} hoạt động, ${b.completed} hoàn thành`
+  const describe = (b: ChartBucket) => `${name(b)}: ${b.activities} ${labels.main}, ${b.completed} ${labels.second}`
   const shown = hovered === null ? null : buckets[hovered]
 
   return (
@@ -94,7 +116,7 @@ export function ActivityChart({ buckets, unit }: { buckets: ChartBucket[]; unit:
             <span className="border-t border-line" />
           </div>
           <ul
-            aria-label={`Hoạt động theo ${unit === 'day' ? 'ngày' : 'tuần'}`}
+            aria-label={`${labels.title} theo ${unit === 'day' ? 'ngày' : 'tuần'}`}
             className="relative m-0 flex h-full list-none items-end gap-[2px] p-0"
             onPointerLeave={() => setHovered(null)}
           >
@@ -124,8 +146,12 @@ export function ActivityChart({ buckets, unit }: { buckets: ChartBucket[]; unit:
               className="pointer-events-none absolute -top-2 z-10 flex -translate-x-1/2 -translate-y-full flex-col gap-0.5 rounded-[10px] bg-[#1F2A44] px-3 py-2 text-[12.5px] whitespace-nowrap text-white shadow-lg"
               style={{ left: `clamp(70px, ${((hovered + 0.5) / buckets.length) * 100}%, calc(100% - 70px))` }}
             >
-              <span className="text-[15px] font-black tabular-nums">{shown.activities} hoạt động</span>
-              <span className="text-white/80">{shown.completed} hoàn thành · {name(shown)}</span>
+              <span className="text-[15px] font-black tabular-nums">
+                {shown.activities} {labels.main}
+              </span>
+              <span className="text-white/80">
+                {shown.completed} {labels.second} · {name(shown)}
+              </span>
             </div>
           )}
         </div>
@@ -140,12 +166,14 @@ export function ActivityChart({ buckets, unit }: { buckets: ChartBucket[]; unit:
         </div>
       </div>
       <table className="sr-only">
-        <caption>Hoạt động theo {unit === 'day' ? 'ngày' : 'tuần'}</caption>
+        <caption>
+          {labels.title} theo {unit === 'day' ? 'ngày' : 'tuần'}
+        </caption>
         <thead>
           <tr>
             <th>{unit === 'day' ? 'Ngày' : 'Tuần'}</th>
-            <th>Hoạt động</th>
-            <th>Hoàn thành</th>
+            <th>{labels.title}</th>
+            <th>{labels.secondTitle}</th>
           </tr>
         </thead>
         <tbody>

@@ -117,7 +117,12 @@ test('the chooser lists the new games, and a new Rung chuông vàng opens the qu
   }
   await page.getByRole('button', { name: 'Chọn trò chơi Rung chuông vàng' }).click()
   const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
-  await dialog.getByRole('radio', { name: /Soạn nội dung mới/ }).click()
+  // A click while the dialog still opens can be lost: click until the choice holds.
+  const fresh = dialog.getByRole('radio', { name: /Soạn nội dung mới/ })
+  await expect(async () => {
+    await fresh.click()
+    await expect(fresh).toHaveAttribute('aria-checked', 'true', { timeout: 1000 })
+  }).toPass()
   await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
   await page.waitForURL(/\/games\/(g-[a-z0-9]+)\/edit$/)
   backend.adopt(page.url().match(/(g-[a-z0-9]+)\/edit$/)![1])

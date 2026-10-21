@@ -1,6 +1,12 @@
 import { createBrowserRouter } from 'react-router'
 import { MainLayout } from '@/components/layout/MainLayout'
+import { RequireAdmin } from '@/components/layout/RequireAdmin'
 import { RequireAuth } from '@/components/layout/RequireAuth'
+import { AdminAuditLogPage } from '@/pages/admin/AdminAuditLogPage'
+import { AdminFeedbackPage } from '@/pages/admin/AdminFeedbackPage'
+import { AdminOverviewPage } from '@/pages/admin/AdminOverviewPage'
+import { AdminTeacherPage } from '@/pages/admin/AdminTeacherPage'
+import { AdminTeachersPage } from '@/pages/admin/AdminTeachersPage'
 import { ChooseGamePage } from '@/pages/ChooseGamePage'
 import { ClassesPage } from '@/pages/ClassesPage'
 import { ClassroomDetailPage } from '@/pages/ClassroomDetailPage'
@@ -44,6 +50,18 @@ export const router = createBrowserRouter([
           { path: 'settings', element: <SettingsPage /> },
           { path: 'reports', element: <ReportsPage /> },
           { path: 'classes/:code', element: <ClassroomDetailPage /> },
+          {
+            // "Quản trị": accounts with the role ADMIN only.
+            path: 'admin',
+            element: <RequireAdmin />,
+            children: [
+              { index: true, element: <AdminOverviewPage /> },
+              { path: 'teachers', element: <AdminTeachersPage /> },
+              { path: 'teachers/:code', element: <AdminTeacherPage /> },
+              { path: 'feedback', element: <AdminFeedbackPage /> },
+              { path: 'audit-log', element: <AdminAuditLogPage /> },
+            ],
+          },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

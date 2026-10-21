@@ -619,8 +619,36 @@ Trả `{"code": "fb-…", "createdAt": "…"}`. Backend lấy thêm `User-Agent`
 | `GET /admin/feedback/{code}/screenshot` | Ảnh đính kèm (cần token admin) |
 | `PATCH /admin/feedback/{code}` | `{"status": "NEW" \| "SEEN" \| "DONE"}`: đánh dấu đã xem / đã xử lý |
 
-Giáo viên gọi các API này → `403 FORBIDDEN`. Cấp quyền admin cho một tài khoản của đội Lớp vui bằng SQL:
-`UPDATE users SET role = 'ADMIN' WHERE email = 'ten@edugame.vn';` (đăng nhập lại để token mang vai trò mới).
+Giáo viên gọi các API này → `403 FORBIDDEN`. Đổi trạng thái (khi thực sự đổi) và mỗi lần tải CSV được ghi vào nhật ký
+quản trị (`FEEDBACK_STATUS_CHANGED`, `FEEDBACK_EXPORTED`).
+
+**Quản trị viên đầu tiên** trên một máy chủ mới cấp bằng SQL (những người sau cấp ngay trong trang Quản trị):
+`UPDATE users SET role = 'ADMIN' WHERE email = 'ten@edugame.vn';` rồi đăng nhập lại. Dữ liệu demo (profile `dev`) có
+sẵn `quantri` / `123456`.
+
+### 37–45. Quản trị (`/admin/...`, chỉ vai trò `ADMIN`)
+
+Trang `/admin` của web. Mọi API dưới đây: giáo viên → `403 FORBIDDEN`. Admin chỉ thấy **số** học sinh, không bao giờ
+thấy tên học sinh hay mật khẩu giáo viên.
+
+| API | |
+|---|---|
+| 37. `GET /admin/dashboard?days=30` | Tổng quan `days` ngày gần nhất (1–366, gồm hôm nay; sai → `400 INVALID_RANGE`): `{from, to, teachers {total, active, joined, locked, admins}, content {classrooms, students, games, questionSets}, plays, daily [{date, signUps, plays}], topTemplates [{templateCode, templateName, plays}], newFeedback}`. `active`: tài khoản đã đăng nhập hoặc mở trang trong kỳ |
+| 38. `GET /admin/teachers?q=&status=&role=&sort=NEWEST&page=0&size=20` | Danh sách tài khoản. `q`: một phần tên, tên đăng nhập hoặc email. `status` (lặp được): mặc định `ACTIVE` + `LOCKED`, tài khoản `DELETED` chỉ hiện khi hỏi. `role` (lặp được). `sort`: `NEWEST`, `LAST_ACTIVE`, `NAME`. `size` ≤ 100. Trả `{items: [{code, displayName, username, email, role, status, emailVerified, createdAt, lastActiveAt, classrooms, games}], total}` |
+| 39. `GET /admin/teachers/{code}` | Một tài khoản: thông tin trên + `phone`, `figures {classrooms, students, games, questionSets, plays, recentPlays}` (`recentPlays`: 30 ngày), `openSessions`, `loginBlockedUntil` (bị chặn do sai mật khẩu nhiều lần), `devices [{name, firstSeenAt, lastSeenAt}]`, `self`, `history` (20 thao tác quản trị gần nhất) |
+| 40. `POST /admin/teachers/{code}/lock` | `{"reason": "…"}` (không bắt buộc, ≤ 300). Không đăng nhập được nữa, mọi phiên kết thúc ngay. Khoá lại tài khoản đã khoá: không làm gì |
+| 41. `POST /admin/teachers/{code}/unlock` | Mở khoá |
+| 42. `POST /admin/teachers/{code}/sign-out` | Đăng xuất mọi thiết bị, mật khẩu giữ nguyên |
+| 43. `PUT /admin/teachers/{code}/role` | `{"role": "ADMIN" \| "TEACHER"}`. Bỏ quyền admin thì tài khoản bị đăng xuất mọi nơi; cấp quyền thì có hiệu lực từ lần tải trang sau |
+| 44. `POST /admin/teachers/{code}/login-unblock` | Mở chặn đăng nhập sau nhiều lần sai mật khẩu |
+| 45. `GET /admin/audit-log?action=&page=0&size=50` | Nhật ký quản trị, mới nhất trước (`size` ≤ 200, `action` lặp được): `{items: [{id, createdAt, actorName, action, targetType, targetCode, targetLabel, details}], total}` |
+
+- Mọi thao tác thay đổi trả lại tài khoản như ở `GET /admin/teachers/{code}` và được ghi vào nhật ký (bảng
+  `admin_audit_log`, chỉ thêm, không sửa / xoá) cùng transaction với thay đổi: `TEACHER_LOCKED`, `TEACHER_UNLOCKED`,
+  `TEACHER_SIGNED_OUT`, `ADMIN_GRANTED`, `ADMIN_REVOKED`, `LOGIN_UNBLOCKED`.
+- Không tự thao tác trên tài khoản của mình → `409 CANNOT_CHANGE_OWN_ACCOUNT`. Khoá một admin → `409
+  ADMIN_CANNOT_BE_LOCKED` (bỏ quyền trước). Cấp quyền cho tài khoản đang khoá → `409 TEACHER_LOCKED`. Bỏ quyền của
+  admin cuối cùng → `409 LAST_ADMIN`. Tài khoản không có hoặc đã xoá → `404`.
 
 ---
 
@@ -646,7 +674,7 @@ Mọi lỗi trả về dạng:
 | 409 | `TOO_MANY_QUESTION_SETS`, `TOO_MANY_QUESTIONS` | Quá 200 bộ / quá 200 câu một bộ | 17, 21, 22 |
 | 409 | `NO_USABLE_QUESTIONS` | Bộ không có câu nào trò chơi này chơi được | 26 |
 | 409 | `CLASSROOM_PAUSED` | Mở trò chơi cho lớp đang tạm ngưng | `POST /classrooms/{code}/sessions` |
-| 400 | `INVALID_RANGE` | Khoảng ngày của báo cáo: bắt đầu sau kết thúc, hoặc quá 366 ngày | 31 |
+| 400 | `INVALID_RANGE` | Khoảng ngày của báo cáo: bắt đầu sau kết thúc, hoặc quá 366 ngày | 31, 37 |
 | 400 | `INVALID_PARAMETER` | Tham số trên URL sai kiểu hoặc thiếu (vd. id không phải số), hoặc thiếu file tải lên | Mọi API |
 | 400 | `EMPTY_FILE` | File tải lên rỗng | 27 |
 | 413 | `FILE_TOO_LARGE` | Ảnh quá 5 MB | 27 |
@@ -670,7 +698,11 @@ Mọi lỗi trả về dạng:
 | 429 | `TOO_MANY_CODES` | Đã gửi 5 mã trong 1 giờ tới email này | 0d, 0e, 0g |
 | 401 | `UNAUTHENTICATED` | Không gửi access token, hoặc tài khoản đã bị khóa / xóa sau khi đăng nhập | Tất cả trừ 0, 2 |
 | 401 | `INVALID_TOKEN` | Access token sai định dạng, sai chữ ký, hết hạn, hoặc phiên đăng nhập của nó đã kết thúc (kèm header `WWW-Authenticate`) | Tất cả trừ 0, 2 |
-| 403 | `FORBIDDEN` | Đã đăng nhập nhưng vai trò không được phép | 33–36 |
+| 403 | `FORBIDDEN` | Đã đăng nhập nhưng vai trò không được phép | 33–45 |
+| 409 | `CANNOT_CHANGE_OWN_ACCOUNT` | Admin khoá / đăng xuất / đổi vai trò tài khoản của chính mình | 40–44 |
+| 409 | `ADMIN_CANNOT_BE_LOCKED` | Khoá một tài khoản admin (bỏ quyền trước) | 40 |
+| 409 | `TEACHER_LOCKED` | Cấp quyền admin cho tài khoản đang khoá | 43 |
+| 409 | `LAST_ADMIN` | Bỏ quyền của admin cuối cùng | 43 |
 | 429 | `TOO_MANY_FEEDBACK` | Đã gửi 10 góp ý trong 1 giờ | 32 |
 | 404 | `RESOURCE_NOT_FOUND` | Không tồn tại, không phải của mình, hoặc đã lưu trữ | Các API có `{code}` / `{id}`, 4 (template) |
 | 409 | `NOTHING_TO_PUBLISH` | Không có bản nháp để publish | 8 |

@@ -769,3 +769,9 @@ UPDATE game SET owner_id = (SELECT id FROM users WHERE code = 'u-thu')
 WHERE code LIKE 'g-test-%' AND owner_id <> (SELECT id FROM users WHERE code = 'u-thu');
 UPDATE classroom SET teacher_id = (SELECT id FROM users WHERE code = 'u-thu')
 WHERE code = 'c-thu-3b' AND teacher_id <> (SELECT id FROM users WHERE code = 'u-thu');
+
+-- ⑧ An admin for the "Quản trị" pages: quantri / 123456 ----------------------------
+
+INSERT INTO users (code, username, password_hash, display_name, email, role)
+VALUES ('u-admin', 'quantri', '{noop}123456', 'Quản trị Lớp vui', 'quantri@edugame.local', 'ADMIN')
+ON CONFLICT (username) DO NOTHING;

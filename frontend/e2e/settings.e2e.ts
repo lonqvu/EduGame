@@ -80,7 +80,12 @@ test('a new game made in the app starts with the defaults; games made before kee
   await page.goto('/games/new')
   await page.getByRole('button', { name: 'Chọn trò chơi Trắc nghiệm' }).click()
   const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
-  await dialog.getByRole('radio', { name: /Soạn nội dung mới/ }).click()
+  // A click while the dialog still opens can be lost: click until the choice holds.
+  const fresh = dialog.getByRole('radio', { name: /Soạn nội dung mới/ })
+  await expect(async () => {
+    await fresh.click()
+    await expect(fresh).toHaveAttribute('aria-checked', 'true', { timeout: 1000 })
+  }).toPass()
   await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
   await page.waitForURL(/\/games\/g-[a-z0-9]+\/edit$/)
   const code = /\/games\/([^/]+)\/edit$/.exec(page.url())![1]

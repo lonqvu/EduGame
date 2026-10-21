@@ -1,5 +1,5 @@
 import { App, Drawer } from 'antd'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
 import { FeedbackButton } from '@/components/feedback/FeedbackButton'
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
@@ -11,9 +11,11 @@ import {
   HomeIcon,
   MenuIcon,
   SettingsIcon,
+  ShieldIcon,
   UsersIcon,
 } from '@/components/ui/icons'
 import { BrandLogo } from '@/components/ui/BrandLogo'
+import { useTeacherStore } from '@/store/teacherStore'
 
 interface NavItem {
   label: string
@@ -31,6 +33,9 @@ const MAIN_NAV: NavItem[] = [
   { label: 'Lớp học', icon: <UsersIcon size={22} strokeWidth={1.8} />, to: '/classes', match: (p) => p.startsWith('/classes') },
   { label: 'Báo cáo', icon: <ChartIcon size={22} />, to: '/reports', match: (p) => p.startsWith('/reports') },
 ]
+
+/** Only for accounts with the role ADMIN (the API refuses everyone else too). */
+const ADMIN_NAV: NavItem = { label: 'Quản trị', icon: <ShieldIcon size={22} />, to: '/admin', match: (p) => p.startsWith('/admin') }
 
 const FOOTER_NAV: NavItem[] = [
   { label: 'Cài đặt', icon: <SettingsIcon size={22} />, to: '/settings', match: (p) => p.startsWith('/settings') },
@@ -102,6 +107,12 @@ function Logo() {
 function Sidebar({ onNavigate }: { onNavigate: () => void }) {
   const { pathname } = useLocation()
   const { message } = App.useApp()
+  const isAdmin = useTeacherStore((s) => s.teacher?.isAdmin ?? false)
+  const loadTeacher = useTeacherStore((s) => s.load)
+
+  useEffect(() => {
+    void loadTeacher()
+  }, [loadTeacher])
 
   const item = (nav: NavItem) => {
     const active = nav.match?.(pathname) ?? false
@@ -135,7 +146,7 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
         <Logo />
       </div>
       <ul className="m-0 flex list-none flex-col gap-1.5 p-0">{MAIN_NAV.map(item)}</ul>
-      <ul className="m-0 mt-auto flex list-none flex-col gap-1.5 p-0">{FOOTER_NAV.map(item)}</ul>
+      <ul className="m-0 mt-auto flex list-none flex-col gap-1.5 p-0">{(isAdmin ? [ADMIN_NAV, ...FOOTER_NAV] : FOOTER_NAV).map(item)}</ul>
     </nav>
   )
 }

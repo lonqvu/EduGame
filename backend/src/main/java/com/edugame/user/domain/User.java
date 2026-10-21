@@ -68,6 +68,19 @@ public class User extends AuditableEntity {
     @Column(name = "settings", nullable = false)
     private JsonNode settings = JsonNodeFactory.instance.objectNode();
 
+    /** Locked by an admin: cannot sign in, and every request of an existing session is refused. */
+    public void lock() {
+        status = UserStatus.LOCKED;
+    }
+
+    public void unlock() {
+        status = UserStatus.ACTIVE;
+    }
+
+    public void changeRole(UserRole newRole) {
+        role = newRole;
+    }
+
     /** A teacher who signed up and confirmed the email address. */
     public static User verifiedTeacher(String code, String username, String passwordHash, String displayName,
                                        String email, Instant verifiedAt) {
