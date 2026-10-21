@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { PICK_MODES, type PickMode } from '@/game-engine/name-picker/modes'
-import { gameRegistry, startPath, toolPath, type GameBadge } from '@/game-engine/registry'
+import { editPath, gameRegistry, playPath, toolPath, type GameBadge } from '@/game-engine/registry'
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
@@ -257,7 +257,7 @@ export function ChooseGamePage() {
           <div className="flex items-center justify-between gap-3">
             <h2 className="m-0 flex items-center gap-2.5 text-[19px] font-black">
               <ClockIcon size={22} className="text-primary" />
-              Trò chơi gần đây
+              Chơi lại
             </h2>
             <button
               type="button"
@@ -270,25 +270,39 @@ export function ChooseGamePage() {
           </div>
           <ul className="m-0 mt-[12px] grid list-none grid-cols-1 gap-4 p-0 @min-[720px]:grid-cols-2 @min-[1080px]:grid-cols-3">
             {recent.map((game) => (
-              <li key={game.id}>
+              <li key={game.id} className="relative">
+                {/* "Chơi lại": the whole card plays the game again. */}
                 <Link
-                  to={startPath(game)}
-                  className="flex items-center gap-4 rounded-[14px] bg-white p-[14px] pr-[16px] text-ink shadow-[0_1px_3px_rgba(31,42,68,0.05)] hover:text-ink hover:shadow-[0_6px_18px_rgba(31,42,68,0.08)]"
+                  to={playPath(game)}
+                  aria-label={`Chơi lại ${game.title}`}
+                  className="flex items-center gap-4 rounded-[14px] bg-white p-[14px] pr-[60px] text-ink shadow-[0_1px_3px_rgba(31,42,68,0.05)] hover:text-ink hover:shadow-[0_6px_18px_rgba(31,42,68,0.08)]"
                 >
                   <img src={cardArt(game.type)} alt="" className="aspect-[2/1] w-[124px] shrink-0 rounded-[10px]" />
                   <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                    <span className="truncate text-[15px] font-black">{templateName(game.type)}</span>
-                    <span className="truncate text-[13.5px] text-ink-soft" title={game.title}>
-                      {recentLine(game)}
+                    <span className="truncate text-[15px] font-black">{game.title}</span>
+                    <span className="truncate text-[13.5px] text-ink-soft">
+                      {templateName(game.type)} · {recentLine(game)}
                     </span>
                     <span className="mt-[6px] w-fit rounded-full bg-[#F1F3F7] px-[11px] py-[3px] text-[12px] text-ink-soft">
-                      {relativeTimeLabel(game.updatedAt) || game.title}
+                      {relativeTimeLabel(game.updatedAt) || 'Chơi lại'}
                     </span>
                   </span>
-                  <span className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-[#EAF1FE] text-primary">
-                    <ArrowRightIcon size={17} strokeWidth={2.4} />
-                  </span>
                 </Link>
+                <span className="pointer-events-none absolute top-1/2 right-[16px] flex size-[34px] -translate-y-1/2 items-center justify-center rounded-full bg-primary text-white">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" />
+                  </svg>
+                </span>
+                {gameRegistry[game.type].hasEditor && (
+                  <Link
+                    to={editPath(game.id)}
+                    aria-label={`Sửa ${game.title}`}
+                    title="Sửa câu hỏi"
+                    className="absolute top-[8px] right-[8px] flex size-[26px] items-center justify-center rounded-full bg-white/90 text-[13px] text-ink-soft shadow-sm hover:text-primary-ink"
+                  >
+                    ✎
+                  </Link>
+                )}
               </li>
             ))}
           </ul>

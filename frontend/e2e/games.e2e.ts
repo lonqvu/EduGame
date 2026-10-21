@@ -266,14 +266,7 @@ test('the editor autosaves edits and they are there after a reload', async ({ pa
 test('a new game made from the chooser shows up in the library', async ({ page, backend }) => {
   await page.goto('/games/new')
   await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Trắc nghiệm' }).click()
-  const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
-  // A click while the dialog still opens can be lost: click until the choice holds.
-  const fresh = dialog.getByRole('radio', { name: /Soạn nội dung mới/ })
-  await expect(async () => {
-    await fresh.click()
-    await expect(fresh).toHaveAttribute('aria-checked', 'true', { timeout: 1000 })
-  }).toPass()
-  await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
+  await page.getByRole('dialog', { name: /Chơi với câu hỏi nào/ }).getByRole('button', { name: /Soạn câu hỏi/ }).click()
   await page.waitForURL(/\/games\/(g-[a-z0-9]+)\/edit$/)
   const code = page.url().match(/(g-[a-z0-9]+)\/edit$/)![1]
   backend.adopt(code)

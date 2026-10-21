@@ -52,7 +52,8 @@ export function PlayGamePage() {
     if (state !== 'play' && state !== 'edit') void loadGame(gameId, 'play')
     void loadTemplates()
   }, [gameId, loadGame, loadTemplates])
-  useBeginPlaySession(!!game && (loadState === 'play' || loadState === 'edit'))
+  // A play is counted (reports, the set's plays) once the class starts, not when the introduction is only looked at.
+  useBeginPlaySession(started && !!game && (loadState === 'play' || loadState === 'edit'))
 
   if (loadState === 'missing') return <NotFoundPage />
   if (loadState === 'error') return <LoadError onRetry={() => void loadGame(gameId, 'play')} />

@@ -24,12 +24,14 @@ const unique = (prefix: string) => `${prefix} ${Date.now().toString(36).slice(-5
 
 /** Picks an option of an antd select by its label. */
 async function pick(page: Page, select: string, option: string) {
-  await page.getByRole('combobox', { name: select }).click()
+  const box = page.getByRole('combobox', { name: select })
+  const holder = box.locator('xpath=ancestor::div[contains(@class,"ant-select")][1]')
   const item = page.locator(`.ant-select-item-option[title="${option}"]`)
-  // A click while the list is still opening can be lost: click until the list closes on the choice.
+  // A click while the list is still opening can be lost: open and pick until the select shows the choice.
   await expect(async () => {
-    if (await item.isVisible()) await item.click()
-    await expect(item).toBeHidden({ timeout: 1000 })
+    if (!(await item.isVisible())) await box.click()
+    await item.click({ timeout: 1000 })
+    await expect(holder).toContainText(option, { timeout: 1000 })
   }).toPass()
 }
 
@@ -93,7 +95,7 @@ test('a teacher creates a set and writes, pastes, edits, moves and deletes its q
   backend.adoptQuestionSet(code)
   await expect(page.getByRole('heading', { name: title })).toBeVisible()
   await expect(page.getByText('Bộ chưa có câu hỏi')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Sử dụng' }).first()).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Chơi', exact: true }).first()).toBeDisabled()
 
   // One multiple choice question, then a short answer one in the same dialog.
   await page.getByRole('button', { name: 'Thêm câu hỏi' }).first().click()
@@ -172,7 +174,7 @@ test('a teacher creates a set and writes, pastes, edits, moves and deletes its q
   expect((await backend.questionSetList()).map((s) => s.code)).not.toContain(copy)
 })
 
-test('"Sử dụng" makes a game from the set and opens it in the editor', async ({ page, backend }) => {
+test('"Chơi" makes a game from the set and plays it at once', async ({ page, backend }) => {
   const title = unique('E2E Dùng')
   const set = await backend.createQuestionSet(title, [
     choice('2 + 2 = ?', ['4', '5']),
@@ -182,18 +184,19 @@ test('"Sử dụng" makes a game from the set and opens it in the editor', async
   const onlyShort = await backend.createQuestionSet(unique('E2E Tự luận'), [shortAnswer('Con gì kêu meo meo?', 'Con mèo')])
 
   await page.goto('/question-sets')
-  await row(page, title).getByRole('button', { name: 'Sử dụng' }).click()
-  const using = page.getByRole('dialog', { name: 'Sử dụng trong trò chơi' })
+  await row(page, title).getByRole('button', { name: 'Chơi', exact: true }).click()
+  const using = page.getByRole('dialog', { name: 'Chơi với bộ câu hỏi này' })
   await expect(using.getByRole('radio', { name: /Trắc nghiệm/ })).toHaveAttribute('aria-checked', 'true')
   await expect(using.getByRole('radio', { name: /Trắc nghiệm/ })).toContainText('Dùng được 2/3 câu (câu trắc nghiệm)')
   await expect(using.getByRole('radio', { name: /Lật ô thi đua/ })).toContainText('Dùng được cả 3 câu')
   await using.getByRole('radio', { name: /Rung chuông vàng/ }).click()
-  await using.getByRole('button', { name: 'Tạo trò chơi' }).click()
+  await using.getByRole('button', { name: '▶ Chơi ngay' }).click()
 
-  await expect(page).toHaveURL(/\/games\/[^/]+\/edit$/)
-  const gameCode = page.url().split('/').at(-2)!
+  await expect(page).toHaveURL(/\/play\/g-[a-z0-9]+$/)
+  const gameCode = page.url().split('/').at(-1)!
   backend.adopt(gameCode)
-  await expect(page.getByText('Đã tạo trò chơi với 2 câu hỏi (bỏ qua 1 câu tự luận)')).toBeVisible()
+  await expect(page.getByText('Trò chơi dùng 2 câu (bỏ qua 1 câu tự luận).')).toBeVisible()
+  await expect(page.getByRole('region', { name: /^Giới thiệu trò chơi/ })).toBeVisible()
   const game = await backend.game(gameCode)
   expect(game.title).toBe(title)
   expect(game.items.map((i) => i.content.text)).toEqual(['2 + 2 = ?', '3 + 3 = ?'])
@@ -205,11 +208,11 @@ test('"Sử dụng" makes a game from the set and opens it in the editor', async
   await expect(page.getByText('chơi 0 lần với lớp')).toBeVisible()
   expect((await backend.questionSet(set.summary.code)).summary.useCount).toBe(1)
 
-  // A set of short answers only plays in Lật ô; "Sử dụng trong trò chơi" lets the teacher pick the set.
+  // A set of short answers only plays in Lật ô; "Chơi với bộ câu hỏi" lets the teacher pick the set.
   await page.goto('/question-sets')
-  await page.getByRole('button', { name: /Sử dụng trong trò chơi/ }).click()
+  await page.getByRole('button', { name: /Chơi với bộ câu hỏi/ }).click()
   await pick(page, 'Bộ câu hỏi', `${onlyShort.summary.title} (1 câu)`)
-  const dialog = page.getByRole('dialog', { name: 'Sử dụng trong trò chơi' })
+  const dialog = page.getByRole('dialog', { name: 'Chơi với bộ câu hỏi này' })
   await expect(dialog.getByRole('radio', { name: /Trắc nghiệm/ })).toBeDisabled()
   await expect(dialog.getByRole('radio', { name: /Lật ô thi đua/ })).toHaveAttribute('aria-checked', 'true')
   await dialog.getByRole('button', { name: 'Hủy' }).click()

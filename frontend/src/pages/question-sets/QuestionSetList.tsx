@@ -269,7 +269,7 @@ function SetRow({ set, onUse, onEdit, onCopy, onArchive }: SetActions & { set: Q
             onClick={() => onUse(set)}
             className="h-10 flex-1 rounded-[12px] font-extrabold"
           >
-            Sử dụng
+            Chơi
           </Button>
         </span>
       </div>

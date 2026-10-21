@@ -1,17 +1,20 @@
 import { App, Dropdown, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
-import { BulbIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@/components/ui/icons'
+import { BulbIcon, ChevronDownIcon, ChevronLeftIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { BulkPasteModal } from '@/editor/BulkPasteModal'
 import { EDITOR_DEFINITIONS } from '@/editor/editorDefinitions'
 import { QuestionList } from '@/editor/QuestionList'
-import { gameRegistry, isQuizFamily, QUIZ_FAMILY, startPath } from '@/game-engine/registry'
+import { countPlayable, isGuideGame } from '@/game-engine/gameGuide'
+import { gameRegistry, isQuizFamily, playPath, QUIZ_FAMILY, startPath } from '@/game-engine/registry'
 import { useCatalogStore, useTemplateName } from '@/store/catalogStore'
 import { useGameLibraryStore, type SaveState } from '@/store/gameLibraryStore'
+import { useSettingsStore } from '@/store/settingsStore'
 import { NotFoundPage } from '@/pages/NotFoundPage'
-import type { ItemDraft } from '@/types/game'
+import type { GameType, ItemDraft } from '@/types/game'
 import { apiErrorMessage } from '@/utils/apiError'
+import { enterFullscreen } from '@/utils/fullscreen'
 import { itemCodec } from '@/utils/gameItems'
 
 const EMPTY: never[] = []
@@ -43,7 +46,9 @@ export function GameEditorPage() {
   const templateName = useTemplateName(game?.type)
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [pasteOpen, setPasteOpen] = useState(false)
+  // "Dán từ Word / Excel" from the game chooser opens the paste dialog at once.
+  const [pasteOpen, setPasteOpen] = useState(() => (location.state as { paste?: boolean } | null)?.paste === true)
+  const fullscreenOnStart = useSettingsStore((s) => s.settings.display.fullscreenOnStart)
 
   useEffect(() => {
     void loadGame(gameId, 'edit')
@@ -72,6 +77,27 @@ export function GameEditorPage() {
   )
   const selected = items[selectedIndex]
   const playable = gameRegistry[game.type].playable
+  const ready = isGuideGame(game.type) ? countPlayable(game.type, items) : items.length
+  const unfinished = items.length - ready
+
+  /** On the projector at once (its introduction shows the rules); unfinished items are left out, so say so first. */
+  const play = (as?: GameType) => {
+    const go = () => {
+      if (fullscreenOnStart) enterFullscreen()
+      navigate(as ? `${playPath(game)}?as=${as}` : playPath(game))
+    }
+    if (!unfinished) {
+      go()
+      return
+    }
+    modal.confirm({
+      title: `${unfinished} ${noun} chưa đủ nội dung`,
+      content: `${unfinished === 1 ? 'Mục' : 'Các mục'} đó sẽ được bỏ qua khi chơi. Chơi ${ready} ${noun} đã xong, hay sửa tiếp?`,
+      okText: `Chơi ${ready} ${noun}`,
+      cancelText: 'Sửa tiếp',
+      onOk: go,
+    })
+  }
 
   const add = async (drafts: ItemDraft[]) => {
     try {
@@ -147,10 +173,9 @@ export function GameEditorPage() {
               menu={{
                 items: QUIZ_FAMILY.filter((t) => t !== game.type).map((t) => ({
                   key: t,
+                  onClick: () => play(t),
                   label: (
-                    <Link to={startPath(game, t)} className="text-base font-bold">
-                      {templates.find((tpl) => tpl.type === t)?.name ?? t}
-                    </Link>
+                    <span className="text-base font-bold">{templates.find((tpl) => tpl.type === t)?.name ?? t}</span>
                   ),
                 })),
               }}
@@ -164,21 +189,25 @@ export function GameEditorPage() {
               </button>
             </Dropdown>
           )}
-          <Tooltip title={playable ? undefined : 'Màn chiếu cho trò này đang được hoàn thiện'}>
-            {playable ? (
-              <Link
-                to={startPath(game)}
-                className="flex min-h-[52px] items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-extrabold text-white hover:text-white hover:brightness-110"
-              >
-                Xong, chơi thử
-                <ChevronRightIcon size={20} />
-              </Link>
-            ) : (
-              <span className="flex min-h-[52px] cursor-not-allowed items-center gap-2 rounded-full bg-line px-7 py-3.5 font-extrabold text-ink-soft">
-                Xong, chơi thử
-                <ChevronRightIcon size={20} />
-              </span>
-            )}
+          <Link to={startPath(game)} className="px-2 text-[15px] font-bold text-ink-soft hover:text-primary-ink">
+            Luật chơi & cài đặt
+          </Link>
+          <Tooltip
+            title={
+              !playable ? 'Màn chiếu cho trò này đang được hoàn thiện' : ready === 0 ? `Chưa có ${noun} nào đủ nội dung để chơi` : undefined
+            }
+          >
+            <button
+              type="button"
+              onClick={() => play()}
+              disabled={!playable || ready === 0}
+              className="flex min-h-[52px] cursor-pointer items-center gap-2 rounded-full border-0 bg-primary px-7 py-3.5 font-[inherit] font-extrabold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-soft disabled:hover:brightness-100"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" />
+              </svg>
+              Chơi · {ready} {noun}
+            </button>
           </Tooltip>
         </div>
       </header>

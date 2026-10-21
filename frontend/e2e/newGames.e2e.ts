@@ -96,11 +96,10 @@ test('a quiz can be played as Rung chuông vàng or Đua thuyền from the edito
   const game = await backend.createGame('QUIZ', 'E2E Chơi kiểu khác', QUESTIONS)
   await page.goto(`/games/${game.code}/edit`)
   await page.getByRole('button', { name: 'Chơi kiểu khác' }).click()
-  await page.getByRole('link', { name: 'Rung chuông vàng' }).click()
-  // The start page comes first, and keeps the chosen way of playing.
-  await expect(page).toHaveURL(new RegExp(`/games/${game.code}/start\\?as=GOLDEN_BELL$`))
-  await page.getByRole('link', { name: 'Bắt đầu trò chơi' }).click()
-  await expect(page).toHaveURL(new RegExp(`/play/${game.code}\\?as=GOLDEN_BELL`))
+  await page.getByRole('menuitem', { name: 'Rung chuông vàng' }).click()
+  // Straight to the projector, played the chosen way, through its introduction.
+  await expect(page).toHaveURL(new RegExp(`/play/${game.code}\\?as=GOLDEN_BELL$`))
+  await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
   await expect(page.getByText('Còn 28 / 28 bạn')).toBeVisible()
 
   await openGame(page, `/play/${game.code}?as=BOAT_RACE`)
@@ -116,14 +115,7 @@ test('the chooser lists the new games, and a new Rung chuông vàng opens the qu
     await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
   }
   await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Rung chuông vàng' }).click()
-  const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
-  // A click while the dialog still opens can be lost: click until the choice holds.
-  const fresh = dialog.getByRole('radio', { name: /Soạn nội dung mới/ })
-  await expect(async () => {
-    await fresh.click()
-    await expect(fresh).toHaveAttribute('aria-checked', 'true', { timeout: 1000 })
-  }).toPass()
-  await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
+  await page.getByRole('dialog', { name: /Chơi với câu hỏi nào/ }).getByRole('button', { name: /Soạn câu hỏi/ }).click()
   await page.waitForURL(/\/games\/(g-[a-z0-9]+)\/edit$/)
   backend.adopt(page.url().match(/(g-[a-z0-9]+)\/edit$/)![1])
   await expect(page.getByRole('button', { name: 'Thêm câu Đúng / Sai' })).toBeVisible()

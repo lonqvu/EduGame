@@ -34,7 +34,7 @@ export function QuestionSetsBanner({ onCreate, onManage, onUse }: QuestionSetsBa
           <div className="grid grid-cols-1 gap-3 @min-[400px]/main:grid-cols-3">
             <Shortcut icon={<PlusIcon size={20} />} title="Tạo bộ câu hỏi mới" text="Thêm câu hỏi, đáp án, chủ đề" onClick={onCreate} />
             <Shortcut icon={<SearchIcon size={20} />} title="Quản lý bộ câu hỏi" text="Tìm, sửa, nhân bản, xóa" onClick={onManage} />
-            <Shortcut icon={<GamepadIcon size={21} />} title="Sử dụng trong trò chơi" text="Kết hợp với nhiều loại game" onClick={onUse} />
+            <Shortcut icon={<GamepadIcon size={21} />} title="Chơi với bộ câu hỏi" text="Trắc nghiệm, Rung chuông vàng, Đua thuyền, Lật ô" onClick={onUse} />
           </div>
         </div>
         <div aria-hidden="true" className="relative hidden @min-[700px]:block">

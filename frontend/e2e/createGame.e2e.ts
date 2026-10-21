@@ -1,5 +1,5 @@
 import { test as base, expect } from '@playwright/test'
-import { Backend, choice, shortAnswer, signInBrowser } from './api'
+import { Backend, choice, quizItem, shortAnswer, signInBrowser } from './api'
 
 const test = base.extend<{ backend: Backend }>({
   // Playwright needs the destructuring pattern here, even with no fixtures to take.
@@ -20,9 +20,10 @@ test.beforeEach(async ({ page, context }) => {
 })
 
 const unique = (prefix: string) => `${prefix} ${Date.now().toString(36).slice(-5)}`
-const gameCode = (url: string) => url.match(/\/games\/(g-[a-z0-9]+)\/(edit|start)$/)![1]
+const playedCode = (url: string) => url.match(/\/play\/(g-[a-z0-9]+)/)![1]
+const editedCode = (url: string) => url.match(/\/games\/(g-[a-z0-9]+)\/edit$/)![1]
 
-test('a game made from a question set: named, the set picked among those it can play, then its start page', async ({ page, backend }) => {
+test('"Chơi với câu hỏi nào?": a set is played in one click, the game named after it, on the projector', async ({ page, backend }) => {
   const title = unique('E2E Bộ đua')
   await backend.createQuestionSet(title, [choice('2 + 2 = ?', ['4', '5']), choice('3 + 3 = ?', ['6', '7']), shortAnswer('Thủ đô?', 'Hà Nội')])
   const onlyShort = unique('E2E Chỉ tự luận')
@@ -30,79 +31,85 @@ test('a game made from a question set: named, the set picked among those it can 
 
   await page.goto('/games/new')
   await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Đua thuyền' }).click()
-  const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
-  await expect(dialog.getByText('Đua thuyền • Tạo nội dung và bắt đầu chơi')).toBeVisible()
-  // The name starts from the game and the class; the set option comes first and is chosen.
-  await expect(dialog.getByLabel('Tên trò chơi')).toHaveValue(/^Đua thuyền/)
-  await expect(dialog.getByRole('radio', { name: /Dùng bộ câu hỏi có sẵn/ })).toHaveAttribute('aria-checked', 'true')
-
-  await dialog.getByLabel('Tên trò chơi').fill('')
-  await expect(dialog.getByText('Cô đặt tên cho trò chơi nhé.')).toBeVisible()
-  await expect(dialog.getByRole('button', { name: 'Tiếp tục' })).toBeDisabled()
-  await dialog.getByLabel('Tên trò chơi').fill('Đua thuyền – Ôn tập')
-  await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
-
-  const picker = page.getByRole('dialog', { name: /Chọn bộ câu hỏi/ })
-  await picker.getByLabel('Tìm bộ câu hỏi').fill('E2E')
-  const ours = picker.getByRole('radio', { name: new RegExp(title) })
+  const dialog = page.getByRole('dialog', { name: /Chơi với câu hỏi nào/ })
+  await expect(dialog).toContainText('Đua thuyền')
+  // Many sets: the search box helps.
+  await dialog.getByLabel('Tìm bộ câu hỏi').fill('E2E')
+  const ours = dialog.getByRole('listitem', { name: title })
   await expect(ours).toContainText('2/3 câu · Trắc nghiệm + tự luận')
-  await expect(ours).toContainText('Phù hợp')
-  const unfit = picker.getByRole('radio', { name: new RegExp(onlyShort) })
-  await expect(unfit).toContainText('Không phù hợp với trò chơi này')
-  await expect(unfit).toBeDisabled()
+  const unfit = dialog.getByRole('listitem', { name: onlyShort })
+  await expect(unfit).toContainText('Chưa có câu trắc nghiệm cho trò này')
+  await expect(unfit.getByRole('button')).toHaveCount(0)
 
-  // Back keeps the name; then the set is picked and the game made.
-  await picker.getByRole('button', { name: '← Quay lại' }).click()
-  await expect(dialog.getByLabel('Tên trò chơi')).toHaveValue('Đua thuyền – Ôn tập')
-  await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
-  await picker.getByLabel('Tìm bộ câu hỏi').fill(title)
-  await ours.click()
-  await expect(ours).toHaveAttribute('aria-checked', 'true')
-  await picker.getByRole('button', { name: 'Tạo game' }).click()
-
-  // A game made from a set is ready to play: its start page opens.
-  await page.waitForURL(/\/games\/g-[a-z0-9]+\/start$/)
-  const code = gameCode(page.url())
+  await ours.getByRole('button', { name: `Chơi với ${title}` }).click()
+  await page.waitForURL(/\/play\/g-[a-z0-9]+$/)
+  const code = playedCode(page.url())
   backend.adopt(code)
-  await expect(page.getByText('Đã tạo “Đua thuyền – Ôn tập” với 2 câu hỏi (bỏ qua 1 câu tự luận).')).toBeVisible()
+  await expect(page.getByText('Trò chơi dùng 2 câu, bỏ qua 1 câu tự luận.')).toBeVisible()
+  await expect(page.getByRole('region', { name: /^Giới thiệu trò chơi/ })).toContainText(`Đua thuyền – ${title}`)
   const game = await backend.game(code)
-  expect(game.title).toBe('Đua thuyền – Ôn tập')
+  expect(game.title).toBe(`Đua thuyền – ${title}`)
   expect(game.items.map((i) => i.content.text)).toEqual(['2 + 2 = ?', '3 + 3 = ?'])
 })
 
-test('a game that cannot use a set only offers new content, named as the teacher wants', async ({ page, backend }) => {
+test('a game without sets is written from scratch; closing the dialog leaves nothing behind', async ({ page, backend }) => {
   await page.goto('/games/new')
   await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Nối cặp' }).click()
-  const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
-  await expect(dialog.getByRole('radio', { name: /Dùng bộ câu hỏi có sẵn/ })).toHaveCount(0)
-  await expect(dialog.getByRole('radio', { name: /Soạn nội dung mới/ })).toHaveAttribute('aria-checked', 'true')
+  const dialog = page.getByRole('dialog', { name: /Chơi với câu hỏi nào/ })
+  await expect(dialog.getByRole('region', { name: 'Bộ câu hỏi của cô' })).toHaveCount(0)
 
-  // Cancel leaves nothing behind.
   const before = (await backend.library()).length
-  await dialog.getByRole('button', { name: 'Hủy' }).click()
+  await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
   expect((await backend.library()).length).toBe(before)
 
   await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Nối cặp' }).click()
-  await dialog.getByLabel('Tên trò chơi').fill('Nối từ tiếng Anh')
-  await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
+  await dialog.getByRole('button', { name: /Soạn câu hỏi/ }).click()
   await page.waitForURL(/\/games\/g-[a-z0-9]+\/edit$/)
-  const code = gameCode(page.url())
+  const code = editedCode(page.url())
   backend.adopt(code)
-  expect((await backend.game(code)).title).toBe('Nối từ tiếng Anh')
+  // Named for her, renamed in the editor if she wants.
+  await expect(page.getByLabel('Tên trò chơi')).toHaveValue(/^Nối cặp – /)
+  expect((await backend.game(code)).items).toHaveLength(1)
+})
+
+test('"Dán từ Word / Excel" opens the editor with the paste dialog, and no empty question', async ({ page, backend }) => {
+  await page.goto('/games/new')
+  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Trắc nghiệm' }).click()
+  await page.getByRole('dialog', { name: /Chơi với câu hỏi nào/ }).getByRole('button', { name: /Dán từ Word/ }).click()
+  await page.waitForURL(/\/games\/g-[a-z0-9]+\/edit$/)
+  const code = editedCode(page.url())
+  backend.adopt(code)
+  await expect(page.getByRole('dialog')).toBeVisible()
+  expect((await backend.game(code)).items).toHaveLength(0)
 })
 
 test('"Dùng câu hỏi của cô" on Lật ô offers the seeded sets that fit', async ({ page }) => {
   await page.goto('/games/new')
   await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Lật ô thi đua' }).click()
-  const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
-  await expect(dialog.getByText('Lật ô thi đua • Tạo nội dung và bắt đầu chơi')).toBeVisible()
-  await expect(dialog.getByRole('radio', { name: /Dùng bộ câu hỏi có sẵn/ })).toBeVisible()
-  await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
+  const dialog = page.getByRole('dialog', { name: /Chơi với câu hỏi nào/ })
   // Lật ô plays every question: the seeded sets fit.
-  const picker = page.getByRole('dialog', { name: /Chọn bộ câu hỏi/ })
-  await expect(picker.getByRole('radio', { name: /Tiếng Việt - Luyện đọc hiểu/ })).toContainText('6/6 câu')
-  await expect(picker.getByRole('radio', { name: /Tiếng Việt - Luyện đọc hiểu/ })).toBeEnabled()
-  await picker.getByRole('button', { name: 'Hủy' }).click()
-  await expect(picker).toBeHidden()
+  const reading = dialog.getByRole('listitem', { name: 'Tiếng Việt - Luyện đọc hiểu' })
+  await expect(reading).toContainText('6/6 câu')
+  await expect(reading.getByRole('button', { name: 'Chơi với Tiếng Việt - Luyện đọc hiểu' })).toBeEnabled()
+})
+
+test('the editor\'s "Chơi" goes to the projector, after saying which questions are left out', async ({ page, backend }) => {
+  const game = await backend.createGame('QUIZ', 'E2E Chơi từ trình soạn', [
+    quizItem('1 + 1 = ?', ['2', '3'], 0),
+    quizItem('2 + 2 = ?', ['4', '5'], 0),
+    // As the editor saves a question still being written: no correct answer yet.
+    { itemType: 'SINGLE_CHOICE', content: { text: 'Chưa xong', options: [{ id: 'a', text: 'A' }, { id: 'b', text: '' }] } },
+  ])
+  await page.goto(`/games/${game.code}/edit`)
+  await page.getByRole('button', { name: 'Chơi · 2 câu hỏi' }).click()
+  const confirm = page.getByRole('dialog', { name: /1 câu hỏi chưa đủ nội dung/ })
+  await confirm.getByRole('button', { name: 'Sửa tiếp' }).click()
+  await expect(page).toHaveURL(new RegExp(`/games/${game.code}/edit$`))
+
+  await page.getByRole('button', { name: 'Chơi · 2 câu hỏi' }).click()
+  await page.getByRole('dialog', { name: /1 câu hỏi chưa đủ nội dung/ }).getByRole('button', { name: 'Chơi 2 câu hỏi' }).click()
+  await expect(page).toHaveURL(new RegExp(`/play/${game.code}$`))
+  await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
+  await expect(page.getByText('Câu 1 / 2')).toBeVisible()
 })
