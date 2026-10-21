@@ -34,7 +34,7 @@ export function apiErrorMessage(error: unknown): string {
   if (error.code === 'UNSUPPORTED_IMAGE') return 'File này không phải ảnh PNG, JPG, GIF hoặc WEBP.'
   if (error.code === 'EMPTY_FILE') return 'File ảnh này bị trống.'
   if (error.code === 'TOO_MANY_ASSETS') return 'Trò chơi này đã có quá nhiều ảnh tải lên. Cô tạo trò mới để thêm ảnh nhé.'
-  if (error.code === 'TOO_MANY_FEEDBACK') return 'Cô đã gửi nhiều góp ý trong một giờ qua. Cô thử lại sau ít phút nhé, đội Lớp vui đang đọc.'
+  if (error.code === 'TOO_MANY_FEEDBACK') return 'Cô đã gửi nhiều góp ý trong một giờ qua. Cô thử lại sau ít phút nhé, đội Lớp Vui đang đọc.'
   if (error.status === 401) return 'Phiên làm việc đã hết, cô đăng nhập lại nhé.'
   if (error.status === 404) return 'Không tìm thấy dữ liệu (có thể đã bị xoá).'
   return 'Có lỗi xảy ra, cô thử lại nhé.'

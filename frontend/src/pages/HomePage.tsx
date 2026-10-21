@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
 import { gameRegistry } from '@/game-engine/registry'
 import { usePlayNow } from '@/pages/choose-game/usePlayNow'
-import { ActionCards } from '@/pages/home/ActionCards'
 import { HomeHero } from '@/pages/home/HomeHero'
-import { PurposePicker } from '@/pages/home/PurposePicker'
 import { PraiseCorner, type StarPeriod } from '@/pages/home/PraiseCorner'
+import { QuickActions } from '@/pages/home/QuickActions'
 import { RecentActivity } from '@/pages/home/RecentActivity'
-import { FeaturedGames, QuestionSets, TodayPanel } from '@/pages/home/RightColumn'
+import { ClassInfo, PopularGames } from '@/pages/home/RightColumn'
+import { StartCard } from '@/pages/home/StartCard'
+import { TipBar } from '@/pages/home/TipBar'
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
@@ -20,11 +21,9 @@ import { apiErrorMessage } from '@/utils/apiError'
 import { classTitle } from '@/utils/classrooms'
 import { relativeTimeLabel } from '@/utils/dateLabels'
 import { gradeLabel } from '@/utils/gameMapping'
-import { OPEN_CREATE_SET } from '@/utils/questionSets'
+import { homeTip } from '@/utils/homeTips'
 
-const RECENT_LIMIT = 4
-const TODAY_LIMIT = 2
-const SETS_LIMIT = 3
+const RECENT_LIMIT = 3
 
 /** Unit of a game's items in sentences like "10 câu hỏi". */
 const ITEM_UNITS: Partial<Record<GameType, string>> = {
@@ -111,57 +110,68 @@ export function HomePage() {
       },
     })
 
-  // One spacing everywhere (GAP), and two rows that share the columns: the banner and "Hôm nay" are one row, so
-  // their tops and bottoms line up; the rest starts on one line below.
-  const columns = 'grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_306px]'
+  const classes = classrooms
+    .filter((c) => c.status === 'ACTIVE')
+    .map((c) => ({ code: c.code, label: classTitle(c.name), studentCount: c.studentCount }))
+  const classPath = currentCode ? `/classes/${encodeURIComponent(currentCode)}` : '/classes'
+  const switcher = {
+    classes,
+    currentCode,
+    onPickClass: (code: string) => void pickClass(code),
+    onManageClasses: () => navigate('/classes'),
+  }
+  const tip = homeTip({
+    hasClass: classes.length > 0,
+    hasStudents: students.length > 0,
+    hasGames: gamesStatus !== 'ready' || games.length > 0,
+    hasQuestionSets: questionSets.length > 0,
+  })
 
+  const topBar = <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+
+  // Wide screens: the main area (banner over two columns of panels) and a side column whose top holds the
+  // account bar. Narrower, the account bar comes first, the side column goes under the main area (two columns
+  // from tablets up) and the tip last.
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex justify-end">
-        <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
-      </div>
+    <div className="grid grid-cols-1 items-start gap-5 min-[1400px]:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="min-[1400px]:hidden">{topBar}</div>
 
-      <div className={columns}>
+      <div className="flex min-w-0 flex-col gap-5">
         <HomeHero
           greetingName={teacher?.greetingName ?? 'cô'}
           className={className}
           studentCount={students.length}
-          classes={classrooms
-            .filter((c) => c.status === 'ACTIVE')
-            .map((c) => ({ code: c.code, label: classTitle(c.name), studentCount: c.studentCount }))}
-          currentCode={currentCode}
-          onPickClass={(code) => void pickClass(code)}
-          onManageClasses={() => navigate('/classes')}
+          {...switcher}
         />
-        <TodayPanel games={games.slice(0, TODAY_LIMIT)} subtitle={(g) => `${classLabel(g)} - ${templateName(g)}`} />
-      </div>
-
-      {gamesStatus === 'ready' && <PurposePicker games={games} busy={busy} onPlayNow={startGame} />}
-
-      <div className={`${columns} items-start`}>
-        <div className="@container flex min-w-0 flex-col gap-5">
-          <ActionCards startTarget="/games/new" onCreate={() => navigate('/question-sets', { state: OPEN_CREATE_SET })}onOpenClass={() => navigate(currentCode ? `/classes/${encodeURIComponent(currentCode)}` : '/classes')} />
-          <div className="grid grid-cols-1 items-start gap-5 @min-[900px]:grid-cols-[minmax(0,1fr)_356px]">
-            <RecentActivity
-              games={recent}
-              status={gamesStatus}
-              expanded={allRecent}
-              onToggleExpanded={() => setAllRecent((v) => !v)}
-              templateName={templateName}
-              meta={meta}
-              onRetry={() => void loadGames()}
-              onArchive={confirmArchive}
-            />
-            <PraiseCorner students={students} period={period} onPeriodChange={setPeriod} />
-          </div>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+          <StartCard />
+          <QuickActions classPath={classPath} />
+          <RecentActivity
+            games={recent}
+            status={gamesStatus}
+            expanded={allRecent}
+            onToggleExpanded={() => setAllRecent((v) => !v)}
+            templateName={templateName}
+            meta={meta}
+            onRetry={() => void loadGames()}
+            onArchive={confirmArchive}
+          />
+          <PraiseCorner students={students} period={period} onPeriodChange={setPeriod} />
         </div>
-
-        <div className="flex min-w-0 flex-col gap-5">
-          <FeaturedGames onStart={startGame} />
-          <QuestionSets sets={questionSets.slice(0, SETS_LIMIT)} />
+        <div className="hidden min-[1400px]:block">
+          <TipBar tip={tip} />
         </div>
       </div>
 
+      <div className="grid min-w-0 grid-cols-1 items-start gap-5 md:grid-cols-2 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] min-[1400px]:grid-cols-1">
+        <div className="hidden min-[1400px]:block">{topBar}</div>
+        <ClassInfo className={className} studentCount={students.length} {...switcher} />
+        <PopularGames busy={busy} onStart={startGame} />
+      </div>
+
+      <div className="min-[1400px]:hidden">
+        <TipBar tip={tip} />
+      </div>
     </div>
   )
 }

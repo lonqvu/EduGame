@@ -426,7 +426,7 @@ export interface FeedbackRequest {
   /** Browser window, "1366x768". */
   viewport?: string
   appVersion?: string
-  /** The Lớp vui team may write back to the teacher's email. */
+  /** The Lớp Vui team may write back to the teacher's email. */
   contactOk: boolean
 }
 

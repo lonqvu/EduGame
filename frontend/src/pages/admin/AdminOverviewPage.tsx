@@ -11,7 +11,7 @@ import { chartBuckets, periodLabel } from '@/utils/reports'
 
 const PLAY_LABELS = { title: 'Lượt chơi', main: 'lượt chơi', second: 'giáo viên mới', secondTitle: 'Giáo viên mới' }
 
-/** /admin — "Tổng quan": how many teachers use Lớp vui, what they make and play. The period is in the URL (?days=7). */
+/** /admin — "Tổng quan": how many teachers use Lớp Vui, what they make and play. The period is in the URL (?days=7). */
 export function AdminOverviewPage() {
   const [params, setParams] = useSearchParams()
   const days = DASHBOARD_PERIODS.find((p) => String(p.days) === params.get('days'))?.days ?? 30
@@ -19,7 +19,7 @@ export function AdminOverviewPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminHeader title="Tổng quan" text="Giáo viên dùng Lớp vui thế nào: tài khoản, nội dung đã tạo và lượt chơi." />
+      <AdminHeader title="Tổng quan" text="Giáo viên dùng Lớp Vui thế nào: tài khoản, nội dung đã tạo và lượt chơi." />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Segmented<number>
@@ -50,7 +50,7 @@ export function AdminOverviewPage() {
             <StatTile
               label="Đang hoạt động"
               value={count(data.teachers.active)}
-              detail="Đã vào Lớp vui trong kỳ"
+              detail="Đã vào Lớp Vui trong kỳ"
               icon={<UserIcon size={19} />}
               tint="bg-[#E3F6EC] text-success"
             />

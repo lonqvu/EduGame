@@ -1,4 +1,4 @@
-# Lớp vui – Database
+# Lớp Vui – Database
 
 PostgreSQL 13+ · Flyway (`src/main/resources/db/migration`)
 

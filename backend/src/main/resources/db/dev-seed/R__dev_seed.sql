@@ -773,5 +773,6 @@ WHERE code = 'c-thu-3b' AND teacher_id <> (SELECT id FROM users WHERE code = 'u-
 -- ⑧ An admin for the "Quản trị" pages: quantri / 123456 ----------------------------
 
 INSERT INTO users (code, username, password_hash, display_name, email, role)
-VALUES ('u-admin', 'quantri', '{noop}123456', 'Quản trị Lớp vui', 'quantri@edugame.local', 'ADMIN')
-ON CONFLICT (username) DO NOTHING;
+VALUES ('u-admin', 'quantri', '{noop}123456', 'Quản trị Lớp Vui', 'quantri@edugame.local', 'ADMIN')
+-- The product name is part of it, so a rename reaches databases seeded before.
+ON CONFLICT (username) DO UPDATE SET display_name = EXCLUDED.display_name;

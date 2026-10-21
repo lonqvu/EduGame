@@ -101,7 +101,7 @@ app:
       resend-cooldown: 60s
       max-sends-per-hour: 5
   mail:
-    from: ${MAIL_FROM:Lớp vui <no-reply@edugame.local>}
+    from: ${MAIL_FROM:Lớp Vui <no-reply@edugame.local>}
     # Also write verification codes to the log. Development only.
     log-codes: false
   # Used for "this week" star totals.

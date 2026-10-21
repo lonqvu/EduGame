@@ -22,18 +22,18 @@ class AuthMailerTest {
 
     private final JavaMailSender mailSender = mock(JavaMailSender.class);
     private final AuthMailer mailer = new AuthMailer(mailSender,
-            new AppProperties(null, null, new AppProperties.Mail("Lớp vui <no-reply@edugame.vn>", false), null));
+            new AppProperties(null, null, new AppProperties.Mail("Lớp Vui <no-reply@edugame.vn>", false), null));
 
     @Test
     void verificationCodeMail() throws Exception {
         MimeMessage sent = send(new AuthMail.VerificationCode("co.hoa@truong.edu.vn", VerificationPurpose.REGISTER,
                 "042917", 10));
 
-        assertThat(sent.getSubject()).isEqualTo("Mã xác nhận Lớp vui: 042917");
+        assertThat(sent.getSubject()).isEqualTo("Mã xác nhận Lớp Vui: 042917");
         assertThat(sent.getAllRecipients()[0].toString()).isEqualTo("co.hoa@truong.edu.vn");
         assertThat(sent.getFrom()[0].toString()).contains("no-reply@edugame.vn");
         // The Vietnamese sender name goes out encoded, and reads back as it is.
-        assertThat(((InternetAddress) sent.getFrom()[0]).getPersonal()).isEqualTo("Lớp vui");
+        assertThat(((InternetAddress) sent.getFrom()[0]).getPersonal()).isEqualTo("Lớp Vui");
         assertThat(sent.getHeader("From")[0]).startsWith("=?UTF-8?").doesNotContain("Lớp");
         assertThat(raw(sent)).contains("042917", "text/plain", "text/html");
     }
@@ -42,7 +42,7 @@ class AuthMailerTest {
     void accountExistsMailEscapesTheAddress() throws Exception {
         MimeMessage sent = send(new AuthMail.AccountExists("a<b>@truong.edu.vn"));
 
-        assertThat(sent.getSubject()).isEqualTo("Bạn đã có tài khoản Lớp vui");
+        assertThat(sent.getSubject()).isEqualTo("Bạn đã có tài khoản Lớp Vui");
         assertThat(raw(sent)).contains("a&lt;b&gt;@truong.edu.vn");
     }
 

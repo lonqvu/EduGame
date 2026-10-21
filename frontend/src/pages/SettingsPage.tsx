@@ -70,7 +70,7 @@ export function SettingsPage() {
             <h1 className="m-0 text-[32px] leading-[1.1] font-black tracking-[-0.01em] text-[#1A2440]">Cài đặt</h1>
             {ready && <SaveState saving={saving} />}
           </div>
-          <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">Tùy chỉnh Lớp vui theo cách cô dạy. Mọi thay đổi được lưu tự động.</p>
+          <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">Tùy chỉnh Lớp Vui theo cách cô dạy. Mọi thay đổi được lưu tự động.</p>
         </div>
         <div className="order-first ml-auto sm:order-none">
           <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
@@ -111,7 +111,7 @@ export function SettingsPage() {
             <SettingItem
               id="set-language"
               label="Ngôn ngữ"
-              hint="Lớp vui hiện dùng tiếng Việt cho mọi màn hình."
+              hint="Lớp Vui hiện dùng tiếng Việt cho mọi màn hình."
               control={<span className="text-[15px] font-bold text-ink-soft">Tiếng Việt</span>}
             />
           </SettingsSection>
@@ -209,7 +209,7 @@ export function SettingsPage() {
             title="Thông báo qua email"
             text={
               profile && !profile.email
-                ? 'Tài khoản chưa có email nên Lớp vui chưa gửi được thông báo.'
+                ? 'Tài khoản chưa có email nên Lớp Vui chưa gửi được thông báo.'
                 : `Gửi tới ${profile?.email ?? 'email của tài khoản'} để cô biết ngay khi tài khoản có thay đổi.`
             }
             highlighted={highlighted('notifications')}

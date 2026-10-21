@@ -1,4 +1,4 @@
-"""Sound effects and music of the projector games, synthesized so EduGame owns them outright (no licence to track).
+"""Sound effects and music of the projector games, synthesized so Lớp Vui owns them outright (no licence to track).
 
     python3 scripts/make_sounds.py        # from frontend/; needs numpy and ffmpeg
 

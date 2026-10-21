@@ -32,7 +32,7 @@ const QUESTIONS = [
   {
     key: 'password',
     label: 'Quên mật khẩu thì làm sao?',
-    text: 'Ở màn đăng nhập, bấm “Quên mật khẩu?” và nhập email: Lớp vui gửi mã để cô đặt mật khẩu mới. Khi đang đăng nhập, cô đổi mật khẩu trong “Bảo mật tài khoản”.',
+    text: 'Ở màn đăng nhập, bấm “Quên mật khẩu?” và nhập email: Lớp Vui gửi mã để cô đặt mật khẩu mới. Khi đang đăng nhập, cô đổi mật khẩu trong “Bảo mật tài khoản”.',
   },
 ]
 
@@ -41,7 +41,7 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
   const openFeedback = useFeedbackStore((s) => s.openFeedback)
   return (
     <Modal open={open} title="Trợ giúp" footer={null} onCancel={onClose} width={620}>
-      <p className="mt-1 mb-3 text-[14px] text-ink-soft">Những câu hỏi thường gặp khi dùng Lớp vui.</p>
+      <p className="mt-1 mb-3 text-[14px] text-ink-soft">Những câu hỏi thường gặp khi dùng Lớp Vui.</p>
       <Collapse
         accordion
         defaultActiveKey={['game']}
@@ -70,7 +70,7 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
           }}
           className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] font-bold text-primary hover:underline"
         >
-          Gửi góp ý cho đội Lớp vui
+          Gửi góp ý cho đội Lớp Vui
         </button>
       </p>
     </Modal>

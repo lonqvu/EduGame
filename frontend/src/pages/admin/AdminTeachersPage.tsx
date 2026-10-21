@@ -56,7 +56,7 @@ export function AdminTeachersPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminHeader title="Giáo viên" text="Tìm tài khoản, xem giáo viên đã dùng Lớp vui thế nào, khoá hoặc mở khoá khi cần." />
+      <AdminHeader title="Giáo viên" text="Tìm tài khoản, xem giáo viên đã dùng Lớp Vui thế nào, khoá hoặc mở khoá khi cần." />
 
       <AdminCard>
         <div role="group" aria-label="Lọc giáo viên" className="flex flex-wrap items-center gap-3">

@@ -1,14 +1,7 @@
-import { Dropdown } from 'antd'
-import { CheckIcon, ChevronDownIcon, UsersIcon } from '@/components/ui/icons'
+import { ChevronDownIcon, UsersIcon } from '@/components/ui/icons'
+import { ClassSwitcher, type ClassChoice } from '@/pages/home/ClassSwitcher'
 import { HOME_ASSETS } from '@/pages/home/homeAssets'
 import { Art } from '@/pages/home/homeUi'
-
-/** An active class the teacher can switch to. */
-export interface ClassChoice {
-  code: string
-  label: string
-  studentCount: number
-}
 
 interface HomeHeroProps {
   greetingName: string
@@ -20,82 +13,48 @@ interface HomeHeroProps {
   onManageClasses: () => void
 }
 
-/** Greeting banner: teacher, class being taught, class size; illustration on the right. */
-export function HomeHero({ greetingName, className, studentCount, classes, currentCode, onPickClass, onManageClasses }: HomeHeroProps) {
+/** Greeting banner: teacher, class being taught and its size; the classroom picture on the right. */
+export function HomeHero({ greetingName, className, studentCount, ...switcher }: HomeHeroProps) {
   return (
-    <section className="@container relative flex min-h-[235px] overflow-hidden rounded-[22px] bg-[linear-gradient(100deg,#DCEDFD_0%,#D3E8FC_45%,#CDE5FC_100%)]">
-      {/* Soft clouds behind the text, as in the design. */}
-      <span aria-hidden="true" className="absolute -bottom-10 -left-6 h-28 w-56 rounded-full bg-white/45 blur-[2px]" />
-      <span aria-hidden="true" className="absolute bottom-[-30px] left-40 h-20 w-44 rounded-full bg-white/35" />
+    <section className="@container relative flex min-h-[170px] overflow-hidden rounded-[22px] bg-[linear-gradient(100deg,#E4F0FE_0%,#D9EAFD_50%,#CFE5FC_100%)]">
+      <span aria-hidden="true" className="absolute -bottom-12 -left-6 h-28 w-56 rounded-full bg-white/45" />
 
-      <div className="relative z-10 flex flex-col justify-center gap-[9px] px-6 py-7 @min-[640px]:max-w-[56%] @min-[980px]:max-w-none sm:pl-[44px]">
-        <h1 className="m-0 flex items-center gap-3 text-[38px] leading-[1.05] font-black tracking-[-0.015em] text-[#1A2440] @min-[980px]:text-[50px]">
+      <div className="relative z-10 flex flex-col justify-center gap-1.5 px-5 py-5 sm:px-6 @min-[640px]:max-w-[52%] @min-[900px]:max-w-[440px]">
+        <h1 className="m-0 flex items-center gap-2 text-[26px] leading-tight font-black text-[#1A2440] sm:text-[28px]">
           Chào {greetingName}!
-          <Art name="wave" className="h-[46px] w-[46px] sm:h-[60px] sm:w-[60px]" />
+          <Art name="wave" className="size-[34px]" />
         </h1>
-        <p className="m-0 text-[17px] text-[#3F4B68] sm:text-[19px]">Cùng tạo những giờ học thật vui và ý nghĩa nhé!</p>
+        <p className="m-0 text-[15px] text-[#3F4B68]">Cùng tạo những giờ học thật vui và ý nghĩa nhé!</p>
 
-        <div className="mt-[14px] flex w-fit flex-wrap items-center gap-x-7 gap-y-2 rounded-[22px] bg-white/75 py-[9px] pr-7 pl-[10px] shadow-[0_2px_8px_rgba(53,99,233,0.06)]">
-          <Dropdown
-            trigger={['click']}
-            placement="bottomLeft"
-            menu={{
-              selectable: true,
-              selectedKeys: currentCode ? [currentCode] : [],
-              items: [
-                ...classes.map((c) => ({
-                  key: c.code,
-                  label: (
-                    <span className="flex min-w-[210px] items-center justify-between gap-4">
-                      <span>
-                        <strong>{c.label}</strong> <span className="text-ink-muted">· {c.studentCount} học sinh</span>
-                      </span>
-                      {c.code === currentCode && <CheckIcon size={16} className="text-primary" />}
-                    </span>
-                  ),
-                  onClick: () => onPickClass(c.code),
-                })),
-                ...(classes.length ? [{ type: 'divider' as const }] : []),
-                { key: 'manage', label: classes.length ? 'Quản lý lớp học' : 'Tạo lớp học', onClick: onManageClasses },
-              ],
-            }}
-          >
+        <div className="mt-3 flex w-fit max-w-full flex-wrap items-center gap-x-5 gap-y-1 rounded-[18px] bg-white/85 py-2 pr-5 pl-2 shadow-[0_2px_8px_rgba(53,99,233,0.06)]">
+          <ClassSwitcher {...switcher}>
             <button
               type="button"
               aria-label={`Lớp đang dạy: ${className || 'chưa có lớp'}. Đổi lớp`}
-              className="flex cursor-pointer items-center gap-3 border-0 bg-transparent p-0 text-left font-[inherit] text-ink"
+              className="flex min-w-0 cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-left font-[inherit] text-ink"
             >
-              <span className="flex size-[46px] items-center justify-center rounded-full bg-[#CFE3FB] text-primary">
-                <UsersIcon size={24} strokeWidth={2} />
+              <span className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-[#DCEAFE] text-primary">
+                <UsersIcon size={20} strokeWidth={2} />
               </span>
-              <span className="flex flex-col">
-                <span className="text-[12.5px] text-ink-soft">Lớp đang dạy</span>
-                <span className="flex items-center gap-1.5 text-[15.5px] font-extrabold">
-                  {className || 'Chưa có lớp'}
-                  <ChevronDownIcon size={16} strokeWidth={2.6} />
-                </span>
-              </span>
+              <span className="truncate text-[15.5px] font-extrabold">{className || 'Chưa có lớp'}</span>
+              <ChevronDownIcon size={16} strokeWidth={2.6} className="shrink-0" />
             </button>
-          </Dropdown>
-          <span className="flex items-center gap-3">
-            <span className="flex size-[42px] items-center justify-center rounded-full bg-[#E4E9FF] text-[#4B57D6]">
-              <UsersIcon size={22} strokeWidth={2} />
-            </span>
-            <span className="text-[15px] font-extrabold">{studentCount} học sinh</span>
+          </ClassSwitcher>
+          <span className="flex items-center gap-2 text-[14px] font-bold text-[#3F4B68]">
+            <UsersIcon size={18} strokeWidth={2} className="text-[#4B57D6]" />
+            {studentCount} học sinh
           </span>
         </div>
       </div>
 
       {/*
-        The scene is drawn wider than any banner (scripts/extend_banners.py): it starts right after the greeting,
-        always as tall as the banner, anchored on the right so it reaches the text whatever the screen width.
-        When the space is too narrow for the whole group, the picture slides right instead of shrinking: the teacher
-        (1.28 picture heights from its right edge) stays in the middle of the space, the board is cut first.
+        The scene is drawn wider than any banner (scripts/extend_banners.py), always as tall as the banner and
+        anchored on the right; when the space is narrow it slides right instead of shrinking, so the teacher stays.
       */}
-      <div className="pointer-events-none absolute inset-y-0 right-0 left-[50%] hidden overflow-hidden [container-type:size] [mask-image:linear-gradient(to_right,transparent,black_80px)] @min-[640px]:block @min-[980px]:left-[430px]">
+      <div className="pointer-events-none absolute inset-y-0 right-0 left-[48%] hidden overflow-hidden [container-type:size] [mask-image:linear-gradient(to_right,transparent,black_80px)] @min-[640px]:block @min-[900px]:left-[400px]">
         <img
           src={`${HOME_ASSETS}/hero-wide.png`}
-          alt="Cô giáo và các bạn nhỏ bên bảng: Học vui, học tốt cùng Lớp vui!"
+          alt="Cô giáo và các bạn nhỏ bên bảng: Học vui, học tốt cùng Lớp Vui!"
           className="absolute right-[min(0px,calc(50cqw-128cqh))] bottom-0 h-full w-auto max-w-none select-none"
         />
       </div>

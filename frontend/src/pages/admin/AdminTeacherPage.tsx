@@ -87,7 +87,7 @@ export function AdminTeacherPage() {
           </dl>
         </AdminCard>
 
-        <AdminCard title="Đã dùng Lớp vui">
+        <AdminCard title="Đã dùng Lớp Vui">
           <dl className="m-0 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Figure label="Lớp học" value={teacher.figures.classrooms} />
             <Figure label="Học sinh" value={teacher.figures.students} />
@@ -184,7 +184,7 @@ export function AdminTeacherPage() {
                       isAdmin ? 'Bỏ quyền quản trị?' : 'Cấp quyền quản trị?',
                       isAdmin
                         ? `${teacher.displayName} sẽ không vào được trang Quản trị nữa.`
-                        : `${teacher.displayName} sẽ quản lý được mọi tài khoản giáo viên. Chỉ cấp cho người trong đội Lớp vui.`,
+                        : `${teacher.displayName} sẽ quản lý được mọi tài khoản giáo viên. Chỉ cấp cho người trong đội Lớp Vui.`,
                       isAdmin ? 'Bỏ quyền' : 'Cấp quyền',
                       () =>
                         run(

@@ -120,7 +120,7 @@ test('an admin finds a teacher, locks and unlocks them, gives and takes the admi
   const lines = page.getByRole('list', { name: 'Nhật ký quản trị' }).getByRole('listitem')
   await expect(lines.nth(0)).toContainText('Bỏ quyền quản trị')
   await expect(lines.nth(0)).toContainText('Cô Thu (cothu@edugame.local)')
-  await expect(lines.nth(0)).toContainText('Quản trị Lớp vui')
+  await expect(lines.nth(0)).toContainText('Quản trị Lớp Vui')
   await expect(lines.nth(1)).toContainText('Cấp quyền quản trị')
   await page.getByRole('combobox', { name: 'Loại thao tác' }).click()
   await page.locator('.ant-select-item-option[title="Khoá tài khoản"]').click()

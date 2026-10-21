@@ -29,7 +29,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 class FeedbackMailerTest {
 
     private static final AppProperties APP = new AppProperties(null, null,
-            new AppProperties.Mail("Lớp vui <no-reply@edugame.vn>", false), ZoneId.of("Asia/Ho_Chi_Minh"));
+            new AppProperties.Mail("Lớp Vui <no-reply@edugame.vn>", false), ZoneId.of("Asia/Ho_Chi_Minh"));
     private static final byte[] PNG = {(byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
 
     private final JavaMailSender mailSender = mock(JavaMailSender.class);
@@ -39,7 +39,7 @@ class FeedbackMailerTest {
         MimeMessage sent = send(new FeedbackProperties(List.of("gopy@edugame.vn", " tech@edugame.vn ", "")),
                 mail("cohoa@truong.edu.vn", PNG, "Nút <Lưu> không chạy\nDòng hai"));
 
-        assertThat(sent.getSubject()).isEqualTo("[Góp ý Lớp vui] Báo lỗi – Cô Hoa: Nút <Lưu> không chạy");
+        assertThat(sent.getSubject()).isEqualTo("[Góp ý Lớp Vui] Báo lỗi – Cô Hoa: Nút <Lưu> không chạy");
         assertThat(sent.getAllRecipients()).extracting(Object::toString).containsExactly("gopy@edugame.vn", "tech@edugame.vn");
         assertThat(sent.getReplyTo()[0].toString()).isEqualTo("cohoa@truong.edu.vn");
         String text = text(sent);
@@ -60,7 +60,7 @@ class FeedbackMailerTest {
     @Test
     void aLongFirstLineIsCutInTheSubject() {
         assertThat(FeedbackMailer.subject(mail(null, null, "a".repeat(100))))
-                .isEqualTo("[Góp ý Lớp vui] Báo lỗi – Cô Hoa: " + "a".repeat(60) + "…");
+                .isEqualTo("[Góp ý Lớp Vui] Báo lỗi – Cô Hoa: " + "a".repeat(60) + "…");
     }
 
     @Test

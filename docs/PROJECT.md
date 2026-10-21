@@ -1,4 +1,4 @@
-# Lớp vui — Tổng quan dự án
+# Lớp Vui — Tổng quan dự án
 
 ## 1. Mục tiêu
 

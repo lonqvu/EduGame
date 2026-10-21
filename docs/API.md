@@ -1,4 +1,4 @@
-# Lớp vui – REST API
+# Lớp Vui – REST API
 
 Danh sách toàn bộ API backend: mục đích, vị trí code backend và nơi frontend gọi.
 Swagger UI (chạy thử trực tiếp): <http://localhost:8080/swagger-ui.html> · OpenAPI JSON: `/v3/api-docs`.
@@ -160,8 +160,8 @@ Ai có email cũng đăng ký được. Tài khoản **chỉ được tạo khi 
 { "email": "co.hoa@truong.edu.vn", "expiresIn": 600, "resendAfter": 60 }
 ```
 
-Lưu tạm tên + mật khẩu (đã băm BCrypt) cùng mã, gửi mail "Mã xác nhận Lớp vui: 123456". Email đã có tài khoản →
-**vẫn trả đúng câu trả lời trên** (không lộ email nào đã đăng ký), nhưng mail gửi tới là "Bạn đã có tài khoản Lớp vui".
+Lưu tạm tên + mật khẩu (đã băm BCrypt) cùng mã, gửi mail "Mã xác nhận Lớp Vui: 123456". Email đã có tài khoản →
+**vẫn trả đúng câu trả lời trên** (không lộ email nào đã đăng ký), nhưng mail gửi tới là "Bạn đã có tài khoản Lớp Vui".
 Mật khẩu ≥ 8 ký tự và **≤ 72 byte UTF-8** (giới hạn của BCrypt; chữ có dấu chiếm 2–3 byte, nên mật khẩu tiếng Việt
 có dấu khoảng 24–36 ký tự là tối đa). Email được chuẩn hoá chữ thường, bỏ khoảng trắng.
 

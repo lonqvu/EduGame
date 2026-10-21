@@ -6,7 +6,7 @@ trình soạn dùng cùng màn chơi nhưng luôn im lặng (`useSound()` trả 
 ## File
 
 `frontend/public/assets/sounds/<tên>.webm` (Opus) và `<tên>.mp3` (Safari, trình duyệt cũ). Tất cả được **tổng hợp**
-bằng `frontend/scripts/make_sounds.py` (numpy + ffmpeg), nên Lớp vui sở hữu hoàn toàn, không phải theo dõi giấy phép:
+bằng `frontend/scripts/make_sounds.py` (numpy + ffmpeg), nên Lớp Vui sở hữu hoàn toàn, không phải theo dõi giấy phép:
 
 ```bash
 cd frontend && python3 scripts/make_sounds.py
@@ -40,7 +40,7 @@ nhạc nền khoảng −26 LUFS, đỉnh không quá −1,5 dBFS.
 
 | File | Nguồn | Giấy phép |
 |---|---|---|
-| Tất cả | `scripts/make_sounds.py` | Của Lớp vui |
+| Tất cả | `scripts/make_sounds.py` | Của Lớp Vui |
 
 ## Bộ phát
 

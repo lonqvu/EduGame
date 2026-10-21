@@ -7,9 +7,9 @@ export const MAX_SCREENSHOT_BYTES = 3 * 1024 * 1024
 
 export const FEEDBACK_KINDS: { kind: FeedbackKind; label: string; emoji: string; placeholder: string }[] = [
   { kind: 'BUG', label: 'Báo lỗi', emoji: '🐞', placeholder: 'Cô đang làm gì thì gặp lỗi? Màn hình hiện ra như thế nào?' },
-  { kind: 'IDEA', label: 'Đề xuất', emoji: '💡', placeholder: 'Cô muốn Lớp vui có thêm trò chơi hay tính năng gì?' },
-  { kind: 'PRAISE', label: 'Khen', emoji: '❤️', placeholder: 'Cô thích điều gì ở Lớp vui?' },
-  { kind: 'OTHER', label: 'Khác', emoji: '💬', placeholder: 'Cô muốn nhắn gì tới đội Lớp vui?' },
+  { kind: 'IDEA', label: 'Đề xuất', emoji: '💡', placeholder: 'Cô muốn Lớp Vui có thêm trò chơi hay tính năng gì?' },
+  { kind: 'PRAISE', label: 'Khen', emoji: '❤️', placeholder: 'Cô thích điều gì ở Lớp Vui?' },
+  { kind: 'OTHER', label: 'Khác', emoji: '💬', placeholder: 'Cô muốn nhắn gì tới đội Lớp Vui?' },
 ]
 
 export const RATINGS: { value: number; emoji: string; label: string }[] = [

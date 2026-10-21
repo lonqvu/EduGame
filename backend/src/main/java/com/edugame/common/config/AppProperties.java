@@ -43,7 +43,7 @@ public record AppProperties(Cors cors, Auth auth, Mail mail, ZoneId timeZone) {
     }
 
     /**
-     * @param from     sender of every mail, e.g. {@code Lớp vui <no-reply@edugame.vn>}
+     * @param from     sender of every mail, e.g. {@code Lớp Vui <no-reply@edugame.vn>}
      * @param logCodes also write verification codes to the log (development only)
      */
     public record Mail(String from, boolean logCodes) {

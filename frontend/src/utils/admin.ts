@@ -101,7 +101,7 @@ export function adminErrorMessage(error: unknown): string {
     case 'TEACHER_LOCKED':
       return 'Tài khoản đang bị khoá. Mở khoá trước khi cấp quyền quản trị.'
     case 'LAST_ADMIN':
-      return 'Lớp vui cần ít nhất một quản trị viên.'
+      return 'Lớp Vui cần ít nhất một quản trị viên.'
     default:
       return apiErrorMessage(error)
   }

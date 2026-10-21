@@ -13,7 +13,7 @@ public final class MailAddresses {
     }
 
     /**
-     * The sender of {@code app.mail.from}, e.g. {@code Lớp vui <no-reply@edugame.vn>}. Its name has Vietnamese
+     * The sender of {@code app.mail.from}, e.g. {@code Lớp Vui <no-reply@edugame.vn>}. Its name has Vietnamese
      * letters, which a header may only carry encoded (RFC 2047): parsed as it is, it would go out raw and show up
      * garbled in some mail clients.
      */

@@ -65,11 +65,11 @@ public class FeedbackMailer {
         }
     }
 
-    /** "[Góp ý Lớp vui] Báo lỗi – Cô Lan: Không lưu được câu hỏi khi…". */
+    /** "[Góp ý Lớp Vui] Báo lỗi – Cô Lan: Không lưu được câu hỏi khi…". */
     static String subject(FeedbackMail mail) {
         String firstLine = mail.message().lines().findFirst().orElse("").strip();
         String excerpt = firstLine.length() <= SUBJECT_EXCERPT ? firstLine : firstLine.substring(0, SUBJECT_EXCERPT) + "…";
-        return "[Góp ý Lớp vui] %s – %s: %s".formatted(mail.kind().label(), teacher(mail), excerpt);
+        return "[Góp ý Lớp Vui] %s – %s: %s".formatted(mail.kind().label(), teacher(mail), excerpt);
     }
 
     private String text(FeedbackMail mail) {

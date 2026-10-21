@@ -54,15 +54,15 @@ public class AuthMailer {
                     helper.setText(verificationText(code, wording), verificationHtml(code, wording));
                 }
                 case AuthMail.AccountExists exists -> {
-                    helper.setSubject("Bạn đã có tài khoản Lớp vui");
+                    helper.setSubject("Bạn đã có tài khoản Lớp Vui");
                     helper.setText(accountExistsText(exists), accountExistsHtml(exists));
                 }
                 case AuthMail.NewSignIn signIn -> {
-                    helper.setSubject("Đăng nhập mới vào Lớp vui: " + signIn.device());
+                    helper.setSubject("Đăng nhập mới vào Lớp Vui: " + signIn.device());
                     helper.setText(newSignInText(signIn), newSignInHtml(signIn));
                 }
                 case AuthMail.PasswordChanged changed -> {
-                    helper.setSubject("Mật khẩu Lớp vui của bạn vừa được đổi");
+                    helper.setSubject("Mật khẩu Lớp Vui của bạn vừa được đổi");
                     helper.setText(passwordChangedText(changed), passwordChangedHtml(changed));
                 }
             }
@@ -77,11 +77,11 @@ public class AuthMailer {
 
         static Wording of(VerificationPurpose purpose) {
             return switch (purpose) {
-                case REGISTER -> new Wording("Mã xác nhận Lớp vui: ",
-                        "Mã xác nhận email của bạn trên Lớp vui là:",
-                        "Nếu bạn không đăng ký Lớp vui, hãy bỏ qua email này.");
-                case RESET_PASSWORD -> new Wording("Mã đặt lại mật khẩu Lớp vui: ",
-                        "Mã để đặt lại mật khẩu Lớp vui của bạn là:",
+                case REGISTER -> new Wording("Mã xác nhận Lớp Vui: ",
+                        "Mã xác nhận email của bạn trên Lớp Vui là:",
+                        "Nếu bạn không đăng ký Lớp Vui, hãy bỏ qua email này.");
+                case RESET_PASSWORD -> new Wording("Mã đặt lại mật khẩu Lớp Vui: ",
+                        "Mã để đặt lại mật khẩu Lớp Vui của bạn là:",
                         "Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này: mật khẩu của bạn không đổi.");
             };
         }
@@ -112,7 +112,7 @@ public class AuthMailer {
         return """
                 Xin chào,
 
-                Có người vừa đăng ký Lớp vui bằng địa chỉ %s, nhưng địa chỉ này đã có tài khoản.
+                Có người vừa đăng ký Lớp Vui bằng địa chỉ %s, nhưng địa chỉ này đã có tài khoản.
                 Bạn có thể đăng nhập bằng email này. Nếu quên mật khẩu, hãy dùng "Quên mật khẩu?" ở trang đăng nhập.
                 Nếu không phải bạn, hãy bỏ qua email này: tài khoản của bạn không bị thay đổi.
                 """.formatted(mail.email());
@@ -121,7 +121,7 @@ public class AuthMailer {
     private static String accountExistsHtml(AuthMail.AccountExists mail) {
         return layout("""
                 <p style="margin:0 0 16px">Xin chào,</p>
-                <p style="margin:0 0 12px">Có người vừa đăng ký Lớp vui bằng địa chỉ <b>%s</b>, nhưng địa chỉ này
+                <p style="margin:0 0 12px">Có người vừa đăng ký Lớp Vui bằng địa chỉ <b>%s</b>, nhưng địa chỉ này
                 đã có tài khoản.</p>
                 <p style="margin:0 0 12px">Bạn có thể đăng nhập bằng email này. Nếu quên mật khẩu, hãy dùng
                 “Quên mật khẩu?” ở trang đăng nhập.</p>
@@ -136,7 +136,7 @@ public class AuthMailer {
         return """
                 Xin chào,
 
-                Tài khoản Lớp vui của bạn vừa đăng nhập trên %s lúc %s.
+                Tài khoản Lớp Vui của bạn vừa đăng nhập trên %s lúc %s.
                 Nếu đó là bạn, không cần làm gì thêm.
                 Nếu không phải bạn, hãy đổi mật khẩu ngay (Hồ sơ của tôi → Bảo mật tài khoản) hoặc dùng "Quên mật khẩu?"
                 ở trang đăng nhập.
@@ -148,7 +148,7 @@ public class AuthMailer {
     private String newSignInHtml(AuthMail.NewSignIn mail) {
         return layout("""
                 <p style="margin:0 0 16px">Xin chào,</p>
-                <p style="margin:0 0 12px">Tài khoản Lớp vui của bạn vừa đăng nhập trên <b>%s</b> lúc <b>%s</b>.</p>
+                <p style="margin:0 0 12px">Tài khoản Lớp Vui của bạn vừa đăng nhập trên <b>%s</b> lúc <b>%s</b>.</p>
                 <p style="margin:0 0 12px">Nếu đó là bạn, không cần làm gì thêm.</p>
                 <p style="margin:0 0 12px">Nếu không phải bạn, hãy đổi mật khẩu ngay (Hồ sơ của tôi → Bảo mật tài khoản)
                 hoặc dùng “Quên mật khẩu?” ở trang đăng nhập.</p>
@@ -160,7 +160,7 @@ public class AuthMailer {
         return """
                 Xin chào,
 
-                Mật khẩu Lớp vui của bạn vừa được đổi lúc %s. Các thiết bị khác đã được đăng xuất.
+                Mật khẩu Lớp Vui của bạn vừa được đổi lúc %s. Các thiết bị khác đã được đăng xuất.
                 Nếu không phải bạn, hãy dùng "Quên mật khẩu?" ở trang đăng nhập ngay để lấy lại tài khoản.
 
                 %s
@@ -170,7 +170,7 @@ public class AuthMailer {
     private String passwordChangedHtml(AuthMail.PasswordChanged mail) {
         return layout("""
                 <p style="margin:0 0 16px">Xin chào,</p>
-                <p style="margin:0 0 12px">Mật khẩu Lớp vui của bạn vừa được đổi lúc <b>%s</b>. Các thiết bị khác đã
+                <p style="margin:0 0 12px">Mật khẩu Lớp Vui của bạn vừa được đổi lúc <b>%s</b>. Các thiết bị khác đã
                 được đăng xuất.</p>
                 <p style="margin:0 0 12px">Nếu không phải bạn, hãy dùng “Quên mật khẩu?” ở trang đăng nhập ngay để lấy
                 lại tài khoản.</p>

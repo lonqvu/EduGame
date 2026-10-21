@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** "Hồ sơ của tôi": the signed-in teacher's account, what they have done with Lớp vui, and edits to it. */
+/** "Hồ sơ của tôi": the signed-in teacher's account, what they have done with Lớp Vui, and edits to it. */
 @Service
 @RequiredArgsConstructor
 public class ProfileService {

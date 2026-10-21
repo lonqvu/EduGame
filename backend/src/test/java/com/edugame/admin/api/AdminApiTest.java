@@ -213,7 +213,7 @@ class AdminApiTest {
         assertThat(locked.at("/history/0/action").asText()).isEqualTo("TEACHER_LOCKED");
         assertThat(locked.at("/history/0/details/reason").asText()).isEqualTo("Tài khoản bị lộ");
         assertThat(locked.at("/history/0/details/sessionsEnded").asInt()).isEqualTo(1);
-        assertThat(locked.at("/history/0/actorName").asText()).isEqualTo("Quản trị Lớp vui");
+        assertThat(locked.at("/history/0/actorName").asText()).isEqualTo("Quản trị Lớp Vui");
 
         // The token in use stops working at once, and the password no longer signs in.
         me(hoa).andExpect(status().isUnauthorized());
@@ -340,7 +340,7 @@ class AdminApiTest {
         assertThat(first.get("targetType").asText()).isEqualTo("TEACHER");
         assertThat(first.get("targetCode").asText()).isEqualTo(HOA);
         assertThat(first.get("targetLabel").asText()).isEqualTo("Cô Hoa (cohoa@truong.edu.vn)");
-        assertThat(first.get("actorName").asText()).isEqualTo("Quản trị Lớp vui");
+        assertThat(first.get("actorName").asText()).isEqualTo("Quản trị Lớp Vui");
 
         JsonNode locks = body(send(get(ADMIN + "/audit-log?action=TEACHER_LOCKED&action=TEACHER_UNLOCKED"), admin));
         assertThat(locks.get("items").findValuesAsText("action")).doesNotContain("TEACHER_SIGNED_OUT");
