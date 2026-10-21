@@ -19,7 +19,16 @@ import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { QuestionSetPage } from '@/pages/QuestionSetPage'
 import { QuestionSetsPage } from '@/pages/QuestionSetsPage'
-import { DicePage, TeamMakerPage, TimerPage } from '@/pages/play/ClassToolPages'
+import {
+  CoinFlipPage,
+  DicePage,
+  NoiseMeterPage,
+  RandomNumberPage,
+  ScoreboardPage,
+  TeamMakerPage,
+  TimerPage,
+  TrafficLightPage,
+} from '@/pages/play/ClassToolPages'
 import { GridBoardPage } from '@/pages/play/GridBoardPage'
 import { NamePickerPage } from '@/pages/play/NamePickerPage'
 import { PlayGamePage } from '@/pages/play/PlayGamePage'
@@ -74,6 +83,11 @@ export const router = createBrowserRouter([
       { path: 'tools/groups', element: <TeamMakerPage /> },
       { path: 'tools/timer', element: <TimerPage /> },
       { path: 'tools/dice', element: <DicePage /> },
+      { path: 'tools/coin', element: <CoinFlipPage /> },
+      { path: 'tools/number', element: <RandomNumberPage /> },
+      { path: 'tools/scoreboard', element: <ScoreboardPage /> },
+      { path: 'tools/noise', element: <NoiseMeterPage /> },
+      { path: 'tools/light', element: <TrafficLightPage /> },
     ],
   },
 ])

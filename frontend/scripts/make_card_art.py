@@ -463,6 +463,45 @@ for i, (lab, col) in enumerate(zip(seg_labels, seg_colors)):
 pw += '<circle cx="240" cy="128" r="16" fill="#FFFFFF"/><path d="M240 28 l-12 -10 h24 z" fill="#E5484D" transform="rotate(180 240 23)"/>'
 cards.append(card('point-wheel', '#FFF6DC', '#FFE6A6', '#FFD879', pw, '#FFFFFF', '#F2A93B'))
 
+# --- Tung đồng xu: a gold coin in the air above a silver one. ---
+coin = ('<ellipse cx="240" cy="206" rx="70" ry="10" fill="#1F2A44" opacity="0.08"/>'
+        '<circle cx="210" cy="104" r="58" fill="#E9A800"/><circle cx="210" cy="100" r="58" fill="#FFC93C"/><circle cx="210" cy="100" r="44" fill="#FFE07A"/>'
+        + star(210, 100, 26, '#E9A800')
+        + '<ellipse cx="292" cy="172" rx="46" ry="16" fill="#9AA6BF"/><ellipse cx="292" cy="166" rx="46" ry="16" fill="#D5DEEE"/>'
+        '<path d="M150 60 q-14 -20 -4 -36 M268 58 q14 -20 4 -36" stroke="#F2A93B" stroke-width="4" fill="none" stroke-linecap="round"/>')
+cards.append(card('coin-flip', '#FFF6DC', '#FFE8AE', '#FFD879', coin, '#FFFFFF', '#F2A93B'))
+
+# --- Chọn số ngẫu nhiên: a big number ball and two small ones. ---
+balls = ('<circle cx="240" cy="118" r="66" fill="#3563E9"/><circle cx="222" cy="98" r="22" fill="#6E95FF" opacity="0.6"/>'
+         + text(240, 142, '17', 64, '#FFFFFF')
+         + '<circle cx="146" cy="160" r="30" fill="#F28C28"/>' + text(146, 171, '5', 30, '#FFFFFF')
+         + '<circle cx="334" cy="160" r="30" fill="#2E9E6A"/>' + text(334, 171, '28', 26, '#FFFFFF'))
+cards.append(card('random-number', '#EAF1FE', '#D2DFFB', '#BFD1FA', balls, '#FFFFFF', '#3563E9'))
+
+# --- Bảng điểm: two team columns with big scores and a crown. ---
+board = (rect(120, 50, 116, 150, 20, '#FFFFFF') + rect(244, 50, 116, 150, 20, '#FFFFFF')
+         + rect(132, 62, 92, 24, 12, '#F28C28') + rect(256, 62, 92, 24, 12, '#3563E9')
+         + text(178, 152, '25', 52, '#F28C28') + text(302, 152, '18', 52, '#3563E9')
+         + rect(132, 168, 40, 22, 8, '#F28C28') + text(152, 185, '+5', 15, '#FFFFFF')
+         + rect(256, 168, 40, 22, 8, '#3563E9') + text(276, 185, '+5', 15, '#FFFFFF')
+         + '<path d="M158 40 l8 -18 l12 12 l12 -12 l8 18 z" fill="#FFC93C"/>')
+cards.append(card('scoreboard', '#E8F7EE', '#CDEED9', '#B4E4C8', board, '#FFFFFF', '#2E9E6A'))
+
+# --- Đo tiếng ồn: a microphone beside a meter from green to red. ---
+meter = (rect(110, 160, 260, 30, 15, '#FFFFFF') + rect(114, 164, 92, 22, 11, '#2E9E6A') + rect(206, 164, 70, 22, 0, '#FFC93C')
+         + rect(276, 164, 90, 22, 11, '#E5484D', 'opacity="0.35"') + '<rect x="300" y="152" width="5" height="46" rx="2" fill="#1F2A44"/>'
+         + rect(212, 44, 56, 86, 28, '#3F4B68') + '<path d="M196 94 q44 54 88 0" stroke="#3F4B68" stroke-width="7" fill="none" stroke-linecap="round"/>'
+         + '<rect x="236" y="126" width="8" height="24" fill="#3F4B68"/>'
+         + '<path d="M160 70 q-12 18 0 36 M140 60 q-20 28 0 56 M320 70 q12 18 0 36 M340 60 q20 28 0 56" stroke="#8B5CF6" stroke-width="5" fill="none" stroke-linecap="round"/>')
+cards.append(card('noise-meter', '#F3EEFF', '#E2D6FD', '#D2C1FB', meter, '#FFFFFF', '#8B5CF6'))
+
+# --- Đèn tín hiệu: a traffic light, green on. ---
+light = (rect(196, 30, 88, 184, 30, '#1F2A44') + '<circle cx="240" cy="70" r="24" fill="#5A2224"/><circle cx="240" cy="122" r="24" fill="#5A4A1C"/>'
+         '<circle cx="240" cy="174" r="34" fill="#2E9E6A" opacity="0.25"/><circle cx="240" cy="174" r="24" fill="#3DD68C"/>'
+         + rect(120, 96, 60, 46, 14, '#FFFFFF') + text(150, 128, '🤫', 24)
+         + rect(300, 150, 60, 46, 14, '#FFFFFF') + text(330, 182, '💬', 24))
+cards.append(card('traffic-light', '#E9F7E2', '#CDEBC0', '#B9E2A8', light, '#FFFFFF', '#2E9E6A'))
+
 for name, svg in cards:
     with open(f'{OUT}/card-{name}.svg', 'w') as f:
         f.write(svg)

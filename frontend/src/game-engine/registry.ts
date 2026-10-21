@@ -47,6 +47,11 @@ export const gameRegistry: Record<GameType, GameDefinition> = {
   TEAM_MAKER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 21, itemUnit: 'nhóm', toolRoute: '/tools/groups' },
   TIMER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 22, itemUnit: 'phút', toolRoute: '/tools/timer' },
   DICE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 23, itemUnit: 'lần', toolRoute: '/tools/dice' },
+  COIN_FLIP: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 24, itemUnit: 'lần', toolRoute: '/tools/coin' },
+  RANDOM_NUMBER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 25, itemUnit: 'số', toolRoute: '/tools/number' },
+  SCOREBOARD: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 26, itemUnit: 'đội', toolRoute: '/tools/scoreboard' },
+  NOISE_METER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 27, itemUnit: 'lần', toolRoute: '/tools/noise' },
+  TRAFFIC_LIGHT: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 28, itemUnit: 'đèn', toolRoute: '/tools/light' },
 }
 
 /** Games whose items are quiz questions: any of them can be played the way of the others. */

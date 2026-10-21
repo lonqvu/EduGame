@@ -12,6 +12,7 @@ PostgreSQL 13+ · Flyway (`src/main/resources/db/migration`)
 | `V9__classroom_management.sql` | `classroom.school_name`, `classroom.avatar`, trạng thái `PAUSED`, tên lớp không trùng (theo giáo viên + năm học, trừ lớp đã xóa), index đếm `game_session` theo lớp |
 | `V10__question_sets.sql` | Bộ câu hỏi: `question_set`, `question` (trắc nghiệm / tự luận, ràng buộc đúng hình dạng từng loại), `question_set_use` (trò chơi tạo từ bộ) |
 | `V17__more_quiz_games.sql` | 9 template hỏi đáp mới, dùng item như QUIZ (mọi bộ câu hỏi chơi được): MILLIONAIRE (Ai là triệu phú), TUG_OF_WAR (Kéo co), FLOWER_PICK (Hái hoa dân chủ), WHACK_MOLE (Đập chuột), TRUE_FALSE (Đúng hay sai), LUCKY_STAR (Ngôi sao may mắn), SECRET_PICTURE (Ô cửa bí mật), MOUNTAIN_CLIMB (Leo núi), POINT_WHEEL (Vòng quay điểm thưởng) |
+| `V18__more_class_tools.sql` | 5 công cụ lớp học mới trong nhóm `CLASS_TOOL` (không có item): COIN_FLIP (Tung đồng xu), RANDOM_NUMBER (Chọn số ngẫu nhiên), SCOREBOARD (Bảng điểm), NOISE_METER (Đo tiếng ồn), TRAFFIC_LIGHT (Đèn tín hiệu) |
 | `db/dev-seed/R__dev_seed.sql` | **Chỉ profile `dev`**: dữ liệu demo (Cô Lan, lớp 3A, một game mẫu cho mỗi trò có câu hỏi). Idempotent, chạy lại khi file đổi |
 
 Các thay đổi sau này tạo migration mới `V2__...`, `V3__...`; **không sửa V1** khi đã chạy trên môi trường dùng chung.

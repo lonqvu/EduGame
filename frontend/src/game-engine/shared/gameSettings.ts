@@ -46,7 +46,20 @@ export function readPlaySettings(settings: Record<string, unknown> | undefined, 
 }
 
 /** Question games whose projector reads its rules from `settings` (Lật ô has fixed teams and points per tile). */
-export type RulesGameType = Exclude<GameType, 'GRID_BOARD' | 'SPIN_WHEEL' | 'NAME_RACE' | 'TEAM_MAKER' | 'TIMER' | 'DICE'>
+export type RulesGameType = Exclude<
+  GameType,
+  | 'GRID_BOARD'
+  | 'SPIN_WHEEL'
+  | 'NAME_RACE'
+  | 'TEAM_MAKER'
+  | 'TIMER'
+  | 'DICE'
+  | 'COIN_FLIP'
+  | 'RANDOM_NUMBER'
+  | 'SCOREBOARD'
+  | 'NOISE_METER'
+  | 'TRAFFIC_LIGHT'
+>
 
 /** What each projector plays with when `settings` leaves a rule out. */
 export const PLAY_DEFAULTS: Record<RulesGameType, Partial<PlaySettings>> = {

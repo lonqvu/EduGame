@@ -290,7 +290,7 @@ test('Xúc xắc: rolls the chosen number of dice and keeps the last rolls', asy
 test('the "Công cụ" filter lists the classroom tools, and each opens', async ({ page }) => {
   await page.goto('/games/new')
   await page.getByRole('tab', { name: 'Công cụ' }).click()
-  await expect(page.getByText('Tổng 3 trò chơi')).toBeVisible()
+  await expect(page.getByText('Tổng 8 trò chơi')).toBeVisible()
   await page.getByRole('button', { name: 'Chơi ngay Xúc xắc' }).click()
   await expect(page).toHaveURL(/\/tools\/dice$/)
 })

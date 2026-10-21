@@ -56,4 +56,49 @@ export const TOOL_GUIDES: Partial<Record<GameType, ToolGuide>> = {
     ],
     tip: 'Dùng để chọn lượt, chọn câu hỏi hoặc cho trò chơi cờ của lớp.',
   },
+  COIN_FLIP: {
+    goal: 'Tung đồng xu để chọn đội đi trước hay quyết định nhanh mà công bằng.',
+    steps: [
+      { title: 'Chọn mặt', text: 'Mỗi đội chọn một mặt: sấp hoặc ngửa.' },
+      { title: 'Tung', text: 'Bấm nút hoặc nhấn phím cách, đồng xu bay lên rồi rơi xuống.' },
+      { title: 'Xem kết quả', text: 'Mặt hiện ra, bảng đếm ghi lại các lần tung.' },
+    ],
+    tip: 'Dùng thay cho oẳn tù tì khi hai đội tranh lượt.',
+  },
+  RANDOM_NUMBER: {
+    goal: 'Chọn một số ngẫu nhiên, ví dụ để gọi bạn theo số thứ tự.',
+    steps: [
+      { title: 'Đặt khoảng', text: 'Chọn từ số mấy đến số mấy, ví dụ 1 đến 30.' },
+      { title: 'Chọn số', text: 'Bấm Chọn số, các số chạy rồi dừng ở một số.' },
+      { title: 'Không lặp lại', text: 'Bật "Không lặp lại" để mỗi số chỉ ra một lần.' },
+    ],
+    tip: 'Hợp để gọi bạn lên bảng mà không cần danh sách lớp.',
+  },
+  SCOREBOARD: {
+    goal: 'Bảng điểm to rõ cho các đội trong mọi hoạt động của lớp.',
+    steps: [
+      { title: 'Chọn số đội', text: 'Từ 2 đến 6 đội, bấm vào tên để đổi tên đội.' },
+      { title: 'Cộng điểm', text: 'Bấm +1, +5, +10 hoặc −1 cho đội.' },
+      { title: 'Xem đội dẫn đầu', text: 'Đội nhiều điểm nhất có vương miện.' },
+    ],
+    tip: 'Điểm được giữ lại trên máy này, mở lại vẫn còn. Bấm "Về 0 hết" để chơi lượt mới.',
+  },
+  NOISE_METER: {
+    goal: 'Đo độ ồn của lớp bằng micro để cả lớp cùng giữ trật tự.',
+    steps: [
+      { title: 'Bật micro', text: 'Bấm Bật micro và cho phép trình duyệt dùng micro.' },
+      { title: 'Đặt mức', text: 'Kéo thanh "Mức cho phép" cho hợp với hoạt động.' },
+      { title: 'Theo dõi', text: 'Ồn quá mức lâu, màn hình đỏ lên và có chuông báo.' },
+    ],
+    tip: 'Micro chỉ đo độ ồn, không ghi âm và không gửi đi đâu.',
+  },
+  TRAFFIC_LIGHT: {
+    goal: 'Đèn tín hiệu cho biết lúc nào lớp cần im lặng, nói nhỏ hay được thảo luận.',
+    steps: [
+      { title: 'Đèn đỏ', text: 'Im lặng, lắng nghe cô.' },
+      { title: 'Đèn vàng', text: 'Nói nhỏ với bạn bên cạnh.' },
+      { title: 'Đèn xanh', text: 'Các nhóm được thảo luận.' },
+    ],
+    tip: 'Nhấn phím 1, 2, 3 để đổi đèn nhanh khi đang giảng bài.',
+  },
 }

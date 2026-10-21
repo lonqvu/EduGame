@@ -23,6 +23,11 @@ export type GameType =
   | 'TEAM_MAKER'
   | 'TIMER'
   | 'DICE'
+  | 'COIN_FLIP'
+  | 'RANDOM_NUMBER'
+  | 'SCOREBOARD'
+  | 'NOISE_METER'
+  | 'TRAFFIC_LIGHT'
 
 export type GameCategory = 'QUESTION' | 'PUZZLE' | 'RANDOM_TOOL' | 'CLASS_TOOL'
 
