@@ -36,7 +36,7 @@ export function TeamMakerScreen() {
   return (
     <ToolFrame
       title="Chia nhóm ngẫu nhiên"
-      subtitle={`${className} · ${students.length} bạn`}
+      subtitle={[className, `${students.length} bạn`].filter(Boolean).join(' · ')}
       actions={
         <>
           <span className="text-lg font-extrabold">Số nhóm</span>

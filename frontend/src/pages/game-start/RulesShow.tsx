@@ -9,6 +9,11 @@ interface RulesShowProps {
   title: string
   guide: GameGuide
   onClose: () => void
+  /**
+   * Goes full screen while open (from the start page). Off on the projector, which may already be full screen and
+   * must stay so when the rules close.
+   */
+  fullscreen?: boolean
 }
 
 const STEP_COLORS = ['#3563E9', '#F28C28', '#2E9E6A', '#8B5CF6']
@@ -27,7 +32,7 @@ function Slide({ heading, children }: { heading: string; children: ReactNode }) 
  * The rules for the class on the projector: full screen, big type, one topic per page (goal, rules, how to play, who
  * wins). Only what the class needs: no settings, no teacher notes, no answers. ←/→ change page, Esc closes.
  */
-export function RulesShow({ mode, title, guide, onClose }: RulesShowProps) {
+export function RulesShow({ mode, title, guide, onClose, fullscreen = true }: RulesShowProps) {
   const [page, setPage] = useState(0)
   const root = useRef<HTMLDivElement>(null)
   // Up to six rules must fit the board: longer lists get smaller type and tighter rows.
@@ -81,6 +86,7 @@ export function RulesShow({ mode, title, guide, onClose }: RulesShowProps) {
 
   // Full screen while it is open; leaving full screen (Esc in the browser) closes the show too.
   useEffect(() => {
+    if (!fullscreen) return
     let entered = false
     const el = root.current
     el?.requestFullscreen?.().then(
@@ -95,7 +101,7 @@ export function RulesShow({ mode, title, guide, onClose }: RulesShowProps) {
       document.removeEventListener('fullscreenchange', onChange)
       if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
     }
-  }, [onClose])
+  }, [onClose, fullscreen])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

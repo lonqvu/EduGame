@@ -64,6 +64,10 @@ public class Game extends AuditableEntity {
     @Column(name = "status", nullable = false, length = 20)
     private GameStatus status = GameStatus.DRAFT;
 
+    /** Made from the built-in sample content by "Chơi ngay" (at most one live per teacher and game type). */
+    @Column(name = "sample", nullable = false)
+    private boolean sample;
+
     /** Composite FK (current_version_id, id) in DB: the version must belong to this game. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_version_id")

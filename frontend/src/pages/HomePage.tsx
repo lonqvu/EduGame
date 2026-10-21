@@ -2,8 +2,8 @@ import { App } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
-import { gameRegistry, toolPath } from '@/game-engine/registry'
-import { NewGameModal } from '@/pages/choose-game/NewGameModal'
+import { gameRegistry } from '@/game-engine/registry'
+import { usePlayNow } from '@/pages/choose-game/usePlayNow'
 import { ActionCards } from '@/pages/home/ActionCards'
 import { HomeHero } from '@/pages/home/HomeHero'
 import { PraiseCorner, type StarPeriod } from '@/pages/home/PraiseCorner'
@@ -14,7 +14,7 @@ import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
 import { useQuestionSetStore } from '@/store/questionSetStore'
 import { useTeacherStore } from '@/store/teacherStore'
-import type { GameSummary, GameTemplate, GameType } from '@/types/game'
+import type { GameSummary, GameType } from '@/types/game'
 import { apiErrorMessage } from '@/utils/apiError'
 import { classTitle } from '@/utils/classrooms'
 import { relativeTimeLabel } from '@/utils/dateLabels'
@@ -61,7 +61,7 @@ export function HomePage() {
 
   const [allRecent, setAllRecent] = useState(false)
   const [period, setPeriod] = useState<StarPeriod>('week')
-  const [newGame, setNewGame] = useState<GameTemplate | null>(null)
+  const { playNow } = usePlayNow()
 
   useEffect(() => {
     void loadTeacher()
@@ -90,15 +90,8 @@ export function HomePage() {
     }
   }
 
-  const startGame = (type: GameType) => {
-    if (!gameRegistry[type].usesQuestions) {
-      navigate(toolPath(type))
-      return
-    }
-    // Name it and pick how to start, as from the game chooser.
-    setNewGame(templates.find((t) => t.type === type) ?? null)
-  }
-
+  /** "Chơi ngay", as on the game chooser: the sample game, or the tool, on the projector at once. */
+  const startGame = (type: GameType) => void playNow(type)
 
   const confirmArchive = (game: GameSummary) =>
     modal.confirm({
@@ -166,7 +159,6 @@ export function HomePage() {
         </div>
       </div>
 
-      <NewGameModal template={newGame} grade={classGrade} className={className || undefined} onClose={() => setNewGame(null)} />
     </div>
   )
 }

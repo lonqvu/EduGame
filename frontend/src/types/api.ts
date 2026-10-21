@@ -124,6 +124,8 @@ export interface GameSummaryResponse {
   grade?: number
   status: GameStatus
   itemCount: number
+  /** Made by "Chơi ngay" from the built-in sample content. */
+  sample: boolean
   updatedAt: string
 }
 
@@ -149,6 +151,8 @@ export interface GameResponse {
   status: GameStatus
   version: number
   versionStatus: 'DRAFT' | 'PUBLISHED'
+  /** Made by "Chơi ngay" from the built-in sample content. */
+  sample: boolean
   settings: Record<string, unknown>
   items: GameItemResponse[]
   updatedAt: string

@@ -147,6 +147,8 @@ export function GameStartPage() {
           {playable > 0 ? (
             <Link
               to={playUrl}
+              // The class just saw the rules here: the projector skips its introduction.
+              state={{ skipIntro: true }}
               onClick={() => {
                 if (fullscreenOnStart) enterFullscreen()
               }}

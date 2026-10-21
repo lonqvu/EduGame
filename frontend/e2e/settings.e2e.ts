@@ -78,7 +78,7 @@ test('a new game made in the app starts with the defaults; games made before kee
   await expect.poll(async () => (await backend.settings()).games).toEqual({ teams: 3, timeLimitSec: 20, shuffleItems: true })
 
   await page.goto('/games/new')
-  await page.getByRole('button', { name: 'Chọn trò chơi Trắc nghiệm' }).click()
+  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Trắc nghiệm' }).click()
   const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
   // A click while the dialog still opens can be lost: click until the choice holds.
   const fresh = dialog.getByRole('radio', { name: /Soạn nội dung mới/ })

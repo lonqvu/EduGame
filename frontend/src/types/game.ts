@@ -39,6 +39,8 @@ export interface GameSummary {
   subject?: string
   /** ISO time of the last edit. */
   updatedAt?: string
+  /** Made by "Chơi ngay" from the built-in sample content. */
+  sample?: boolean
 }
 
 export interface Question {

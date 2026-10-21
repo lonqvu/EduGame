@@ -1,4 +1,4 @@
-import { request, type APIRequestContext, type BrowserContext } from '@playwright/test'
+import { request, type APIRequestContext, type BrowserContext, type Page } from '@playwright/test'
 
 export const TEACHER = { username: 'colan@edugame.local', password: '123456' }
 /** The seeded admin ("Quản trị"). */
@@ -9,6 +9,12 @@ const API_URL = process.env.E2E_API_URL ?? 'http://localhost:8080/api/v1/'
 export async function signInBrowser(context: BrowserContext, account: { username: string; password: string } = TEACHER) {
   const res = await context.request.post(`${API_URL}auth/login`, { data: { ...account, remember: true } })
   if (!res.ok()) throw new Error(`Sign-in failed: ${res.status()} ${await res.text()}`)
+}
+
+/** Opens a question game on the projector and starts it from its introduction (rules, teams, "Bắt đầu"). */
+export async function openGame(page: Page, path: string) {
+  await page.goto(path)
+  await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
 }
 
 export interface Item {

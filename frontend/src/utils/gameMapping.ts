@@ -26,7 +26,16 @@ export function toGameTemplate(t: GameTemplateResponse): GameTemplate | null {
 
 export function toGameSummary(g: GameSummaryResponse): GameSummary | null {
   if (!isGameType(g.templateCode)) return null
-  return { id: g.code, type: g.templateCode, title: g.title, grade: g.grade, itemCount: g.itemCount, subject: g.subject, updatedAt: g.updatedAt }
+  return {
+    id: g.code,
+    type: g.templateCode,
+    title: g.title,
+    grade: g.grade,
+    itemCount: g.itemCount,
+    subject: g.subject,
+    updatedAt: g.updatedAt,
+    sample: g.sample,
+  }
 }
 
 /** Summary of a game from its detail response (opened directly, e.g. /games/:id/edit). */
@@ -38,6 +47,7 @@ export function detailToSummary(g: GameResponse): GameSummary | null {
     title: g.title,
     grade: g.grade,
     itemCount: g.items.length,
+    sample: g.sample,
     subject: g.subject,
     updatedAt: g.updatedAt,
   }

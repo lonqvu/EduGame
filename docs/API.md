@@ -311,6 +311,15 @@ Xóa mềm (`status = ARCHIVED`): game biến mất khỏi thư viện, lịch s
 Khóa bản DRAFT thành `PUBLISHED`, đặt làm bản được chơi (`current_version_id`), game chuyển `PUBLISHED`.
 Không có DRAFT (chưa sửa gì sau lần publish trước) → `409 NOTHING_TO_PUBLISH`.
 
+### 8b. `POST /games/samples` — "Chơi ngay" với câu hỏi mẫu
+
+Body `{"templateCode": "QUIZ"}`. Trả về trò mẫu của giáo viên cho loại trò đó (như `GET /games/{code}`, có `sample: true`):
+lần đầu được tạo từ nội dung mẫu có sẵn (`backend/src/main/resources/samples/sample-games.json`, kiểm tra như nội dung
+giáo viên soạn), các lần sau trả lại đúng trò đó. Mỗi giáo viên có tối đa một trò mẫu còn dùng cho mỗi loại trò (lưu
+trữ trò mẫu thì lần sau tạo bản mới). Có cho 9 trò hỏi đáp: QUIZ, GOLDEN_BELL, BOAT_RACE, GRID_BOARD, MATCHING, MEMORY,
+CROSSWORD, ORDERING, SORTING; trò công cụ hoặc mã không có → `400 NO_SAMPLE`. `GET /games` và `GET /games/{code}` cũng
+có trường `sample`.
+
 ### 9–12. Câu hỏi (items)
 
 **Quan trọng — id câu hỏi có thể thay đổi.** Bản đã publish không bao giờ bị sửa. Lần sửa đầu tiên sau khi publish
@@ -705,6 +714,7 @@ Mọi lỗi trả về dạng:
 | 409 | `LAST_ADMIN` | Bỏ quyền của admin cuối cùng | 43 |
 | 429 | `TOO_MANY_FEEDBACK` | Đã gửi 10 góp ý trong 1 giờ | 32 |
 | 404 | `RESOURCE_NOT_FOUND` | Không tồn tại, không phải của mình, hoặc đã lưu trữ | Các API có `{code}` / `{id}`, 4 (template) |
+| 400 | `NO_SAMPLE` | Loại trò không có nội dung mẫu (công cụ, mã không có) | 8b |
 | 409 | `NOTHING_TO_PUBLISH` | Không có bản nháp để publish | 8 |
 | 500 | `INTERNAL_ERROR` | Lỗi không lường trước (xem log backend) | |
 

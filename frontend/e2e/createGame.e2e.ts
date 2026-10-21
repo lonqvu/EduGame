@@ -29,7 +29,7 @@ test('a game made from a question set: named, the set picked among those it can 
   await backend.createQuestionSet(onlyShort, [shortAnswer('Con gì kêu meo meo?', 'Con mèo')])
 
   await page.goto('/games/new')
-  await page.getByRole('button', { name: 'Chọn trò chơi Đua thuyền' }).click()
+  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Đua thuyền' }).click()
   const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
   await expect(dialog.getByText('Đua thuyền • Tạo nội dung và bắt đầu chơi')).toBeVisible()
   // The name starts from the game and the class; the set option comes first and is chosen.
@@ -72,7 +72,7 @@ test('a game made from a question set: named, the set picked among those it can 
 
 test('a game that cannot use a set only offers new content, named as the teacher wants', async ({ page, backend }) => {
   await page.goto('/games/new')
-  await page.getByRole('button', { name: 'Chọn trò chơi Nối cặp' }).click()
+  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Nối cặp' }).click()
   const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
   await expect(dialog.getByRole('radio', { name: /Dùng bộ câu hỏi có sẵn/ })).toHaveCount(0)
   await expect(dialog.getByRole('radio', { name: /Soạn nội dung mới/ })).toHaveAttribute('aria-checked', 'true')
@@ -83,7 +83,7 @@ test('a game that cannot use a set only offers new content, named as the teacher
   await expect(dialog).toBeHidden()
   expect((await backend.library()).length).toBe(before)
 
-  await page.getByRole('button', { name: 'Chọn trò chơi Nối cặp' }).click()
+  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Nối cặp' }).click()
   await dialog.getByLabel('Tên trò chơi').fill('Nối từ tiếng Anh')
   await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
   await page.waitForURL(/\/games\/g-[a-z0-9]+\/edit$/)
@@ -92,9 +92,9 @@ test('a game that cannot use a set only offers new content, named as the teacher
   expect((await backend.game(code)).title).toBe('Nối từ tiếng Anh')
 })
 
-test('"Trò chơi nổi bật" on the home page opens the same dialog', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('button', { name: /Lật ô thi đua/ }).first().click()
+test('"Dùng câu hỏi của cô" on Lật ô offers the seeded sets that fit', async ({ page }) => {
+  await page.goto('/games/new')
+  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Lật ô thi đua' }).click()
   const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
   await expect(dialog.getByText('Lật ô thi đua • Tạo nội dung và bắt đầu chơi')).toBeVisible()
   await expect(dialog.getByRole('radio', { name: /Dùng bộ câu hỏi có sẵn/ })).toBeVisible()

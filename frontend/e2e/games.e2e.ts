@@ -1,5 +1,5 @@
 import { test as base, expect, type Page } from '@playwright/test'
-import { Backend, gridQuestion, pairSet, quizItem, signInBrowser, type Game } from './api'
+import { Backend, gridQuestion, pairSet, quizItem, signInBrowser, type Game, openGame } from './api'
 
 const test = base.extend<{ backend: Backend }>({
   // Playwright needs the destructuring pattern here, even with no fixtures to take.
@@ -33,7 +33,7 @@ test('Lật ô thi đua: play the whole board, undo a mark, see the winner', asy
     gridQuestion('7 - 4 = ?', '3', 20),
     gridQuestion('6 + 6 = ?', '12', 30),
   ])
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   await expect(page.getByText('Còn 3 ô')).toBeVisible()
 
   // Tile 1, Đội Cam: right.
@@ -85,7 +85,7 @@ test('Trắc nghiệm: teams steal wrong answers and the scores add up', async (
   ])
   // The end of the game is recorded for the class, with the scores the results show (for "Báo cáo").
   const ended = page.waitForRequest((r) => r.method() === 'POST' && /\/sessions\/\d+\/end$/.test(r.url()))
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   const option = (text: string) => page.locator('button').filter({ has: page.locator('span', { hasText: exact(text) }) })
   const teams = ['Đội Cam', 'Đội Biển']
 
@@ -125,7 +125,7 @@ test('Nối cặp: a wrong attempt passes the turn, then every pair is joined', 
     ['Đà Nẵng', 'Cầu Rồng'],
   ]
   const game = await backend.createGame('MATCHING', 'E2E Nối cặp', [pairSet('PAIR_SET', pairs)])
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   const left = (name: string) => page.getByLabel('Cột trái').getByRole('button', { name, exact: true })
   const right = (name: string) => page.getByLabel('Cột phải').getByRole('button', { name, exact: true })
 
@@ -154,7 +154,7 @@ test('Lật thẻ: a miss turns the cards back, a pair keeps the turn, all pairs
   ]
   const game = await backend.createGame('MEMORY', 'E2E Lật thẻ', [pairSet('CARD_SET', pairs)])
   const partner = new Map(pairs.flatMap(([a, b]) => [[a, b], [b, a]] as const))
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
 
   const cards = page.locator('div.grid button')
   await expect(cards).toHaveCount(6)
@@ -192,7 +192,10 @@ test('Lật thẻ: a miss turns the cards back, a pair keeps the turn, all pairs
 test('a game with nothing playable says so instead of crashing', async ({ page, backend }) => {
   const quiz = await backend.createGame('QUIZ', 'E2E Trống')
   await page.goto(`/play/${quiz.code}`)
-  await expect(page.getByText('Chưa có câu hỏi nào đủ nội dung')).toBeVisible()
+  // The introduction says so, and leads to the editor instead of starting.
+  await expect(page.getByRole('alert')).toContainText('Chưa có câu nào đủ nội dung để chơi.')
+  await expect(page.getByRole('link', { name: 'Soạn nội dung' })).toHaveAttribute('href', `/games/${quiz.code}/edit`)
+  await expect(page.getByRole('button', { name: 'Bắt đầu', exact: true })).toHaveCount(0)
   await page.goto('/play/g-does-not-exist')
   await expect(page.getByText('Trang bạn tìm không tồn tại.')).toBeVisible()
 })
@@ -262,7 +265,7 @@ test('the editor autosaves edits and they are there after a reload', async ({ pa
 
 test('a new game made from the chooser shows up in the library', async ({ page, backend }) => {
   await page.goto('/games/new')
-  await page.getByRole('button', { name: /Trắc nghiệm/ }).first().click()
+  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Trắc nghiệm' }).click()
   const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
   // A click while the dialog still opens can be lost: click until the choice holds.
   const fresh = dialog.getByRole('radio', { name: /Soạn nội dung mới/ })
@@ -295,7 +298,7 @@ test('each name picker is its own game, grouped under the "Gọi tên" filter', 
     ['Tên lửa', 'rocket', 'Phóng tên lửa'],
   ]) {
     await page.goto('/games/new')
-    await page.getByRole('button', { name: `Chọn trò chơi ${name}` }).click()
+    await page.getByRole('button', { name: `Chơi ngay ${name}` }).click()
     await expect(page).toHaveURL(new RegExp(`/tools/pick/${mode}$`))
     await expect(page.getByRole('button', { name: start, exact: true })).toBeVisible()
   }

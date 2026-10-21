@@ -1,0 +1,1487 @@
+{
+ "QUIZ": {
+  "title": "Trắc nghiệm mẫu – Kiến thức chung",
+  "subject": "Tổng hợp",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "7 × 8 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "54"
+      },
+      {
+       "id": "b",
+       "text": "56"
+      },
+      {
+       "id": "c",
+       "text": "63"
+      },
+      {
+       "id": "d",
+       "text": "48"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào sống dưới nước?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con mèo"
+      },
+      {
+       "id": "b",
+       "text": "Con gà"
+      },
+      {
+       "id": "c",
+       "text": "Con cá"
+      },
+      {
+       "id": "d",
+       "text": "Con chó"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Thủ đô của Việt Nam là thành phố nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Hà Nội"
+      },
+      {
+       "id": "b",
+       "text": "Huế"
+      },
+      {
+       "id": "c",
+       "text": "Đà Nẵng"
+      },
+      {
+       "id": "d",
+       "text": "Cần Thơ"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Mặt Trời mọc ở hướng Đông.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Một tuần có mấy ngày?",
+     "options": [
+      {
+       "id": "a",
+       "text": "5 ngày"
+      },
+      {
+       "id": "b",
+       "text": "6 ngày"
+      },
+      {
+       "id": "c",
+       "text": "7 ngày"
+      },
+      {
+       "id": "d",
+       "text": "8 ngày"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào chỉ màu sắc?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Chạy nhảy"
+      },
+      {
+       "id": "b",
+       "text": "Quyển vở"
+      },
+      {
+       "id": "c",
+       "text": "Vui vẻ"
+      },
+      {
+       "id": "d",
+       "text": "Xanh lá"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "d"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Số liền sau của 99 là số nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "98"
+      },
+      {
+       "id": "b",
+       "text": "100"
+      },
+      {
+       "id": "c",
+       "text": "101"
+      },
+      {
+       "id": "d",
+       "text": "90"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Bộ phận nào của cây hút nước từ đất?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Rễ"
+      },
+      {
+       "id": "b",
+       "text": "Lá"
+      },
+      {
+       "id": "c",
+       "text": "Hoa"
+      },
+      {
+       "id": "d",
+       "text": "Quả"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Hình tam giác có 4 cạnh.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "false"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "1 giờ có bao nhiêu phút?",
+     "options": [
+      {
+       "id": "a",
+       "text": "30 phút"
+      },
+      {
+       "id": "b",
+       "text": "45 phút"
+      },
+      {
+       "id": "c",
+       "text": "60 phút"
+      },
+      {
+       "id": "d",
+       "text": "100 phút"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   }
+  ]
+ },
+ "GOLDEN_BELL": {
+  "title": "Rung chuông vàng mẫu",
+  "subject": "Tổng hợp",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "8 × 9 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "63"
+      },
+      {
+       "id": "b",
+       "text": "64"
+      },
+      {
+       "id": "c",
+       "text": "81"
+      },
+      {
+       "id": "d",
+       "text": "72"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "d"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào biết bay?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con voi"
+      },
+      {
+       "id": "b",
+       "text": "Con chim"
+      },
+      {
+       "id": "c",
+       "text": "Con rùa"
+      },
+      {
+       "id": "d",
+       "text": "Con cá"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Nước đá là nước ở thể rắn.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào trái nghĩa với \"nóng\"?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Ấm"
+      },
+      {
+       "id": "b",
+       "text": "Mát mẻ"
+      },
+      {
+       "id": "c",
+       "text": "Lạnh"
+      },
+      {
+       "id": "d",
+       "text": "Nắng"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Việt Nam có bao nhiêu mùa ở miền Bắc?",
+     "options": [
+      {
+       "id": "a",
+       "text": "2 mùa"
+      },
+      {
+       "id": "b",
+       "text": "4 mùa"
+      },
+      {
+       "id": "c",
+       "text": "3 mùa"
+      },
+      {
+       "id": "d",
+       "text": "1 mùa"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "100 − 45 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "55"
+      },
+      {
+       "id": "b",
+       "text": "65"
+      },
+      {
+       "id": "c",
+       "text": "45"
+      },
+      {
+       "id": "d",
+       "text": "50"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Cầu vồng có 7 màu.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Loài cây nào là biểu tượng của làng quê Việt Nam?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Cây thông"
+      },
+      {
+       "id": "b",
+       "text": "Cây xương rồng"
+      },
+      {
+       "id": "c",
+       "text": "Cây tre"
+      },
+      {
+       "id": "d",
+       "text": "Cây táo"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   }
+  ]
+ },
+ "BOAT_RACE": {
+  "title": "Đua thuyền mẫu – Tính nhẩm",
+  "subject": "Toán",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "25 + 17 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "32"
+      },
+      {
+       "id": "b",
+       "text": "41"
+      },
+      {
+       "id": "c",
+       "text": "42"
+      },
+      {
+       "id": "d",
+       "text": "52"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "60 − 24 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "46"
+      },
+      {
+       "id": "b",
+       "text": "36"
+      },
+      {
+       "id": "c",
+       "text": "34"
+      },
+      {
+       "id": "d",
+       "text": "26"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "6 × 7 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "42"
+      },
+      {
+       "id": "b",
+       "text": "36"
+      },
+      {
+       "id": "c",
+       "text": "48"
+      },
+      {
+       "id": "d",
+       "text": "49"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "56 : 8 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "6"
+      },
+      {
+       "id": "b",
+       "text": "8"
+      },
+      {
+       "id": "c",
+       "text": "9"
+      },
+      {
+       "id": "d",
+       "text": "7"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "d"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Số nào lớn nhất?",
+     "options": [
+      {
+       "id": "a",
+       "text": "389"
+      },
+      {
+       "id": "b",
+       "text": "938"
+      },
+      {
+       "id": "c",
+       "text": "893"
+      },
+      {
+       "id": "d",
+       "text": "398"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "1 m = 100 cm",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Nửa giờ là bao nhiêu phút?",
+     "options": [
+      {
+       "id": "a",
+       "text": "30 phút"
+      },
+      {
+       "id": "b",
+       "text": "15 phút"
+      },
+      {
+       "id": "c",
+       "text": "20 phút"
+      },
+      {
+       "id": "d",
+       "text": "60 phút"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "9 × 5 = 54",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "false"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "125 + 75 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "190"
+      },
+      {
+       "id": "b",
+       "text": "195"
+      },
+      {
+       "id": "c",
+       "text": "200"
+      },
+      {
+       "id": "d",
+       "text": "210"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Hình vuông có mấy góc vuông?",
+     "options": [
+      {
+       "id": "a",
+       "text": "1"
+      },
+      {
+       "id": "b",
+       "text": "2"
+      },
+      {
+       "id": "c",
+       "text": "3"
+      },
+      {
+       "id": "d",
+       "text": "4"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "d"
+     ]
+    }
+   }
+  ]
+ },
+ "GRID_BOARD": {
+  "title": "Lật ô mẫu – Ai nhanh trí hơn",
+  "subject": "Tổng hợp",
+  "items": [
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Con gì kêu \"ò ó o\" mỗi sáng?",
+     "points": 10
+    },
+    "solution": {
+     "answer": "Con gà trống"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "15 + 27 = ?",
+     "points": 20
+    },
+    "solution": {
+     "answer": "42"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Kể tên 3 loài hoa em biết.",
+     "points": 20
+    },
+    "solution": {
+     "answer": "Hoa hồng, hoa cúc, hoa sen…"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Thủ đô của Việt Nam là gì?",
+     "points": 10
+    },
+    "solution": {
+     "answer": "Hà Nội"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "8 × 6 = ?",
+     "points": 20
+    },
+    "solution": {
+     "answer": "48"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Trái nghĩa với \"chăm chỉ\" là gì?",
+     "points": 20
+    },
+    "solution": {
+     "answer": "Lười biếng"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Một năm có mấy tháng?",
+     "points": 10
+    },
+    "solution": {
+     "answer": "12 tháng"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Con vật nào là chúa tể rừng xanh?",
+     "points": 20
+    },
+    "solution": {
+     "answer": "Con hổ (sư tử)"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "90 − 35 = ?",
+     "points": 20
+    },
+    "solution": {
+     "answer": "55"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Đặt một câu có từ \"thân thiện\".",
+     "points": 10
+    },
+    "solution": {
+     "answer": "Bạn Lan rất thân thiện với mọi người."
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Mặt Trăng tròn nhất vào ngày nào âm lịch?",
+     "points": 20
+    },
+    "solution": {
+     "answer": "Ngày rằm (15)"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Kể tên 2 loài vật sống dưới nước.",
+     "points": 20
+    },
+    "solution": {
+     "answer": "Cá, tôm, cua…"
+    }
+   }
+  ]
+ },
+ "MATCHING": {
+  "title": "Nối cặp mẫu",
+  "subject": "Tổng hợp",
+  "items": [
+   {
+    "itemType": "PAIR_SET",
+    "content": {
+     "left": [
+      {
+       "id": "l0",
+       "text": "Con bò"
+      },
+      {
+       "id": "l1",
+       "text": "Con mèo"
+      },
+      {
+       "id": "l2",
+       "text": "Con ong"
+      },
+      {
+       "id": "l3",
+       "text": "Con gà"
+      },
+      {
+       "id": "l4",
+       "text": "Con chó"
+      }
+     ],
+     "right": [
+      {
+       "id": "r0",
+       "text": "Ăn cỏ"
+      },
+      {
+       "id": "r1",
+       "text": "Bắt chuột"
+      },
+      {
+       "id": "r2",
+       "text": "Làm mật"
+      },
+      {
+       "id": "r3",
+       "text": "Đẻ trứng"
+      },
+      {
+       "id": "r4",
+       "text": "Giữ nhà"
+      }
+     ]
+    },
+    "solution": {
+     "pairs": [
+      [
+       "l0",
+       "r0"
+      ],
+      [
+       "l1",
+       "r1"
+      ],
+      [
+       "l2",
+       "r2"
+      ],
+      [
+       "l3",
+       "r3"
+      ],
+      [
+       "l4",
+       "r4"
+      ]
+     ]
+    }
+   },
+   {
+    "itemType": "PAIR_SET",
+    "content": {
+     "left": [
+      {
+       "id": "l0",
+       "text": "3 × 4"
+      },
+      {
+       "id": "l1",
+       "text": "5 × 5"
+      },
+      {
+       "id": "l2",
+       "text": "6 × 3"
+      },
+      {
+       "id": "l3",
+       "text": "7 × 2"
+      },
+      {
+       "id": "l4",
+       "text": "9 × 4"
+      }
+     ],
+     "right": [
+      {
+       "id": "r0",
+       "text": "12"
+      },
+      {
+       "id": "r1",
+       "text": "25"
+      },
+      {
+       "id": "r2",
+       "text": "18"
+      },
+      {
+       "id": "r3",
+       "text": "14"
+      },
+      {
+       "id": "r4",
+       "text": "36"
+      }
+     ]
+    },
+    "solution": {
+     "pairs": [
+      [
+       "l0",
+       "r0"
+      ],
+      [
+       "l1",
+       "r1"
+      ],
+      [
+       "l2",
+       "r2"
+      ],
+      [
+       "l3",
+       "r3"
+      ],
+      [
+       "l4",
+       "r4"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ "MEMORY": {
+  "title": "Lật thẻ mẫu – Tiếng Anh",
+  "subject": "Tiếng Anh",
+  "items": [
+   {
+    "itemType": "CARD_SET",
+    "content": {
+     "cards": [
+      {
+       "id": "a0",
+       "text": "Cat"
+      },
+      {
+       "id": "b0",
+       "text": "Con mèo"
+      },
+      {
+       "id": "a1",
+       "text": "Dog"
+      },
+      {
+       "id": "b1",
+       "text": "Con chó"
+      },
+      {
+       "id": "a2",
+       "text": "Bird"
+      },
+      {
+       "id": "b2",
+       "text": "Con chim"
+      },
+      {
+       "id": "a3",
+       "text": "Fish"
+      },
+      {
+       "id": "b3",
+       "text": "Con cá"
+      },
+      {
+       "id": "a4",
+       "text": "Sun"
+      },
+      {
+       "id": "b4",
+       "text": "Mặt trời"
+      },
+      {
+       "id": "a5",
+       "text": "Book"
+      },
+      {
+       "id": "b5",
+       "text": "Quyển sách"
+      }
+     ]
+    },
+    "solution": {
+     "pairs": [
+      [
+       "a0",
+       "b0"
+      ],
+      [
+       "a1",
+       "b1"
+      ],
+      [
+       "a2",
+       "b2"
+      ],
+      [
+       "a3",
+       "b3"
+      ],
+      [
+       "a4",
+       "b4"
+      ],
+      [
+       "a5",
+       "b5"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ "CROSSWORD": {
+  "title": "Ô chữ mẫu – Từ khoá: SÁCH",
+  "subject": "Tiếng Việt",
+  "items": [
+   {
+    "itemType": "CROSSWORD_ROW",
+    "content": {
+     "clue": "Loài hoa mọc trong đầm, được chọn là quốc hoa của Việt Nam?"
+    },
+    "solution": {
+     "answer": "HOA SEN",
+     "keyIndex": 3
+    }
+   },
+   {
+    "itemType": "CROSSWORD_ROW",
+    "content": {
+     "clue": "Con cá có màu vàng óng, thường được nuôi trong bể kính?"
+    },
+    "solution": {
+     "answer": "CÁ VÀNG",
+     "keyIndex": 1
+    }
+   },
+   {
+    "itemType": "CROSSWORD_ROW",
+    "content": {
+     "clue": "Con vật kêu \"meo meo\" và rất thích bắt chuột?"
+    },
+    "solution": {
+     "answer": "CON MÈO",
+     "keyIndex": 0
+    }
+   },
+   {
+    "itemType": "CROSSWORD_ROW",
+    "content": {
+     "clue": "Nơi em đến học và gặp thầy cô, bạn bè mỗi ngày?"
+    },
+    "solution": {
+     "answer": "TRƯỜNG HỌC",
+     "keyIndex": 6
+    }
+   }
+  ]
+ },
+ "ORDERING": {
+  "title": "Sắp xếp mẫu",
+  "subject": "Tổng hợp",
+  "items": [
+   {
+    "itemType": "ORDER_SET",
+    "content": {
+     "text": "Xếp các số từ bé đến lớn",
+     "items": [
+      {
+       "id": "s0",
+       "text": "12"
+      },
+      {
+       "id": "s1",
+       "text": "25"
+      },
+      {
+       "id": "s2",
+       "text": "48"
+      },
+      {
+       "id": "s3",
+       "text": "70"
+      },
+      {
+       "id": "s4",
+       "text": "99"
+      }
+     ]
+    },
+    "solution": {
+     "order": [
+      "s0",
+      "s1",
+      "s2",
+      "s3",
+      "s4"
+     ]
+    }
+   },
+   {
+    "itemType": "ORDER_SET",
+    "content": {
+     "text": "Xếp các từ thành câu đúng",
+     "items": [
+      {
+       "id": "s0",
+       "text": "Em"
+      },
+      {
+       "id": "s1",
+       "text": "rất"
+      },
+      {
+       "id": "s2",
+       "text": "yêu"
+      },
+      {
+       "id": "s3",
+       "text": "mẹ"
+      },
+      {
+       "id": "s4",
+       "text": "của em."
+      }
+     ]
+    },
+    "solution": {
+     "order": [
+      "s0",
+      "s1",
+      "s2",
+      "s3",
+      "s4"
+     ]
+    }
+   },
+   {
+    "itemType": "ORDER_SET",
+    "content": {
+     "text": "Thứ tự các mùa trong năm, bắt đầu từ mùa xuân",
+     "items": [
+      {
+       "id": "s0",
+       "text": "Mùa xuân"
+      },
+      {
+       "id": "s1",
+       "text": "Mùa hạ"
+      },
+      {
+       "id": "s2",
+       "text": "Mùa thu"
+      },
+      {
+       "id": "s3",
+       "text": "Mùa đông"
+      }
+     ]
+    },
+    "solution": {
+     "order": [
+      "s0",
+      "s1",
+      "s2",
+      "s3"
+     ]
+    }
+   },
+   {
+    "itemType": "ORDER_SET",
+    "content": {
+     "text": "Các bước đánh răng",
+     "items": [
+      {
+       "id": "s0",
+       "text": "Lấy kem đánh răng"
+      },
+      {
+       "id": "s1",
+       "text": "Chải răng"
+      },
+      {
+       "id": "s2",
+       "text": "Súc miệng"
+      },
+      {
+       "id": "s3",
+       "text": "Rửa bàn chải"
+      }
+     ]
+    },
+    "solution": {
+     "order": [
+      "s0",
+      "s1",
+      "s2",
+      "s3"
+     ]
+    }
+   }
+  ]
+ },
+ "SORTING": {
+  "title": "Phân loại mẫu",
+  "subject": "Tổng hợp",
+  "items": [
+   {
+    "itemType": "SORT_SET",
+    "content": {
+     "text": "Con vật này sống ở đâu?",
+     "groups": [
+      {
+       "id": "g0",
+       "text": "Trên cạn"
+      },
+      {
+       "id": "g1",
+       "text": "Dưới nước"
+      }
+     ],
+     "cards": [
+      {
+       "id": "c0",
+       "text": "Con voi"
+      },
+      {
+       "id": "c1",
+       "text": "Con cá"
+      },
+      {
+       "id": "c2",
+       "text": "Con thỏ"
+      },
+      {
+       "id": "c3",
+       "text": "Con tôm"
+      },
+      {
+       "id": "c4",
+       "text": "Con hổ"
+      },
+      {
+       "id": "c5",
+       "text": "Con cua"
+      }
+     ]
+    },
+    "solution": {
+     "assign": [
+      [
+       "c0",
+       "g0"
+      ],
+      [
+       "c1",
+       "g1"
+      ],
+      [
+       "c2",
+       "g0"
+      ],
+      [
+       "c3",
+       "g1"
+      ],
+      [
+       "c4",
+       "g0"
+      ],
+      [
+       "c5",
+       "g1"
+      ]
+     ]
+    }
+   },
+   {
+    "itemType": "SORT_SET",
+    "content": {
+     "text": "Số chẵn hay số lẻ?",
+     "groups": [
+      {
+       "id": "g0",
+       "text": "Số chẵn"
+      },
+      {
+       "id": "g1",
+       "text": "Số lẻ"
+      }
+     ],
+     "cards": [
+      {
+       "id": "c0",
+       "text": "2"
+      },
+      {
+       "id": "c1",
+       "text": "7"
+      },
+      {
+       "id": "c2",
+       "text": "10"
+      },
+      {
+       "id": "c3",
+       "text": "13"
+      },
+      {
+       "id": "c4",
+       "text": "24"
+      },
+      {
+       "id": "c5",
+       "text": "35"
+      }
+     ]
+    },
+    "solution": {
+     "assign": [
+      [
+       "c0",
+       "g0"
+      ],
+      [
+       "c1",
+       "g1"
+      ],
+      [
+       "c2",
+       "g0"
+      ],
+      [
+       "c3",
+       "g1"
+      ],
+      [
+       "c4",
+       "g0"
+      ],
+      [
+       "c5",
+       "g1"
+      ]
+     ]
+    }
+   }
+  ]
+ }
+}

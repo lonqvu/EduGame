@@ -1,5 +1,5 @@
 import { test as base, expect } from '@playwright/test'
-import { Backend, crosswordRow, orderSet, quizItem, signInBrowser, sortSet } from './api'
+import { Backend, crosswordRow, orderSet, quizItem, signInBrowser, sortSet, openGame } from './api'
 
 const test = base.extend<{ backend: Backend }>({
   // Playwright needs the destructuring pattern here, even with no fixtures to take.
@@ -26,7 +26,7 @@ const QUESTIONS = [
 
 test('Rung chuông vàng: wrong answers leave, a rescue brings them back, the last one rings the bell', async ({ page, backend }) => {
   const game = await backend.createGame('GOLDEN_BELL', 'E2E Rung chuông', QUESTIONS)
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   await expect(page.getByText('Còn 28 / 28 bạn')).toBeVisible()
   const board = page.getByLabel('Học sinh trong lớp')
 
@@ -60,7 +60,7 @@ test('Rung chuông vàng: wrong answers leave, a rescue brings them back, the la
 
 test('Rung chuông vàng: when everyone is wrong, nobody is out', async ({ page, backend }) => {
   const game = await backend.createGame('GOLDEN_BELL', 'E2E Cả lớp sai', QUESTIONS)
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   await page.getByRole('button', { name: 'Hiện đáp án' }).click()
   const chips = page.getByLabel('Học sinh trong lớp').getByRole('button')
   for (let i = 0; i < (await chips.count()); i++) await chips.nth(i).click()
@@ -73,7 +73,7 @@ test('Rung chuông vàng: when everyone is wrong, nobody is out', async ({ page,
 test('Đua thuyền: right answers move the boat, the first boat at the dock wins', async ({ page, backend }) => {
   const game = await backend.createGame('BOAT_RACE', 'E2E Đua thuyền', QUESTIONS)
   await backend.setSettings(game.code, { shuffleItems: false, rules: { participants: { teams: 2 }, scoring: { points: 1, allowSteal: true }, win: { steps: 2 } } })
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   const option = (text: string) => page.getByRole('button', { name: new RegExp(`^[A-F✓]?\\s*${text}$`) })
 
   // Question 1: Đội Cam is wrong, Đội Biển steals it.
@@ -103,10 +103,10 @@ test('a quiz can be played as Rung chuông vàng or Đua thuyền from the edito
   await expect(page).toHaveURL(new RegExp(`/play/${game.code}\\?as=GOLDEN_BELL`))
   await expect(page.getByText('Còn 28 / 28 bạn')).toBeVisible()
 
-  await page.goto(`/play/${game.code}?as=BOAT_RACE`)
+  await openGame(page, `/play/${game.code}?as=BOAT_RACE`)
   await expect(page.getByText('Bến', { exact: true })).toBeVisible()
   // Anything else falls back to the game's own screen.
-  await page.goto(`/play/${game.code}?as=MATCHING`)
+  await openGame(page, `/play/${game.code}?as=MATCHING`)
   await expect(page.getByText('Đội nào giành được quyền trả lời? Cô bấm vào tên đội.')).toBeVisible()
 })
 
@@ -115,7 +115,7 @@ test('the chooser lists the new games, and a new Rung chuông vàng opens the qu
   for (const name of ['Rung chuông vàng', 'Đua thuyền']) {
     await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
   }
-  await page.getByRole('button', { name: 'Chọn trò chơi Rung chuông vàng' }).click()
+  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Rung chuông vàng' }).click()
   const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
   // A click while the dialog still opens can be lost: click until the choice holds.
   const fresh = dialog.getByRole('radio', { name: /Soạn nội dung mới/ })
@@ -137,7 +137,7 @@ test('Ô chữ: rows open in turn, a steal, and the keyword guessed early', asyn
     crosswordRow('Con vật kêu meo?', 'CON MÈO', 4),
   ])
   await backend.setSettings(game.code, { rules: { participants: { teams: 2 }, scoring: { points: 10, keywordPoints: 40, allowSteal: true } } })
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   await expect(page.getByText('Còn 3 / 3 hàng')).toBeVisible()
 
   // Đội Cam picks row 1 and gets it.
@@ -176,7 +176,7 @@ test('Ô chữ editor: the key letter picked in the form is saved', async ({ pag
 
 test('Sắp xếp: a wrong check keeps the right cards, the next team completes it', async ({ page, backend }) => {
   const game = await backend.createGame('ORDERING', 'E2E Sắp xếp', [orderSet('Từ bé đến lớn', ['1', '2', '3'])])
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   const card = (text: string) => page.getByLabel('Các thẻ').getByRole('button', { name: text, exact: true })
 
   await card('1').click()
@@ -207,7 +207,7 @@ test('Sắp xếp editor: cards move up and down, and the order is saved', async
 
 test('Phân loại: cards go into the right basket, a wrong one comes back later', async ({ page, backend }) => {
   const game = await backend.createGame('SORTING', 'E2E Phân loại', [sortSet('Chẵn hay lẻ?', { Chẵn: ['2', '4'], Lẻ: ['1'] })])
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   const right: Record<string, string> = { '2': 'Chẵn', '4': 'Chẵn', '1': 'Lẻ' }
   const wrong: Record<string, string> = { '2': 'Lẻ', '4': 'Lẻ', '1': 'Chẵn' }
 
@@ -299,6 +299,6 @@ test('the "Công cụ" filter lists the classroom tools, and each opens', async 
   await page.goto('/games/new')
   await page.getByRole('tab', { name: 'Công cụ' }).click()
   await expect(page.getByText('Tổng 3 trò chơi')).toBeVisible()
-  await page.getByRole('button', { name: 'Chọn trò chơi Xúc xắc' }).click()
+  await page.getByRole('button', { name: 'Chơi ngay Xúc xắc' }).click()
   await expect(page).toHaveURL(/\/tools\/dice$/)
 })
