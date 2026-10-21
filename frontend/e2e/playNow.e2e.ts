@@ -77,7 +77,7 @@ test('the sample game is made once: playing again opens the same one', async ({ 
   const first = page.url()
 
   await page.goto('/')
-  // "Trò chơi phổ biến" plays at once too.
+  // "Trò chơi nổi bật" plays at once too.
   await page.goto('/games/new')
   await page.getByRole('button', { name: 'Chơi ngay Ô chữ' }).click()
   await expect(page).toHaveURL(first)
@@ -85,9 +85,9 @@ test('the sample game is made once: playing again opens the same one', async ({ 
   expect(games.filter((g) => g.templateCode === 'CROSSWORD')).toEqual([expect.objectContaining({ sample: true })])
 })
 
-test('"Trò chơi phổ biến" on the home page plays the game at once', async ({ page }) => {
+test('"Trò chơi nổi bật" on the home page plays the game at once', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('button', { name: 'Chơi ngay Lật ô thi đua' }).click()
+  await page.getByRole('button', { name: /Lật ô thi đua/ }).first().click()
   await expect(page).toHaveURL(/\/play\/g-/)
   await expect(intro(page)).toContainText('Lật ô mẫu')
   await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()

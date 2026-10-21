@@ -218,9 +218,10 @@ test('"Chơi" makes a game from the set and plays it at once', async ({ page, ba
   await dialog.getByRole('button', { name: 'Hủy' }).click()
 })
 
-test('"Tạo bộ câu hỏi" on the home page opens the bank on a new set', async ({ page }) => {
+test('the home page shows the last changed sets and leads to the bank', async ({ page, backend }) => {
+  const [last] = await backend.questionSetList()
   await page.goto('/')
-  await page.getByRole('link', { name: /Tạo bộ câu hỏi/ }).click()
+  await expect(page.getByRole('link', { name: last.title })).toBeVisible()
+  await page.getByRole('link', { name: 'Xem tất cả' }).last().click()
   await expect(page).toHaveURL(/\/question-sets$/)
-  await expect(page.getByRole('dialog')).toBeVisible()
 })

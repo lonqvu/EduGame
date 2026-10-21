@@ -18,7 +18,7 @@ interface RecentActivityProps {
   onArchive: (game: GameSummary) => void
 }
 
-/** "Tiếp tục hoạt động": the latest games, newest first, each played again in one click. */
+/** Latest games, newest first, with a button to play them again. */
 export function RecentActivity({
   games,
   status,
@@ -33,7 +33,7 @@ export function RecentActivity({
     <Panel className="@container flex flex-col gap-3 px-4 pt-[18px] pb-4">
       <PanelHeader
         icon={<ClockIcon size={23} className="text-primary" />}
-        title="Tiếp tục hoạt động"
+        title="Hoạt động gần đây"
         action={
           games.length > 0 && <TextAction label={expanded ? 'Thu gọn' : 'Xem tất cả'} onClick={onToggleExpanded} />
         }
@@ -69,32 +69,32 @@ export function RecentActivity({
           return (
             <li
               key={game.id}
-              className="flex items-center gap-3 rounded-[16px] border border-[#EDF1F7] bg-white p-2 pr-1.5 pl-3 shadow-[0_1px_3px_rgba(31,42,68,0.04)] @min-[480px]:gap-4 @min-[480px]:pl-2"
+              className="flex items-center gap-3 rounded-[14px] border border-[#EDF1F7] bg-white p-[7px] pr-2 pl-3 @min-[480px]:gap-[18px] @min-[480px]:pl-[7px] shadow-[0_1px_3px_rgba(31,42,68,0.04)]"
             >
               <img
                 src={gameThumb(game.type)}
                 alt=""
-                className="hidden h-[60px] w-[84px] shrink-0 rounded-[12px] object-cover @min-[480px]:block"
+                className="hidden aspect-[2/1] w-[132px] shrink-0 rounded-[10px] @min-[480px]:block"
               />
               <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
                 <div className="flex min-w-0 flex-wrap items-center gap-x-[11px] gap-y-1">
-                  <span className="truncate text-[15.5px] font-extrabold">{templateName(game)}</span>
+                  <span className="truncate text-[16px] font-extrabold">{templateName(game)}</span>
                   <SubjectTag subject={game.subject} />
                 </div>
-                <span className="truncate text-[13.5px] text-[#3F4B68]">{game.title}</span>
-                <span className="truncate text-[12.5px] text-ink-muted">{meta(game)}</span>
+                <span className="truncate text-[14px] text-[#3F4B68]">{game.title}</span>
+                <span className="truncate text-[13.5px] text-ink-muted">{meta(game)}</span>
               </div>
               {unfinished ? (
                 <Link
                   to={editPath(game.id)}
-                  className="flex h-[38px] w-[88px] shrink-0 items-center justify-center rounded-full border-[1.5px] border-dashed border-[#BFD3F7] bg-white text-[14.5px] font-extrabold text-primary-ink hover:border-primary hover:text-primary-ink"
+                  className="flex h-[38px] w-[85px] shrink-0 items-center justify-center rounded-full border-[1.5px] border-primary bg-white text-[15px] font-extrabold text-primary-ink hover:text-primary-ink"
                 >
                   Tiếp tục
                 </Link>
               ) : (
                 <Link
                   to={playPath(game)}
-                  className="flex h-[38px] w-[88px] shrink-0 items-center justify-center rounded-full border-[1.5px] border-[#BFD3F7] bg-white text-[14.5px] font-extrabold text-primary-ink hover:border-primary hover:bg-primary hover:text-white"
+                  className="flex h-[38px] w-[85px] shrink-0 items-center justify-center rounded-full bg-primary text-[15px] font-extrabold text-white hover:text-white hover:brightness-110"
                 >
                   Chơi lại
                 </Link>

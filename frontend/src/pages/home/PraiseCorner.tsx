@@ -1,6 +1,6 @@
 import { Modal } from 'antd'
 import { useState } from 'react'
-import { ArrowRightIcon, ChevronDownIcon, FilledStarIcon } from '@/components/ui/icons'
+import { ArrowRightIcon, ChartIcon, ChevronDownIcon, FilledStarIcon } from '@/components/ui/icons'
 import { kidAvatar } from '@/pages/home/homeAssets'
 import { Art, Panel, PanelHeader } from '@/pages/home/homeUi'
 import type { Student } from '@/types/game'
@@ -20,10 +20,10 @@ interface Ranked {
 }
 
 const PODIUM = [
-  // 2nd on the left, 1st in the middle, 3rd on the right; the step under each is as high as the place is good.
-  { position: 2, crown: 'crown-2', step: 'h-[46px] bg-[linear-gradient(#DCEAFE,#EEF5FF)]', medal: 'bg-[#8FB4F2]', ring: 'ring-[#CFE3FB]', size: 62 },
-  { position: 1, crown: 'crown-1', step: 'h-[66px] bg-[linear-gradient(#FFEFA8,#FFF8DA)]', medal: 'bg-[#F5B400]', ring: 'ring-[#FFE27A]', size: 74 },
-  { position: 3, crown: 'crown-3', step: 'h-[32px] bg-[linear-gradient(#FFDCD6,#FFF1EE)]', medal: 'bg-[#E58A6F]', ring: 'ring-[#FFD3CA]', size: 62 },
+  // [position, crown, card tint, height]: 2nd on the left, 1st in the middle, 3rd on the right.
+  { position: 2, crown: 'crown-2', tint: 'bg-[linear-gradient(#EEF5FE,#F7FAFF)]', ring: 'bg-[#CFE3FB]', size: 66, top: 26 },
+  { position: 1, crown: 'crown-1', tint: 'bg-[linear-gradient(#FFF6CF,#FFFBEA)]', ring: 'bg-[#FFE883]', size: 76, top: 0 },
+  { position: 3, crown: 'crown-3', tint: 'bg-[linear-gradient(#FFEDEE,#FFF7F7)]', ring: 'bg-[#FFD3D5]', size: 66, top: 26 },
 ] as const
 
 const Star = ({ size = 18 }: { size?: number }) => (
@@ -32,7 +32,7 @@ const Star = ({ size = 18 }: { size?: number }) => (
   </span>
 )
 
-/** Weekly (or all-time) star ranking: a podium for the top 3; the whole class in a dialog. */
+/** Weekly (or all-time) star ranking: podium for the top 3, then the next five. */
 export function PraiseCorner({ students, period, onPeriodChange }: PraiseCornerProps) {
   const [fullOpen, setFullOpen] = useState(false)
   const [periodOpen, setPeriodOpen] = useState(false)
@@ -55,7 +55,7 @@ export function PraiseCorner({ students, period, onPeriodChange }: PraiseCornerP
               aria-haspopup="listbox"
               aria-expanded={periodOpen}
               onClick={() => setPeriodOpen((o) => !o)}
-              className="flex h-[32px] cursor-pointer items-center gap-3 rounded-[11px] whitespace-nowrap border border-line bg-white px-3 font-[inherit] text-[13px] font-bold text-ink"
+              className="flex h-[32px] cursor-pointer items-center gap-3 rounded-[11px] border border-line bg-white px-3 font-[inherit] text-[13px] font-bold text-ink"
             >
               {period === 'week' ? 'Tuần này' : 'Tất cả'}
               <ChevronDownIcon size={15} strokeWidth={2.6} />
@@ -93,46 +93,48 @@ export function PraiseCorner({ students, period, onPeriodChange }: PraiseCornerP
         <p className="m-0 py-8 text-center text-ink-soft">Lớp chưa có học sinh.</p>
       ) : (
         <>
-          <div className="mt-4 grid grid-cols-3 items-end gap-1.5">
+          <div className="mt-[14px] grid grid-cols-3 items-end gap-0">
             {PODIUM.map((slot) => {
               const r = byPosition(slot.position)
               if (!r) return <div key={slot.position} />
               return (
-                <div key={slot.position} className="flex min-w-0 flex-col items-center">
-                  <Art name={slot.crown} className="relative z-10 -mb-[5px]" />
+                <div key={slot.position} className="relative flex flex-col items-center" style={{ paddingTop: slot.top }}>
                   <span
-                    className={`flex items-center justify-center overflow-hidden rounded-full bg-white ring-4 ${slot.ring}`}
+                    aria-hidden="true"
+                    className={`absolute right-0 bottom-0 left-0 rounded-t-[16px] ${slot.tint}`}
+                    style={{ top: slot.top + slot.size * 0.62 }}
+                  />
+                  <Art name={slot.crown} className="relative z-10 -mb-[6px]" />
+                  <span
+                    className={`relative z-10 flex items-center justify-center overflow-hidden rounded-full ${slot.ring}`}
                     style={{ width: slot.size, height: slot.size }}
                   >
                     <img src={kidAvatar(slot.position)} alt="" className="size-full object-cover" />
                   </span>
-                  <span className="mt-2 max-w-full truncate px-1 text-[14.5px] font-extrabold">{r.student.name}</span>
-                  <span className="mt-0.5 mb-2 flex items-center gap-1 text-[13.5px] font-bold text-[#3F4B68]">
-                    <Star size={15} />
-                    {r.stars} sao
-                  </span>
-                  <span className={`flex w-full items-start justify-center rounded-t-[12px] pt-1.5 ${slot.step}`}>
-                    <span
-                      className={`flex size-[22px] items-center justify-center rounded-full text-[12px] font-black text-white ${slot.medal}`}
-                    >
-                      {slot.position}
-                    </span>
+                  <span className="relative z-10 mt-[8px] max-w-full truncate px-1 text-[15px] font-extrabold">{r.student.name}</span>
+                  <span className="relative z-10 mt-[2px] mb-[12px] flex items-center gap-1.5 text-[15px] font-extrabold">
+                    <Star />
+                    {r.stars}
                   </span>
                 </div>
               )
             })}
           </div>
 
+          <ol className="m-0 mt-[6px] flex list-none flex-col p-0">
+            {ranked.slice(3, 8).map((r) => (
+              <RankRow key={r.student.id} ranked={r} />
+            ))}
+          </ol>
+
           <button
             type="button"
             onClick={() => setFullOpen(true)}
-            className="mt-3 flex min-h-[40px] cursor-pointer flex-wrap items-center justify-center gap-x-2 gap-y-0.5 py-1.5 rounded-[12px] border-0 bg-[#FFF8E6] px-3 font-[inherit] text-[13.5px] font-bold text-[#7A5A00] hover:bg-[#FFF1CC]"
+            className="mt-[12px] flex h-[41px] cursor-pointer items-center justify-center gap-2.5 rounded-[12px] border border-[#BFD3F7] bg-[#F4F8FE] font-[inherit] text-[14.5px] font-bold text-primary hover:border-primary"
           >
-            🏆 Cùng nhau cố gắng hơn nữa nhé!
-            <span className="flex items-center gap-1 text-primary">
-              Xem cả lớp
-              <ArrowRightIcon size={15} strokeWidth={2.4} />
-            </span>
+            <ChartIcon size={19} />
+            Xem bảng xếp hạng đầy đủ
+            <ArrowRightIcon size={16} strokeWidth={2.4} />
           </button>
         </>
       )}

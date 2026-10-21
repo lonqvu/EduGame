@@ -143,7 +143,7 @@ test('the class picked on the home page plays the games, and its numbers count t
   await page.getByRole('button', { name: /^Lớp đang dạy:/ }).click()
   await page.getByRole('menuitem', { name: new RegExp(`Lớp ${name}`) }).click()
   await expect(page.getByRole('button', { name: `Lớp đang dạy: Lớp ${name}. Đổi lớp` })).toBeVisible()
-  await expect(page.getByText('3 học sinh', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('3 học sinh', { exact: true })).toBeVisible()
 
   await openGame(page, `/play/${game.code}`)
   await page.getByRole('button', { name: /Đội Cam/ }).click()
