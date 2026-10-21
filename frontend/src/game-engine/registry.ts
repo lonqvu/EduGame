@@ -28,20 +28,42 @@ export const gameRegistry: Record<GameType, GameDefinition> = {
   QUIZ: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân hoặc đội', duration: '5–10 phút', badge: 'EASY', popularity: 2, itemUnit: 'câu' },
   GOLDEN_BELL: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cả lớp', duration: '10–15 phút', badge: 'NEW', popularity: 3, itemUnit: 'câu' },
   BOAT_RACE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', badge: 'NEW', popularity: 4, itemUnit: 'câu' },
-  MATCHING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 5, itemUnit: 'bộ' },
-  MEMORY: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 6, itemUnit: 'bộ thẻ' },
-  CROSSWORD: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 7, itemUnit: 'hàng' },
-  ORDERING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 8, itemUnit: 'bài' },
-  SORTING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 9, itemUnit: 'bộ' },
-  SPIN_WHEEL: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '2–5 phút', popularity: 10, itemUnit: 'ô', toolRoute: '/tools/wheel' },
-  NAME_RACE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '5–10 phút', popularity: 11, itemUnit: 'ô', toolRoute: '/tools/pick/horse' },
-  TEAM_MAKER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 12, itemUnit: 'nhóm', toolRoute: '/tools/groups' },
-  TIMER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 13, itemUnit: 'phút', toolRoute: '/tools/timer' },
-  DICE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 14, itemUnit: 'lần', toolRoute: '/tools/dice' },
+  MILLIONAIRE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '10–15 phút', badge: 'NEW', popularity: 5, itemUnit: 'câu' },
+  TUG_OF_WAR: { playable: true, usesQuestions: true, hasEditor: true, players: '2 đội', duration: '5–10 phút', badge: 'NEW', popularity: 6, itemUnit: 'câu' },
+  FLOWER_PICK: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 7, itemUnit: 'câu' },
+  WHACK_MOLE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', badge: 'NEW', popularity: 8, itemUnit: 'câu' },
+  TRUE_FALSE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cả lớp theo đội', duration: '5 phút', badge: 'NEW', popularity: 9, itemUnit: 'câu' },
+  LUCKY_STAR: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 10, itemUnit: 'câu' },
+  SECRET_PICTURE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 11, itemUnit: 'câu' },
+  MOUNTAIN_CLIMB: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', badge: 'NEW', popularity: 12, itemUnit: 'câu' },
+  POINT_WHEEL: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 13, itemUnit: 'câu' },
+  MATCHING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 14, itemUnit: 'bộ' },
+  MEMORY: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 15, itemUnit: 'bộ thẻ' },
+  CROSSWORD: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 16, itemUnit: 'hàng' },
+  ORDERING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 17, itemUnit: 'bài' },
+  SORTING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 18, itemUnit: 'bộ' },
+  SPIN_WHEEL: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '2–5 phút', popularity: 19, itemUnit: 'ô', toolRoute: '/tools/wheel' },
+  NAME_RACE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '5–10 phút', popularity: 20, itemUnit: 'ô', toolRoute: '/tools/pick/horse' },
+  TEAM_MAKER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 21, itemUnit: 'nhóm', toolRoute: '/tools/groups' },
+  TIMER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 22, itemUnit: 'phút', toolRoute: '/tools/timer' },
+  DICE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 23, itemUnit: 'lần', toolRoute: '/tools/dice' },
 }
 
 /** Games whose items are quiz questions: any of them can be played the way of the others. */
-export const QUIZ_FAMILY = ['QUIZ', 'GOLDEN_BELL', 'BOAT_RACE'] as const satisfies readonly GameType[]
+export const QUIZ_FAMILY = [
+  'QUIZ',
+  'GOLDEN_BELL',
+  'BOAT_RACE',
+  'MILLIONAIRE',
+  'TUG_OF_WAR',
+  'FLOWER_PICK',
+  'WHACK_MOLE',
+  'TRUE_FALSE',
+  'LUCKY_STAR',
+  'SECRET_PICTURE',
+  'MOUNTAIN_CLIMB',
+  'POINT_WHEEL',
+] as const satisfies readonly GameType[]
 export type QuizFamilyType = (typeof QUIZ_FAMILY)[number]
 export const isQuizFamily = (type: GameType): type is QuizFamilyType => (QUIZ_FAMILY as readonly GameType[]).includes(type)
 

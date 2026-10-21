@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="240" viewBox="0 0 480 240">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E6F4FF"/><stop offset="1" stop-color="#CDE8FD"/></linearGradient>
+  <filter id="sh" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="3.5" flood-color="#1F2A44" flood-opacity="0.14"/></filter>
+</defs>
+<rect width="480" height="240" fill="url(#bg)"/>
+<circle cx="14" cy="18" r="78" fill="#B8DDFB" opacity="0.6"/>
+<circle cx="470" cy="236" r="88" fill="#B8DDFB" opacity="0.6"/>
+<circle cx="452" cy="26" r="28" fill="#B8DDFB" opacity="0.4"/>
+<circle cx="38" cy="226" r="22" fill="#B8DDFB" opacity="0.4"/>
+<path d="M58 115 Q60.7 127.3 73 130 Q60.7 132.7 58 145 Q55.3 132.7 43 130 Q55.3 127.3 58 115Z" fill="#FFFFFF" opacity="0.95"/><path d="M424 105 Q426.34 115.66 437 118 Q426.34 120.34 424 131 Q421.66 120.34 411 118 Q421.66 115.66 424 105Z" fill="#FFFFFF" opacity="0.95"/><path d="M108 50 Q109.44 56.56 116 58 Q109.44 59.44 108 66 Q106.56 59.44 100 58 Q106.56 56.56 108 50Z" fill="#E5484D" opacity="0.8"/><path d="M388 188 Q389.44 194.56 396 196 Q389.44 197.44 388 204 Q386.56 197.44 380 196 Q386.56 194.56 388 188Z" fill="#E5484D" opacity="0.8"/>
+<g filter="url(#sh)">
+<rect x="0" y="150" width="480" height="90" fill="#9ED37E"/><line x1="240" y1="140" x2="240" y2="236" stroke="#FFFFFF" stroke-width="5" stroke-dasharray="10 8"/><path d="M80 128 H400" stroke="#B07A3E" stroke-width="12" stroke-linecap="round"/><path d="M80 128 H400" stroke="#D9A566" stroke-width="4" stroke-dasharray="9 11"/><path d="M240 128 l-16 40 h32 z" fill="#E5484D"/><circle cx="112" cy="128" r="14" fill="#FFD9B8" stroke="#F28C28" stroke-width="6"/><circle cx="152" cy="128" r="14" fill="#FFD9B8" stroke="#F28C28" stroke-width="6"/><circle cx="328" cy="128" r="14" fill="#FFD9B8" stroke="#3563E9" stroke-width="6"/><circle cx="368" cy="128" r="14" fill="#FFD9B8" stroke="#3563E9" stroke-width="6"/><rect x="90" y="60" width="94" height="34" rx="17" fill="#F28C28" /><text x="137" y="84" font-family="Nunito, Arial, Helvetica, sans-serif" font-size="18" font-weight="900" fill="#FFFFFF" text-anchor="middle">ĐỘI 1</text><rect x="296" y="60" width="94" height="34" rx="17" fill="#3563E9" /><text x="343" y="84" font-family="Nunito, Arial, Helvetica, sans-serif" font-size="18" font-weight="900" fill="#FFFFFF" text-anchor="middle">ĐỘI 2</text>
+</g>
+</svg>

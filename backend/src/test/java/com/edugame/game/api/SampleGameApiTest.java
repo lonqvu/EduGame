@@ -46,7 +46,8 @@ class SampleGameApiTest {
 
     private static final String SAMPLES = "/api/v1/games/samples";
     private static final List<String> QUESTION_GAMES = List.of("QUIZ", "GOLDEN_BELL", "BOAT_RACE", "GRID_BOARD",
-            "MATCHING", "MEMORY", "CROSSWORD", "ORDERING", "SORTING");
+            "MATCHING", "MEMORY", "CROSSWORD", "ORDERING", "SORTING", "MILLIONAIRE", "TUG_OF_WAR", "FLOWER_PICK",
+            "WHACK_MOLE", "TRUE_FALSE", "LUCKY_STAR", "SECRET_PICTURE", "MOUNTAIN_CLIMB", "POINT_WHEEL");
 
     @Autowired
     private MockMvc mockMvc;

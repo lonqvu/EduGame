@@ -318,7 +318,20 @@ export interface QuestionRequest {
 }
 
 /** Games a set can be used in. */
-export type QuestionGameCode = 'QUIZ' | 'GOLDEN_BELL' | 'BOAT_RACE' | 'GRID_BOARD'
+export type QuestionGameCode =
+  | 'QUIZ'
+  | 'GOLDEN_BELL'
+  | 'BOAT_RACE'
+  | 'GRID_BOARD'
+  | 'MILLIONAIRE'
+  | 'TUG_OF_WAR'
+  | 'FLOWER_PICK'
+  | 'WHACK_MOLE'
+  | 'TRUE_FALSE'
+  | 'LUCKY_STAR'
+  | 'SECRET_PICTURE'
+  | 'MOUNTAIN_CLIMB'
+  | 'POINT_WHEEL'
 
 export interface UsedQuestionSetResponse {
   gameCode: string

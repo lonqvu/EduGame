@@ -156,6 +156,15 @@ export const USE_GAMES: UseGame[] = [
   { code: 'QUIZ', name: 'Trắc nghiệm', description: 'Các đội chọn đáp án đúng, cướp lượt khi đội trước sai.' },
   { code: 'GOLDEN_BELL', name: 'Rung chuông vàng', description: 'Cả lớp cùng trả lời, sai thì ra ngoài, ai trụ lại cuối cùng?' },
   { code: 'BOAT_RACE', name: 'Đua thuyền', description: 'Trả lời đúng để thuyền của đội tiến về đích.' },
+  { code: 'MILLIONAIRE', name: 'Ai là triệu phú', description: 'Một bạn leo bậc thưởng, có 3 quyền trợ giúp.' },
+  { code: 'TUG_OF_WAR', name: 'Kéo co', description: 'Hai đội thi trả lời, mỗi câu đúng kéo dây về phía mình.' },
+  { code: 'FLOWER_PICK', name: 'Hái hoa dân chủ', description: 'Mỗi bông hoa trên cây là một câu hỏi.' },
+  { code: 'WHACK_MOLE', name: 'Đập chuột', description: 'Đập đúng chú chuột mang đáp án đúng.' },
+  { code: 'TRUE_FALSE', name: 'Đúng hay sai', description: 'Mọi đội cùng chọn Đúng hoặc Sai cho đáp án hiện ra.' },
+  { code: 'LUCKY_STAR', name: 'Ngôi sao may mắn', description: 'Chọn ngôi sao: câu hỏi hoặc điểm thưởng may mắn.' },
+  { code: 'SECRET_PICTURE', name: 'Ô cửa bí mật', description: 'Trả lời đúng để mở ô cửa và đoán bức tranh.' },
+  { code: 'MOUNTAIN_CLIMB', name: 'Leo núi', description: 'Trả lời đúng để người leo núi của đội lên đỉnh.' },
+  { code: 'POINT_WHEEL', name: 'Vòng quay điểm thưởng', description: 'Quay để biết câu hỏi đáng bao nhiêu điểm.' },
   { code: 'GRID_BOARD', name: 'Lật ô thi đua', description: 'Các đội chọn ô số và trả lời để ghi điểm. Dùng được mọi câu.' },
 ]
 

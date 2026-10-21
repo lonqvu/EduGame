@@ -274,6 +274,15 @@ interface ItemOf {
   QUIZ: QuizQuestion
   GOLDEN_BELL: QuizQuestion
   BOAT_RACE: QuizQuestion
+  MILLIONAIRE: QuizQuestion
+  TUG_OF_WAR: QuizQuestion
+  FLOWER_PICK: QuizQuestion
+  WHACK_MOLE: QuizQuestion
+  TRUE_FALSE: QuizQuestion
+  LUCKY_STAR: QuizQuestion
+  SECRET_PICTURE: QuizQuestion
+  MOUNTAIN_CLIMB: QuizQuestion
+  POINT_WHEEL: QuizQuestion
   MATCHING: PairSet
   MEMORY: PairSet
   CROSSWORD: CrosswordRow
@@ -287,6 +296,15 @@ const CODECS: { [K in keyof ItemOf]: ItemCodec<ItemOf[K]> } = {
   // Same questions as QUIZ, played another way.
   GOLDEN_BELL: quizCodec,
   BOAT_RACE: quizCodec,
+  MILLIONAIRE: quizCodec,
+  TUG_OF_WAR: quizCodec,
+  FLOWER_PICK: quizCodec,
+  WHACK_MOLE: quizCodec,
+  TRUE_FALSE: quizCodec,
+  LUCKY_STAR: quizCodec,
+  SECRET_PICTURE: quizCodec,
+  MOUNTAIN_CLIMB: quizCodec,
+  POINT_WHEEL: quizCodec,
   MATCHING: matchingCodec,
   MEMORY: memoryCodec,
   CROSSWORD: crosswordCodec,

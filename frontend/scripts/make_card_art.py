@@ -365,6 +365,104 @@ cards.append(card('pick-rocket', '#2B3A7A', '#1B2552', '#3B4C94',
                   space + rocket2(170, 158, '#E5484D') + rocket2(240, 112, '#F28C28', True) + rocket2(310, 158, '#8B5CF6'),
                   '#FFFFFF', '#FFD15C'))
 
+# --- Ai là triệu phú: the lit stage, a gold diamond with the question mark, the ladder beside it. ---
+ladder = ''.join(rect(330, 52 + i * 18, 62, 13, 6, '#F28C28' if i == 3 else '#22307A') for i in range(8))
+millionaire = (f'<circle cx="210" cy="122" r="74" fill="#22307A"/>'
+               f'<polygon points="210,60 268,122 210,184 152,122" fill="#FFD15C" stroke="#C9A13B" stroke-width="5" stroke-linejoin="round"/>'
+               + text(210, 142, '?', 64, '#22307A') + ladder
+               + rect(120, 190, 180, 18, 9, '#14215E') + rect(126, 194, 168, 10, 5, '#C9A13B', 'opacity="0.6"'))
+cards.append(card('millionaire', '#2B3A86', '#121B52', '#3B4CA8', millionaire, '#FFD15C', '#FFFFFF'))
+
+# --- Kéo co: the rope with its red ribbon over the middle line, two teams' hands pulling. ---
+tug = ('<rect x="0" y="150" width="480" height="90" fill="#9ED37E"/>'
+       '<line x1="240" y1="140" x2="240" y2="236" stroke="#FFFFFF" stroke-width="5" stroke-dasharray="10 8"/>'
+       '<path d="M80 128 H400" stroke="#B07A3E" stroke-width="12" stroke-linecap="round"/>'
+       '<path d="M80 128 H400" stroke="#D9A566" stroke-width="4" stroke-dasharray="9 11"/>'
+       '<path d="M240 128 l-16 40 h32 z" fill="#E5484D"/>'
+       + ''.join(f'<circle cx="{x}" cy="128" r="14" fill="#FFD9B8" stroke="{c}" stroke-width="6"/>' for x, c in
+                 [(112, '#F28C28'), (152, '#F28C28'), (328, '#3563E9'), (368, '#3563E9')])
+       + rect(90, 60, 94, 34, 17, '#F28C28') + text(137, 84, 'ĐỘI 1', 18, '#FFFFFF')
+       + rect(296, 60, 94, 34, 17, '#3563E9') + text(343, 84, 'ĐỘI 2', 18, '#FFFFFF'))
+cards.append(card('tug-of-war', '#E6F4FF', '#CDE8FD', '#B8DDFB', tug, '#FFFFFF', '#E5484D'))
+
+
+def flower(cx, cy, r, petal, label=''):
+    petals = ''.join(f'<ellipse cx="{cx}" cy="{cy - r * .55}" rx="{r * .38}" ry="{r * .52}" fill="{petal}" transform="rotate({a} {cx} {cy})"/>'
+                     for a in (0, 72, 144, 216, 288))
+    return petals + f'<circle cx="{cx}" cy="{cy}" r="{r * .42}" fill="#FFF6C7" stroke="#F2B705" stroke-width="2.5"/>' + (text(cx, cy + 6, label, 16, '#5A3A00') if label else '')
+
+
+# --- Hái hoa dân chủ: a round tree full of numbered flowers. ---
+tree = ('<path d="M226 230 Q236 170 228 140 L252 140 Q246 170 256 230 Z" fill="#9A6B43"/>'
+        '<ellipse cx="240" cy="104" rx="140" ry="74" fill="#7CC36B"/><ellipse cx="240" cy="84" rx="96" ry="50" fill="#8ED07B"/>'
+        + ''.join(flower(x, y, 26, c, n) for x, y, c, n in
+                  [(160, 100, '#FF8FB1', '1'), (214, 70, '#FFB547', '2'), (272, 76, '#B98CFF', '3'), (322, 108, '#5EC2FF', '4'),
+                   (204, 132, '#FF7A6B', '5'), (268, 136, '#F7D046', '6')]))
+cards.append(card('flower-pick', '#FFF0F5', '#FFDCE8', '#FFC9DB', tree, '#FFFFFF', '#FF6F9C'))
+
+
+def mole(cx, cy, label, fill='#FFFFFF'):
+    return (f'<ellipse cx="{cx}" cy="{cy + 34}" rx="44" ry="12" fill="#4E3524"/>'
+            f'<path d="M{cx - 30} {cy + 34} Q{cx - 30} {cy - 18} {cx} {cy - 18} Q{cx + 30} {cy - 18} {cx + 30} {cy + 34} Z" fill="#8B5E3C"/>'
+            f'<ellipse cx="{cx}" cy="{cy + 14}" rx="16" ry="14" fill="#C79A72"/>'
+            f'<circle cx="{cx - 11}" cy="{cy - 2}" r="4.5" fill="#1F2A44"/><circle cx="{cx + 11}" cy="{cy - 2}" r="4.5" fill="#1F2A44"/>'
+            f'<ellipse cx="{cx}" cy="{cy + 8}" rx="6" ry="4" fill="#F28CA0"/>'
+            + rect(cx - 26, cy - 52, 52, 28, 10, fill) + text(cx, cy - 31, label, 20, '#3563E9'))
+
+
+# --- Đập chuột: moles holding answers, a hammer coming down on one. ---
+whack = ('<rect x="0" y="150" width="480" height="90" fill="#8BC86C"/>' + mole(150, 140, 'A') + mole(240, 120, 'B', '#E3F6EC') + mole(330, 140, 'C')
+         + '<g transform="rotate(-35 300 70)"><rect x="296" y="40" width="12" height="80" rx="5" fill="#9A6B43"/>'
+         '<rect x="272" y="26" width="60" height="30" rx="10" fill="#E5484D"/></g>')
+cards.append(card('whack-mole', '#EAF7E4', '#D2EDC5', '#BDE3AC', whack, '#FFFFFF', '#E5484D'))
+
+# --- Đúng hay sai: a statement card between a big check and a big cross. ---
+tf = (rect(150, 58, 180, 70, 18, '#FFFFFF') + rect(170, 78, 140, 10, 5, '#C9D7FB') + rect(170, 98, 96, 10, 5, '#C9D7FB')
+      + '<circle cx="168" cy="166" r="34" fill="#2E9E6A"/><path d="M152 166 l11 11 l22 -24" stroke="#FFFFFF" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+      + '<circle cx="312" cy="166" r="34" fill="#E5484D"/><path d="M298 152 l28 28 M326 152 l-28 28" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>')
+cards.append(card('true-false', '#EEF3FF', '#DCE6FE', '#C9D7FB', tf, '#FFFFFF', '#3563E9'))
+
+# --- Ngôi sao may mắn: a night board of numbered stars, one glowing lucky star. ---
+stars = ''.join(star(x, y, 22, c) + text(x, y + 6, n, 15, '#1F2A44') for x, y, c, n in
+                [(150, 80, '#FFC93C', '1'), (210, 64, '#7BC8F6', '2'), (330, 80, '#B98CFF', '4'), (160, 160, '#FF9F43', '5'),
+                 (320, 162, '#FF8FB1', '7')])
+lucky = '<circle cx="250" cy="126" r="46" fill="#FFF3C4" opacity="0.35"/>' + star(250, 126, 40, '#FFD43B') + text(250, 136, '★', 26, '#E59400')
+cards.append(card('lucky-star', '#2C3577', '#1E2457', '#3B4594', stars + lucky, '#FFD15C', '#FFFFFF'))
+
+# --- Ô cửa bí mật: a picture behind doors, two of them open on a sunny landscape. ---
+doors_bg = ('<rect x="140" y="50" width="200" height="150" rx="16" fill="#BFE3FF"/><circle cx="300" cy="84" r="16" fill="#FFD43B"/>'
+            '<path d="M140 170 Q190 120 240 160 Q290 128 340 168 L340 200 L140 200 Z" fill="#7CC36B"/>')
+doors = ''
+for i in range(6):
+    x, y = 140 + (i % 3) * 67, 50 + (i // 3) * 75
+    if i in (1, 5):
+        continue
+    doors += rect(x + 2, y + 2, 63, 71, 10, ['#3563E9', '#F08C00', '#1FA463', '#8B5CF6', '#E5484D', '#0E9AA7'][i]) + text(x + 33, y + 48, str(i + 1), 28, '#FFFFFF')
+cards.append(card('secret-picture', '#FFF4E3', '#FFE2BC', '#FFD39C', doors_bg + doors, '#FFFFFF', '#F08C00'))
+
+# --- Leo núi: a snowy mountain, a trail of steps and a flag on the summit. ---
+mountain = ('<path d="M90 206 L240 50 L390 206 Z" fill="#7FB77E"/><path d="M90 206 L240 50 L262 206 Z" fill="#6AA56B"/>'
+            '<path d="M206 86 L240 50 L274 86 L256 78 L240 92 L222 78 Z" fill="#FFFFFF"/>'
+            '<rect x="238" y="22" width="4" height="34" fill="#6B4E2E"/><path d="M242 24 L266 32 L242 40 Z" fill="#E5484D"/>'
+            + ''.join(f'<circle cx="{x}" cy="{y}" r="6" fill="#FFFFFF" stroke="#F28C28" stroke-width="3"/>' for x, y in
+                      [(150, 190), (178, 160), (200, 132), (224, 106)])
+            + '<circle cx="178" cy="146" r="9" fill="#FFD9B8"/><rect x="170" y="154" width="16" height="16" rx="5" fill="#F28C28"/>')
+cards.append(card('mountain-climb', '#E6F4FF', '#CDE6FA', '#B8DAF6', mountain, '#FFFFFF', '#2E9E6A'))
+
+# --- Vòng quay điểm thưởng: a wheel of points with "x2" and a pointer. ---
+seg_labels = ['10', '20', 'x2', '50', '30', '100']
+seg_colors = ['#FFD15C', '#BFD3FF', '#FF8FB1', '#BDEBD3', '#E3D5FF', '#FFC3A8']
+pw = ''
+for i, (lab, col) in enumerate(zip(seg_labels, seg_colors)):
+    a0, a1 = math.radians(-90 + i * 60), math.radians(-90 + (i + 1) * 60)
+    x0, y0 = 240 + 86 * math.cos(a0), 128 + 86 * math.sin(a0)
+    x1, y1 = 240 + 86 * math.cos(a1), 128 + 86 * math.sin(a1)
+    am = (a0 + a1) / 2
+    pw += f'<path d="M240 128 L{x0:.1f} {y0:.1f} A86 86 0 0 1 {x1:.1f} {y1:.1f} Z" fill="{col}" stroke="#FFFFFF" stroke-width="3"/>'
+    pw += text(round(240 + 56 * math.cos(am), 1), round(128 + 56 * math.sin(am) + 7, 1), lab, 20)
+pw += '<circle cx="240" cy="128" r="16" fill="#FFFFFF"/><path d="M240 28 l-12 -10 h24 z" fill="#E5484D" transform="rotate(180 240 23)"/>'
+cards.append(card('point-wheel', '#FFF6DC', '#FFE6A6', '#FFD879', pw, '#FFFFFF', '#F2A93B'))
+
 for name, svg in cards:
     with open(f'{OUT}/card-{name}.svg', 'w') as f:
         f.write(svg)

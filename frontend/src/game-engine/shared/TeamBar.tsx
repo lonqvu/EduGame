@@ -12,13 +12,15 @@ interface TeamBarProps {
   onPick?: (teamId: string) => void
   /** Teams that cannot be picked now (already answered wrong). */
   disabledIds?: string[]
+  /** Cards per row; all in one row by default. */
+  columns?: number
 }
 
 /** Projector: one card per team with its score. */
-export function TeamBar({ teams, activeId, activeLabel = 'Đến lượt', onPick, disabledIds = [] }: TeamBarProps) {
+export function TeamBar({ teams, activeId, activeLabel = 'Đến lượt', onPick, disabledIds = [], columns = teams.length }: TeamBarProps) {
   const sound = useSound()
   return (
-    <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${teams.length}, minmax(0, 1fr))` }}>
+    <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
       {teams.map((team) => {
         const active = team.id === activeId
         const disabled = disabledIds.includes(team.id)

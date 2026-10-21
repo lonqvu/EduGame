@@ -1483,5 +1483,2818 @@
     }
    }
   ]
+ },
+ "MILLIONAIRE": {
+  "title": "Ai là triệu phú mẫu – Kiến thức chung",
+  "subject": "Tổng hợp",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Một tuần có bao nhiêu ngày?",
+     "options": [
+      {
+       "id": "a",
+       "text": "5 ngày"
+      },
+      {
+       "id": "b",
+       "text": "6 ngày"
+      },
+      {
+       "id": "c",
+       "text": "7 ngày"
+      },
+      {
+       "id": "d",
+       "text": "8 ngày"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào được gọi là “chúa sơn lâm”?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con voi"
+      },
+      {
+       "id": "b",
+       "text": "Con hổ"
+      },
+      {
+       "id": "c",
+       "text": "Con gấu"
+      },
+      {
+       "id": "d",
+       "text": "Con khỉ"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Màu của lá cây thường là màu gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Màu đỏ"
+      },
+      {
+       "id": "b",
+       "text": "Màu xanh lá"
+      },
+      {
+       "id": "c",
+       "text": "Màu tím"
+      },
+      {
+       "id": "d",
+       "text": "Màu đen"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "9 + 6 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "14"
+      },
+      {
+       "id": "b",
+       "text": "15"
+      },
+      {
+       "id": "c",
+       "text": "16"
+      },
+      {
+       "id": "d",
+       "text": "17"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Thủ đô của Việt Nam là thành phố nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Huế"
+      },
+      {
+       "id": "b",
+       "text": "Đà Nẵng"
+      },
+      {
+       "id": "c",
+       "text": "Hà Nội"
+      },
+      {
+       "id": "d",
+       "text": "Hải Phòng"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Hình nào có 3 cạnh?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Hình vuông"
+      },
+      {
+       "id": "b",
+       "text": "Hình tròn"
+      },
+      {
+       "id": "c",
+       "text": "Hình tam giác"
+      },
+      {
+       "id": "d",
+       "text": "Hình chữ nhật"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Nước đóng băng ở bao nhiêu độ C?",
+     "options": [
+      {
+       "id": "a",
+       "text": "0 °C"
+      },
+      {
+       "id": "b",
+       "text": "10 °C"
+      },
+      {
+       "id": "c",
+       "text": "50 °C"
+      },
+      {
+       "id": "d",
+       "text": "100 °C"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Hành tinh nào chúng ta đang sống?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Sao Hỏa"
+      },
+      {
+       "id": "b",
+       "text": "Trái Đất"
+      },
+      {
+       "id": "c",
+       "text": "Sao Kim"
+      },
+      {
+       "id": "d",
+       "text": "Sao Mộc"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "6 × 7 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "36"
+      },
+      {
+       "id": "b",
+       "text": "42"
+      },
+      {
+       "id": "c",
+       "text": "48"
+      },
+      {
+       "id": "d",
+       "text": "49"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào đẻ trứng?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con mèo"
+      },
+      {
+       "id": "b",
+       "text": "Con chó"
+      },
+      {
+       "id": "c",
+       "text": "Con gà"
+      },
+      {
+       "id": "d",
+       "text": "Con bò"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Sông nào dài nhất Việt Nam (tính phần chảy trên đất Việt Nam)?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Sông Hồng"
+      },
+      {
+       "id": "b",
+       "text": "Sông Đồng Nai"
+      },
+      {
+       "id": "c",
+       "text": "Sông Mã"
+      },
+      {
+       "id": "d",
+       "text": "Sông Cửu Long"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Trong một năm, tháng nào có ít ngày nhất?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Tháng 1"
+      },
+      {
+       "id": "b",
+       "text": "Tháng 2"
+      },
+      {
+       "id": "c",
+       "text": "Tháng 4"
+      },
+      {
+       "id": "d",
+       "text": "Tháng 12"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Đỉnh núi cao nhất Việt Nam là đỉnh nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Bạch Mã"
+      },
+      {
+       "id": "b",
+       "text": "Phan-xi-păng"
+      },
+      {
+       "id": "c",
+       "text": "Bà Đen"
+      },
+      {
+       "id": "d",
+       "text": "Ngọc Linh"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Bộ phận nào của cây hút nước từ đất?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Lá"
+      },
+      {
+       "id": "b",
+       "text": "Hoa"
+      },
+      {
+       "id": "c",
+       "text": "Rễ"
+      },
+      {
+       "id": "d",
+       "text": "Quả"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Vị vua nào dời đô về Thăng Long năm 1010?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Lý Thái Tổ"
+      },
+      {
+       "id": "b",
+       "text": "Lê Lợi"
+      },
+      {
+       "id": "c",
+       "text": "Quang Trung"
+      },
+      {
+       "id": "d",
+       "text": "Trần Nhân Tông"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   }
+  ]
+ },
+ "TUG_OF_WAR": {
+  "title": "Kéo co mẫu – Bảng cửu chương",
+  "subject": "Toán",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "3 × 4 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "7"
+      },
+      {
+       "id": "b",
+       "text": "12"
+      },
+      {
+       "id": "c",
+       "text": "14"
+      },
+      {
+       "id": "d",
+       "text": "16"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "5 × 6 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "25"
+      },
+      {
+       "id": "b",
+       "text": "30"
+      },
+      {
+       "id": "c",
+       "text": "35"
+      },
+      {
+       "id": "d",
+       "text": "36"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "8 × 2 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "10"
+      },
+      {
+       "id": "b",
+       "text": "14"
+      },
+      {
+       "id": "c",
+       "text": "16"
+      },
+      {
+       "id": "d",
+       "text": "18"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "7 × 3 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "21"
+      },
+      {
+       "id": "b",
+       "text": "24"
+      },
+      {
+       "id": "c",
+       "text": "27"
+      },
+      {
+       "id": "d",
+       "text": "17"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "4 × 9 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "32"
+      },
+      {
+       "id": "b",
+       "text": "36"
+      },
+      {
+       "id": "c",
+       "text": "40"
+      },
+      {
+       "id": "d",
+       "text": "45"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "6 × 6 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "30"
+      },
+      {
+       "id": "b",
+       "text": "36"
+      },
+      {
+       "id": "c",
+       "text": "42"
+      },
+      {
+       "id": "d",
+       "text": "12"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "9 × 5 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "40"
+      },
+      {
+       "id": "b",
+       "text": "45"
+      },
+      {
+       "id": "c",
+       "text": "50"
+      },
+      {
+       "id": "d",
+       "text": "54"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "2 × 8 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "10"
+      },
+      {
+       "id": "b",
+       "text": "16"
+      },
+      {
+       "id": "c",
+       "text": "18"
+      },
+      {
+       "id": "d",
+       "text": "28"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "8 × 7 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "54"
+      },
+      {
+       "id": "b",
+       "text": "56"
+      },
+      {
+       "id": "c",
+       "text": "63"
+      },
+      {
+       "id": "d",
+       "text": "64"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "10 × 3 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "13"
+      },
+      {
+       "id": "b",
+       "text": "30"
+      },
+      {
+       "id": "c",
+       "text": "33"
+      },
+      {
+       "id": "d",
+       "text": "300"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "5 × 4 = 20",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "7 × 7 = 47",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "false"
+     ]
+    }
+   }
+  ]
+ },
+ "FLOWER_PICK": {
+  "title": "Hái hoa dân chủ mẫu – Tiếng Việt",
+  "subject": "Tiếng Việt",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào viết đúng chính tả?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Xinh đẹp"
+      },
+      {
+       "id": "b",
+       "text": "Sinh đẹp"
+      },
+      {
+       "id": "c",
+       "text": "Xinh đẹb"
+      },
+      {
+       "id": "d",
+       "text": "Sinh đẹb"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào trái nghĩa với “cao”?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Lớn"
+      },
+      {
+       "id": "b",
+       "text": "Thấp"
+      },
+      {
+       "id": "c",
+       "text": "Dài"
+      },
+      {
+       "id": "d",
+       "text": "To"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào chỉ hoạt động?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Quyển sách"
+      },
+      {
+       "id": "b",
+       "text": "Chạy"
+      },
+      {
+       "id": "c",
+       "text": "Xanh"
+      },
+      {
+       "id": "d",
+       "text": "Đẹp"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào chỉ đặc điểm?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Ngôi nhà"
+      },
+      {
+       "id": "b",
+       "text": "Học bài"
+      },
+      {
+       "id": "c",
+       "text": "Chăm chỉ"
+      },
+      {
+       "id": "d",
+       "text": "Cái bàn"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Câu “Bạn Lan học rất giỏi.” thuộc kiểu câu nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Ai là gì?"
+      },
+      {
+       "id": "b",
+       "text": "Ai làm gì?"
+      },
+      {
+       "id": "c",
+       "text": "Ai thế nào?"
+      },
+      {
+       "id": "d",
+       "text": "Câu hỏi"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào cùng nghĩa với “siêng năng”?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Lười biếng"
+      },
+      {
+       "id": "b",
+       "text": "Chăm chỉ"
+      },
+      {
+       "id": "c",
+       "text": "Vui vẻ"
+      },
+      {
+       "id": "d",
+       "text": "Thông minh"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Dấu câu nào đặt cuối câu hỏi?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Dấu chấm"
+      },
+      {
+       "id": "b",
+       "text": "Dấu phẩy"
+      },
+      {
+       "id": "c",
+       "text": "Dấu chấm hỏi"
+      },
+      {
+       "id": "d",
+       "text": "Dấu chấm than"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Mẹ” và “mạ” là hai từ…",
+     "options": [
+      {
+       "id": "a",
+       "text": "Trái nghĩa"
+      },
+      {
+       "id": "b",
+       "text": "Cùng nghĩa"
+      },
+      {
+       "id": "c",
+       "text": "Không liên quan"
+      },
+      {
+       "id": "d",
+       "text": "Chỉ đồ vật"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "“Con mèo” là từ chỉ sự vật.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Chữ “gh” đứng trước “a”, như “gha”.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "false"
+     ]
+    }
+   }
+  ]
+ },
+ "WHACK_MOLE": {
+  "title": "Đập chuột mẫu – Con vật",
+  "subject": "Tự nhiên và Xã hội",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào sống dưới nước?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con cá"
+      },
+      {
+       "id": "b",
+       "text": "Con mèo"
+      },
+      {
+       "id": "c",
+       "text": "Con gà"
+      },
+      {
+       "id": "d",
+       "text": "Con chó"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào biết bay?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con lợn"
+      },
+      {
+       "id": "b",
+       "text": "Con chim"
+      },
+      {
+       "id": "c",
+       "text": "Con trâu"
+      },
+      {
+       "id": "d",
+       "text": "Con rắn"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào có vòi dài?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con hươu"
+      },
+      {
+       "id": "b",
+       "text": "Con voi"
+      },
+      {
+       "id": "c",
+       "text": "Con ngựa"
+      },
+      {
+       "id": "d",
+       "text": "Con thỏ"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào kêu “ò ó o”?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con vịt"
+      },
+      {
+       "id": "b",
+       "text": "Con gà trống"
+      },
+      {
+       "id": "c",
+       "text": "Con mèo"
+      },
+      {
+       "id": "d",
+       "text": "Con bò"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào có cổ dài nhất?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con hươu cao cổ"
+      },
+      {
+       "id": "b",
+       "text": "Con ngựa vằn"
+      },
+      {
+       "id": "c",
+       "text": "Con lạc đà"
+      },
+      {
+       "id": "d",
+       "text": "Con voi"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào ăn cà rốt và có tai dài?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con sóc"
+      },
+      {
+       "id": "b",
+       "text": "Con thỏ"
+      },
+      {
+       "id": "c",
+       "text": "Con chuột"
+      },
+      {
+       "id": "d",
+       "text": "Con khỉ"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào nhả tơ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con ong"
+      },
+      {
+       "id": "b",
+       "text": "Con tằm"
+      },
+      {
+       "id": "c",
+       "text": "Con kiến"
+      },
+      {
+       "id": "d",
+       "text": "Con bướm"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào làm ra mật?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con ong"
+      },
+      {
+       "id": "b",
+       "text": "Con ruồi"
+      },
+      {
+       "id": "c",
+       "text": "Con muỗi"
+      },
+      {
+       "id": "d",
+       "text": "Con bướm"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào có mai cứng và bò chậm?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con rùa"
+      },
+      {
+       "id": "b",
+       "text": "Con cua"
+      },
+      {
+       "id": "c",
+       "text": "Con ốc"
+      },
+      {
+       "id": "d",
+       "text": "Con tôm"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào gáy báo sáng?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con mèo"
+      },
+      {
+       "id": "b",
+       "text": "Con chó"
+      },
+      {
+       "id": "c",
+       "text": "Con gà trống"
+      },
+      {
+       "id": "d",
+       "text": "Con lợn"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   }
+  ]
+ },
+ "TRUE_FALSE": {
+  "title": "Đúng hay sai mẫu – Khoa học vui",
+  "subject": "Khoa học",
+  "items": [
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Mặt Trăng tự phát ra ánh sáng.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "false"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Cây xanh cần ánh sáng để sống.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Nước sôi ở bao nhiêu độ C?",
+     "options": [
+      {
+       "id": "a",
+       "text": "50 °C"
+      },
+      {
+       "id": "b",
+       "text": "80 °C"
+      },
+      {
+       "id": "c",
+       "text": "100 °C"
+      },
+      {
+       "id": "d",
+       "text": "120 °C"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Cơ quan nào giúp chúng ta thở?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Tim"
+      },
+      {
+       "id": "b",
+       "text": "Phổi"
+      },
+      {
+       "id": "c",
+       "text": "Dạ dày"
+      },
+      {
+       "id": "d",
+       "text": "Gan"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Một ngày có bao nhiêu giờ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "12 giờ"
+      },
+      {
+       "id": "b",
+       "text": "20 giờ"
+      },
+      {
+       "id": "c",
+       "text": "24 giờ"
+      },
+      {
+       "id": "d",
+       "text": "48 giờ"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Cá voi là loài cá.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "false"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Không khí cần cho sự cháy.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Vật nào nổi trên mặt nước?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Hòn đá"
+      },
+      {
+       "id": "b",
+       "text": "Chiếc đinh"
+      },
+      {
+       "id": "c",
+       "text": "Miếng gỗ"
+      },
+      {
+       "id": "d",
+       "text": "Chiếc chìa khóa"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Mắt giúp chúng ta làm gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Nghe"
+      },
+      {
+       "id": "b",
+       "text": "Nhìn"
+      },
+      {
+       "id": "c",
+       "text": "Ngửi"
+      },
+      {
+       "id": "d",
+       "text": "Nếm"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Trái Đất quay quanh Mặt Trời.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   }
+  ]
+ },
+ "LUCKY_STAR": {
+  "title": "Ngôi sao may mắn mẫu – Toán vui",
+  "subject": "Toán",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "15 + 27 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "32"
+      },
+      {
+       "id": "b",
+       "text": "42"
+      },
+      {
+       "id": "c",
+       "text": "41"
+      },
+      {
+       "id": "d",
+       "text": "52"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "50 − 18 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "32"
+      },
+      {
+       "id": "b",
+       "text": "38"
+      },
+      {
+       "id": "c",
+       "text": "42"
+      },
+      {
+       "id": "d",
+       "text": "22"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Số liền sau của 99 là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "98"
+      },
+      {
+       "id": "b",
+       "text": "100"
+      },
+      {
+       "id": "c",
+       "text": "101"
+      },
+      {
+       "id": "d",
+       "text": "90"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "1 giờ = ? phút",
+     "options": [
+      {
+       "id": "a",
+       "text": "30"
+      },
+      {
+       "id": "b",
+       "text": "60"
+      },
+      {
+       "id": "c",
+       "text": "100"
+      },
+      {
+       "id": "d",
+       "text": "24"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Số nào là số chẵn?",
+     "options": [
+      {
+       "id": "a",
+       "text": "13"
+      },
+      {
+       "id": "b",
+       "text": "27"
+      },
+      {
+       "id": "c",
+       "text": "34"
+      },
+      {
+       "id": "d",
+       "text": "45"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "36 : 4 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "8"
+      },
+      {
+       "id": "b",
+       "text": "9"
+      },
+      {
+       "id": "c",
+       "text": "7"
+      },
+      {
+       "id": "d",
+       "text": "6"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Hình vuông có mấy cạnh bằng nhau?",
+     "options": [
+      {
+       "id": "a",
+       "text": "2"
+      },
+      {
+       "id": "b",
+       "text": "3"
+      },
+      {
+       "id": "c",
+       "text": "4"
+      },
+      {
+       "id": "d",
+       "text": "5"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "1 m = ? cm",
+     "options": [
+      {
+       "id": "a",
+       "text": "10"
+      },
+      {
+       "id": "b",
+       "text": "100"
+      },
+      {
+       "id": "c",
+       "text": "1000"
+      },
+      {
+       "id": "d",
+       "text": "50"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "25 lớn hơn 52.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "false"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Một nửa của 10 là 5.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   }
+  ]
+ },
+ "SECRET_PICTURE": {
+  "title": "Ô cửa bí mật mẫu – Quê hương em",
+  "subject": "Lịch sử và Địa lý",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Việt Nam nằm ở châu lục nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Châu Âu"
+      },
+      {
+       "id": "b",
+       "text": "Châu Á"
+      },
+      {
+       "id": "c",
+       "text": "Châu Phi"
+      },
+      {
+       "id": "d",
+       "text": "Châu Mỹ"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Thành phố nào đông dân nhất Việt Nam?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Hà Nội"
+      },
+      {
+       "id": "b",
+       "text": "TP. Hồ Chí Minh"
+      },
+      {
+       "id": "c",
+       "text": "Đà Nẵng"
+      },
+      {
+       "id": "d",
+       "text": "Cần Thơ"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Vịnh Hạ Long thuộc tỉnh nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Quảng Ninh"
+      },
+      {
+       "id": "b",
+       "text": "Khánh Hòa"
+      },
+      {
+       "id": "c",
+       "text": "Bình Định"
+      },
+      {
+       "id": "d",
+       "text": "Kiên Giang"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Quốc kỳ Việt Nam có màu gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Xanh và trắng"
+      },
+      {
+       "id": "b",
+       "text": "Đỏ và vàng"
+      },
+      {
+       "id": "c",
+       "text": "Đỏ và trắng"
+      },
+      {
+       "id": "d",
+       "text": "Xanh và vàng"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Ngày Quốc khánh Việt Nam là ngày nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "1/5"
+      },
+      {
+       "id": "b",
+       "text": "30/4"
+      },
+      {
+       "id": "c",
+       "text": "2/9"
+      },
+      {
+       "id": "d",
+       "text": "1/6"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Món ăn nào nổi tiếng của Hà Nội?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Phở"
+      },
+      {
+       "id": "b",
+       "text": "Bánh xèo"
+      },
+      {
+       "id": "c",
+       "text": "Cơm tấm"
+      },
+      {
+       "id": "d",
+       "text": "Bún bò"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Cố đô Huế nằm bên dòng sông nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Sông Hồng"
+      },
+      {
+       "id": "b",
+       "text": "Sông Hương"
+      },
+      {
+       "id": "c",
+       "text": "Sông Hàn"
+      },
+      {
+       "id": "d",
+       "text": "Sông Đà"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Đồng bằng lớn nhất nước ta là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Đồng bằng sông Hồng"
+      },
+      {
+       "id": "b",
+       "text": "Đồng bằng sông Cửu Long"
+      },
+      {
+       "id": "c",
+       "text": "Đồng bằng duyên hải"
+      },
+      {
+       "id": "d",
+       "text": "Tây Nguyên"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Ngày Tết Thiếu nhi là ngày nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "1/6"
+      },
+      {
+       "id": "b",
+       "text": "20/11"
+      },
+      {
+       "id": "c",
+       "text": "8/3"
+      },
+      {
+       "id": "d",
+       "text": "22/12"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Thủ đô của Việt Nam là Hà Nội.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Việt Nam có biển ở phía Tây.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "false"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Bánh chưng thường được gói vào dịp nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Trung thu"
+      },
+      {
+       "id": "b",
+       "text": "Tết Nguyên đán"
+      },
+      {
+       "id": "c",
+       "text": "Quốc khánh"
+      },
+      {
+       "id": "d",
+       "text": "Giáng sinh"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   }
+  ]
+ },
+ "MOUNTAIN_CLIMB": {
+  "title": "Leo núi mẫu – Tiếng Anh",
+  "subject": "Tiếng Anh",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Cat” nghĩa là gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con chó"
+      },
+      {
+       "id": "b",
+       "text": "Con mèo"
+      },
+      {
+       "id": "c",
+       "text": "Con cá"
+      },
+      {
+       "id": "d",
+       "text": "Con chim"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Red” là màu gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Xanh"
+      },
+      {
+       "id": "b",
+       "text": "Vàng"
+      },
+      {
+       "id": "c",
+       "text": "Đỏ"
+      },
+      {
+       "id": "d",
+       "text": "Đen"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“One, two, …” số tiếp theo là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Four"
+      },
+      {
+       "id": "b",
+       "text": "Three"
+      },
+      {
+       "id": "c",
+       "text": "Five"
+      },
+      {
+       "id": "d",
+       "text": "Ten"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Hello” nghĩa là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Tạm biệt"
+      },
+      {
+       "id": "b",
+       "text": "Xin chào"
+      },
+      {
+       "id": "c",
+       "text": "Cảm ơn"
+      },
+      {
+       "id": "d",
+       "text": "Xin lỗi"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Book” nghĩa là gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Cái bút"
+      },
+      {
+       "id": "b",
+       "text": "Quyển sách"
+      },
+      {
+       "id": "c",
+       "text": "Cái bàn"
+      },
+      {
+       "id": "d",
+       "text": "Cái cặp"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Apple” là quả gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Quả chuối"
+      },
+      {
+       "id": "b",
+       "text": "Quả táo"
+      },
+      {
+       "id": "c",
+       "text": "Quả cam"
+      },
+      {
+       "id": "d",
+       "text": "Quả nho"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Thank you” nghĩa là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Xin chào"
+      },
+      {
+       "id": "b",
+       "text": "Cảm ơn"
+      },
+      {
+       "id": "c",
+       "text": "Tạm biệt"
+      },
+      {
+       "id": "d",
+       "text": "Không có gì"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Sun” nghĩa là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Mặt Trăng"
+      },
+      {
+       "id": "b",
+       "text": "Ngôi sao"
+      },
+      {
+       "id": "c",
+       "text": "Mặt Trời"
+      },
+      {
+       "id": "d",
+       "text": "Đám mây"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào chỉ “mẹ”?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Father"
+      },
+      {
+       "id": "b",
+       "text": "Mother"
+      },
+      {
+       "id": "c",
+       "text": "Sister"
+      },
+      {
+       "id": "d",
+       "text": "Brother"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Blue” là màu gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Xanh dương"
+      },
+      {
+       "id": "b",
+       "text": "Hồng"
+      },
+      {
+       "id": "c",
+       "text": "Tím"
+      },
+      {
+       "id": "d",
+       "text": "Nâu"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   }
+  ]
+ },
+ "POINT_WHEEL": {
+  "title": "Vòng quay điểm thưởng mẫu – Đố vui",
+  "subject": "Tổng hợp",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Cái gì càng lấy đi càng to ra?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Cái hố"
+      },
+      {
+       "id": "b",
+       "text": "Quả bóng"
+      },
+      {
+       "id": "c",
+       "text": "Cái bánh"
+      },
+      {
+       "id": "d",
+       "text": "Cái cây"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con gì đầu dê, mình ốc?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con dốc"
+      },
+      {
+       "id": "b",
+       "text": "Con dê"
+      },
+      {
+       "id": "c",
+       "text": "Con ốc sên"
+      },
+      {
+       "id": "d",
+       "text": "Con sò"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Tháng nào có 28 ngày?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Chỉ tháng 2"
+      },
+      {
+       "id": "b",
+       "text": "Tháng 1"
+      },
+      {
+       "id": "c",
+       "text": "Tất cả các tháng"
+      },
+      {
+       "id": "d",
+       "text": "Không tháng nào"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Cái gì có răng nhưng không biết cắn?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Cái lược"
+      },
+      {
+       "id": "b",
+       "text": "Con cá"
+      },
+      {
+       "id": "c",
+       "text": "Cái kéo"
+      },
+      {
+       "id": "d",
+       "text": "Con mèo"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Bố mẹ Nam có ba người con: Tý, Sửu và ai nữa?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Dần"
+      },
+      {
+       "id": "b",
+       "text": "Mão"
+      },
+      {
+       "id": "c",
+       "text": "Nam"
+      },
+      {
+       "id": "d",
+       "text": "Tuất"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Cái gì của bạn nhưng người khác dùng nhiều hơn?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Cái bút"
+      },
+      {
+       "id": "b",
+       "text": "Cái tên"
+      },
+      {
+       "id": "c",
+       "text": "Quyển vở"
+      },
+      {
+       "id": "d",
+       "text": "Cái cặp"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Hai con vịt đi trước một con vịt, hai con vịt đi sau một con vịt. Có mấy con vịt?",
+     "options": [
+      {
+       "id": "a",
+       "text": "3"
+      },
+      {
+       "id": "b",
+       "text": "4"
+      },
+      {
+       "id": "c",
+       "text": "5"
+      },
+      {
+       "id": "d",
+       "text": "6"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con gì càng già càng nhỏ đi?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Cây nến"
+      },
+      {
+       "id": "b",
+       "text": "Con voi"
+      },
+      {
+       "id": "c",
+       "text": "Con mèo"
+      },
+      {
+       "id": "d",
+       "text": "Con kiến"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Cái gì luôn đến nhưng không bao giờ tới?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Ngày mai"
+      },
+      {
+       "id": "b",
+       "text": "Hôm qua"
+      },
+      {
+       "id": "c",
+       "text": "Chiếc xe"
+      },
+      {
+       "id": "d",
+       "text": "Cơn mưa"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Con cua đi ngang.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   }
+  ]
  }
 }

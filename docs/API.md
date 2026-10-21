@@ -270,7 +270,7 @@ Cấu trúc `content` / `solution` theo template:
 | QUIZ | `SINGLE_CHOICE`, `TRUE_FALSE` | `{ text, image?, audio?, options: [{id, text}] }` | `{ correct: [optionId] }` |
 | MATCHING | `PAIR_SET` | `{ left: [{id, text}], right: [{id, text}] }` | `{ pairs: [[leftId, rightId]] }` |
 | MEMORY | `CARD_SET` | `{ cards: [{id, text?, image?}] }` | `{ pairs: [[cardId, cardId]] }` |
-| GOLDEN_BELL, BOAT_RACE | như QUIZ | như QUIZ | như QUIZ |
+| GOLDEN_BELL, BOAT_RACE, MILLIONAIRE, TUG_OF_WAR, FLOWER_PICK, WHACK_MOLE, TRUE_FALSE, LUCKY_STAR, SECRET_PICTURE, MOUNTAIN_CLIMB, POINT_WHEEL | như QUIZ | như QUIZ | như QUIZ |
 | CROSSWORD | `CROSSWORD_ROW` | `{ clue, image? }` | `{ answer, keyIndex }` |
 | ORDERING | `ORDER_SET` | `{ text?, items: [{id, text}] }` | `{ order: [id] }` |
 | SORTING | `SORT_SET` | `{ text?, groups: [{id, text}], cards: [{id, text}] }` | `{ assign: [[cardId, groupId]] }` |
@@ -316,8 +316,8 @@ Không có DRAFT (chưa sửa gì sau lần publish trước) → `409 NOTHING_T
 Body `{"templateCode": "QUIZ"}`. Trả về trò mẫu của giáo viên cho loại trò đó (như `GET /games/{code}`, có `sample: true`):
 lần đầu được tạo từ nội dung mẫu có sẵn (`backend/src/main/resources/samples/sample-games.json`, kiểm tra như nội dung
 giáo viên soạn), các lần sau trả lại đúng trò đó. Mỗi giáo viên có tối đa một trò mẫu còn dùng cho mỗi loại trò (lưu
-trữ trò mẫu thì lần sau tạo bản mới). Có cho 9 trò hỏi đáp: QUIZ, GOLDEN_BELL, BOAT_RACE, GRID_BOARD, MATCHING, MEMORY,
-CROSSWORD, ORDERING, SORTING; trò công cụ hoặc mã không có → `400 NO_SAMPLE`. `GET /games` và `GET /games/{code}` cũng
+trữ trò mẫu thì lần sau tạo bản mới). Có cho 18 trò hỏi đáp: QUIZ, GOLDEN_BELL, BOAT_RACE, GRID_BOARD, MATCHING, MEMORY,
+CROSSWORD, ORDERING, SORTING, MILLIONAIRE, TUG_OF_WAR, FLOWER_PICK, WHACK_MOLE, TRUE_FALSE, LUCKY_STAR, SECRET_PICTURE, MOUNTAIN_CLIMB, POINT_WHEEL; trò công cụ hoặc mã không có → `400 NO_SAMPLE`. `GET /games` và `GET /games/{code}` cũng
 có trường `sample`.
 
 ### 9–12. Câu hỏi (items)
@@ -351,7 +351,7 @@ Thêm vào cuối danh sách, theo thứ tự gửi. Dùng cho cả thêm 1 câu
 | QUIZ | `TRUE_FALSE` | như trên, đúng 2 phương án (Đúng / Sai) | `{correct: [optionId]}` |
 | MATCHING (Nối cặp) | `PAIR_SET` | `{left: [{id, text}], right: [{id, text}]}`, mỗi cột 1–12 ô | `{pairs: [[leftId, rightId]]}` |
 | MEMORY (Lật thẻ) | `CARD_SET` | `{cards: [{id, text}]}`, 2–24 thẻ | `{pairs: [[cardId, cardId]]}` |
-| GOLDEN_BELL (Rung chuông vàng), BOAT_RACE (Đua thuyền) | `SINGLE_CHOICE`, `TRUE_FALSE` | giống QUIZ | giống QUIZ |
+| GOLDEN_BELL (Rung chuông vàng), BOAT_RACE (Đua thuyền), MILLIONAIRE (Ai là triệu phú), TUG_OF_WAR (Kéo co), FLOWER_PICK (Hái hoa dân chủ), WHACK_MOLE (Đập chuột), TRUE_FALSE (Đúng hay sai), LUCKY_STAR (Ngôi sao may mắn), SECRET_PICTURE (Ô cửa bí mật), MOUNTAIN_CLIMB (Leo núi), POINT_WHEEL (Vòng quay điểm thưởng) | `SINGLE_CHOICE`, `TRUE_FALSE` | giống QUIZ | giống QUIZ |
 | CROSSWORD (Ô chữ bí mật) | `CROSSWORD_ROW` | `{clue, image?}`: một hàng ngang | `{answer, keyIndex}`: đáp án 1–15 chữ cái (không tính dấu cách); `keyIndex` là vị trí (từ 0) của chữ nằm ở cột từ khóa |
 | ORDERING (Sắp xếp) | `ORDER_SET` | `{text?, items: [{id, text}]}`, 2–8 thẻ | `{order: [id]}`: mọi id đúng một lần, theo thứ tự đúng |
 | SORTING (Phân loại) | `SORT_SET` | `{text?, groups: [{id, text}], cards: [{id, text}]}`, 2–4 giỏ, 1–16 thẻ | `{assign: [[cardId, groupId]]}`: mỗi thẻ vào nhiều nhất một giỏ |
@@ -508,7 +508,7 @@ Field của loại câu kia bị bỏ qua. Câu không chơi được → `400 I
 
 | Trò chơi | Câu được dùng |
 |---|---|
-| `QUIZ`, `GOLDEN_BELL`, `BOAT_RACE` | Các câu trắc nghiệm (thành `SINGLE_CHOICE`); câu tự luận bị bỏ qua (`skippedCount`) |
+| `QUIZ`, `GOLDEN_BELL`, `BOAT_RACE` và 9 trò của V17 (MILLIONAIRE, TUG_OF_WAR, FLOWER_PICK, WHACK_MOLE, TRUE_FALSE, LUCKY_STAR, SECRET_PICTURE, MOUNTAIN_CLIMB, POINT_WHEEL) | Các câu trắc nghiệm (thành `SINGLE_CHOICE`); câu tự luận bị bỏ qua (`skippedCount`) |
 | `GRID_BOARD` (Lật ô) | Mọi câu (thành `OPEN_QUESTION`, 10 điểm); đáp án là đáp án đúng hoặc câu trả lời tự luận |
 
 Trò chơi mang tên `title` (không gửi thì lấy tên bộ), mô tả, môn và khối của bộ (khối 6–12 thì để trống, game là tiểu học). Câu hỏi được chép sang game:
