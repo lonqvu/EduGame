@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
 import { gameRegistry } from '@/game-engine/registry'
 import { usePlayNow } from '@/pages/choose-game/usePlayNow'
-import { WelcomeTry } from '@/pages/home/WelcomeTry'
 import { ActionCards } from '@/pages/home/ActionCards'
 import { HomeHero } from '@/pages/home/HomeHero'
+import { PurposePicker } from '@/pages/home/PurposePicker'
 import { PraiseCorner, type StarPeriod } from '@/pages/home/PraiseCorner'
 import { RecentActivity } from '@/pages/home/RecentActivity'
 import { FeaturedGames, QuestionSets, TodayPanel } from '@/pages/home/RightColumn'
@@ -121,8 +121,6 @@ export function HomePage() {
         <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
       </div>
 
-      {gamesStatus === 'ready' && games.length === 0 && <WelcomeTry busy={busy} onPlay={startGame} />}
-
       <div className={columns}>
         <HomeHero
           greetingName={teacher?.greetingName ?? 'cô'}
@@ -137,6 +135,8 @@ export function HomePage() {
         />
         <TodayPanel games={games.slice(0, TODAY_LIMIT)} subtitle={(g) => `${classLabel(g)} - ${templateName(g)}`} />
       </div>
+
+      {gamesStatus === 'ready' && <PurposePicker games={games} busy={busy} onPlayNow={startGame} />}
 
       <div className={`${columns} items-start`}>
         <div className="@container flex min-w-0 flex-col gap-5">

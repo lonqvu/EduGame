@@ -139,19 +139,22 @@ test('"Cách chơi" on a card explains the game, then plays it with sample quest
   await expect(tool.getByRole('button', { name: '▶ Chơi ngay' })).toBeVisible()
 })
 
-test('a teacher without games is welcomed on the home page with games to try, until it is hidden', async ({ page }) => {
+test('"Hôm nay cô muốn làm gì?" plays by purpose: a sample first, then the teacher\'s latest game, or a tool', async ({ page }) => {
   await page.goto('/')
-  const welcome = page.getByRole('region', { name: 'Thử ngay một trò chơi' })
-  await expect(welcome).toBeVisible()
-  await welcome.getByRole('button', { name: 'Ẩn gợi ý' }).click()
-  await expect(welcome).toBeHidden()
-  await page.reload()
-  await expect(page.getByRole('button', { name: /Lật ô thi đua/ }).first()).toBeVisible()
-  await expect(welcome).toBeHidden()
-
-  await page.evaluate(() => localStorage.removeItem('edugame.welcomeDismissed'))
-  await page.reload()
-  await welcome.getByRole('button', { name: 'Thử Trắc nghiệm' }).click()
+  const purposes = page.getByRole('region', { name: 'Hôm nay cô muốn làm gì?' })
+  await expect(purposes).toContainText('Lần đầu dùng Lớp vui?')
+  await purposes.getByRole('button', { name: 'Ôn bài: Trắc nghiệm, câu hỏi mẫu' }).click()
   await expect(page).toHaveURL(/\/play\/g-/)
+  const sample = page.url()
   await expect(intro(page)).toContainText('Trắc nghiệm mẫu')
+
+  // Now the teacher has a game for it: the tile says so, and plays it.
+  await page.goto('/')
+  await expect(purposes).not.toContainText('Lần đầu dùng Lớp vui?')
+  await purposes.getByRole('button', { name: /^Ôn bài: Chơi lại: Trắc nghiệm mẫu/ }).click()
+  await expect(page).toHaveURL(sample)
+
+  await page.goto('/')
+  await purposes.getByRole('button', { name: 'Gọi tên phát biểu: Vòng quay may mắn' }).click()
+  await expect(page).toHaveURL(/\/tools\/wheel$/)
 })
