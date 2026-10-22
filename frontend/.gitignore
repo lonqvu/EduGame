@@ -28,3 +28,6 @@ dist-ssr
 /test-results/
 /playwright-report/
 __pycache__/
+
+# Fluent Emoji downloaded by scripts/make_card_photos.py
+scripts/.emoji-cache/
