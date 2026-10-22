@@ -332,6 +332,12 @@ export type QuestionGameCode =
   | 'SECRET_PICTURE'
   | 'MOUNTAIN_CLIMB'
   | 'POINT_WHEEL'
+  | 'TIC_TAC_TOE'
+  | 'CONNECT_FOUR'
+  | 'TREASURE_CHEST'
+  | 'BUILD_TOWER'
+  | 'BEE_FLOWER'
+  | 'BINGO'
 
 export interface UsedQuestionSetResponse {
   gameCode: string

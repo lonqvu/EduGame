@@ -1,4 +1,8 @@
+import { BeeFlowerScreen } from '@/game-engine/bee-flower/BeeFlowerScreen'
+import { BingoScreen } from '@/game-engine/bingo/BingoScreen'
 import { BoatRaceScreen } from '@/game-engine/boat-race/BoatRaceScreen'
+import { BuildTowerScreen } from '@/game-engine/build-tower/BuildTowerScreen'
+import { ConnectFourScreen } from '@/game-engine/connect-four/ConnectFourScreen'
 import { CrosswordScreen } from '@/game-engine/crossword/CrosswordScreen'
 import { FlowerPickScreen } from '@/game-engine/flower-pick/FlowerPickScreen'
 import { GoldenBellScreen } from '@/game-engine/golden-bell/GoldenBellScreen'
@@ -13,6 +17,8 @@ import { PointWheelScreen } from '@/game-engine/point-wheel/PointWheelScreen'
 import { QuizScreen } from '@/game-engine/quiz/QuizScreen'
 import { SecretPictureScreen } from '@/game-engine/secret-picture/SecretPictureScreen'
 import { SortingScreen } from '@/game-engine/sorting/SortingScreen'
+import { TicTacToeScreen } from '@/game-engine/tic-tac-toe/TicTacToeScreen'
+import { TreasureChestScreen } from '@/game-engine/treasure-chest/TreasureChestScreen'
 import { TrueFalseScreen } from '@/game-engine/true-false/TrueFalseScreen'
 import { TugOfWarScreen } from '@/game-engine/tug-of-war/TugOfWarScreen'
 import { WhackMoleScreen } from '@/game-engine/whack-mole/WhackMoleScreen'
@@ -59,6 +65,18 @@ export function GameScreen({ mode, game, items, settings }: GameScreenProps) {
       return <MountainClimbScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
     case 'POINT_WHEEL':
       return <PointWheelScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
+    case 'TIC_TAC_TOE':
+      return <TicTacToeScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
+    case 'CONNECT_FOUR':
+      return <ConnectFourScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
+    case 'TREASURE_CHEST':
+      return <TreasureChestScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
+    case 'BUILD_TOWER':
+      return <BuildTowerScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
+    case 'BEE_FLOWER':
+      return <BeeFlowerScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
+    case 'BINGO':
+      return <BingoScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
     case 'MATCHING':
       return <MatchingScreen key={game.id} game={game} sets={items as PairSet[]} settings={settings} />
     case 'MEMORY':

@@ -283,6 +283,12 @@ interface ItemOf {
   SECRET_PICTURE: QuizQuestion
   MOUNTAIN_CLIMB: QuizQuestion
   POINT_WHEEL: QuizQuestion
+  TIC_TAC_TOE: QuizQuestion
+  CONNECT_FOUR: QuizQuestion
+  TREASURE_CHEST: QuizQuestion
+  BUILD_TOWER: QuizQuestion
+  BEE_FLOWER: QuizQuestion
+  BINGO: QuizQuestion
   MATCHING: PairSet
   MEMORY: PairSet
   CROSSWORD: CrosswordRow
@@ -305,6 +311,12 @@ const CODECS: { [K in keyof ItemOf]: ItemCodec<ItemOf[K]> } = {
   SECRET_PICTURE: quizCodec,
   MOUNTAIN_CLIMB: quizCodec,
   POINT_WHEEL: quizCodec,
+  TIC_TAC_TOE: quizCodec,
+  CONNECT_FOUR: quizCodec,
+  TREASURE_CHEST: quizCodec,
+  BUILD_TOWER: quizCodec,
+  BEE_FLOWER: quizCodec,
+  BINGO: quizCodec,
   MATCHING: matchingCodec,
   MEMORY: memoryCodec,
   CROSSWORD: crosswordCodec,

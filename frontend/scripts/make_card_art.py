@@ -502,6 +502,76 @@ light = (rect(196, 30, 88, 184, 30, '#1F2A44') + '<circle cx="240" cy="70" r="24
          + rect(300, 150, 60, 46, 14, '#FFFFFF') + text(330, 182, '💬', 24))
 cards.append(card('traffic-light', '#E9F7E2', '#CDEBC0', '#B9E2A8', light, '#FFFFFF', '#2E9E6A'))
 
+# --- Cờ ca-rô hỏi đáp: a 3x3 board with X and O, three X in a row. ---
+ttt = rect(150, 36, 180, 180, 22, '#FFFFFF')
+for i in range(1, 3):
+    ttt += rect(150 + i * 60 - 2, 48, 4, 156, 2, '#D5DEEE') + rect(162, 36 + i * 60 - 2, 156, 4, 2, '#D5DEEE')
+for (c, r, m) in [(0, 0, 'X'), (1, 1, 'X'), (2, 2, 'X'), (2, 0, 'O'), (0, 2, 'O')]:
+    ttt += text(180 + c * 60, 36 + r * 60 + 44, m, 40, '#F28C28' if m == 'X' else '#3563E9')
+ttt += '<path d="M168 54 L312 198" stroke="#F28C28" stroke-width="7" stroke-linecap="round" opacity="0.5"/>'
+cards.append(card('tic-tac-toe', '#FFF1E3', '#FFDDBD', '#FFCFA0', ttt, '#FFFFFF', '#F28C28'))
+
+# --- Bốn ô liên tiếp: a blue board with orange and green discs, four in a row. ---
+c4 = rect(130, 50, 220, 160, 20, '#3563E9')
+grid = {(5, 1): '#F28C28', (4, 2): '#F28C28', (3, 3): '#F28C28', (2, 4): '#F28C28', (5, 2): '#2E9E6A', (5, 3): '#2E9E6A', (4, 3): '#2E9E6A', (5, 4): '#2E9E6A', (4, 4): '#2E9E6A', (3, 4): '#2E9E6A'}
+for r in range(6):
+    for c in range(7):
+        c4 += f'<circle cx="{150 + c * 30}" cy="{68 + r * 26}" r="10" fill="{grid.get((r, c), "#DCE7FF")}"/>'
+c4 += '<circle cx="240" cy="30" r="11" fill="#F28C28"/><path d="M240 46 v8" stroke="#F28C28" stroke-width="4" stroke-linecap="round"/>'
+cards.append(card('connect-four', '#E6EEFF', '#CFDCFD', '#BDD0FB', c4, '#FFFFFF', '#3563E9'))
+
+
+def chest(cx, cy, s, open_=False):
+    w, h = 70 * s, 44 * s
+    out = rect(cx - w / 2, cy - h / 2, w, h, 8 * s, '#B9733A') + rect(cx - w / 2, cy - h / 2, w, 8 * s, 0, '#8C5326')
+    if open_:
+        out += f'<path d="M{cx - w / 2} {cy - h / 2} L{cx - w / 2 + 6 * s} {cy - h / 2 - 34 * s} L{cx + w / 2 - 6 * s} {cy - h / 2 - 34 * s} L{cx + w / 2} {cy - h / 2} Z" fill="#D18A48"/>'
+        out += ''.join(f'<circle cx="{cx + dx * s}" cy="{cy - h / 2 - 4 * s}" r="{7 * s}" fill="#FFD43B" stroke="#E9A800" stroke-width="2"/>' for dx in (-16, 0, 16))
+    else:
+        out += f'<path d="M{cx - w / 2} {cy - h / 2} Q{cx - w / 2} {cy - h / 2 - 30 * s} {cx} {cy - h / 2 - 30 * s} Q{cx + w / 2} {cy - h / 2 - 30 * s} {cx + w / 2} {cy - h / 2} Z" fill="#D18A48"/>'
+    out += rect(cx - 8 * s, cy - h / 2 - 2 * s, 16 * s, 18 * s, 4 * s, '#FFD15C')
+    return out
+
+
+# --- Rương vàng: three chests, the middle one open and full of gold. ---
+gold = chest(160, 160, 1.1) + chest(320, 160, 1.1) + chest(240, 140, 1.5, True) + sparkle(240, 52, 14, '#FFD43B')
+cards.append(card('treasure-chest', '#2E3A82', '#1B2459', '#3E4CA0', gold, '#FFD15C', '#FFFFFF'))
+
+# --- Xây tháp: three towers of colorful blocks, the tallest with a flag. ---
+tower = '<rect x="0" y="206" width="480" height="40" fill="#9ED37E"/>'
+for i, (x, n) in enumerate([(160, 3), (240, 5), (320, 2)]):
+    for b in range(n):
+        tower += rect(x - 30, 182 - b * 28, 60, 26, 6, ['#FFD15C', '#FF9F6B', '#7BC8F6', '#9BE08B', '#C9A7FF'][(b + i) % 5])
+tower += '<rect x="238" y="18" width="4" height="40" fill="#6B4E2E"/><path d="M242 20 L266 28 L242 36 Z" fill="#E5484D"/>'
+cards.append(card('build-tower', '#E6F4FF', '#CDE6FA', '#B8DAF6', tower, '#FFFFFF', '#F28C28'))
+
+
+def flower6(cx, cy, r, petal):
+    return ''.join(f'<ellipse cx="{cx}" cy="{cy - r * .55}" rx="{r * .36}" ry="{r * .5}" fill="{petal}" transform="rotate({a} {cx} {cy})"/>'
+                   for a in range(0, 360, 60)) + f'<circle cx="{cx}" cy="{cy}" r="{r * .38}" fill="#FFE27A" stroke="#F2B705" stroke-width="2.5"/>'
+
+
+# --- Ong tìm hoa: flowers with answer letters, a bee flying to one. ---
+bee = '<rect x="0" y="196" width="480" height="50" fill="#9ED37E"/>'
+for x, col, l in [(150, '#FF8FB1', 'A'), (240, '#FFB547', 'B'), (330, '#B98CFF', 'C')]:
+    bee += rect(x - 3, 150, 6, 50, 3, '#4E9A4A') + flower6(x, 140, 46, col) + text(x, 148, l, 20, '#5A3A00')
+bee += ('<g transform="translate(300 56)"><ellipse cx="-6" cy="-14" rx="12" ry="8" fill="#E8F6FF" stroke="#9FD4F5" stroke-width="2"/>'
+        '<ellipse cx="8" cy="-15" rx="11" ry="7" fill="#E8F6FF" stroke="#9FD4F5" stroke-width="2"/>'
+        '<ellipse cx="0" cy="4" rx="24" ry="17" fill="#FFD43B"/><path d="M-8 -11 Q-11 4 -8 20 M4 -12 Q1 4 4 21" stroke="#3F2A1E" stroke-width="5" fill="none"/>'
+        '<circle cx="20" cy="0" r="11" fill="#FFD43B"/><circle cx="23" cy="-2" r="2.6" fill="#1F2A44"/></g>'
+        '<path d="M276 70 q-24 20 -36 50" stroke="#F2A93B" stroke-width="3" stroke-dasharray="5 6" fill="none"/>')
+cards.append(card('bee-flower', '#FFF8DE', '#FFE9A8', '#FFDC7F', bee, '#FFFFFF', '#F2A93B'))
+
+# --- Bingo: a 3x3 card of answers with a full marked row, a "BINGO" ribbon. ---
+bingo = rect(150, 48, 180, 160, 20, '#FFFFFF')
+vals = ['7', '12', '9', '15', '4', '20', '8', '16', '11']
+for i, v in enumerate(vals):
+    x, y = 162 + (i % 3) * 54, 60 + (i // 3) * 48
+    marked = i // 3 == 1
+    bingo += rect(x, y, 48, 42, 10, '#8B5CF6' if marked else '#F1EAFE') + text(x + 24, y + 29, v, 20, '#FFFFFF' if marked else '#5B3FB0')
+bingo += rect(176, 192, 128, 34, 17, '#F2B705') + text(240, 216, 'BINGO!', 20, '#FFFFFF')
+cards.append(card('bingo', '#F3EDFE', '#E0D3FC', '#D2BFFA', bingo, '#FFFFFF', '#8B5CF6'))
+
 for name, svg in cards:
     with open(f'{OUT}/card-{name}.svg', 'w') as f:
         f.write(svg)

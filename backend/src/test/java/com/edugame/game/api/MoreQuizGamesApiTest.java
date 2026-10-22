@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The question games added by V17 (and the tools of V18), end to end against PostgreSQL: the catalog lists them as question games, they take
+ * The question games added by V17 and V19 (and the tools of V18), end to end against PostgreSQL: the catalog lists them as question games, they take
  * the quiz items (and only those), start with their own rules, and question sets play them.
  */
 @SpringBootTest
@@ -34,7 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 class MoreQuizGamesApiTest {
 
     private static final List<String> GAMES = List.of("MILLIONAIRE", "TUG_OF_WAR", "FLOWER_PICK", "WHACK_MOLE",
-            "TRUE_FALSE", "LUCKY_STAR", "SECRET_PICTURE", "MOUNTAIN_CLIMB", "POINT_WHEEL");
+            "TRUE_FALSE", "LUCKY_STAR", "SECRET_PICTURE", "MOUNTAIN_CLIMB", "POINT_WHEEL", "TIC_TAC_TOE", "CONNECT_FOUR",
+            "TREASURE_CHEST", "BUILD_TOWER", "BEE_FLOWER", "BINGO");
 
     private static final String CHOICE = """
             {"itemType": "SINGLE_CHOICE",
@@ -108,7 +109,7 @@ class MoreQuizGamesApiTest {
 
     @Test
     void aQuestionSetPlaysThem() throws Exception {
-        for (String template : List.of("MILLIONAIRE", "TRUE_FALSE", "POINT_WHEEL")) {
+        for (String template : List.of("MILLIONAIRE", "TRUE_FALSE", "POINT_WHEEL", "TIC_TAC_TOE", "BINGO")) {
             JsonNode used = body(send(post("/api/v1/question-sets/qs-toan2-cong100/games"),
                     "{\"templateCode\": \"%s\"}".formatted(template)).andExpect(status().isCreated()));
             assertThat(used.path("templateCode").asText()).isEqualTo(template);

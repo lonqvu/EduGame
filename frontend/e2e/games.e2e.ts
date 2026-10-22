@@ -298,7 +298,7 @@ test('each name picker is its own game, grouped under the "Gọi tên" filter', 
 
   // Searching finds a name picker by its own name.
   await page.goto('/games/new')
-  await page.getByLabel('Tìm kiếm trò chơi').fill('bong bay')
+  await page.getByLabel('Tìm kiếm trò chơi').fill('chum bong bay')
   await expect(page.getByText('Tổng 1 trò chơi')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Bóng bay', exact: true })).toBeVisible()
 })

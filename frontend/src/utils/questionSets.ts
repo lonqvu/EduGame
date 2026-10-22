@@ -165,6 +165,12 @@ export const USE_GAMES: UseGame[] = [
   { code: 'SECRET_PICTURE', name: 'Ô cửa bí mật', description: 'Trả lời đúng để mở ô cửa và đoán bức tranh.' },
   { code: 'MOUNTAIN_CLIMB', name: 'Leo núi', description: 'Trả lời đúng để người leo núi của đội lên đỉnh.' },
   { code: 'POINT_WHEEL', name: 'Vòng quay điểm thưởng', description: 'Quay để biết câu hỏi đáng bao nhiêu điểm.' },
+  { code: 'TIC_TAC_TOE', name: 'Cờ ca-rô hỏi đáp', description: 'Trả lời đúng để đánh dấu ô, ba ô thẳng hàng là thắng.' },
+  { code: 'CONNECT_FOUR', name: 'Bốn ô liên tiếp', description: 'Trả lời đúng để thả quân, bốn quân liền nhau là thắng.' },
+  { code: 'TREASURE_CHEST', name: 'Rương vàng', description: 'Trả lời đúng để mở rương báu đầy bất ngờ.' },
+  { code: 'BUILD_TOWER', name: 'Xây tháp', description: 'Mỗi câu đúng thêm một khối, tháp nào cao nhất?' },
+  { code: 'BEE_FLOWER', name: 'Ong tìm hoa', description: 'Chỉ đường cho chú ong đến bông hoa có đáp án đúng.' },
+  { code: 'BINGO', name: 'Bingo', description: 'Đánh dấu đáp án trên thẻ, đủ một hàng là Bingo!' },
   { code: 'GRID_BOARD', name: 'Lật ô thi đua', description: 'Các đội chọn ô số và trả lời để ghi điểm. Dùng được mọi câu.' },
 ]
 

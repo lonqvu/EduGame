@@ -4296,5 +4296,1886 @@
     }
    }
   ]
+ },
+ "TIC_TAC_TOE": {
+  "title": "Cờ ca-rô mẫu – Toán lớp 2",
+  "subject": "Toán",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "35 + 24 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "49"
+      },
+      {
+       "id": "b",
+       "text": "59"
+      },
+      {
+       "id": "c",
+       "text": "69"
+      },
+      {
+       "id": "d",
+       "text": "58"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "80 − 30 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "40"
+      },
+      {
+       "id": "b",
+       "text": "50"
+      },
+      {
+       "id": "c",
+       "text": "60"
+      },
+      {
+       "id": "d",
+       "text": "70"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "2 × 5 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "7"
+      },
+      {
+       "id": "b",
+       "text": "10"
+      },
+      {
+       "id": "c",
+       "text": "12"
+      },
+      {
+       "id": "d",
+       "text": "25"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Số lớn nhất có hai chữ số là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "90"
+      },
+      {
+       "id": "b",
+       "text": "98"
+      },
+      {
+       "id": "c",
+       "text": "99"
+      },
+      {
+       "id": "d",
+       "text": "100"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "1 tuần có mấy ngày?",
+     "options": [
+      {
+       "id": "a",
+       "text": "5"
+      },
+      {
+       "id": "b",
+       "text": "6"
+      },
+      {
+       "id": "c",
+       "text": "7"
+      },
+      {
+       "id": "d",
+       "text": "8"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "16 : 2 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "6"
+      },
+      {
+       "id": "b",
+       "text": "7"
+      },
+      {
+       "id": "c",
+       "text": "8"
+      },
+      {
+       "id": "d",
+       "text": "9"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Số liền trước của 50 là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "49"
+      },
+      {
+       "id": "b",
+       "text": "51"
+      },
+      {
+       "id": "c",
+       "text": "40"
+      },
+      {
+       "id": "d",
+       "text": "59"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "4 × 3 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "7"
+      },
+      {
+       "id": "b",
+       "text": "12"
+      },
+      {
+       "id": "c",
+       "text": "14"
+      },
+      {
+       "id": "d",
+       "text": "43"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "45 + 5 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "40"
+      },
+      {
+       "id": "b",
+       "text": "49"
+      },
+      {
+       "id": "c",
+       "text": "50"
+      },
+      {
+       "id": "d",
+       "text": "55"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "1 dm = ? cm",
+     "options": [
+      {
+       "id": "a",
+       "text": "1"
+      },
+      {
+       "id": "b",
+       "text": "10"
+      },
+      {
+       "id": "c",
+       "text": "100"
+      },
+      {
+       "id": "d",
+       "text": "5"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "100 − 1 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "90"
+      },
+      {
+       "id": "b",
+       "text": "98"
+      },
+      {
+       "id": "c",
+       "text": "99"
+      },
+      {
+       "id": "d",
+       "text": "101"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   }
+  ]
+ },
+ "CONNECT_FOUR": {
+  "title": "Bốn ô liên tiếp mẫu – Tiếng Anh",
+  "subject": "Tiếng Anh",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Dog” nghĩa là gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con mèo"
+      },
+      {
+       "id": "b",
+       "text": "Con chó"
+      },
+      {
+       "id": "c",
+       "text": "Con gà"
+      },
+      {
+       "id": "d",
+       "text": "Con cá"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Green” là màu gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Xanh lá"
+      },
+      {
+       "id": "b",
+       "text": "Đỏ"
+      },
+      {
+       "id": "c",
+       "text": "Vàng"
+      },
+      {
+       "id": "d",
+       "text": "Tím"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Five” là số mấy?",
+     "options": [
+      {
+       "id": "a",
+       "text": "4"
+      },
+      {
+       "id": "b",
+       "text": "5"
+      },
+      {
+       "id": "c",
+       "text": "6"
+      },
+      {
+       "id": "d",
+       "text": "7"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“School” nghĩa là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Ngôi nhà"
+      },
+      {
+       "id": "b",
+       "text": "Trường học"
+      },
+      {
+       "id": "c",
+       "text": "Công viên"
+      },
+      {
+       "id": "d",
+       "text": "Bệnh viện"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Pen” nghĩa là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Cái bút"
+      },
+      {
+       "id": "b",
+       "text": "Cái thước"
+      },
+      {
+       "id": "c",
+       "text": "Quyển vở"
+      },
+      {
+       "id": "d",
+       "text": "Cục tẩy"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Goodbye” nghĩa là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Xin chào"
+      },
+      {
+       "id": "b",
+       "text": "Tạm biệt"
+      },
+      {
+       "id": "c",
+       "text": "Cảm ơn"
+      },
+      {
+       "id": "d",
+       "text": "Xin lỗi"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Father” nghĩa là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Mẹ"
+      },
+      {
+       "id": "b",
+       "text": "Bố"
+      },
+      {
+       "id": "c",
+       "text": "Anh trai"
+      },
+      {
+       "id": "d",
+       "text": "Ông"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Ten” là số mấy?",
+     "options": [
+      {
+       "id": "a",
+       "text": "8"
+      },
+      {
+       "id": "b",
+       "text": "9"
+      },
+      {
+       "id": "c",
+       "text": "10"
+      },
+      {
+       "id": "d",
+       "text": "12"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Bird” là con gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con chim"
+      },
+      {
+       "id": "b",
+       "text": "Con bướm"
+      },
+      {
+       "id": "c",
+       "text": "Con ong"
+      },
+      {
+       "id": "d",
+       "text": "Con cá"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Yellow” là màu gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Xanh"
+      },
+      {
+       "id": "b",
+       "text": "Vàng"
+      },
+      {
+       "id": "c",
+       "text": "Hồng"
+      },
+      {
+       "id": "d",
+       "text": "Trắng"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Teacher” nghĩa là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Học sinh"
+      },
+      {
+       "id": "b",
+       "text": "Giáo viên"
+      },
+      {
+       "id": "c",
+       "text": "Bác sĩ"
+      },
+      {
+       "id": "d",
+       "text": "Nông dân"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Ball” nghĩa là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Quả bóng"
+      },
+      {
+       "id": "b",
+       "text": "Con búp bê"
+      },
+      {
+       "id": "c",
+       "text": "Ô tô"
+      },
+      {
+       "id": "d",
+       "text": "Cái diều"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   }
+  ]
+ },
+ "TREASURE_CHEST": {
+  "title": "Rương vàng mẫu – Kiến thức chung",
+  "subject": "Tổng hợp",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Một năm có bao nhiêu tháng?",
+     "options": [
+      {
+       "id": "a",
+       "text": "10"
+      },
+      {
+       "id": "b",
+       "text": "11"
+      },
+      {
+       "id": "c",
+       "text": "12"
+      },
+      {
+       "id": "d",
+       "text": "13"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào là biểu tượng của sự chăm chỉ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Con ong"
+      },
+      {
+       "id": "b",
+       "text": "Con mèo"
+      },
+      {
+       "id": "c",
+       "text": "Con bướm"
+      },
+      {
+       "id": "d",
+       "text": "Con chim"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Bảy sắc cầu vồng có màu nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Màu đen"
+      },
+      {
+       "id": "b",
+       "text": "Màu xám"
+      },
+      {
+       "id": "c",
+       "text": "Màu tím"
+      },
+      {
+       "id": "d",
+       "text": "Màu nâu"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Mặt Trời mọc ở hướng nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Đông"
+      },
+      {
+       "id": "b",
+       "text": "Tây"
+      },
+      {
+       "id": "c",
+       "text": "Nam"
+      },
+      {
+       "id": "d",
+       "text": "Bắc"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Đâu là một loại quả?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Cà rốt"
+      },
+      {
+       "id": "b",
+       "text": "Xoài"
+      },
+      {
+       "id": "c",
+       "text": "Khoai tây"
+      },
+      {
+       "id": "d",
+       "text": "Rau muống"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Bác Hồ sinh ngày nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "2/9"
+      },
+      {
+       "id": "b",
+       "text": "19/5"
+      },
+      {
+       "id": "c",
+       "text": "1/6"
+      },
+      {
+       "id": "d",
+       "text": "30/4"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Ngày Nhà giáo Việt Nam là ngày nào?",
+     "options": [
+      {
+       "id": "a",
+       "text": "20/10"
+      },
+      {
+       "id": "b",
+       "text": "20/11"
+      },
+      {
+       "id": "c",
+       "text": "8/3"
+      },
+      {
+       "id": "d",
+       "text": "1/6"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Con vật nào sống ở Bắc Cực?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Gấu trắng"
+      },
+      {
+       "id": "b",
+       "text": "Hươu cao cổ"
+      },
+      {
+       "id": "c",
+       "text": "Sư tử"
+      },
+      {
+       "id": "d",
+       "text": "Khỉ"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Cá heo thở bằng phổi.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Một ngày có 12 giờ.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "false"
+     ]
+    }
+   }
+  ]
+ },
+ "BUILD_TOWER": {
+  "title": "Xây tháp mẫu – Khoa học",
+  "subject": "Khoa học",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Nước tồn tại ở mấy thể?",
+     "options": [
+      {
+       "id": "a",
+       "text": "1"
+      },
+      {
+       "id": "b",
+       "text": "2"
+      },
+      {
+       "id": "c",
+       "text": "3"
+      },
+      {
+       "id": "d",
+       "text": "4"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Cây hấp thụ khí gì để quang hợp?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Ô-xi"
+      },
+      {
+       "id": "b",
+       "text": "Các-bô-níc"
+      },
+      {
+       "id": "c",
+       "text": "Ni-tơ"
+      },
+      {
+       "id": "d",
+       "text": "Hi-đrô"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Bộ phận nào bơm máu đi khắp cơ thể?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Phổi"
+      },
+      {
+       "id": "b",
+       "text": "Tim"
+      },
+      {
+       "id": "c",
+       "text": "Gan"
+      },
+      {
+       "id": "d",
+       "text": "Dạ dày"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Vật nào dẫn điện tốt?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Gỗ"
+      },
+      {
+       "id": "b",
+       "text": "Nhựa"
+      },
+      {
+       "id": "c",
+       "text": "Đồng"
+      },
+      {
+       "id": "d",
+       "text": "Cao su"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Âm thanh truyền được qua?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Chân không"
+      },
+      {
+       "id": "b",
+       "text": "Không khí"
+      },
+      {
+       "id": "c",
+       "text": "Không gì cả"
+      },
+      {
+       "id": "d",
+       "text": "Chỉ qua nước"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Thực phẩm nào giàu chất đạm?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Rau cải"
+      },
+      {
+       "id": "b",
+       "text": "Trứng"
+      },
+      {
+       "id": "c",
+       "text": "Cơm"
+      },
+      {
+       "id": "d",
+       "text": "Táo"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Hành tinh gần Mặt Trời nhất?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Sao Thủy"
+      },
+      {
+       "id": "b",
+       "text": "Sao Kim"
+      },
+      {
+       "id": "c",
+       "text": "Trái Đất"
+      },
+      {
+       "id": "d",
+       "text": "Sao Hỏa"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Muốn có cơ thể khỏe mạnh, em cần?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Ăn nhiều kẹo"
+      },
+      {
+       "id": "b",
+       "text": "Thức khuya"
+      },
+      {
+       "id": "c",
+       "text": "Tập thể dục"
+      },
+      {
+       "id": "d",
+       "text": "Xem ti vi cả ngày"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Băng là nước ở thể rắn.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "true"
+     ]
+    }
+   },
+   {
+    "itemType": "TRUE_FALSE",
+    "content": {
+     "text": "Thực vật không cần nước để sống.",
+     "options": [
+      {
+       "id": "true",
+       "text": "Đúng"
+      },
+      {
+       "id": "false",
+       "text": "Sai"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "false"
+     ]
+    }
+   }
+  ]
+ },
+ "BEE_FLOWER": {
+  "title": "Ong tìm hoa mẫu – Tiếng Việt lớp 1",
+  "subject": "Tiếng Việt",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Chữ nào là nguyên âm?",
+     "options": [
+      {
+       "id": "a",
+       "text": "b"
+      },
+      {
+       "id": "b",
+       "text": "a"
+      },
+      {
+       "id": "c",
+       "text": "c"
+      },
+      {
+       "id": "d",
+       "text": "d"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Tiếng “mẹ” có dấu gì?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Dấu sắc"
+      },
+      {
+       "id": "b",
+       "text": "Dấu nặng"
+      },
+      {
+       "id": "c",
+       "text": "Dấu huyền"
+      },
+      {
+       "id": "d",
+       "text": "Dấu hỏi"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào chỉ con vật?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Cái bàn"
+      },
+      {
+       "id": "b",
+       "text": "Con mèo"
+      },
+      {
+       "id": "c",
+       "text": "Quả cam"
+      },
+      {
+       "id": "d",
+       "text": "Bông hoa"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Tiếng “bà” có âm đầu là?",
+     "options": [
+      {
+       "id": "a",
+       "text": "a"
+      },
+      {
+       "id": "b",
+       "text": "b"
+      },
+      {
+       "id": "c",
+       "text": "à"
+      },
+      {
+       "id": "d",
+       "text": "bà"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào viết đúng?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Ghế"
+      },
+      {
+       "id": "b",
+       "text": "Gế"
+      },
+      {
+       "id": "c",
+       "text": "Ghể"
+      },
+      {
+       "id": "d",
+       "text": "Gé"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Chữ “ng” hay “ngh”: … ỉ ngơi",
+     "options": [
+      {
+       "id": "a",
+       "text": "ng"
+      },
+      {
+       "id": "b",
+       "text": "ngh"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Từ nào chỉ màu sắc?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Đỏ"
+      },
+      {
+       "id": "b",
+       "text": "Chạy"
+      },
+      {
+       "id": "c",
+       "text": "Bút"
+      },
+      {
+       "id": "d",
+       "text": "Nhà"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Tiếng nào có vần “an”?",
+     "options": [
+      {
+       "id": "a",
+       "text": "Bàn"
+      },
+      {
+       "id": "b",
+       "text": "Bình"
+      },
+      {
+       "id": "c",
+       "text": "Bông"
+      },
+      {
+       "id": "d",
+       "text": "Bếp"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "“Cái …”: điền từ chỉ đồ vật",
+     "options": [
+      {
+       "id": "a",
+       "text": "cặp"
+      },
+      {
+       "id": "b",
+       "text": "chạy"
+      },
+      {
+       "id": "c",
+       "text": "xanh"
+      },
+      {
+       "id": "d",
+       "text": "vui"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "Có mấy dấu thanh trong Tiếng Việt?",
+     "options": [
+      {
+       "id": "a",
+       "text": "4"
+      },
+      {
+       "id": "b",
+       "text": "5"
+      },
+      {
+       "id": "c",
+       "text": "6"
+      },
+      {
+       "id": "d",
+       "text": "7"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   }
+  ]
+ },
+ "BINGO": {
+  "title": "Bingo mẫu – Tính nhẩm",
+  "subject": "Toán",
+  "items": [
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "3 + 4 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "7"
+      },
+      {
+       "id": "b",
+       "text": "8"
+      },
+      {
+       "id": "c",
+       "text": "6"
+      },
+      {
+       "id": "d",
+       "text": "5"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "9 − 1 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "7"
+      },
+      {
+       "id": "b",
+       "text": "8"
+      },
+      {
+       "id": "c",
+       "text": "9"
+      },
+      {
+       "id": "d",
+       "text": "10"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "2 × 6 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "10"
+      },
+      {
+       "id": "b",
+       "text": "12"
+      },
+      {
+       "id": "c",
+       "text": "14"
+      },
+      {
+       "id": "d",
+       "text": "8"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "5 + 5 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "9"
+      },
+      {
+       "id": "b",
+       "text": "10"
+      },
+      {
+       "id": "c",
+       "text": "11"
+      },
+      {
+       "id": "d",
+       "text": "15"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "20 − 5 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "15"
+      },
+      {
+       "id": "b",
+       "text": "10"
+      },
+      {
+       "id": "c",
+       "text": "25"
+      },
+      {
+       "id": "d",
+       "text": "14"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "3 × 3 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "6"
+      },
+      {
+       "id": "b",
+       "text": "9"
+      },
+      {
+       "id": "c",
+       "text": "12"
+      },
+      {
+       "id": "d",
+       "text": "33"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "14 + 6 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "18"
+      },
+      {
+       "id": "b",
+       "text": "19"
+      },
+      {
+       "id": "c",
+       "text": "20"
+      },
+      {
+       "id": "d",
+       "text": "21"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "c"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "18 : 3 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "5"
+      },
+      {
+       "id": "b",
+       "text": "6"
+      },
+      {
+       "id": "c",
+       "text": "7"
+      },
+      {
+       "id": "d",
+       "text": "3"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "11 + 2 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "13"
+      },
+      {
+       "id": "b",
+       "text": "12"
+      },
+      {
+       "id": "c",
+       "text": "14"
+      },
+      {
+       "id": "d",
+       "text": "11"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "4 × 4 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "8"
+      },
+      {
+       "id": "b",
+       "text": "16"
+      },
+      {
+       "id": "c",
+       "text": "12"
+      },
+      {
+       "id": "d",
+       "text": "44"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "30 − 13 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "17"
+      },
+      {
+       "id": "b",
+       "text": "13"
+      },
+      {
+       "id": "c",
+       "text": "27"
+      },
+      {
+       "id": "d",
+       "text": "23"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "a"
+     ]
+    }
+   },
+   {
+    "itemType": "SINGLE_CHOICE",
+    "content": {
+     "text": "2 + 9 = ?",
+     "options": [
+      {
+       "id": "a",
+       "text": "10"
+      },
+      {
+       "id": "b",
+       "text": "11"
+      },
+      {
+       "id": "c",
+       "text": "12"
+      },
+      {
+       "id": "d",
+       "text": "29"
+      }
+     ]
+    },
+    "solution": {
+     "correct": [
+      "b"
+     ]
+    }
+   }
+  ]
  }
 }

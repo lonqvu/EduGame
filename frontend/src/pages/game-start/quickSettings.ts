@@ -87,6 +87,12 @@ export const QUICK_SETTINGS: Record<GuideGameType, QuickSetting[]> = {
     SHUFFLE,
   ],
   POINT_WHEEL: [TEAMS, TIME, SHUFFLE],
+  TIC_TAC_TOE: [TIME, SHUFFLE],
+  CONNECT_FOUR: [TIME, SHUFFLE],
+  TREASURE_CHEST: [TEAMS, TIME, SHUFFLE],
+  BUILD_TOWER: [TEAMS, TIME, STEAL, SHUFFLE],
+  BEE_FLOWER: [TEAMS, TIME, points('Điểm mỗi câu đúng'), STEAL, SHUFFLE],
+  BINGO: [TEAMS, TIME, points('Điểm mỗi ô đánh dấu'), SHUFFLE],
   MATCHING: [TEAMS, points('Điểm mỗi cặp đúng')],
   MEMORY: [TEAMS, points('Điểm mỗi cặp tìm được')],
   CROSSWORD: [

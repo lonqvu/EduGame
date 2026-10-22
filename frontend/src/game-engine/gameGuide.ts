@@ -1,3 +1,4 @@
+import { bingoQuestions } from '@/game-engine/bingo/bingo'
 import { playableRows } from '@/game-engine/crossword/crosswordRound'
 import { DEFAULT_TEAMS } from '@/game-engine/grid-board/teams'
 import { playableMatchingSets } from '@/game-engine/matching/matchingRound'
@@ -30,7 +31,14 @@ export function countPlayable(type: GuideGameType, items: GameItem[]): number {
     case 'SECRET_PICTURE':
     case 'MOUNTAIN_CLIMB':
     case 'POINT_WHEEL':
+    case 'TIC_TAC_TOE':
+    case 'CONNECT_FOUR':
+    case 'TREASURE_CHEST':
+    case 'BUILD_TOWER':
+    case 'BEE_FLOWER':
       return playableQuizQuestions(items as QuizQuestion[], { shuffleOptions: false }).length
+    case 'BINGO':
+      return bingoQuestions(playableQuizQuestions(items as QuizQuestion[], { shuffleOptions: false })).asked.length
     case 'MATCHING':
       return playableMatchingSets(items as PairSet[]).length
     case 'MEMORY':
@@ -352,6 +360,134 @@ export function gameGuide(type: GuideGameType, settings: Record<string, unknown>
         ],
         winner: HIGHEST_SCORE,
         teacherNotes: ['Bấm "Quay" cho đội đến lượt, rồi bấm đáp án đội nói.', 'Bấm "Tiếp tục" để sang lượt của đội sau.'],
+      }
+
+    case 'TIC_TAC_TOE':
+      return {
+        goal: 'Trả lời đúng để đánh dấu ô, xếp được ba ô thẳng hàng trước đội bạn.',
+        rules: [
+          'Lớp chia thành 2 đội: đội X và đội O.',
+          'Hai đội lần lượt trả lời câu hỏi.',
+          ...timeRule(s.timeLimitSec),
+          'Trả lời đúng: đội được chọn một ô trống để đánh dấu.',
+          'Trả lời sai: mất lượt, cô công bố đáp án đúng.',
+          'Đội có 3 ô thẳng hàng ngang, dọc hoặc chéo là thắng.',
+        ],
+        steps: [
+          { title: 'Trả lời', text: 'Đội đến lượt trả lời câu hỏi.' },
+          { title: 'Chọn ô', text: 'Trả lời đúng thì chọn một ô để đánh dấu.' },
+          { title: 'Chặn đối thủ', text: 'Chọn ô khéo để chặn đường của đội bạn.' },
+          { title: 'Ba ô thẳng hàng', text: 'Đội có 3 ô thẳng hàng trước là thắng.' },
+        ],
+        winner: 'Đội có 3 ô thẳng hàng trước là đội thắng. Hết ô mà chưa ai thắng thì đội có nhiều ô hơn thắng.',
+        teacherNotes: ['Bấm đáp án đội nói. Đúng thì bấm vào ô đội chọn.', 'Bấm "Ván mới" để chơi tiếp với bàn cờ mới.'],
+      }
+
+    case 'CONNECT_FOUR':
+      return {
+        goal: 'Trả lời đúng để thả quân, xếp bốn quân liền nhau trước đội bạn.',
+        rules: [
+          'Lớp chia thành 2 đội, mỗi đội một màu quân.',
+          'Hai đội lần lượt trả lời câu hỏi.',
+          ...timeRule(s.timeLimitSec),
+          'Trả lời đúng: đội chọn một cột để thả quân, quân rơi xuống ô thấp nhất còn trống.',
+          'Trả lời sai: mất lượt.',
+          'Đội có 4 quân liền nhau theo hàng ngang, dọc hoặc chéo là thắng.',
+        ],
+        steps: [
+          { title: 'Trả lời', text: 'Đội đến lượt trả lời câu hỏi.' },
+          { title: 'Thả quân', text: 'Đúng thì chọn một cột để thả quân.' },
+          { title: 'Chặn đối thủ', text: 'Thả quân khéo để chặn đường của đội bạn.' },
+          { title: 'Bốn liền nhau', text: 'Đội có 4 quân liền nhau trước là thắng.' },
+        ],
+        winner: 'Đội có 4 quân liền nhau trước là đội thắng.',
+        teacherNotes: ['Bấm đáp án đội nói. Đúng thì bấm vào cột đội chọn.', 'Hết câu hỏi thì câu hỏi được dùng lại từ đầu.'],
+      }
+
+    case 'TREASURE_CHEST':
+      return {
+        goal: 'Trả lời đúng để mở rương báu và gom thật nhiều điểm.',
+        rules: [
+          teamsRule(s.teams),
+          'Các đội lần lượt trả lời câu hỏi.',
+          ...timeRule(s.timeLimitSec),
+          'Trả lời đúng: đội được chọn một trong ba rương báu.',
+          'Trong rương có thể là điểm thưởng, nhân đôi điểm, lấy điểm hay đổi điểm với đội dẫn đầu, hoặc rương trống!',
+          'Trả lời sai: mất lượt.',
+        ],
+        steps: [
+          { title: 'Trả lời', text: 'Đội đến lượt trả lời câu hỏi.' },
+          { title: 'Chọn rương', text: 'Đúng thì chọn một trong ba rương.' },
+          { title: 'Mở rương', text: 'Rương mở ra, điểm của các đội thay đổi theo.' },
+          { title: 'Đổi lượt', text: 'Lượt chuyển sang đội tiếp theo.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: ['Bấm đáp án đội nói. Đúng thì bấm vào rương đội chọn.', 'Bấm "Kết thúc" khi muốn dừng trò chơi.'],
+      }
+
+    case 'BUILD_TOWER':
+      return {
+        goal: 'Trả lời đúng để xây tháp của đội cao nhất.',
+        rules: [
+          teamsRule(s.teams),
+          ...timeRule(s.timeLimitSec),
+          ...buzzerRules(s).slice(0, 1),
+          'Trả lời đúng: tháp của đội được thêm một khối.',
+          ...buzzerRules(s).slice(1),
+        ],
+        steps: [
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi và các đáp án hiện trên màn chiếu.' },
+          { title: 'Giành quyền', text: 'Đội giơ tay nhanh nhất được trả lời.' },
+          { title: 'Xây tháp', text: 'Trả lời đúng, tháp của đội cao thêm một khối.' },
+          { title: 'So tháp', text: 'Hết câu hỏi, tháp cao nhất là đội thắng.' },
+        ],
+        winner: 'Hết câu hỏi, đội có tháp cao nhất là đội chiến thắng.',
+        teacherNotes: ['Bấm vào tên đội giành được quyền, rồi bấm đáp án đội đó chọn.', 'Bấm "Câu tiếp theo" để sang câu mới.'],
+      }
+
+    case 'BEE_FLOWER':
+      return {
+        goal: 'Chỉ đường cho chú ong bay đến bông hoa có đáp án đúng.',
+        rules: [
+          teamsRule(s.teams),
+          'Mỗi bông hoa mang một đáp án.',
+          ...timeRule(s.timeLimitSec),
+          ...buzzerRules(s).slice(0, 1),
+          pointsRule(s.points, 'Ong bay đến đúng bông hoa'),
+          ...buzzerRules(s).slice(1),
+        ],
+        steps: [
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi hiện ở trên, các bông hoa mang đáp án.' },
+          { title: 'Giành quyền', text: 'Đội giơ tay nhanh nhất được chỉ đường cho ong.' },
+          { title: 'Bay đến hoa', text: 'Ong bay đến bông hoa đội chọn.' },
+          { title: 'Lấy mật', text: 'Đúng bông hoa thì ong lấy được mật, đội được điểm.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: ['Bấm vào tên đội giành được quyền, rồi bấm bông hoa đội chọn.', 'Bấm "Câu tiếp theo" để sang câu mới.'],
+      }
+
+    case 'BINGO':
+      return {
+        goal: 'Tìm đáp án trên thẻ bingo của đội, đủ một hàng là hô "Bingo!".',
+        rules: [
+          teamsRule(s.teams),
+          'Mỗi đội có một thẻ bingo ghi các đáp án, mỗi đội một thẻ khác nhau.',
+          ...timeRule(s.timeLimitSec),
+          'Câu hỏi hiện ra, đội nào thấy đáp án đúng trên thẻ của mình thì giơ tay.',
+          `Đội tìm đúng được đánh dấu ô đó và cộng ${s.points} điểm.`,
+          'Chọn nhầm ô thì không được đánh dấu.',
+        ],
+        steps: [
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi hiện trên màn chiếu.' },
+          { title: 'Tìm trên thẻ', text: 'Các đội tìm đáp án đúng trên thẻ của mình.' },
+          { title: 'Giơ tay', text: 'Đội tìm thấy giơ tay, cô bấm ô đội chỉ.' },
+          { title: 'Bingo!', text: 'Đội đủ một hàng ngang, dọc hoặc chéo là thắng.' },
+        ],
+        winner: 'Đội đủ một hàng đầu tiên hô "Bingo!" và chiến thắng. Hết câu hỏi thì đội nhiều điểm nhất thắng.',
+        teacherNotes: [
+          'Đội nào giơ tay thì bấm vào ô đội đó chỉ trên thẻ, rồi bấm "Công bố đáp án".',
+          'Câu Đúng/Sai không dùng trong Bingo.',
+        ],
       }
 
     case 'GOLDEN_BELL':
