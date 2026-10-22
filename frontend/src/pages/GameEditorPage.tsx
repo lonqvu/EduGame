@@ -7,7 +7,7 @@ import { BulkPasteModal } from '@/editor/BulkPasteModal'
 import { EDITOR_DEFINITIONS } from '@/editor/editorDefinitions'
 import { QuestionList } from '@/editor/QuestionList'
 import { countPlayable, isGuideGame } from '@/game-engine/gameGuide'
-import { gameRegistry, isQuizFamily, playPath, QUIZ_FAMILY, startPath } from '@/game-engine/registry'
+import { alsoPlayableAs, gameRegistry, playPath, startPath } from '@/game-engine/registry'
 import { useCatalogStore, useTemplateName } from '@/store/catalogStore'
 import { useGameLibraryStore, type SaveState } from '@/store/gameLibraryStore'
 import { useSettingsStore } from '@/store/settingsStore'
@@ -166,12 +166,12 @@ export function GameEditorPage() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {isQuizFamily(game.type) && (
-            // The same questions can be played as any quiz game.
+          {alsoPlayableAs(game.type).length > 0 && (
+            // The same questions can be played as another game of their kind.
             <Dropdown
               trigger={['click']}
               menu={{
-                items: QUIZ_FAMILY.filter((t) => t !== game.type).map((t) => ({
+                items: alsoPlayableAs(game.type).map((t) => ({
                   key: t,
                   onClick: () => play(t),
                   label: (

@@ -7,6 +7,7 @@ import { playableOrderSets } from '@/game-engine/ordering/orderingRound'
 import { playableQuizQuestions } from '@/game-engine/quiz/quizRound'
 import { PLAY_DEFAULTS, type PlaySettings, readPlaySettings, type RulesGameType } from '@/game-engine/shared/gameSettings'
 import { playableSortSets } from '@/game-engine/sorting/sortingRound'
+import { wordQuestions } from '@/game-engine/words/words'
 import type { CrosswordRow, GameItem, GameType, OrderSet, PairSet, Question, QuizQuestion, SortSet } from '@/types/game'
 
 /** Games played on the projector with questions or cards (the tools have no rules to explain). */
@@ -37,6 +38,9 @@ export function countPlayable(type: GuideGameType, items: GameItem[]): number {
     case 'BUILD_TOWER':
     case 'BEE_FLOWER':
       return playableQuizQuestions(items as QuizQuestion[], { shuffleOptions: false }).length
+    case 'WORD_SCRAMBLE':
+    case 'HANGMAN':
+      return wordQuestions(items as Question[]).length
     case 'BINGO':
       return bingoQuestions(playableQuizQuestions(items as QuizQuestion[], { shuffleOptions: false })).asked.length
     case 'MATCHING':
@@ -487,6 +491,55 @@ export function gameGuide(type: GuideGameType, settings: Record<string, unknown>
         teacherNotes: [
           'Đội nào giơ tay thì bấm vào ô đội đó chỉ trên thẻ, rồi bấm "Công bố đáp án".',
           'Câu Đúng/Sai không dùng trong Bingo.',
+        ],
+      }
+
+    case 'WORD_SCRAMBLE':
+      return {
+        goal: 'Sắp xếp các chữ cái bị xáo trộn thành từ đúng theo gợi ý.',
+        rules: [
+          teamsRule(s.teams),
+          'Mỗi câu có một gợi ý và các chữ cái của đáp án đã bị xáo trộn.',
+          ...timeRule(s.timeLimitSec),
+          'Đội giơ tay nhanh nhất được đọc thứ tự các chữ cái, cô xếp lên bảng.',
+          'Xếp đúng: đội được điểm của câu đó.',
+          s.allowSteal ? 'Xếp sai: các đội khác được giành quyền.' : 'Xếp sai: cô công bố đáp án.',
+          'Cô có thể cho gợi ý từng chữ cái. Gợi ý quá nửa từ thì chỉ được nửa số điểm.',
+        ],
+        steps: [
+          { title: 'Đọc gợi ý', text: 'Gợi ý và các chữ cái xáo trộn hiện trên màn chiếu.' },
+          { title: 'Giành quyền', text: 'Đội giơ tay nhanh nhất được trả lời.' },
+          { title: 'Xếp chữ', text: 'Đội đọc lần lượt từng chữ cái, cô bấm để xếp.' },
+          { title: 'Chấm điểm', text: 'Xếp đủ chữ, màn hình báo đúng hay sai.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: [
+          'Bấm tên đội giành quyền, rồi bấm các chữ cái theo thứ tự đội đọc. Bấm "Xóa chữ" để bỏ chữ vừa xếp.',
+          'Đáp án có tối đa 16 chữ cái; câu có đáp án dài hơn hoặc có kí hiệu sẽ được bỏ qua.',
+        ],
+      }
+
+    case 'HANGMAN':
+      return {
+        goal: 'Đoán từng chữ cái để mở ô chữ bí ẩn, rồi giải ô chữ để giành điểm thưởng.',
+        rules: [
+          teamsRule(s.teams),
+          'Ô chữ hiện số ô trống và một gợi ý.',
+          'Các đội lần lượt đoán một chữ cái.',
+          `Chữ cái có trong ô chữ: mỗi ô mở ra được ${s.points} điểm, đội được đoán tiếp.`,
+          'Chữ cái không có: lượt chuyển sang đội tiếp theo.',
+          `Đến lượt, đội có thể giải cả ô chữ: đúng được ${s.keywordPoints} điểm thưởng và điểm các ô còn lại, sai thì mất lượt.`,
+        ],
+        steps: [
+          { title: 'Đọc gợi ý', text: 'Gợi ý và các ô trống hiện trên màn chiếu.' },
+          { title: 'Đoán chữ', text: 'Đội đến lượt đoán một chữ cái.' },
+          { title: 'Mở ô', text: 'Chữ cái có trong ô chữ thì các ô đó mở ra.' },
+          { title: 'Giải ô chữ', text: 'Đội đoán được cả từ thì giải ô chữ để lấy điểm thưởng.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: [
+          'Bấm vào chữ cái đội đoán. Đoán "O" thì mở cả Ò, Ó, Ỏ, Õ, Ọ, nhưng Ô và Ơ là chữ riêng.',
+          'Khi đội giải ô chữ, bấm "Giải ô chữ" rồi chấm Đúng hay Sai.',
         ],
       }
 

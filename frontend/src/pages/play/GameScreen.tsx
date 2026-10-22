@@ -22,8 +22,10 @@ import { TreasureChestScreen } from '@/game-engine/treasure-chest/TreasureChestS
 import { TrueFalseScreen } from '@/game-engine/true-false/TrueFalseScreen'
 import { TugOfWarScreen } from '@/game-engine/tug-of-war/TugOfWarScreen'
 import { WhackMoleScreen } from '@/game-engine/whack-mole/WhackMoleScreen'
+import { HangmanScreen } from '@/game-engine/words/HangmanScreen'
+import { WordScrambleScreen } from '@/game-engine/words/WordScrambleScreen'
 import type { GuideGameType } from '@/game-engine/gameGuide'
-import type { CrosswordRow, GameItem, GameSummary, OrderSet, PairSet, QuizQuestion, SortSet } from '@/types/game'
+import type { CrosswordRow, GameItem, GameSummary, OrderSet, PairSet, Question, QuizQuestion, SortSet } from '@/types/game'
 
 interface GameScreenProps {
   /** The game played: the game's type, or another quiz game (see playMode). */
@@ -77,6 +79,10 @@ export function GameScreen({ mode, game, items, settings }: GameScreenProps) {
       return <BeeFlowerScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
     case 'BINGO':
       return <BingoScreen key={game.id} game={game} questions={items as QuizQuestion[]} settings={settings} />
+    case 'WORD_SCRAMBLE':
+      return <WordScrambleScreen key={game.id} game={game} questions={items as Question[]} settings={settings} />
+    case 'HANGMAN':
+      return <HangmanScreen key={game.id} game={game} questions={items as Question[]} settings={settings} />
     case 'MATCHING':
       return <MatchingScreen key={game.id} game={game} sets={items as PairSet[]} settings={settings} />
     case 'MEMORY':

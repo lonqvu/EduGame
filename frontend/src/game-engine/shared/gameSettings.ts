@@ -81,6 +81,8 @@ export const PLAY_DEFAULTS: Record<RulesGameType, Partial<PlaySettings>> = {
   BUILD_TOWER: { teams: 3, points: 1, allowSteal: true, timeLimitSec: 20 },
   BEE_FLOWER: { teams: 2, points: 10, allowSteal: true, timeLimitSec: 20 },
   BINGO: { teams: 3, points: 10, timeLimitSec: 20 },
+  WORD_SCRAMBLE: { teams: 3, allowSteal: true, timeLimitSec: 45 },
+  HANGMAN: { teams: 3, points: 10, keywordPoints: 30, timeLimitSec: 0 },
   MATCHING: { teams: 2, points: 10 },
   MEMORY: { teams: 2, points: 10 },
   CROSSWORD: { teams: 4, points: 10, allowSteal: true, keywordPoints: 40 },

@@ -19,6 +19,8 @@ export type GameType =
   | 'BUILD_TOWER'
   | 'BEE_FLOWER'
   | 'BINGO'
+  | 'WORD_SCRAMBLE'
+  | 'HANGMAN'
   | 'MATCHING'
   | 'MEMORY'
   | 'CROSSWORD'

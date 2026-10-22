@@ -316,8 +316,8 @@ Không có DRAFT (chưa sửa gì sau lần publish trước) → `409 NOTHING_T
 Body `{"templateCode": "QUIZ"}`. Trả về trò mẫu của giáo viên cho loại trò đó (như `GET /games/{code}`, có `sample: true`):
 lần đầu được tạo từ nội dung mẫu có sẵn (`backend/src/main/resources/samples/sample-games.json`, kiểm tra như nội dung
 giáo viên soạn), các lần sau trả lại đúng trò đó. Mỗi giáo viên có tối đa một trò mẫu còn dùng cho mỗi loại trò (lưu
-trữ trò mẫu thì lần sau tạo bản mới). Có cho 24 trò hỏi đáp: QUIZ, GOLDEN_BELL, BOAT_RACE, GRID_BOARD, MATCHING, MEMORY,
-CROSSWORD, ORDERING, SORTING, MILLIONAIRE, TUG_OF_WAR, FLOWER_PICK, WHACK_MOLE, TRUE_FALSE, LUCKY_STAR, SECRET_PICTURE, MOUNTAIN_CLIMB, POINT_WHEEL, TIC_TAC_TOE, CONNECT_FOUR, TREASURE_CHEST, BUILD_TOWER, BEE_FLOWER, BINGO; trò công cụ hoặc mã không có → `400 NO_SAMPLE`. `GET /games` và `GET /games/{code}` cũng
+trữ trò mẫu thì lần sau tạo bản mới). Có cho 26 trò hỏi đáp: QUIZ, GOLDEN_BELL, BOAT_RACE, GRID_BOARD, MATCHING, MEMORY,
+CROSSWORD, ORDERING, SORTING, MILLIONAIRE, TUG_OF_WAR, FLOWER_PICK, WHACK_MOLE, TRUE_FALSE, LUCKY_STAR, SECRET_PICTURE, MOUNTAIN_CLIMB, POINT_WHEEL, TIC_TAC_TOE, CONNECT_FOUR, TREASURE_CHEST, BUILD_TOWER, BEE_FLOWER, BINGO, WORD_SCRAMBLE, HANGMAN; trò công cụ hoặc mã không có → `400 NO_SAMPLE`. `GET /games` và `GET /games/{code}` cũng
 có trường `sample`.
 
 ### 9–12. Câu hỏi (items)
@@ -509,7 +509,7 @@ Field của loại câu kia bị bỏ qua. Câu không chơi được → `400 I
 | Trò chơi | Câu được dùng |
 |---|---|
 | `QUIZ`, `GOLDEN_BELL`, `BOAT_RACE` và các trò của V17, V19 (MILLIONAIRE, TUG_OF_WAR, FLOWER_PICK, WHACK_MOLE, TRUE_FALSE, LUCKY_STAR, SECRET_PICTURE, MOUNTAIN_CLIMB, POINT_WHEEL) | Các câu trắc nghiệm (thành `SINGLE_CHOICE`); câu tự luận bị bỏ qua (`skippedCount`) |
-| `GRID_BOARD` (Lật ô) | Mọi câu (thành `OPEN_QUESTION`, 10 điểm); đáp án là đáp án đúng hoặc câu trả lời tự luận |
+| `GRID_BOARD` (Lật ô), `WORD_SCRAMBLE`, `HANGMAN` | Mọi câu (thành `OPEN_QUESTION`, 10 điểm); đáp án là đáp án đúng hoặc câu trả lời tự luận |
 
 Trò chơi mang tên `title` (không gửi thì lấy tên bộ), mô tả, môn và khối của bộ (khối 6–12 thì để trống, game là tiểu học). Câu hỏi được chép sang game:
 sửa bộ sau đó không đổi game, và ngược lại. Không có câu nào dùng được → `409 NO_USABLE_QUESTIONS`.

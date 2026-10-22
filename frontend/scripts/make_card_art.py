@@ -572,6 +572,27 @@ for i, v in enumerate(vals):
 bingo += rect(176, 192, 128, 34, 17, '#F2B705') + text(240, 216, 'BINGO!', 20, '#FFFFFF')
 cards.append(card('bingo', '#F3EDFE', '#E0D3FC', '#D2BFFA', bingo, '#FFFFFF', '#8B5CF6'))
 
+# --- Vua Tiếng Việt: shuffled letter tiles above the answer slots, a crown. ---
+vtv = '<path d="M214 46 l10 -22 l16 14 l16 -14 l10 22 z" fill="#FFC93C"/>'
+for i, ch in enumerate(['Ư', 'T', 'G', 'R', 'N', 'Ờ']):
+    x = 126 + i * 40
+    vtv += rect(x, 66 + (i % 2) * 10, 34, 38, 9, '#FFFFFF') + text(x + 17, 93 + (i % 2) * 10, ch, 22, '#3563E9')
+for i, ch in enumerate(['T', 'R', 'Ư', '', '', '']):
+    x = 126 + i * 40
+    vtv += rect(x, 146, 34, 40, 9, '#3563E9' if ch else '#BFD3FF') + (text(x + 17, 174, ch, 22, '#FFFFFF') if ch else '')
+cards.append(card('word-scramble', '#EAF1FE', '#D2DFFB', '#BFD1FA', vtv, '#FFFFFF', '#F2A93B'))
+
+# --- Đoán chữ: hidden letter boxes, some open, and a few keys guessed. ---
+hm = ''
+for i, ch in enumerate(['H', '', '', 'L', 'O', '', 'G']):
+    x = 110 + i * 38
+    hm += rect(x, 60, 32, 44, 8, '#FFFFFF' if ch else '#3E51B5') + (text(x + 16, 90, ch, 22, '#1F2A44') if ch else '')
+for i, (ch, col) in enumerate([('A', '#FFFFFF'), ('O', '#2E9E6A'), ('Ê', '#E5484D'), ('L', '#2E9E6A'), ('M', '#FFFFFF'), ('N', '#FFFFFF')]):
+    x = 136 + i * 36
+    hm += rect(x, 140, 30, 34, 8, col) + text(x + 15, 164, ch, 18, '#FFFFFF' if col != '#FFFFFF' else '#1F2A44')
+hm += text(380, 112, '?', 46, '#FFD15C')
+cards.append(card('hangman', '#2C3577', '#1E2457', '#3B4594', hm, '#FFD15C', '#FFFFFF'))
+
 for name, svg in cards:
     with open(f'{OUT}/card-{name}.svg', 'w') as f:
         f.write(svg)

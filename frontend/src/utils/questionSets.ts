@@ -156,6 +156,7 @@ export const USE_GAMES: UseGame[] = [
   { code: 'QUIZ', name: 'Trắc nghiệm', description: 'Các đội chọn đáp án đúng, cướp lượt khi đội trước sai.' },
   { code: 'GOLDEN_BELL', name: 'Rung chuông vàng', description: 'Cả lớp cùng trả lời, sai thì ra ngoài, ai trụ lại cuối cùng?' },
   { code: 'BOAT_RACE', name: 'Đua thuyền', description: 'Trả lời đúng để thuyền của đội tiến về đích.' },
+  { code: 'GRID_BOARD', name: 'Lật ô thi đua', description: 'Các đội chọn ô số và trả lời để ghi điểm. Dùng được mọi câu.' },
   { code: 'MILLIONAIRE', name: 'Ai là triệu phú', description: 'Một bạn leo bậc thưởng, có 3 quyền trợ giúp.' },
   { code: 'TUG_OF_WAR', name: 'Kéo co', description: 'Hai đội thi trả lời, mỗi câu đúng kéo dây về phía mình.' },
   { code: 'FLOWER_PICK', name: 'Hái hoa dân chủ', description: 'Mỗi bông hoa trên cây là một câu hỏi.' },
@@ -171,12 +172,13 @@ export const USE_GAMES: UseGame[] = [
   { code: 'BUILD_TOWER', name: 'Xây tháp', description: 'Mỗi câu đúng thêm một khối, tháp nào cao nhất?' },
   { code: 'BEE_FLOWER', name: 'Ong tìm hoa', description: 'Chỉ đường cho chú ong đến bông hoa có đáp án đúng.' },
   { code: 'BINGO', name: 'Bingo', description: 'Đánh dấu đáp án trên thẻ, đủ một hàng là Bingo!' },
-  { code: 'GRID_BOARD', name: 'Lật ô thi đua', description: 'Các đội chọn ô số và trả lời để ghi điểm. Dùng được mọi câu.' },
+  { code: 'WORD_SCRAMBLE', name: 'Vua Tiếng Việt', description: 'Xếp lại các chữ cái bị xáo trộn thành đáp án. Dùng được mọi câu.' },
+  { code: 'HANGMAN', name: 'Đoán chữ', description: 'Đoán từng chữ cái để mở ô chữ. Dùng được mọi câu.' },
 ]
 
 /** Questions of the set the game can play: quiz games play multiple choice, Lật ô plays every question. */
 export const usableCount = (set: Pick<QuestionSetSummaryResponse, 'questionCount' | 'multipleChoiceCount'>, game: QuestionGameCode) =>
-  game === 'GRID_BOARD' ? set.questionCount : set.multipleChoiceCount
+  game === 'GRID_BOARD' || game === 'WORD_SCRAMBLE' || game === 'HANGMAN' ? set.questionCount : set.multipleChoiceCount
 
 // --- Questions ------------------------------------------------------------------------------------------------
 

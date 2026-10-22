@@ -338,6 +338,8 @@ export type QuestionGameCode =
   | 'BUILD_TOWER'
   | 'BEE_FLOWER'
   | 'BINGO'
+  | 'WORD_SCRAMBLE'
+  | 'HANGMAN'
 
 export interface UsedQuestionSetResponse {
   gameCode: string

@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The question games added by V17 and V19 (and the tools of V18), end to end against PostgreSQL: the catalog lists them as question games, they take
+ * The question games added by V17, V19 and V20 (and the tools of V18), end to end against PostgreSQL: the catalog lists them as question games, they take
  * the quiz items (and only those), start with their own rules, and question sets play them.
  */
 @SpringBootTest
@@ -77,6 +77,21 @@ class MoreQuizGamesApiTest {
         }
         // Tools have no sample content.
         send(post("/api/v1/games/samples"), "{\"templateCode\": \"COIN_FLIP\"}").andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void theWordGamesTakeOpenQuestionsAndEveryQuestionOfASet() throws Exception {
+        for (String template : List.of("WORD_SCRAMBLE", "HANGMAN")) {
+            String code = createGame(template);
+            send(post(itemsPath(code)), items("""
+                    {"itemType": "OPEN_QUESTION", "content": {"text": "Thủ đô của Việt Nam", "points": 20},
+                     "solution": {"answer": "HÀ NỘI"}}
+                    """)).andExpect(status().isCreated());
+            send(post(itemsPath(code)), items(CHOICE)).andExpect(status().isBadRequest());
+            JsonNode used = body(send(post("/api/v1/question-sets/qs-toan2-cong100/games"),
+                    "{\"templateCode\": \"%s\"}".formatted(template)).andExpect(status().isCreated()));
+            assertThat(used.path("skippedCount").asInt()).as(template).isZero();
+        }
     }
 
     @Test

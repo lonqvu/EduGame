@@ -85,21 +85,26 @@ const QUIZ_EDITOR: EditorDefinition = {
   },
 }
 
-export const EDITOR_DEFINITIONS: Partial<Record<GameType, EditorDefinition>> = {
-  GRID_BOARD: {
-    noun: 'Câu hỏi',
-    addLabel: 'Thêm câu hỏi',
-    newItem: () => ({ text: '', answer: '', points: 20 }),
-    blankLabel: 'Câu hỏi chưa có nội dung',
-    form: ({ item, ...props }) => <QuestionForm question={item as Question} {...props} />,
-    paste: {
-      title: 'Dán nhiều câu hỏi',
-      hint: 'Mỗi dòng một câu. Đáp án đặt sau dấu “=”.',
-      placeholder: 'Con gì kêu meo meo? = Con mèo\n25 + 13 = ? = 38\nThủ đô của Việt Nam? = Hà Nội',
-      parse: (text) => parseBulkQuestions(text, 20),
-      unit: 'câu',
-    },
+/** Open questions (a clue and its answer): Lật ô and the word games. */
+const OPEN_EDITOR: EditorDefinition = {
+  noun: 'Câu hỏi',
+  addLabel: 'Thêm câu hỏi',
+  newItem: () => ({ text: '', answer: '', points: 20 }),
+  blankLabel: 'Câu hỏi chưa có nội dung',
+  form: ({ item, ...props }) => <QuestionForm question={item as Question} {...props} />,
+  paste: {
+    title: 'Dán nhiều câu hỏi',
+    hint: 'Mỗi dòng một câu. Đáp án đặt sau dấu “=”.',
+    placeholder: 'Con gì kêu meo meo? = Con mèo\n25 + 13 = ? = 38\nThủ đô của Việt Nam? = Hà Nội',
+    parse: (text) => parseBulkQuestions(text, 20),
+    unit: 'câu',
   },
+}
+
+export const EDITOR_DEFINITIONS: Partial<Record<GameType, EditorDefinition>> = {
+  GRID_BOARD: OPEN_EDITOR,
+  WORD_SCRAMBLE: OPEN_EDITOR,
+  HANGMAN: OPEN_EDITOR,
   QUIZ: QUIZ_EDITOR,
   GOLDEN_BELL: QUIZ_EDITOR,
   BOAT_RACE: QUIZ_EDITOR,

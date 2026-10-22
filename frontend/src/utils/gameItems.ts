@@ -289,6 +289,8 @@ interface ItemOf {
   BUILD_TOWER: QuizQuestion
   BEE_FLOWER: QuizQuestion
   BINGO: QuizQuestion
+  WORD_SCRAMBLE: Question
+  HANGMAN: Question
   MATCHING: PairSet
   MEMORY: PairSet
   CROSSWORD: CrosswordRow
@@ -317,6 +319,9 @@ const CODECS: { [K in keyof ItemOf]: ItemCodec<ItemOf[K]> } = {
   BUILD_TOWER: quizCodec,
   BEE_FLOWER: quizCodec,
   BINGO: quizCodec,
+  // Lật ô's open questions, played as word games.
+  WORD_SCRAMBLE: gridCodec,
+  HANGMAN: gridCodec,
   MATCHING: matchingCodec,
   MEMORY: memoryCodec,
   CROSSWORD: crosswordCodec,

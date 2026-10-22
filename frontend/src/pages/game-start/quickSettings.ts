@@ -93,6 +93,13 @@ export const QUICK_SETTINGS: Record<GuideGameType, QuickSetting[]> = {
   BUILD_TOWER: [TEAMS, TIME, STEAL, SHUFFLE],
   BEE_FLOWER: [TEAMS, TIME, points('Điểm mỗi câu đúng'), STEAL, SHUFFLE],
   BINGO: [TEAMS, TIME, points('Điểm mỗi ô đánh dấu'), SHUFFLE],
+  WORD_SCRAMBLE: [TEAMS, TIME, STEAL, SHUFFLE],
+  HANGMAN: [
+    TEAMS,
+    points('Điểm mỗi chữ cái đoán trúng'),
+    { kind: 'select', key: 'keywordPoints', label: 'Điểm thưởng giải ô chữ', options: values([20, 30, 50, 100], (n) => `${n} điểm`) },
+    SHUFFLE,
+  ],
   MATCHING: [TEAMS, points('Điểm mỗi cặp đúng')],
   MEMORY: [TEAMS, points('Điểm mỗi cặp tìm được')],
   CROSSWORD: [

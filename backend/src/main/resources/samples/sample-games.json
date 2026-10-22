@@ -6177,5 +6177,177 @@
     }
    }
   ]
+ },
+ "WORD_SCRAMBLE": {
+  "title": "Vua Tiếng Việt mẫu – Từ quen thuộc",
+  "subject": "Tiếng Việt",
+  "items": [
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Con vật kêu “meo meo”",
+     "points": 20
+    },
+    "solution": {
+     "answer": "MÈO"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Nơi các bạn đến học mỗi ngày",
+     "points": 20
+    },
+    "solution": {
+     "answer": "TRƯỜNG"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Mùa có hoa đào, hoa mai nở",
+     "points": 20
+    },
+    "solution": {
+     "answer": "XUÂN"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Người dạy học cho các bạn",
+     "points": 20
+    },
+    "solution": {
+     "answer": "CÔ GIÁO"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Loài hoa là quốc hoa của Việt Nam",
+     "points": 20
+    },
+    "solution": {
+     "answer": "HOA SEN"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Đồ dùng để viết bài",
+     "points": 20
+    },
+    "solution": {
+     "answer": "BÚT"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Trái ngược với “buồn”",
+     "points": 20
+    },
+    "solution": {
+     "answer": "VUI"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Thủ đô của Việt Nam",
+     "points": 20
+    },
+    "solution": {
+     "answer": "HÀ NỘI"
+    }
+   }
+  ]
+ },
+ "HANGMAN": {
+  "title": "Đoán chữ mẫu – Quê hương em",
+  "subject": "Tổng hợp",
+  "items": [
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Bánh truyền thống gói vào dịp Tết Nguyên đán",
+     "points": 20
+    },
+    "solution": {
+     "answer": "BÁNH CHƯNG"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Thành phố mang tên Bác Hồ",
+     "points": 20
+    },
+    "solution": {
+     "answer": "HỒ CHÍ MINH"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Vịnh nổi tiếng ở Quảng Ninh",
+     "points": 20
+    },
+    "solution": {
+     "answer": "HẠ LONG"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Con vật có chiếc vòi dài",
+     "points": 20
+    },
+    "solution": {
+     "answer": "CON VOI"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Đỉnh núi cao nhất Việt Nam",
+     "points": 20
+    },
+    "solution": {
+     "answer": "PHAN XI PĂNG"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Món ăn nổi tiếng của Hà Nội, có bánh phở và nước dùng",
+     "points": 20
+    },
+    "solution": {
+     "answer": "PHỞ"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Ngày Quốc khánh nước ta là ngày mùng 2 tháng mấy?",
+     "points": 20
+    },
+    "solution": {
+     "answer": "THÁNG CHÍN"
+    }
+   },
+   {
+    "itemType": "OPEN_QUESTION",
+    "content": {
+     "text": "Loài chim tượng trưng cho hòa bình",
+     "points": 20
+    },
+    "solution": {
+     "answer": "BỒ CÂU"
+    }
+   }
+  ]
  }
 }

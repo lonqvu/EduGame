@@ -43,21 +43,23 @@ export const gameRegistry: Record<GameType, GameDefinition> = {
   BUILD_TOWER: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', badge: 'NEW', popularity: 17, itemUnit: 'câu' },
   BEE_FLOWER: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', badge: 'NEW', popularity: 18, itemUnit: 'câu' },
   BINGO: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 19, itemUnit: 'câu' },
-  MATCHING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 20, itemUnit: 'bộ' },
-  MEMORY: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 21, itemUnit: 'bộ thẻ' },
-  CROSSWORD: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 22, itemUnit: 'hàng' },
-  ORDERING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 23, itemUnit: 'bài' },
-  SORTING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 24, itemUnit: 'bộ' },
-  SPIN_WHEEL: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '2–5 phút', popularity: 25, itemUnit: 'ô', toolRoute: '/tools/wheel' },
-  NAME_RACE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '5–10 phút', popularity: 26, itemUnit: 'ô', toolRoute: '/tools/pick/horse' },
-  TEAM_MAKER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 27, itemUnit: 'nhóm', toolRoute: '/tools/groups' },
-  TIMER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 28, itemUnit: 'phút', toolRoute: '/tools/timer' },
-  DICE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 29, itemUnit: 'lần', toolRoute: '/tools/dice' },
-  COIN_FLIP: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 30, itemUnit: 'lần', toolRoute: '/tools/coin' },
-  RANDOM_NUMBER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 31, itemUnit: 'số', toolRoute: '/tools/number' },
-  SCOREBOARD: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 32, itemUnit: 'đội', toolRoute: '/tools/scoreboard' },
-  NOISE_METER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 33, itemUnit: 'lần', toolRoute: '/tools/noise' },
-  TRAFFIC_LIGHT: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 34, itemUnit: 'đèn', toolRoute: '/tools/light' },
+  WORD_SCRAMBLE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 20, itemUnit: 'từ' },
+  HANGMAN: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 21, itemUnit: 'từ' },
+  MATCHING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 22, itemUnit: 'bộ' },
+  MEMORY: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 23, itemUnit: 'bộ thẻ' },
+  CROSSWORD: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 24, itemUnit: 'hàng' },
+  ORDERING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 25, itemUnit: 'bài' },
+  SORTING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 26, itemUnit: 'bộ' },
+  SPIN_WHEEL: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '2–5 phút', popularity: 27, itemUnit: 'ô', toolRoute: '/tools/wheel' },
+  NAME_RACE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '5–10 phút', popularity: 28, itemUnit: 'ô', toolRoute: '/tools/pick/horse' },
+  TEAM_MAKER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 29, itemUnit: 'nhóm', toolRoute: '/tools/groups' },
+  TIMER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 30, itemUnit: 'phút', toolRoute: '/tools/timer' },
+  DICE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 31, itemUnit: 'lần', toolRoute: '/tools/dice' },
+  COIN_FLIP: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 32, itemUnit: 'lần', toolRoute: '/tools/coin' },
+  RANDOM_NUMBER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 33, itemUnit: 'số', toolRoute: '/tools/number' },
+  SCOREBOARD: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 34, itemUnit: 'đội', toolRoute: '/tools/scoreboard' },
+  NOISE_METER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 35, itemUnit: 'lần', toolRoute: '/tools/noise' },
+  TRAFFIC_LIGHT: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 36, itemUnit: 'đèn', toolRoute: '/tools/light' },
 }
 
 /** Games whose items are quiz questions: any of them can be played the way of the others. */
@@ -84,6 +86,19 @@ export const QUIZ_FAMILY = [
 export type QuizFamilyType = (typeof QUIZ_FAMILY)[number]
 export const isQuizFamily = (type: GameType): type is QuizFamilyType => (QUIZ_FAMILY as readonly GameType[]).includes(type)
 
+/** Games played with open questions (a clue and its answer): Lật ô, and the word games. */
+export const WORD_FAMILY = ['GRID_BOARD', 'WORD_SCRAMBLE', 'HANGMAN'] as const satisfies readonly GameType[]
+
+/**
+ * The other games the items of `type` can be played as ("Chơi kiểu khác"): any quiz game for a quiz, the word games
+ * for Lật ô and the word games (Lật ô keeps its own board and is not offered).
+ */
+export function alsoPlayableAs(type: GameType): GameType[] {
+  if (isQuizFamily(type)) return QUIZ_FAMILY.filter((t) => t !== type)
+  if ((WORD_FAMILY as readonly GameType[]).includes(type)) return WORD_FAMILY.filter((t) => t !== type && t !== 'GRID_BOARD')
+  return []
+}
+
 /** Templates from the backend that this frontend has no engine for are hidden. */
 export const isGameType = (code: string): code is GameType => Object.hasOwn(gameRegistry, code)
 
@@ -106,6 +121,6 @@ export function startPath(game: { id: string; type: GameType }, as?: GameType): 
 
 /** The game the projector plays: the game's own type, or another quiz game asked for with `?as=`. */
 export const playMode = (type: GameType, as: string | null): GameType =>
-  isQuizFamily(type) && as && isGameType(as) && isQuizFamily(as) ? as : type
+  as && isGameType(as) && alsoPlayableAs(type).includes(as) ? as : type
 
 export const editPath = (gameId: string) => `/games/${gameId}/edit`

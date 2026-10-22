@@ -16,6 +16,8 @@ interface PlayFooterProps {
   nextDisabled?: boolean
   /** The row starts at the left edge of the screen, under the sound and rules buttons: leave them room. */
   clearCorner?: boolean
+  /** More buttons, before "Hiện đáp án". */
+  extra?: ReactNode
 }
 
 /** The bottom row of a question game: what to do now, then "Hiện đáp án", "Kết thúc" and the next step. */
@@ -28,12 +30,14 @@ export function PlayFooter({
   nextLabel,
   nextDisabled = !revealed,
   clearCorner = true,
+  extra,
 }: PlayFooterProps) {
   const sound = useSound()
   return (
     <div className="mt-auto flex items-center justify-between gap-4">
       <span className={`text-lg leading-tight font-extrabold text-ink-soft ${clearCorner ? 'pl-[76px]' : ''}`}>{message}</span>
       <div className="flex shrink-0 gap-3">
+        {extra}
         {!revealed && onReveal && (
           <button
             type="button"
