@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { ChevronLeftIcon } from '@/components/ui/icons'
 import { gameGuide, type GuideGameType } from '@/game-engine/gameGuide'
@@ -6,6 +6,7 @@ import { editPath, gameRegistry } from '@/game-engine/registry'
 import { PLAY_DEFAULTS, readPlaySettings, type PlaySettings } from '@/game-engine/shared/gameSettings'
 import { QUICK_SETTINGS, type QuickSetting } from '@/pages/game-start/quickSettings'
 import { gameThumb } from '@/pages/home/homeAssets'
+import { QuestionSourceModal } from '@/pages/play/QuestionSourceModal'
 import type { GameSummary } from '@/types/game'
 
 const STEP_COLORS = ['#3563E9', '#F28C28', '#2E9E6A', '#8B5CF6']
@@ -41,9 +42,11 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
   const location = useLocation()
   // Back where the teacher came from (the game chooser, the home page...); opened directly, to the games.
   const goBack = () => (location.key === 'default' ? navigate('/games/new') : navigate(-1))
+  const [choosing, setChoosing] = useState(false)
 
   useEffect(() => {
-    if (!ready) return
+    // Enter in the dialog is the dialog's.
+    if (!ready || choosing) return
     const onKey = (e: KeyboardEvent) => {
       // Enter on a button presses it; on the team / time chips (just picked) it starts, as anywhere else.
       const onButton = e.target instanceof HTMLButtonElement && e.target.getAttribute('role') !== 'radio'
@@ -53,7 +56,7 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [ready, onStart])
+  }, [ready, choosing, onStart])
 
   return (
     <section aria-label={`Giới thiệu trò chơi ${game.title}`} className="flex h-full flex-col gap-4 px-10 py-7">
@@ -67,8 +70,19 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
           <ChevronLeftIcon size={22} />
         </button>
         <span className="rounded-full bg-white px-5 py-2 text-[18px] font-extrabold">{kindName}</span>
-        {game.sample && <span className="rounded-full bg-[#FFF1C2] px-4 py-2 text-[16px] font-bold text-[#7A5600]">Câu hỏi mẫu</span>}
+        <span className={`rounded-full px-4 py-2 text-[16px] font-bold ${game.sample ? 'bg-[#FFF1C2] text-[#7A5600]' : 'bg-white text-ink'}`}>
+          📚 {game.sample ? 'Câu hỏi mẫu' : 'Câu hỏi của cô'}
+        </span>
+        <button
+          type="button"
+          onClick={() => setChoosing(true)}
+          aria-haspopup="dialog"
+          className="h-11 cursor-pointer rounded-full border-2 border-primary bg-white px-5 font-[inherit] text-[16px] font-extrabold text-primary-ink hover:bg-primary hover:text-white"
+        >
+          Đổi câu hỏi
+        </button>
       </div>
+      <QuestionSourceModal open={choosing} mode={mode} kindName={kindName} current={game} onClose={() => setChoosing(false)} />
 
       <div className="flex min-h-0 flex-1 flex-col gap-5 rounded-[32px] bg-white px-10 py-7">
         <div className="flex items-center gap-7">
