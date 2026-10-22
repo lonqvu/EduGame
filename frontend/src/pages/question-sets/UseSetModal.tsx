@@ -3,9 +3,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import * as questionSetApi from '@/api/questionSetApi'
 import { CheckIcon } from '@/components/ui/icons'
+import { playPath } from '@/game-engine/registry'
 import { gameThumb } from '@/pages/home/homeAssets'
+import { useSettingsStore } from '@/store/settingsStore'
 import type { QuestionGameCode, QuestionSetSummaryResponse } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
+import { enterFullscreen } from '@/utils/fullscreen'
 import { usableCount, USE_GAMES } from '@/utils/questionSets'
 
 interface UseSetModalProps {
@@ -20,8 +23,8 @@ interface UseSetModalProps {
 }
 
 /**
- * "Sử dụng": pick the game to play the set's questions with. The questions are copied into a new game, opened in the
- * editor to check and play.
+ * "Chơi": pick the game to play the set's questions with. The questions are copied into a new game, which opens at once
+ * on the projector (its introduction shows the rules). Editing the set later does not change the game.
  */
 export function UseSetModal(props: UseSetModalProps) {
   // Each opening starts afresh (set and game picked again).
@@ -37,6 +40,7 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
   const firstUsable = (s?: QuestionSetSummaryResponse) => USE_GAMES.find((g) => s && usableCount(s, g.code) > 0)?.code
   const [game, setGame] = useState<QuestionGameCode | undefined>(firstUsable(set))
   const [making, setMaking] = useState(false)
+  const fullscreenOnStart = useSettingsStore((s) => s.settings.display.fullscreenOnStart)
 
   const pickSet = (next: string) => {
     setCode(next)
@@ -46,14 +50,17 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
 
   const make = async () => {
     if (!set || !game) return
+    // Asked inside the click: browsers only allow full screen right after a click.
+    if (fullscreenOnStart) enterFullscreen()
     setMaking(true)
     try {
       const used = await questionSetApi.useQuestionSet(set.code, game)
       onUsed(set.code)
       const skipped = used.skippedCount ? ` (bỏ qua ${used.skippedCount} câu tự luận)` : ''
-      message.success(`Đã tạo trò chơi với ${used.questionCount} câu hỏi${skipped}. Cô xem lại rồi bấm Chơi nhé!`)
+      if (skipped) message.info(`Trò chơi dùng ${used.questionCount} câu${skipped}.`)
       onClose()
-      navigate(`/games/${encodeURIComponent(used.gameCode)}/edit`)
+      // Straight to the projector: its introduction shows the rules; the game can be edited later from the library.
+      navigate(playPath({ id: used.gameCode, type: game }))
     } catch (error) {
       message.error(apiErrorMessage(error))
       setMaking(false)
@@ -63,8 +70,8 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
   return (
     <Modal
       open
-      title="Sử dụng trong trò chơi"
-      okText="Tạo trò chơi"
+      title="Chơi với bộ câu hỏi này"
+      okText="▶ Chơi ngay"
       cancelText="Hủy"
       okButtonProps={{ disabled: !set || !game }}
       confirmLoading={making}

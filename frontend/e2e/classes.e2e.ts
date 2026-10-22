@@ -1,5 +1,5 @@
 import { test as base, expect } from '@playwright/test'
-import { Backend, quizItem, signInBrowser } from './api'
+import { Backend, quizItem, signInBrowser, openGame } from './api'
 
 const test = base.extend<{ backend: Backend }>({
   // Playwright needs the destructuring pattern here, even with no fixtures to take.
@@ -145,7 +145,7 @@ test('the class picked on the home page plays the games, and its numbers count t
   await expect(page.getByRole('button', { name: `Lớp đang dạy: Lớp ${name}. Đổi lớp` })).toBeVisible()
   await expect(page.getByText('3 học sinh', { exact: true })).toBeVisible()
 
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   await page.getByRole('button', { name: /Đội Cam/ }).click()
   await page.locator('button').filter({ has: page.locator('span', { hasText: /^4$/ }) }).click()
   await page.getByRole('button', { name: 'Xem kết quả' }).click()

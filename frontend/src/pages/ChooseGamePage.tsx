@@ -11,11 +11,13 @@ import {
 } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { PICK_MODES, type PickMode } from '@/game-engine/name-picker/modes'
-import { gameRegistry, startPath, toolPath, type GameBadge } from '@/game-engine/registry'
+import { editPath, gameRegistry, playPath, toolPath, type GameBadge } from '@/game-engine/registry'
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
+import { HowToPlayDrawer } from '@/pages/choose-game/HowToPlayDrawer'
 import { NewGameModal } from '@/pages/choose-game/NewGameModal'
+import { usePlayNow } from '@/pages/choose-game/usePlayNow'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { GameCategory, GameSummary, GameTemplate, GameType } from '@/types/game'
 import { relativeTimeLabel } from '@/utils/dateLabels'
@@ -103,6 +105,9 @@ export function ChooseGamePage() {
   const [filter, setFilter] = useState<Filter>('ALL')
   const [sort, setSort] = useState<Sort>('popular')
   const [allRecent, setAllRecent] = useState(false)
+  const { playNow, busy } = usePlayNow()
+  /** The card whose "Cách chơi" is open. */
+  const [guideOf, setGuideOf] = useState<Entry | null>(null)
 
   useEffect(() => {
     void loadTemplates()
@@ -111,6 +116,16 @@ export function ChooseGamePage() {
     void loadGames()
   }, [loadTemplates, loadClass, loadTeacher, loadGames])
 
+  /** "Chơi ngay": the sample game, or the tool, on the projector at once. */
+  const play = ({ template, pickMode }: Entry) => {
+    if (!gameRegistry[template.type].playable) {
+      message.info(`Trò "${template.name}" đang được hoàn thiện.`)
+      return
+    }
+    void playNow(template.type, pickMode ? `/tools/pick/${pickMode}` : undefined)
+  }
+
+  /** "Dùng câu hỏi của cô": a question set, or new content in the editor. */
   const choose = ({ template, pickMode }: Entry) => {
     if (pickMode) {
       navigate(`/tools/pick/${pickMode}`)
@@ -245,7 +260,7 @@ export function ChooseGamePage() {
           <div className="flex items-center justify-between gap-3">
             <h2 className="m-0 flex items-center gap-2.5 text-[19px] font-black">
               <ClockIcon size={22} className="text-primary" />
-              Trò chơi gần đây
+              Chơi lại
             </h2>
             <button
               type="button"
@@ -258,25 +273,39 @@ export function ChooseGamePage() {
           </div>
           <ul className="m-0 mt-[12px] grid list-none grid-cols-1 gap-4 p-0 @min-[720px]:grid-cols-2 @min-[1080px]:grid-cols-3">
             {recent.map((game) => (
-              <li key={game.id}>
+              <li key={game.id} className="relative">
+                {/* "Chơi lại": the whole card plays the game again. */}
                 <Link
-                  to={startPath(game)}
-                  className="flex items-center gap-4 rounded-[14px] bg-white p-[14px] pr-[16px] text-ink shadow-[0_1px_3px_rgba(31,42,68,0.05)] hover:text-ink hover:shadow-[0_6px_18px_rgba(31,42,68,0.08)]"
+                  to={playPath(game)}
+                  aria-label={`Chơi lại ${game.title}`}
+                  className="flex items-center gap-4 rounded-[14px] bg-white p-[14px] pr-[60px] text-ink shadow-[0_1px_3px_rgba(31,42,68,0.05)] hover:text-ink hover:shadow-[0_6px_18px_rgba(31,42,68,0.08)]"
                 >
                   <img src={cardArt(game.type)} alt="" className="aspect-[2/1] w-[124px] shrink-0 rounded-[10px]" />
                   <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                    <span className="truncate text-[15px] font-black">{templateName(game.type)}</span>
-                    <span className="truncate text-[13.5px] text-ink-soft" title={game.title}>
-                      {recentLine(game)}
+                    <span className="truncate text-[15px] font-black">{game.title}</span>
+                    <span className="truncate text-[13.5px] text-ink-soft">
+                      {templateName(game.type)} · {recentLine(game)}
                     </span>
                     <span className="mt-[6px] w-fit rounded-full bg-[#F1F3F7] px-[11px] py-[3px] text-[12px] text-ink-soft">
-                      {relativeTimeLabel(game.updatedAt) || game.title}
+                      {relativeTimeLabel(game.updatedAt) || 'Chơi lại'}
                     </span>
                   </span>
-                  <span className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-[#EAF1FE] text-primary">
-                    <ArrowRightIcon size={17} strokeWidth={2.4} />
-                  </span>
                 </Link>
+                <span className="pointer-events-none absolute top-1/2 right-[16px] flex size-[34px] -translate-y-1/2 items-center justify-center rounded-full bg-primary text-white">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" />
+                  </svg>
+                </span>
+                {gameRegistry[game.type].hasEditor && (
+                  <Link
+                    to={editPath(game.id)}
+                    aria-label={`Sửa ${game.title}`}
+                    title="Sửa câu hỏi"
+                    className="absolute top-[8px] right-[8px] flex size-[26px] items-center justify-center rounded-full bg-white/90 text-[13px] text-ink-soft shadow-sm hover:text-primary-ink"
+                  >
+                    ✎
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -298,12 +327,30 @@ export function ChooseGamePage() {
           <ul className="m-0 mt-[12px] grid list-none grid-cols-1 gap-4 p-0 @min-[520px]:grid-cols-2 @min-[820px]:grid-cols-3 @min-[1080px]:grid-cols-4">
             {shown.map((entry) => (
               <li key={entry.key}>
-                <GameCard entry={entry} onChoose={() => choose(entry)} />
+                <GameCard
+                  entry={entry}
+                  opening={busy === entry.template.type && !entry.pickMode}
+                  onPlay={() => play(entry)}
+                  onChoose={() => choose(entry)}
+                  onGuide={() => setGuideOf(entry)}
+                />
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      <HowToPlayDrawer
+        game={guideOf && { type: guideOf.template.type, name: guideOf.name, description: guideOf.description, art: guideOf.art }}
+        opening={!!guideOf && busy === guideOf.template.type}
+        onClose={() => setGuideOf(null)}
+        onPlay={() => guideOf && play(guideOf)}
+        onWrite={() => {
+          if (!guideOf) return
+          choose(guideOf)
+          setGuideOf(null)
+        }}
+      />
 
       <NewGameModal
         template={newGame}
@@ -317,15 +364,21 @@ export function ChooseGamePage() {
 
 interface GameCardProps {
   entry: Entry
+  /** "Chơi ngay" is opening this game. */
+  opening: boolean
+  onPlay: () => void
   onChoose: () => void
+  /** "Cách chơi" */
+  onGuide: () => void
 }
 
-function GameCard({ entry, onChoose }: GameCardProps) {
+function GameCard({ entry, opening, onPlay, onChoose, onGuide }: GameCardProps) {
   const def = gameRegistry[entry.template.type]
   const badge = def.badge && BADGES[def.badge]
+  const ownContent = def.usesQuestions && !entry.pickMode
   return (
-    // The picture keeps the 2:1 shape the card art is drawn in, so it is never cropped or blown up. The whole card is
-    // clickable (the button's ::after covers it).
+    // The picture keeps the 2:1 shape the card art is drawn in, so it is never cropped or blown up. The whole card plays
+    // the game ("Chơi ngay"'s ::after covers it); "Dùng câu hỏi của cô" sits above it.
     <article className="group relative flex h-full flex-col rounded-[16px] border border-[#E6EBF3] bg-white p-[6px] pb-[10px] shadow-[0_1px_3px_rgba(31,42,68,0.05)] transition-[box-shadow,transform,border-color] duration-200 focus-within:border-primary hover:-translate-y-1 hover:border-[#C9D6F5] hover:shadow-[0_12px_28px_rgba(31,42,68,0.12)]">
       <div className="relative aspect-[2/1] shrink-0 overflow-hidden rounded-[12px]">
         <img
@@ -355,16 +408,49 @@ function GameCard({ entry, onChoose }: GameCardProps) {
         <div className="pt-[10px]">
           <button
             type="button"
-            onClick={onChoose}
-            aria-label={`Chọn trò chơi ${entry.name}`}
-            className="flex h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border-0 bg-primary font-[inherit] text-[14.5px] font-semibold text-white outline-none after:absolute after:inset-0 after:rounded-[16px] group-hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            onClick={onPlay}
+            disabled={opening}
+            aria-busy={opening}
+            aria-label={`Chơi ngay ${entry.name}`}
+            className="flex h-[38px] w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border-0 bg-primary font-[inherit] text-[15px] font-bold text-white outline-none after:absolute after:inset-0 after:rounded-[16px] group-hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-wait"
           >
-            Chọn trò chơi
-            <ArrowRightIcon size={16} strokeWidth={2.4} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+            <PlayTriangle />
+            {opening ? 'Đang mở…' : 'Chơi ngay'}
           </button>
+          <div className="relative z-[1] flex h-[30px] items-center justify-center gap-1 pt-[6px]">
+            <button
+              type="button"
+              onClick={onGuide}
+              aria-label={`Cách chơi ${entry.name}`}
+              className={CARD_LINK}
+            >
+              ⓘ Cách chơi
+            </button>
+            {ownContent && (
+              <>
+                <span aria-hidden="true" className="text-line-strong">
+                  ·
+                </span>
+                <button type="button" onClick={onChoose} aria-label={`Dùng câu hỏi của cô cho ${entry.name}`} className={CARD_LINK}>
+                  ✎ Dùng câu hỏi của cô
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </article>
+  )
+}
+
+const CARD_LINK =
+  'cursor-pointer rounded-[8px] border-0 bg-transparent px-1.5 py-1 font-[inherit] text-[13px] font-bold text-primary hover:bg-primary-soft hover:text-primary-ink focus-visible:ring-2 focus-visible:ring-primary'
+
+function PlayTriangle() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" />
+    </svg>
   )
 }
 

@@ -38,3 +38,43 @@ export function rollDice(count: number, random: () => number = Math.random): num
   const n = Math.max(1, Math.min(Math.round(count) || 1, MAX_DICE))
   return Array.from({ length: n }, () => 1 + Math.floor(random() * 6))
 }
+
+export type CoinSide = 'HEADS' | 'TAILS'
+
+/** One toss of the coin. */
+export const flipCoin = (random: () => number = Math.random): CoinSide => (random() < 0.5 ? 'HEADS' : 'TAILS')
+
+/** Widest range of "Chọn số ngẫu nhiên". */
+export const MAX_NUMBER = 999
+
+/**
+ * A number in [min, max] (bounds in either order). With `drawn` numbers to leave out (never twice), one of the others,
+ * or null once every number of the range was drawn.
+ */
+export function drawNumber(min: number, max: number, drawn: readonly number[] = [], random: () => number = Math.random): number | null {
+  const clamp = (n: number) => Math.min(MAX_NUMBER, Math.max(0, Math.round(n) || 0))
+  const lo = Math.min(clamp(min), clamp(max))
+  const hi = Math.max(clamp(min), clamp(max))
+  const left: number[] = []
+  const taken = new Set(drawn)
+  for (let n = lo; n <= hi; n++) if (!taken.has(n)) left.push(n)
+  return left.length ? left[Math.floor(random() * left.length)] : null
+}
+
+export type NoiseLevel = 'QUIET' | 'OK' | 'LOUD'
+
+/**
+ * A microphone reading (RMS of the samples, 0-1) on a 0-100 scale for the class to see: logarithmic, as ears hear,
+ * from about -60 dBFS (a silent room) to 0 dBFS.
+ */
+export function noiseScore(rms: number): number {
+  if (!(rms > 0)) return 0
+  const db = 20 * Math.log10(rms)
+  return Math.round(Math.min(100, Math.max(0, ((db + 60) / 60) * 100)))
+}
+
+/** How the class sounds against the teacher's `limit` (0-100): quiet well under it, loud over it. */
+export const noiseLevel = (score: number, limit: number): NoiseLevel => (score > limit ? 'LOUD' : score > limit * 0.7 ? 'OK' : 'QUIET')
+
+export const MIN_SCOREBOARD_TEAMS = 2
+export const MAX_SCOREBOARD_TEAMS = 6

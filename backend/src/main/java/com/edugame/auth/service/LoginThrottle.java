@@ -3,8 +3,11 @@ package com.edugame.auth.service;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
 
 import com.edugame.common.config.AppProperties;
 import com.edugame.common.exception.BusinessException;
@@ -72,6 +75,20 @@ public class LoginThrottle {
         if (clientIp != null) {
             upsertFailure(ipKey(clientIp), limits.maxFailuresPerIp(), now);
         }
+    }
+
+    /** Until when sign-ins with any of these names (a user's username and email) are refused, if they are now. */
+    @Transactional(readOnly = true)
+    public Optional<Instant> lockedUntil(String... usernames) {
+        List<String> keys = Arrays.stream(usernames).filter(Objects::nonNull).map(LoginThrottle::userKey).toList();
+        if (keys.isEmpty()) {
+            return Optional.empty();
+        }
+        Timestamp until = jdbc.queryForObject("""
+                SELECT max(locked_until) FROM login_throttle WHERE throttle_key IN (:keys) AND locked_until > :now
+                """, new MapSqlParameterSource("keys", keys).addValue("now", Timestamp.from(Instant.now())),
+                Timestamp.class);
+        return Optional.ofNullable(until).map(Timestamp::toInstant);
     }
 
     /** Forgets the failures of a username (signed in, or password reset); the address keeps its count. */

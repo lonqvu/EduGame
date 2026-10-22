@@ -1,4 +1,4 @@
-# EduGame Platform
+# Lớp Vui
 
 Nền tảng web cho phép **giáo viên** tạo và tùy chỉnh trò chơi giáo dục cho **học sinh tiểu học**: tạo game từ template,
 chỉnh sửa câu hỏi / đáp án / giao diện / cài đặt, sau đó publish để học sinh tham gia chơi.
@@ -100,7 +100,8 @@ PowerShell tách tham số `-D...` tại dấu chấm, nên phải đặt trong 
 ```
 
 Flyway tự chạy migration khi khởi động. Profile `dev` nạp thêm dữ liệu demo (`db/dev-seed/R__dev_seed.sql`:
-giáo viên Cô Lan `colan` / `123456`, lớp 3A với 28 học sinh, 3 game). Đăng nhập: `POST /api/v1/auth/login`
+giáo viên Cô Lan `colan` / `123456`, lớp 3A với 28 học sinh, 3 game; quản trị viên `quantri` / `123456` cho trang
+Quản trị). Đăng nhập: `POST /api/v1/auth/login`
 trả access token (JWT), gửi kèm `Authorization: Bearer <token>`. Riêng profile `dev`, request không có token được coi
 là Cô Lan, để frontend chạy được khi chưa có màn đăng nhập (đặt `APP_DEFAULT_USER_CODE=` rỗng để tắt).
 

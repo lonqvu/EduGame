@@ -4,6 +4,23 @@ export type GameType =
   | 'QUIZ'
   | 'GOLDEN_BELL'
   | 'BOAT_RACE'
+  | 'MILLIONAIRE'
+  | 'TUG_OF_WAR'
+  | 'FLOWER_PICK'
+  | 'WHACK_MOLE'
+  | 'TRUE_FALSE'
+  | 'LUCKY_STAR'
+  | 'SECRET_PICTURE'
+  | 'MOUNTAIN_CLIMB'
+  | 'POINT_WHEEL'
+  | 'TIC_TAC_TOE'
+  | 'CONNECT_FOUR'
+  | 'TREASURE_CHEST'
+  | 'BUILD_TOWER'
+  | 'BEE_FLOWER'
+  | 'BINGO'
+  | 'WORD_SCRAMBLE'
+  | 'HANGMAN'
   | 'MATCHING'
   | 'MEMORY'
   | 'CROSSWORD'
@@ -14,6 +31,14 @@ export type GameType =
   | 'TEAM_MAKER'
   | 'TIMER'
   | 'DICE'
+  | 'COIN_FLIP'
+  | 'RANDOM_NUMBER'
+  | 'SCOREBOARD'
+  | 'NOISE_METER'
+  | 'TRAFFIC_LIGHT'
+  | 'STOPWATCH'
+  | 'CARD_DRAW'
+  | 'SEATING'
 
 export type GameCategory = 'QUESTION' | 'PUZZLE' | 'RANDOM_TOOL' | 'CLASS_TOOL'
 
@@ -39,6 +64,8 @@ export interface GameSummary {
   subject?: string
   /** ISO time of the last edit. */
   updatedAt?: string
+  /** Made by "Chơi ngay" from the built-in sample content. */
+  sample?: boolean
 }
 
 export interface Question {

@@ -13,5 +13,7 @@ public enum SessionRevokeReason {
     /** The user changed the password: every session but the one they changed it in ends. */
     PASSWORD_CHANGE,
     /** The user signed out of every other device. */
-    SIGNED_OUT_ELSEWHERE
+    SIGNED_OUT_ELSEWHERE,
+    /** An admin signed the user out of every device, or took their admin role away. */
+    BY_ADMIN
 }

@@ -2,6 +2,7 @@ package com.edugame.question.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.edugame.common.exception.BusinessException;
 import com.edugame.game.dto.AddGameItemsRequest;
@@ -45,6 +46,8 @@ public class QuestionSetUseService {
     /** Points of a Lật ô tile made from a question. */
     static final int GRID_POINTS = 10;
     private static final String OPTION_IDS = "abcdef";
+    /** Games played with open questions (a clue and its answer): every question of a set fits them. */
+    private static final Set<String> OPEN_QUESTION_GAMES = Set.of("GRID_BOARD", "WORD_SCRAMBLE", "HANGMAN");
     private static final JsonNodeFactory JSON = JsonNodeFactory.instance;
 
     private final QuestionSetService questionSetService;
@@ -56,7 +59,7 @@ public class QuestionSetUseService {
     @Transactional
     public UsedQuestionSetResponse use(String setCode, UseQuestionSetRequest request) {
         QuestionSet set = questionSetService.getOwnedSet(setCode);
-        boolean grid = "GRID_BOARD".equals(request.templateCode());
+        boolean grid = OPEN_QUESTION_GAMES.contains(request.templateCode());
         List<Question> questions = questionRepository.findByQuestionSetOrderByPosition(set);
         List<CreateGameItemRequest> items = new ArrayList<>();
         for (Question question : questions) {

@@ -1,3 +1,4 @@
+import { bingoQuestions } from '@/game-engine/bingo/bingo'
 import { playableRows } from '@/game-engine/crossword/crosswordRound'
 import { DEFAULT_TEAMS } from '@/game-engine/grid-board/teams'
 import { playableMatchingSets } from '@/game-engine/matching/matchingRound'
@@ -6,6 +7,7 @@ import { playableOrderSets } from '@/game-engine/ordering/orderingRound'
 import { playableQuizQuestions } from '@/game-engine/quiz/quizRound'
 import { PLAY_DEFAULTS, type PlaySettings, readPlaySettings, type RulesGameType } from '@/game-engine/shared/gameSettings'
 import { playableSortSets } from '@/game-engine/sorting/sortingRound'
+import { wordQuestions } from '@/game-engine/words/words'
 import type { CrosswordRow, GameItem, GameType, OrderSet, PairSet, Question, QuizQuestion, SortSet } from '@/types/game'
 
 /** Games played on the projector with questions or cards (the tools have no rules to explain). */
@@ -21,7 +23,26 @@ export function countPlayable(type: GuideGameType, items: GameItem[]): number {
     case 'QUIZ':
     case 'GOLDEN_BELL':
     case 'BOAT_RACE':
+    case 'MILLIONAIRE':
+    case 'TUG_OF_WAR':
+    case 'FLOWER_PICK':
+    case 'WHACK_MOLE':
+    case 'TRUE_FALSE':
+    case 'LUCKY_STAR':
+    case 'SECRET_PICTURE':
+    case 'MOUNTAIN_CLIMB':
+    case 'POINT_WHEEL':
+    case 'TIC_TAC_TOE':
+    case 'CONNECT_FOUR':
+    case 'TREASURE_CHEST':
+    case 'BUILD_TOWER':
+    case 'BEE_FLOWER':
       return playableQuizQuestions(items as QuizQuestion[], { shuffleOptions: false }).length
+    case 'WORD_SCRAMBLE':
+    case 'HANGMAN':
+      return wordQuestions(items as Question[]).length
+    case 'BINGO':
+      return bingoQuestions(playableQuizQuestions(items as QuizQuestion[], { shuffleOptions: false })).asked.length
     case 'MATCHING':
       return playableMatchingSets(items as PairSet[]).length
     case 'MEMORY':
@@ -146,6 +167,379 @@ export function gameGuide(type: GuideGameType, settings: Record<string, unknown>
         teacherNotes: [
           'Bấm vào làn thuyền của đội giành được quyền, rồi bấm đáp án đội đó chọn.',
           'Bấm "Câu tiếp theo" để sang câu mới.',
+        ],
+      }
+
+    case 'MILLIONAIRE':
+      return {
+        goal: 'Trả lời đúng từng câu để leo lên bậc thưởng 1.000.000 điểm.',
+        rules: [
+          'Một bạn lên chơi, cả lớp cổ vũ.',
+          ...timeRule(s.timeLimitSec),
+          'Chọn đáp án rồi chốt "Câu trả lời cuối cùng". Đúng thì leo lên bậc tiếp theo.',
+          'Trả lời sai: cuộc chơi dừng lại, bạn giữ điểm của mốc an toàn gần nhất đã qua.',
+          'Có thể dừng cuộc chơi bất cứ lúc nào để giữ số điểm đã đạt.',
+          'Có 3 quyền trợ giúp, mỗi quyền dùng một lần: 50:50, hỏi ý kiến cả lớp, hỏi một bạn.',
+        ],
+        steps: [
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi và 4 đáp án hiện trên màn chiếu.' },
+          { title: 'Trợ giúp', text: 'Khi khó, bạn chơi có thể dùng một quyền trợ giúp.' },
+          { title: 'Chốt đáp án', text: 'Bạn chơi chọn và chốt câu trả lời cuối cùng.' },
+          { title: 'Leo bậc', text: 'Đúng thì leo lên bậc thưởng cao hơn, sai thì dừng cuộc chơi.' },
+        ],
+        winner: 'Bạn trả lời đúng câu cuối cùng trở thành triệu phú của lớp!',
+        teacherNotes: [
+          'Bấm đáp án bạn chơi chọn, rồi bấm "Chốt đáp án". Bấm "Tiếp tục" để sang câu sau.',
+          'Hỏi ý kiến cả lớp: các bạn giơ tay cho từng đáp án, cô bấm vào cột đáp án để cộng số bạn giơ tay.',
+          'Mỗi trò hỏi tối đa 15 câu đầu tiên.',
+        ],
+      }
+
+    case 'TUG_OF_WAR':
+      return {
+        goal: 'Trả lời đúng để kéo sợi dây về phía đội mình.',
+        rules: [
+          'Lớp chia thành 2 đội đứng hai bên sợi dây.',
+          ...timeRule(s.timeLimitSec),
+          ...buzzerRules(s).slice(0, 1),
+          'Trả lời đúng: đội kéo dây về phía mình một bước.',
+          ...buzzerRules(s).slice(1),
+          `Đội kéo được dây về phía mình ${s.raceSteps} bước là thắng.`,
+        ],
+        steps: [
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi và các đáp án hiện trên màn chiếu.' },
+          { title: 'Giành quyền', text: 'Đội giơ tay nhanh nhất được trả lời.' },
+          { title: 'Kéo dây', text: 'Trả lời đúng, sợi dây nhích về phía đội mình.' },
+          { title: 'Qua vạch', text: 'Dây qua vạch của đội nào thì đội đó thắng.' },
+        ],
+        winner: `Đội kéo được dây ${s.raceSteps} bước về phía mình, hoặc kéo được xa hơn khi hết câu hỏi, là đội thắng.`,
+        teacherNotes: ['Bấm vào tên đội giành được quyền, rồi bấm đáp án đội đó chọn.', 'Bấm "Câu tiếp theo" để sang câu mới.'],
+      }
+
+    case 'FLOWER_PICK':
+      return {
+        goal: 'Hái hoa trên cây và trả lời câu hỏi giấu trong mỗi bông hoa.',
+        rules: [
+          teamsRule(s.teams),
+          'Các đội lần lượt lên hái một bông hoa. Mỗi bông hoa là một câu hỏi.',
+          ...timeRule(s.timeLimitSec),
+          pointsRule(s.points),
+          s.allowSteal ? `${NO_PENALTY} Các đội khác được giành quyền trả lời.` : `${NO_PENALTY} Cô công bố đáp án đúng.`,
+        ],
+        steps: [
+          { title: 'Hái hoa', text: 'Đội đến lượt chọn một bông hoa trên cây.' },
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi trong bông hoa hiện lên màn chiếu.' },
+          { title: 'Trả lời', text: 'Đội bàn bạc rồi nói đáp án.' },
+          { title: 'Đổi lượt', text: 'Lượt chuyển sang đội tiếp theo cho đến khi hái hết hoa.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: ['Bấm vào bông hoa đội chọn, rồi bấm đáp án đội nói.', 'Bấm "Tiếp tục" để quay lại cây hoa.'],
+      }
+
+    case 'WHACK_MOLE':
+      return {
+        goal: 'Đập trúng chú chuột chũi mang đáp án đúng.',
+        rules: [
+          teamsRule(s.teams),
+          'Những chú chuột chũi thò lên khỏi hang, mỗi chú mang một đáp án.',
+          ...timeRule(s.timeLimitSec),
+          ...buzzerRules(s).slice(0, 1),
+          pointsRule(s.points, 'Đập đúng chú chuột mang đáp án đúng'),
+          ...buzzerRules(s).slice(1),
+        ],
+        steps: [
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi hiện ở trên, chuột chũi thò lên khỏi hang.' },
+          { title: 'Giành quyền', text: 'Đội giơ tay nhanh nhất được trả lời, chuột đứng yên chờ.' },
+          { title: 'Đập chuột', text: 'Đội chỉ chú chuột mang đáp án đúng để đập.' },
+          { title: 'Xem kết quả', text: 'Hết câu hỏi, cả lớp xem bảng điểm.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: ['Bấm vào tên đội giành được quyền, rồi bấm chú chuột đội đó chọn.', 'Bấm "Câu tiếp theo" để sang câu mới.'],
+      }
+
+    case 'TRUE_FALSE':
+      return {
+        goal: 'Đoán xem đáp án hiện ra là đúng hay sai.',
+        rules: [
+          teamsRule(s.teams),
+          'Mỗi câu hỏi hiện kèm một đáp án, có khi đúng, có khi sai.',
+          ...timeRule(s.timeLimitSec),
+          'Tất cả các đội cùng chọn Đúng hoặc Sai.',
+          pointsRule(s.points, 'Chọn đúng'),
+        ],
+        steps: [
+          { title: 'Đọc', text: 'Câu hỏi và một đáp án hiện trên màn chiếu.' },
+          { title: 'Bàn bạc', text: 'Mỗi đội bàn nhanh: đáp án này đúng hay sai?' },
+          { title: 'Giơ tay', text: 'Các đội cùng giơ tay chọn Đúng hoặc Sai.' },
+          { title: 'Công bố', text: 'Cô công bố, các đội chọn đúng được cộng điểm.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: ['Bấm Đúng hoặc Sai trên thẻ của từng đội, rồi bấm "Công bố".', 'Đáp án sai luôn kèm đáp án đúng để cả lớp biết.'],
+      }
+
+    case 'LUCKY_STAR':
+      return {
+        goal: 'Chọn ngôi sao, trả lời đúng hoặc gặp ngôi sao may mắn để ghi điểm.',
+        rules: [
+          teamsRule(s.teams),
+          'Các đội lần lượt chọn một ngôi sao trên bảng.',
+          ...(s.luckyStars > 0 ? [`Có ${s.luckyStars} ngôi sao may mắn: đội được ${s.points} điểm mà không cần trả lời.`] : []),
+          'Các ngôi sao còn lại là câu hỏi.',
+          ...timeRule(s.timeLimitSec),
+          pointsRule(s.points),
+          s.allowSteal ? `${NO_PENALTY} Các đội khác được giành quyền trả lời.` : `${NO_PENALTY} Lượt chuyển sang đội tiếp theo.`,
+        ],
+        steps: [
+          { title: 'Chọn sao', text: 'Đội đến lượt chọn một ngôi sao.' },
+          { title: 'May mắn?', text: 'Ngôi sao may mắn cho điểm ngay, không cần trả lời.' },
+          { title: 'Trả lời', text: 'Ngôi sao câu hỏi: đội trả lời để ghi điểm.' },
+          { title: 'Đổi lượt', text: 'Lượt chuyển sang đội tiếp theo cho đến khi hết sao.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: ['Bấm vào ngôi sao đội chọn, rồi bấm đáp án đội nói.', 'Vị trí ngôi sao may mắn thay đổi mỗi lần chơi.'],
+      }
+
+    case 'SECRET_PICTURE':
+      return {
+        goal: 'Mở các ô cửa và đoán xem bức tranh bí mật là gì.',
+        rules: [
+          teamsRule(s.teams),
+          'Bức tranh bí mật nằm sau các ô cửa. Các đội lần lượt chọn một ô cửa.',
+          ...timeRule(s.timeLimitSec),
+          pointsRule(s.points),
+          'Trả lời xong, ô cửa mở ra để cả lớp nhìn thêm một phần bức tranh.',
+          `Đội nào đoán đúng bức tranh được ${s.keywordPoints} điểm.`,
+        ],
+        steps: [
+          { title: 'Chọn ô cửa', text: 'Đội đến lượt chọn một ô cửa.' },
+          { title: 'Trả lời', text: 'Đội trả lời câu hỏi sau ô cửa.' },
+          { title: 'Mở cửa', text: 'Ô cửa mở ra, lộ thêm một phần bức tranh.' },
+          { title: 'Đoán tranh', text: 'Đội nào đoán được bức tranh thì giơ tay!' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: [
+          'Bấm vào ô cửa đội chọn, rồi bấm đáp án đội nói.',
+          'Khi có đội đoán bức tranh, bấm "Mở bức tranh" rồi bấm tên đội đoán đúng.',
+        ],
+      }
+
+    case 'MOUNTAIN_CLIMB':
+      return {
+        goal: 'Trả lời đúng để đưa người leo núi của đội lên đỉnh trước.',
+        rules: [
+          teamsRule(s.teams),
+          ...timeRule(s.timeLimitSec),
+          ...buzzerRules(s).slice(0, 1),
+          'Trả lời đúng: người leo núi của đội lên thêm một chặng.',
+          ...buzzerRules(s).slice(1),
+          `Cần leo ${s.raceSteps} chặng để lên đến đỉnh.`,
+        ],
+        steps: [
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi và các đáp án hiện trên màn chiếu.' },
+          { title: 'Giành quyền', text: 'Đội giơ tay nhanh nhất được trả lời.' },
+          { title: 'Leo lên', text: 'Trả lời đúng, người leo núi lên thêm một chặng.' },
+          { title: 'Cắm cờ', text: 'Đội lên đỉnh đầu tiên cắm cờ chiến thắng.' },
+        ],
+        winner: 'Đội có người leo núi lên đỉnh đầu tiên là đội chiến thắng.',
+        teacherNotes: ['Bấm vào tên đội giành được quyền, rồi bấm đáp án đội đó chọn.', 'Bấm "Câu tiếp theo" để sang câu mới.'],
+      }
+
+    case 'POINT_WHEEL':
+      return {
+        goal: 'Quay vòng quay để biết câu hỏi đáng bao nhiêu điểm, rồi trả lời đúng để nhận điểm.',
+        rules: [
+          teamsRule(s.teams),
+          'Các đội lần lượt quay vòng quay.',
+          'Ô điểm: trả lời đúng câu hỏi để nhận số điểm đó.',
+          'Ô "Nhân đôi": trả lời đúng thì điểm của đội được nhân đôi.',
+          'Ô "Mất lượt": lượt chuyển ngay sang đội tiếp theo.',
+          ...timeRule(s.timeLimitSec),
+          `${NO_PENALTY}`,
+        ],
+        steps: [
+          { title: 'Quay', text: 'Đội đến lượt bấm quay vòng quay.' },
+          { title: 'Xem điểm', text: 'Vòng quay dừng ở ô nào, câu hỏi đáng số điểm đó.' },
+          { title: 'Trả lời', text: 'Đội trả lời câu hỏi để nhận điểm.' },
+          { title: 'Đổi lượt', text: 'Lượt chuyển sang đội tiếp theo.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: ['Bấm "Quay" cho đội đến lượt, rồi bấm đáp án đội nói.', 'Bấm "Tiếp tục" để sang lượt của đội sau.'],
+      }
+
+    case 'TIC_TAC_TOE':
+      return {
+        goal: 'Trả lời đúng để đánh dấu ô, xếp được ba ô thẳng hàng trước đội bạn.',
+        rules: [
+          'Lớp chia thành 2 đội: đội X và đội O.',
+          'Hai đội lần lượt trả lời câu hỏi.',
+          ...timeRule(s.timeLimitSec),
+          'Trả lời đúng: đội được chọn một ô trống để đánh dấu.',
+          'Trả lời sai: mất lượt, cô công bố đáp án đúng.',
+          'Đội có 3 ô thẳng hàng ngang, dọc hoặc chéo là thắng.',
+        ],
+        steps: [
+          { title: 'Trả lời', text: 'Đội đến lượt trả lời câu hỏi.' },
+          { title: 'Chọn ô', text: 'Trả lời đúng thì chọn một ô để đánh dấu.' },
+          { title: 'Chặn đối thủ', text: 'Chọn ô khéo để chặn đường của đội bạn.' },
+          { title: 'Ba ô thẳng hàng', text: 'Đội có 3 ô thẳng hàng trước là thắng.' },
+        ],
+        winner: 'Đội có 3 ô thẳng hàng trước là đội thắng. Hết ô mà chưa ai thắng thì đội có nhiều ô hơn thắng.',
+        teacherNotes: ['Bấm đáp án đội nói. Đúng thì bấm vào ô đội chọn.', 'Bấm "Ván mới" để chơi tiếp với bàn cờ mới.'],
+      }
+
+    case 'CONNECT_FOUR':
+      return {
+        goal: 'Trả lời đúng để thả quân, xếp bốn quân liền nhau trước đội bạn.',
+        rules: [
+          'Lớp chia thành 2 đội, mỗi đội một màu quân.',
+          'Hai đội lần lượt trả lời câu hỏi.',
+          ...timeRule(s.timeLimitSec),
+          'Trả lời đúng: đội chọn một cột để thả quân, quân rơi xuống ô thấp nhất còn trống.',
+          'Trả lời sai: mất lượt.',
+          'Đội có 4 quân liền nhau theo hàng ngang, dọc hoặc chéo là thắng.',
+        ],
+        steps: [
+          { title: 'Trả lời', text: 'Đội đến lượt trả lời câu hỏi.' },
+          { title: 'Thả quân', text: 'Đúng thì chọn một cột để thả quân.' },
+          { title: 'Chặn đối thủ', text: 'Thả quân khéo để chặn đường của đội bạn.' },
+          { title: 'Bốn liền nhau', text: 'Đội có 4 quân liền nhau trước là thắng.' },
+        ],
+        winner: 'Đội có 4 quân liền nhau trước là đội thắng.',
+        teacherNotes: ['Bấm đáp án đội nói. Đúng thì bấm vào cột đội chọn.', 'Hết câu hỏi thì câu hỏi được dùng lại từ đầu.'],
+      }
+
+    case 'TREASURE_CHEST':
+      return {
+        goal: 'Trả lời đúng để mở rương báu và gom thật nhiều điểm.',
+        rules: [
+          teamsRule(s.teams),
+          'Các đội lần lượt trả lời câu hỏi.',
+          ...timeRule(s.timeLimitSec),
+          'Trả lời đúng: đội được chọn một trong ba rương báu.',
+          'Trong rương có thể là điểm thưởng, nhân đôi điểm, lấy điểm hay đổi điểm với đội dẫn đầu, hoặc rương trống!',
+          'Trả lời sai: mất lượt.',
+        ],
+        steps: [
+          { title: 'Trả lời', text: 'Đội đến lượt trả lời câu hỏi.' },
+          { title: 'Chọn rương', text: 'Đúng thì chọn một trong ba rương.' },
+          { title: 'Mở rương', text: 'Rương mở ra, điểm của các đội thay đổi theo.' },
+          { title: 'Đổi lượt', text: 'Lượt chuyển sang đội tiếp theo.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: ['Bấm đáp án đội nói. Đúng thì bấm vào rương đội chọn.', 'Bấm "Kết thúc" khi muốn dừng trò chơi.'],
+      }
+
+    case 'BUILD_TOWER':
+      return {
+        goal: 'Trả lời đúng để xây tháp của đội cao nhất.',
+        rules: [
+          teamsRule(s.teams),
+          ...timeRule(s.timeLimitSec),
+          ...buzzerRules(s).slice(0, 1),
+          'Trả lời đúng: tháp của đội được thêm một khối.',
+          ...buzzerRules(s).slice(1),
+        ],
+        steps: [
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi và các đáp án hiện trên màn chiếu.' },
+          { title: 'Giành quyền', text: 'Đội giơ tay nhanh nhất được trả lời.' },
+          { title: 'Xây tháp', text: 'Trả lời đúng, tháp của đội cao thêm một khối.' },
+          { title: 'So tháp', text: 'Hết câu hỏi, tháp cao nhất là đội thắng.' },
+        ],
+        winner: 'Hết câu hỏi, đội có tháp cao nhất là đội chiến thắng.',
+        teacherNotes: ['Bấm vào tên đội giành được quyền, rồi bấm đáp án đội đó chọn.', 'Bấm "Câu tiếp theo" để sang câu mới.'],
+      }
+
+    case 'BEE_FLOWER':
+      return {
+        goal: 'Chỉ đường cho chú ong bay đến bông hoa có đáp án đúng.',
+        rules: [
+          teamsRule(s.teams),
+          'Mỗi bông hoa mang một đáp án.',
+          ...timeRule(s.timeLimitSec),
+          ...buzzerRules(s).slice(0, 1),
+          pointsRule(s.points, 'Ong bay đến đúng bông hoa'),
+          ...buzzerRules(s).slice(1),
+        ],
+        steps: [
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi hiện ở trên, các bông hoa mang đáp án.' },
+          { title: 'Giành quyền', text: 'Đội giơ tay nhanh nhất được chỉ đường cho ong.' },
+          { title: 'Bay đến hoa', text: 'Ong bay đến bông hoa đội chọn.' },
+          { title: 'Lấy mật', text: 'Đúng bông hoa thì ong lấy được mật, đội được điểm.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: ['Bấm vào tên đội giành được quyền, rồi bấm bông hoa đội chọn.', 'Bấm "Câu tiếp theo" để sang câu mới.'],
+      }
+
+    case 'BINGO':
+      return {
+        goal: 'Tìm đáp án trên thẻ bingo của đội, đủ một hàng là hô "Bingo!".',
+        rules: [
+          teamsRule(s.teams),
+          'Mỗi đội có một thẻ bingo ghi các đáp án, mỗi đội một thẻ khác nhau.',
+          ...timeRule(s.timeLimitSec),
+          'Câu hỏi hiện ra, đội nào thấy đáp án đúng trên thẻ của mình thì giơ tay.',
+          `Đội tìm đúng được đánh dấu ô đó và cộng ${s.points} điểm.`,
+          'Chọn nhầm ô thì không được đánh dấu.',
+        ],
+        steps: [
+          { title: 'Đọc câu hỏi', text: 'Câu hỏi hiện trên màn chiếu.' },
+          { title: 'Tìm trên thẻ', text: 'Các đội tìm đáp án đúng trên thẻ của mình.' },
+          { title: 'Giơ tay', text: 'Đội tìm thấy giơ tay, cô bấm ô đội chỉ.' },
+          { title: 'Bingo!', text: 'Đội đủ một hàng ngang, dọc hoặc chéo là thắng.' },
+        ],
+        winner: 'Đội đủ một hàng đầu tiên hô "Bingo!" và chiến thắng. Hết câu hỏi thì đội nhiều điểm nhất thắng.',
+        teacherNotes: [
+          'Đội nào giơ tay thì bấm vào ô đội đó chỉ trên thẻ, rồi bấm "Công bố đáp án".',
+          'Câu Đúng/Sai không dùng trong Bingo.',
+        ],
+      }
+
+    case 'WORD_SCRAMBLE':
+      return {
+        goal: 'Sắp xếp các chữ cái bị xáo trộn thành từ đúng theo gợi ý.',
+        rules: [
+          teamsRule(s.teams),
+          'Mỗi câu có một gợi ý và các chữ cái của đáp án đã bị xáo trộn.',
+          ...timeRule(s.timeLimitSec),
+          'Đội giơ tay nhanh nhất được đọc thứ tự các chữ cái, cô xếp lên bảng.',
+          'Xếp đúng: đội được điểm của câu đó.',
+          s.allowSteal ? 'Xếp sai: các đội khác được giành quyền.' : 'Xếp sai: cô công bố đáp án.',
+          'Cô có thể cho gợi ý từng chữ cái. Gợi ý quá nửa từ thì chỉ được nửa số điểm.',
+        ],
+        steps: [
+          { title: 'Đọc gợi ý', text: 'Gợi ý và các chữ cái xáo trộn hiện trên màn chiếu.' },
+          { title: 'Giành quyền', text: 'Đội giơ tay nhanh nhất được trả lời.' },
+          { title: 'Xếp chữ', text: 'Đội đọc lần lượt từng chữ cái, cô bấm để xếp.' },
+          { title: 'Chấm điểm', text: 'Xếp đủ chữ, màn hình báo đúng hay sai.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: [
+          'Bấm tên đội giành quyền, rồi bấm các chữ cái theo thứ tự đội đọc. Bấm "Xóa chữ" để bỏ chữ vừa xếp.',
+          'Đáp án có tối đa 16 chữ cái; câu có đáp án dài hơn hoặc có kí hiệu sẽ được bỏ qua.',
+        ],
+      }
+
+    case 'HANGMAN':
+      return {
+        goal: 'Đoán từng chữ cái để mở ô chữ bí ẩn, rồi giải ô chữ để giành điểm thưởng.',
+        rules: [
+          teamsRule(s.teams),
+          'Ô chữ hiện số ô trống và một gợi ý.',
+          'Các đội lần lượt đoán một chữ cái.',
+          `Chữ cái có trong ô chữ: mỗi ô mở ra được ${s.points} điểm, đội được đoán tiếp.`,
+          'Chữ cái không có: lượt chuyển sang đội tiếp theo.',
+          `Đến lượt, đội có thể giải cả ô chữ: đúng được ${s.keywordPoints} điểm thưởng và điểm các ô còn lại, sai thì mất lượt.`,
+        ],
+        steps: [
+          { title: 'Đọc gợi ý', text: 'Gợi ý và các ô trống hiện trên màn chiếu.' },
+          { title: 'Đoán chữ', text: 'Đội đến lượt đoán một chữ cái.' },
+          { title: 'Mở ô', text: 'Chữ cái có trong ô chữ thì các ô đó mở ra.' },
+          { title: 'Giải ô chữ', text: 'Đội đoán được cả từ thì giải ô chữ để lấy điểm thưởng.' },
+        ],
+        winner: HIGHEST_SCORE,
+        teacherNotes: [
+          'Bấm vào chữ cái đội đoán. Đoán "O" thì mở cả Ò, Ó, Ỏ, Õ, Ọ, nhưng Ô và Ơ là chữ riêng.',
+          'Khi đội giải ô chữ, bấm "Giải ô chữ" rồi chấm Đúng hay Sai.',
         ],
       }
 

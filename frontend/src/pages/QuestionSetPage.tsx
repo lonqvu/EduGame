@@ -34,7 +34,7 @@ export function QuestionSetPage() {
   const [moving, setMoving] = useState(false)
   const [lastType, setLastType] = useState<QuestionType>('MULTIPLE_CHOICE')
 
-  // The bank list (to pick another set in "Sử dụng"), when the page is opened directly.
+  // The bank list (to pick another set in "Chơi"), when the page is opened directly.
   useEffect(() => {
     if (storeStatus === 'idle') void loadSets()
   }, [storeStatus, loadSets])
@@ -105,7 +105,7 @@ export function QuestionSetPage() {
               onClick={() => actions.use(set)}
               className="h-11 flex-1 rounded-[12px] px-5 font-extrabold @min-[760px]:flex-none"
             >
-              Sử dụng
+              Chơi
             </Button>
             <Button icon={<PencilIcon size={17} />} onClick={() => actions.edit(set)} className="h-11 rounded-[12px] font-bold">
               Sửa<span className="hidden @min-[560px]:inline"> thông tin</span>
@@ -199,10 +199,10 @@ function MadeGames({ games, canUse, onUse }: { games: QuestionSetGameResponse[];
       {games.length === 0 ? (
         <div className="mt-3 flex flex-col gap-3">
           <p className="m-0 text-[14px] leading-relaxed text-ink-muted">
-            Chưa có trò chơi nào từ bộ này. Bấm “Sử dụng” để chơi các câu hỏi với Trắc nghiệm, Rung chuông vàng, Đua thuyền hay Lật ô.
+            Chưa có trò chơi nào từ bộ này. Bấm “Chơi” để chơi các câu hỏi với Trắc nghiệm, Rung chuông vàng, Đua thuyền hay Lật ô.
           </p>
           <Button type="primary" ghost icon={<PlayIcon size={15} />} onClick={onUse} disabled={!canUse} className="w-fit rounded-full font-bold">
-            Sử dụng
+            Chơi
           </Button>
         </div>
       ) : (

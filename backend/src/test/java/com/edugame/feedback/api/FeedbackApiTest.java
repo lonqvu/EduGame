@@ -273,6 +273,17 @@ class FeedbackApiTest {
         JsonNode open = body(mockMvc.perform(get(ADMIN).param("status", "NEW", "SEEN").header(HttpHeaders.AUTHORIZATION, admin)));
         assertThat(open.get("items").findValuesAsText("code")).doesNotContain(code);
 
+        // Written to the admin log; marking it DONE again is not a change.
+        mockMvc.perform(patch(ADMIN + "/" + code).header(HttpHeaders.AUTHORIZATION, admin)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"DONE\"}")).andExpect(status().isOk());
+        entityManager.flush();
+        Map<String, Object> logged = jdbcTemplate.queryForMap(
+                "SELECT action, target_label, details::text AS details FROM admin_audit_log WHERE target_code = ?", code);
+        assertThat(logged).containsEntry("action", "FEEDBACK_STATUS_CHANGED")
+                .containsEntry("target_label", "Báo lỗi – Cô Hoa");
+        assertThat(objectMapper.readTree((String) logged.get("details")))
+                .isEqualTo(objectMapper.readTree("{\"from\": \"NEW\", \"to\": \"DONE\"}"));
+
         mockMvc.perform(patch(ADMIN + "/fb-nope").header(HttpHeaders.AUTHORIZATION, admin)
                 .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"DONE\"}")).andExpect(status().isNotFound());
         mockMvc.perform(patch(ADMIN + "/" + code).header(HttpHeaders.AUTHORIZATION, admin)
@@ -292,6 +303,11 @@ class FeedbackApiTest {
                         org.hamcrest.Matchers.matchesPattern("attachment; filename=\"gop-y-edugame-\\d{8}\\.csv\"")))
                 .andReturn().getResponse().getContentAsByteArray();
         String text = new String(csv, StandardCharsets.UTF_8);
+        // Teachers' names and emails were downloaded: the admin log says so.
+        entityManager.flush();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM admin_audit_log WHERE action = 'FEEDBACK_EXPORTED' AND created_at >= now()",
+                Long.class)).isEqualTo(1);
         assertThat(text).startsWith("﻿\"Mã\",\"Thời gian\",\"Loại\"");
         assertThat(text).contains("\"" + code + "\"", "\"Báo lỗi\"", "\"'=HYPERLINK(\"\"http://x\"\")\"", "\"Cô Hoa\"");
     }

@@ -9,12 +9,15 @@ export interface Teacher {
   greetingName: string
   /** "Lan", without the honorific (avatar initial) */
   shortName: string
+  /** Role ADMIN: the "Quản trị" pages. */
+  isAdmin: boolean
 }
 
 const HONORIFIC = /^(cô|thầy)\s+/i
 
-function toTeacher(displayName: string): Teacher {
+function toTeacher(displayName: string, isAdmin: boolean): Teacher {
   return {
+    isAdmin,
     name: displayName,
     greetingName: HONORIFIC.test(displayName) ? displayName.charAt(0).toLowerCase() + displayName.slice(1) : displayName,
     shortName: displayName.replace(HONORIFIC, ''),
@@ -38,10 +41,10 @@ export const useTeacherStore = create<TeacherState>()((set, get) => ({
     set({ status: 'loading' })
     try {
       const me = await getMe()
-      set({ teacher: toTeacher(me.displayName), status: 'ready' })
+      set({ teacher: toTeacher(me.displayName, me.role === 'ADMIN'), status: 'ready' })
     } catch {
       set({ status: 'error' })
     }
   },
-  rename: (displayName) => set({ teacher: toTeacher(displayName), status: 'ready' }),
+  rename: (displayName) => set((s) => ({ teacher: toTeacher(displayName, s.teacher?.isAdmin ?? false), status: 'ready' })),
 }))

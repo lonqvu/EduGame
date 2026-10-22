@@ -49,7 +49,7 @@ public class AuthController {
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request,
                                                @RequestHeader(value = HttpHeaders.USER_AGENT, required = false)
                                                String userAgent, HttpServletRequest servletRequest) {
-        return withCookie(authService.login(request, userAgent, servletRequest.getRemoteAddr()));
+        return withCookie(authService.login(request, userAgent, servletRequest.getRemoteAddr()), servletRequest);
     }
 
     @Operation(summary = "New access token from the refresh token cookie",
@@ -59,10 +59,10 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refresh(HttpServletRequest request, HttpServletResponse response) {
         try {
-            return withCookie(authService.refresh(refreshTokenCookie.read(request)));
+            return withCookie(authService.refresh(refreshTokenCookie.read(request)), request);
         } catch (BusinessException ex) {
             // Kept on the error response written by GlobalExceptionHandler.
-            response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.clear());
+            response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.clear(request));
             throw ex;
         }
     }
@@ -73,7 +73,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request) {
         authService.logout(refreshTokenCookie.read(request));
-        return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, refreshTokenCookie.clear()).build();
+        return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, refreshTokenCookie.clear(request)).build();
     }
 
     @Operation(summary = "Sign up: mails a 6-digit code to confirm the address",
@@ -98,8 +98,8 @@ public class AuthController {
     @PostMapping("/register/verify")
     public ResponseEntity<TokenResponse> verify(@Valid @RequestBody VerifyEmailRequest request,
                                                 @RequestHeader(value = HttpHeaders.USER_AGENT, required = false)
-                                                String userAgent) {
-        return withCookie(registrationService.verify(request, userAgent));
+                                                String userAgent, HttpServletRequest servletRequest) {
+        return withCookie(registrationService.verify(request, userAgent), servletRequest);
     }
 
     @Operation(summary = "Forgotten password: mails a 6-digit code (also to get a new one)",
@@ -118,15 +118,15 @@ public class AuthController {
     @PostMapping("/password/reset")
     public ResponseEntity<TokenResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request,
                                                        @RequestHeader(value = HttpHeaders.USER_AGENT, required = false)
-                                                       String userAgent) {
-        return withCookie(passwordResetService.reset(request, userAgent));
+                                                       String userAgent, HttpServletRequest servletRequest) {
+        return withCookie(passwordResetService.reset(request, userAgent), servletRequest);
     }
 
-    private ResponseEntity<TokenResponse> withCookie(AuthService.SignedIn signedIn) {
+    private ResponseEntity<TokenResponse> withCookie(AuthService.SignedIn signedIn, HttpServletRequest request) {
         ResponseEntity.BodyBuilder response = ResponseEntity.ok();
         if (signedIn.refreshToken() != null) {
             response.header(HttpHeaders.SET_COOKIE,
-                    refreshTokenCookie.issue(signedIn.refreshToken(), signedIn.remember()));
+                    refreshTokenCookie.issue(signedIn.refreshToken(), signedIn.remember(), request));
         }
         return response.body(signedIn.accessToken());
     }

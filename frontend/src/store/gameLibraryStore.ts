@@ -35,7 +35,8 @@ interface GameLibraryState {
   /** Waits for pending saves first, so what is loaded includes the latest edits. */
   loadGame: (gameId: string, mode: 'play' | 'edit') => Promise<void>
   /** Creates a game with one empty item; resolves with its id. */
-  createGame: (type: GameType, grade?: number, title?: string) => Promise<string>
+  /** `firstItem`: start with one empty item to type in (false when the teacher is about to paste). */
+  createGame: (type: GameType, grade?: number, title?: string, firstItem?: boolean) => Promise<string>
   renameGame: (gameId: string, title: string) => void
   /** Replaces the game's settings (rules, time limit...): applied at once, saved shortly after. */
   updateSettings: (gameId: string, settings: Record<string, unknown>) => void
@@ -196,10 +197,14 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
       }
     },
 
-    createGame: async (type, grade, title) => {
+    createGame: async (type, grade, title, firstItem = true) => {
       const created = await gameApi.createGame({ templateCode: type, grade, title })
       const codec = itemCodec(type)
       if (!codec) throw new Error(`${type} has no items`)
+      if (!firstItem) {
+        applyGame(created, 'edit')
+        return created.code
+      }
       try {
         const withItem = await gameApi.addItems(created.code, [toCreateRequest(type, codec.empty())])
         applyGame(withItem, 'edit')

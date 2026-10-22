@@ -1,4 +1,4 @@
-# Kiến trúc — EduGame Platform
+# Kiến trúc — Lớp Vui
 
 ## 1. Tổng quan
 

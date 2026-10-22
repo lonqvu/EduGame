@@ -33,6 +33,7 @@ const server = vi.hoisted(() => {
     status: 'DRAFT',
     version: 1,
     versionStatus: 'DRAFT',
+    sample: false,
     settings: {},
     items: g.items.map((it, position): GameItemResponse => ({ ...structuredClone(it), position })),
     updatedAt: '2026-10-12T00:00:00Z',

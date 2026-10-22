@@ -1,5 +1,5 @@
 import { test as base, expect, type Page } from '@playwright/test'
-import { Backend, quizItem, signInBrowser, type Game } from './api'
+import { Backend, quizItem, signInBrowser, type Game, openGame } from './api'
 
 const SOUND_ON = { enabled: true, volume: 80, music: true }
 
@@ -59,7 +59,7 @@ async function answerRight(page: Page) {
 test('the projector loads its sounds and music, and plays them as the class answers', async ({ page, backend }) => {
   const game = await quiz(backend)
   const files = soundFiles(page)
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   await expect(page.getByText('Câu 1 / 2')).toBeVisible()
 
   // The common sounds load with the screen, the calm music starts.
@@ -72,7 +72,7 @@ test('the projector loads its sounds and music, and plays them as the class answ
 
 test('the speaker button and the M key turn the sounds off and on, and it is remembered', async ({ page, backend }) => {
   const game = await quiz(backend)
-  await page.goto(`/play/${game.code}`)
+  await openGame(page, `/play/${game.code}`)
   await expect(page.getByText('Câu 1 / 2')).toBeVisible()
 
   await page.getByRole('button', { name: 'Tắt âm thanh (phím M)' }).click()

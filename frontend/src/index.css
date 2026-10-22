@@ -76,3 +76,14 @@ html[data-reduce-motion] *::after {
     box-shadow: 0 0 0 4px rgb(53 99 233 / 0);
   }
 }
+
+/* "Cách chơi": the card art floats gently (off with "Giảm hiệu ứng chuyển động", see motion-safe). */
+@keyframes guide-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.02);
+  }
+}

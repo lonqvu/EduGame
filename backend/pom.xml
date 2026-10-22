@@ -15,7 +15,7 @@
     <artifactId>edu-game-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>edu-game-backend</name>
-    <description>EduGame Platform - Backend (Modular Monolith)</description>
+    <description>Lớp Vui Platform - Backend (Modular Monolith)</description>
 
     <properties>
         <java.version>21</java.version>

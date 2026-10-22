@@ -26,6 +26,7 @@ public record GameResponse(
         GameStatus status,
         int version,
         GameVersionStatus versionStatus,
+        boolean sample,
         JsonNode settings,
         List<GameItemResponse> items,
         Instant updatedAt) {

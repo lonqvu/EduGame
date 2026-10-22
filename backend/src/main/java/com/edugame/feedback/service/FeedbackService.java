@@ -8,8 +8,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.edugame.admin.domain.AdminAction;
+import com.edugame.admin.domain.AdminTargetType;
+import com.edugame.admin.service.AdminAuditService;
 import com.edugame.asset.domain.ImageFormat;
 import com.edugame.auth.service.DeviceNames;
 import com.edugame.common.exception.BusinessException;
@@ -54,6 +58,7 @@ public class FeedbackService {
     private final FeedbackRepository feedbackRepository;
     private final FeedbackScreenshotRepository screenshotRepository;
     private final ApplicationEventPublisher events;
+    private final AdminAuditService auditService;
 
     /** Stores the teacher's feedback (and screenshot), then mails it to the team once committed. */
     @Transactional
@@ -87,10 +92,13 @@ public class FeedbackService {
         return new AdminFeedbackPage(responses(found.getContent()), found.getTotalElements());
     }
 
-    /** The newest {@value #EXPORT_LIMIT} feedback (the CSV export). */
-    @Transactional(readOnly = true)
+    /** The newest {@value #EXPORT_LIMIT} feedback (the CSV export); the download is written to the admin log. */
+    @Transactional
     public List<AdminFeedbackResponse> export(Collection<FeedbackStatus> statuses) {
-        return responses(newestFirst(statuses, 0, EXPORT_LIMIT).getContent());
+        List<AdminFeedbackResponse> feedback = responses(newestFirst(statuses, 0, EXPORT_LIMIT).getContent());
+        auditService.record(AdminAction.FEEDBACK_EXPORTED, AdminTargetType.FEEDBACK, null, null,
+                Map.of("rows", feedback.size(), "statuses", statuses == null ? List.of() : statuses));
+        return feedback;
     }
 
     private Page<Feedback> newestFirst(Collection<FeedbackStatus> statuses, int page, int size) {
@@ -109,8 +117,18 @@ public class FeedbackService {
     @Transactional
     public AdminFeedbackResponse updateStatus(String code, FeedbackStatus status) {
         Feedback feedback = find(code);
-        feedback.setStatus(status);
+        FeedbackStatus from = feedback.getStatus();
+        if (from != status) {
+            feedback.setStatus(status);
+            auditService.record(AdminAction.FEEDBACK_STATUS_CHANGED, AdminTargetType.FEEDBACK, code, label(feedback),
+                    Map.of("from", from, "to", status));
+        }
         return responses(List.of(feedback)).getFirst();
+    }
+
+    /** "Báo lỗi – Cô Lan", as the admin log keeps it. */
+    private static String label(Feedback feedback) {
+        return feedback.getKind().label() + (feedback.getUser() == null ? "" : " – " + feedback.getUser().getDisplayName());
     }
 
     private Feedback find(String code) {

@@ -1,6 +1,12 @@
 import { createBrowserRouter } from 'react-router'
 import { MainLayout } from '@/components/layout/MainLayout'
+import { RequireAdmin } from '@/components/layout/RequireAdmin'
 import { RequireAuth } from '@/components/layout/RequireAuth'
+import { AdminAuditLogPage } from '@/pages/admin/AdminAuditLogPage'
+import { AdminFeedbackPage } from '@/pages/admin/AdminFeedbackPage'
+import { AdminOverviewPage } from '@/pages/admin/AdminOverviewPage'
+import { AdminTeacherPage } from '@/pages/admin/AdminTeacherPage'
+import { AdminTeachersPage } from '@/pages/admin/AdminTeachersPage'
 import { ChooseGamePage } from '@/pages/ChooseGamePage'
 import { ClassesPage } from '@/pages/ClassesPage'
 import { ClassroomDetailPage } from '@/pages/ClassroomDetailPage'
@@ -13,7 +19,19 @@ import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { QuestionSetPage } from '@/pages/QuestionSetPage'
 import { QuestionSetsPage } from '@/pages/QuestionSetsPage'
-import { DicePage, TeamMakerPage, TimerPage } from '@/pages/play/ClassToolPages'
+import {
+  CardDrawPage,
+  CoinFlipPage,
+  DicePage,
+  NoiseMeterPage,
+  RandomNumberPage,
+  ScoreboardPage,
+  SeatingPage,
+  StopwatchPage,
+  TeamMakerPage,
+  TimerPage,
+  TrafficLightPage,
+} from '@/pages/play/ClassToolPages'
 import { GridBoardPage } from '@/pages/play/GridBoardPage'
 import { NamePickerPage } from '@/pages/play/NamePickerPage'
 import { PlayGamePage } from '@/pages/play/PlayGamePage'
@@ -44,6 +62,18 @@ export const router = createBrowserRouter([
           { path: 'settings', element: <SettingsPage /> },
           { path: 'reports', element: <ReportsPage /> },
           { path: 'classes/:code', element: <ClassroomDetailPage /> },
+          {
+            // "Quản trị": accounts with the role ADMIN only.
+            path: 'admin',
+            element: <RequireAdmin />,
+            children: [
+              { index: true, element: <AdminOverviewPage /> },
+              { path: 'teachers', element: <AdminTeachersPage /> },
+              { path: 'teachers/:code', element: <AdminTeacherPage /> },
+              { path: 'feedback', element: <AdminFeedbackPage /> },
+              { path: 'audit-log', element: <AdminAuditLogPage /> },
+            ],
+          },
           { path: '*', element: <NotFoundPage /> },
         ],
       },
@@ -56,6 +86,14 @@ export const router = createBrowserRouter([
       { path: 'tools/groups', element: <TeamMakerPage /> },
       { path: 'tools/timer', element: <TimerPage /> },
       { path: 'tools/dice', element: <DicePage /> },
+      { path: 'tools/coin', element: <CoinFlipPage /> },
+      { path: 'tools/number', element: <RandomNumberPage /> },
+      { path: 'tools/scoreboard', element: <ScoreboardPage /> },
+      { path: 'tools/noise', element: <NoiseMeterPage /> },
+      { path: 'tools/light', element: <TrafficLightPage /> },
+      { path: 'tools/stopwatch', element: <StopwatchPage /> },
+      { path: 'tools/draw', element: <CardDrawPage /> },
+      { path: 'tools/seating', element: <SeatingPage /> },
     ],
   },
 ])

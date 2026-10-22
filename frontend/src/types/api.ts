@@ -124,6 +124,8 @@ export interface GameSummaryResponse {
   grade?: number
   status: GameStatus
   itemCount: number
+  /** Made by "Chơi ngay" from the built-in sample content. */
+  sample: boolean
   updatedAt: string
 }
 
@@ -149,6 +151,8 @@ export interface GameResponse {
   status: GameStatus
   version: number
   versionStatus: 'DRAFT' | 'PUBLISHED'
+  /** Made by "Chơi ngay" from the built-in sample content. */
+  sample: boolean
   settings: Record<string, unknown>
   items: GameItemResponse[]
   updatedAt: string
@@ -314,7 +318,28 @@ export interface QuestionRequest {
 }
 
 /** Games a set can be used in. */
-export type QuestionGameCode = 'QUIZ' | 'GOLDEN_BELL' | 'BOAT_RACE' | 'GRID_BOARD'
+export type QuestionGameCode =
+  | 'QUIZ'
+  | 'GOLDEN_BELL'
+  | 'BOAT_RACE'
+  | 'GRID_BOARD'
+  | 'MILLIONAIRE'
+  | 'TUG_OF_WAR'
+  | 'FLOWER_PICK'
+  | 'WHACK_MOLE'
+  | 'TRUE_FALSE'
+  | 'LUCKY_STAR'
+  | 'SECRET_PICTURE'
+  | 'MOUNTAIN_CLIMB'
+  | 'POINT_WHEEL'
+  | 'TIC_TAC_TOE'
+  | 'CONNECT_FOUR'
+  | 'TREASURE_CHEST'
+  | 'BUILD_TOWER'
+  | 'BEE_FLOWER'
+  | 'BINGO'
+  | 'WORD_SCRAMBLE'
+  | 'HANGMAN'
 
 export interface UsedQuestionSetResponse {
   gameCode: string
@@ -422,7 +447,7 @@ export interface FeedbackRequest {
   /** Browser window, "1366x768". */
   viewport?: string
   appVersion?: string
-  /** The EduGame team may write back to the teacher's email. */
+  /** The Lớp Vui team may write back to the teacher's email. */
   contactOk: boolean
 }
 
@@ -430,4 +455,104 @@ export interface FeedbackResponse {
   /** "fb-…", to quote when writing about it. */
   code: string
   createdAt: string
+}
+
+// --- Quản trị (role ADMIN) ------------------------------------------------------------------------------------------
+
+export type UserRole = UserResponse['role']
+export type UserStatus = 'ACTIVE' | 'LOCKED' | 'DELETED'
+
+/** GET /admin/dashboard?days= */
+export interface AdminDashboard {
+  from: string
+  to: string
+  teachers: { total: number; active: number; joined: number; locked: number; admins: number }
+  content: { classrooms: number; students: number; games: number; questionSets: number }
+  plays: number
+  daily: { date: string; signUps: number; plays: number }[]
+  topTemplates: { templateCode: string; templateName: string; plays: number }[]
+  newFeedback: number
+}
+
+export interface AdminTeacherSummary {
+  code: string
+  displayName: string
+  username: string
+  email?: string
+  role: UserRole
+  status: UserStatus
+  emailVerified: boolean
+  createdAt: string
+  lastActiveAt?: string
+  classrooms: number
+  games: number
+}
+
+export interface AdminTeacherPage {
+  items: AdminTeacherSummary[]
+  total: number
+}
+
+export type AdminAction =
+  | 'TEACHER_LOCKED'
+  | 'TEACHER_UNLOCKED'
+  | 'TEACHER_SIGNED_OUT'
+  | 'ADMIN_GRANTED'
+  | 'ADMIN_REVOKED'
+  | 'LOGIN_UNBLOCKED'
+  | 'FEEDBACK_STATUS_CHANGED'
+  | 'FEEDBACK_EXPORTED'
+
+export interface AdminAuditEntry {
+  id: number
+  createdAt: string
+  actorName: string
+  action: AdminAction
+  targetType: 'TEACHER' | 'FEEDBACK'
+  targetCode?: string
+  targetLabel?: string
+  details: Record<string, unknown>
+}
+
+export interface AdminAuditPage {
+  items: AdminAuditEntry[]
+  total: number
+}
+
+/** GET /admin/teachers/{code} */
+export interface AdminTeacher extends Omit<AdminTeacherSummary, 'classrooms' | 'games'> {
+  phone?: string
+  figures: { classrooms: number; students: number; games: number; questionSets: number; plays: number; recentPlays: number }
+  openSessions: number
+  /** Sign-ins refused until then (too many wrong passwords). */
+  loginBlockedUntil?: string
+  devices: { name: string; firstSeenAt: string; lastSeenAt: string }[]
+  /** The admin's own account: no action on it here. */
+  self: boolean
+  history: AdminAuditEntry[]
+}
+
+export type FeedbackStatus = 'NEW' | 'SEEN' | 'DONE'
+
+/** GET /admin/feedback */
+export interface AdminFeedback {
+  code: string
+  kind: FeedbackKind
+  rating?: number
+  message: string
+  page?: string
+  viewport?: string
+  appVersion?: string
+  device?: string
+  contactOk: boolean
+  status: FeedbackStatus
+  createdAt: string
+  teacher?: { code: string; displayName: string; email?: string }
+  /** /api/v1/admin/feedback/{code}/screenshot, read with the admin's token. */
+  screenshotUrl?: string
+}
+
+export interface AdminFeedbackPage {
+  items: AdminFeedback[]
+  total: number
 }

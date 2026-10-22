@@ -5,8 +5,10 @@ import java.util.List;
 import com.edugame.game.dto.CreateGameRequest;
 import com.edugame.game.dto.GameResponse;
 import com.edugame.game.dto.GameSummaryResponse;
+import com.edugame.game.dto.PlaySampleRequest;
 import com.edugame.game.dto.UpdateGameRequest;
 import com.edugame.game.service.GameService;
+import com.edugame.game.service.SampleGameService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
 
     private final GameService gameService;
+    private final SampleGameService sampleGameService;
 
     @Operation(summary = "My games, most recently edited first")
     @GetMapping
@@ -41,6 +44,13 @@ public class GameController {
     @ResponseStatus(HttpStatus.CREATED)
     public GameResponse create(@Valid @RequestBody CreateGameRequest request) {
         return gameService.create(request);
+    }
+
+    @Operation(summary = "\"Chơi ngay\": the teacher's sample game of a game type, made from the built-in sample "
+            + "content the first time", description = "400 NO_SAMPLE for game types without sample content (tools).")
+    @PostMapping("/samples")
+    public GameResponse playSample(@Valid @RequestBody PlaySampleRequest request) {
+        return sampleGameService.playSample(request.templateCode());
     }
 
     @Operation(summary = "A game with the settings and items of the version being edited")

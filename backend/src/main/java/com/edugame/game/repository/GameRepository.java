@@ -17,4 +17,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     /** A teacher's library, most recently edited first. */
     @EntityGraph(attributePaths = "template")
     List<Game> findByOwnerAndStatusNotOrderByUpdatedAtDesc(User owner, GameStatus status);
+
+    /** The teacher's live sample game of a game type ("Chơi ngay"), if made already. */
+    Optional<Game> findFirstByOwnerAndTemplate_CodeAndSampleTrueAndStatusNot(User owner, String templateCode,
+                                                                              GameStatus status);
 }

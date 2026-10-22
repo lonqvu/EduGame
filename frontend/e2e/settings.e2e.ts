@@ -78,10 +78,8 @@ test('a new game made in the app starts with the defaults; games made before kee
   await expect.poll(async () => (await backend.settings()).games).toEqual({ teams: 3, timeLimitSec: 20, shuffleItems: true })
 
   await page.goto('/games/new')
-  await page.getByRole('button', { name: 'Chọn trò chơi Trắc nghiệm' }).click()
-  const dialog = page.getByRole('dialog', { name: /Tạo trò chơi mới/ })
-  await dialog.getByRole('radio', { name: /Soạn nội dung mới/ }).click()
-  await dialog.getByRole('button', { name: 'Tiếp tục' }).click()
+  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Trắc nghiệm' }).click()
+  await page.getByRole('dialog', { name: /Chơi với câu hỏi nào/ }).getByRole('button', { name: /Soạn câu hỏi/ }).click()
   await page.waitForURL(/\/games\/g-[a-z0-9]+\/edit$/)
   const code = /\/games\/([^/]+)\/edit$/.exec(page.url())![1]
   backend.adopt(code)

@@ -15,5 +15,6 @@ public record GameSummaryResponse(
         Short grade,
         GameStatus status,
         long itemCount,
+        boolean sample,
         Instant updatedAt) {
 }

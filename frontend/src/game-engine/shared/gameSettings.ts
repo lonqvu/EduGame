@@ -13,8 +13,10 @@ export interface PlaySettings {
   rescues: number
   /** Đua thuyền: right answers a boat needs to reach the finish. */
   raceSteps: number
-  /** Ô chữ: points for guessing the keyword. */
+  /** Ô chữ: points for guessing the keyword; Ô cửa bí mật: for guessing the picture. */
   keywordPoints: number
+  /** Ngôi sao may mắn: stars that give points without a question. */
+  luckyStars: number
 }
 
 const obj = (value: unknown): Record<string, unknown> =>
@@ -39,17 +41,51 @@ export function readPlaySettings(settings: Record<string, unknown> | undefined, 
     rescues: num(obj(rules.rescue).count, defaults.rescues ?? 1, 0, 5),
     raceSteps: num(obj(rules.win).steps, defaults.raceSteps ?? 5, 2, 20),
     keywordPoints: num(scoring.keywordPoints, defaults.keywordPoints ?? 40, 0, 1000),
+    luckyStars: num(scoring.luckyStars, defaults.luckyStars ?? 3, 0, 10),
   }
 }
 
 /** Question games whose projector reads its rules from `settings` (Lật ô has fixed teams and points per tile). */
-export type RulesGameType = Exclude<GameType, 'GRID_BOARD' | 'SPIN_WHEEL' | 'NAME_RACE' | 'TEAM_MAKER' | 'TIMER' | 'DICE'>
+export type RulesGameType = Exclude<
+  GameType,
+  | 'GRID_BOARD'
+  | 'SPIN_WHEEL'
+  | 'NAME_RACE'
+  | 'TEAM_MAKER'
+  | 'TIMER'
+  | 'DICE'
+  | 'COIN_FLIP'
+  | 'RANDOM_NUMBER'
+  | 'SCOREBOARD'
+  | 'NOISE_METER'
+  | 'TRAFFIC_LIGHT'
+  | 'STOPWATCH'
+  | 'CARD_DRAW'
+  | 'SEATING'
+>
 
 /** What each projector plays with when `settings` leaves a rule out. */
 export const PLAY_DEFAULTS: Record<RulesGameType, Partial<PlaySettings>> = {
   QUIZ: { teams: 4, points: 10, allowSteal: true, timeLimitSec: 30 },
   GOLDEN_BELL: { timeLimitSec: 15, rescues: 1 },
   BOAT_RACE: { teams: 4, points: 1, allowSteal: true, timeLimitSec: 20, raceSteps: 5 },
+  MILLIONAIRE: { timeLimitSec: 30 },
+  TUG_OF_WAR: { teams: 2, points: 1, allowSteal: true, timeLimitSec: 20, raceSteps: 4 },
+  FLOWER_PICK: { teams: 3, points: 10, allowSteal: true, timeLimitSec: 30 },
+  WHACK_MOLE: { teams: 2, points: 10, allowSteal: true, timeLimitSec: 20 },
+  TRUE_FALSE: { teams: 4, points: 10, timeLimitSec: 10 },
+  LUCKY_STAR: { teams: 3, points: 10, allowSteal: false, timeLimitSec: 30, luckyStars: 3 },
+  SECRET_PICTURE: { teams: 3, points: 10, allowSteal: true, timeLimitSec: 30, keywordPoints: 40 },
+  MOUNTAIN_CLIMB: { teams: 3, points: 1, allowSteal: true, timeLimitSec: 20, raceSteps: 5 },
+  POINT_WHEEL: { teams: 3, timeLimitSec: 30 },
+  TIC_TAC_TOE: { teams: 2, points: 10, timeLimitSec: 30 },
+  CONNECT_FOUR: { teams: 2, points: 10, timeLimitSec: 30 },
+  TREASURE_CHEST: { teams: 3, timeLimitSec: 30 },
+  BUILD_TOWER: { teams: 3, points: 1, allowSteal: true, timeLimitSec: 20 },
+  BEE_FLOWER: { teams: 2, points: 10, allowSteal: true, timeLimitSec: 20 },
+  BINGO: { teams: 3, points: 10, timeLimitSec: 20 },
+  WORD_SCRAMBLE: { teams: 3, allowSteal: true, timeLimitSec: 45 },
+  HANGMAN: { teams: 3, points: 10, keywordPoints: 30, timeLimitSec: 0 },
   MATCHING: { teams: 2, points: 10 },
   MEMORY: { teams: 2, points: 10 },
   CROSSWORD: { teams: 4, points: 10, allowSteal: true, keywordPoints: 40 },
@@ -69,6 +105,7 @@ const PATHS: Record<keyof PlaySettings, string[]> = {
   rescues: ['rules', 'rescue', 'count'],
   raceSteps: ['rules', 'win', 'steps'],
   keywordPoints: ['rules', 'scoring', 'keywordPoints'],
+  luckyStars: ['rules', 'scoring', 'luckyStars'],
 }
 
 /** `settings` with the given rules changed; everything else (other keys, rule types...) is kept. */

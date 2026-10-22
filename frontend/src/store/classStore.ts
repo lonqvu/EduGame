@@ -37,6 +37,15 @@ interface ClassState {
   className: string
   grade: number | undefined
   students: Student[]
+  /**
+   * The students are names typed on the projector (no class yet): they are played with, but nothing is saved for
+   * them (no stars, no reports).
+   */
+  quickList: boolean
+  /** Plays the name tools with these names until a class exists. */
+  startQuickList: (names: string[]) => void
+  /** Makes a class of the typed names and teaches it from now on. */
+  saveQuickList: (name: string, grade: number) => Promise<ClassroomResponse>
   /** Refetches the classes and the current class list; keeps showing the current one meanwhile. */
   load: () => Promise<void>
   /** Teaches another (active) class from now on, on this device. */
@@ -68,6 +77,7 @@ export const useClassStore = create<ClassState>()((set, get) => ({
   className: '',
   grade: undefined,
   students: [],
+  quickList: false,
 
   load: () => {
     inflight ??= (async () => {
@@ -82,7 +92,9 @@ export const useClassStore = create<ClassState>()((set, get) => ({
           classroomCode: classroom?.code ?? null,
           className: classroom ? classTitle(classroom.name) : '',
           grade: classroom?.grade,
-          students: students.map(toStudent),
+          // Without a class, names typed on the projector stay for the next tool.
+          students: classroom ? students.map(toStudent) : get().quickList ? get().students : [],
+          quickList: !classroom && get().quickList,
         })
       } catch {
         if (get().status !== 'ready') set({ status: 'error' })
@@ -101,6 +113,23 @@ export const useClassStore = create<ClassState>()((set, get) => ({
     } finally {
       picked = null
     }
+  },
+
+  startQuickList: (names) =>
+    set({ quickList: true, students: names.map((name, i) => ({ id: `quick-${i + 1}`, name, stars: 0, totalStars: 0 })) }),
+
+  saveQuickList: async (name, grade) => {
+    const names = get().students.map((s) => s.name)
+    const created = await classroomApi.createClassroom({ name, grade })
+    await classroomApi.addStudents(created.code, names.map((displayName) => ({ displayName })))
+    remember(created.code)
+    picked = created.code
+    try {
+      await get().refresh()
+    } finally {
+      picked = null
+    }
+    return created
   },
 
   createClassroom: async (request) => {

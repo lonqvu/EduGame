@@ -274,6 +274,23 @@ interface ItemOf {
   QUIZ: QuizQuestion
   GOLDEN_BELL: QuizQuestion
   BOAT_RACE: QuizQuestion
+  MILLIONAIRE: QuizQuestion
+  TUG_OF_WAR: QuizQuestion
+  FLOWER_PICK: QuizQuestion
+  WHACK_MOLE: QuizQuestion
+  TRUE_FALSE: QuizQuestion
+  LUCKY_STAR: QuizQuestion
+  SECRET_PICTURE: QuizQuestion
+  MOUNTAIN_CLIMB: QuizQuestion
+  POINT_WHEEL: QuizQuestion
+  TIC_TAC_TOE: QuizQuestion
+  CONNECT_FOUR: QuizQuestion
+  TREASURE_CHEST: QuizQuestion
+  BUILD_TOWER: QuizQuestion
+  BEE_FLOWER: QuizQuestion
+  BINGO: QuizQuestion
+  WORD_SCRAMBLE: Question
+  HANGMAN: Question
   MATCHING: PairSet
   MEMORY: PairSet
   CROSSWORD: CrosswordRow
@@ -287,6 +304,24 @@ const CODECS: { [K in keyof ItemOf]: ItemCodec<ItemOf[K]> } = {
   // Same questions as QUIZ, played another way.
   GOLDEN_BELL: quizCodec,
   BOAT_RACE: quizCodec,
+  MILLIONAIRE: quizCodec,
+  TUG_OF_WAR: quizCodec,
+  FLOWER_PICK: quizCodec,
+  WHACK_MOLE: quizCodec,
+  TRUE_FALSE: quizCodec,
+  LUCKY_STAR: quizCodec,
+  SECRET_PICTURE: quizCodec,
+  MOUNTAIN_CLIMB: quizCodec,
+  POINT_WHEEL: quizCodec,
+  TIC_TAC_TOE: quizCodec,
+  CONNECT_FOUR: quizCodec,
+  TREASURE_CHEST: quizCodec,
+  BUILD_TOWER: quizCodec,
+  BEE_FLOWER: quizCodec,
+  BINGO: quizCodec,
+  // Lật ô's open questions, played as word games.
+  WORD_SCRAMBLE: gridCodec,
+  HANGMAN: gridCodec,
   MATCHING: matchingCodec,
   MEMORY: memoryCodec,
   CROSSWORD: crosswordCodec,

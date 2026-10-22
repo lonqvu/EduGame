@@ -7,6 +7,7 @@ import type {
   UpdateGameItemRequest,
   UpdateGameRequest,
 } from '@/types/api'
+import type { GameType } from '@/types/game'
 
 const gamePath = (code: string) => `/v1/games/${encodeURIComponent(code)}`
 
@@ -17,6 +18,12 @@ export async function listGames(): Promise<GameSummaryResponse[]> {
 
 export async function createGame(request: CreateGameRequest): Promise<GameResponse> {
   const { data } = await httpClient.post<GameResponse>('/v1/games', request)
+  return data
+}
+
+/** "Chơi ngay": the teacher's sample game of this type, made from the built-in sample content the first time. */
+export async function playSample(templateCode: GameType): Promise<GameResponse> {
+  const { data } = await httpClient.post<GameResponse>('/v1/games/samples', { templateCode })
   return data
 }
 

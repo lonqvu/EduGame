@@ -87,7 +87,7 @@ export function SpinWheelScreen() {
           <div className="flex flex-col gap-1">
             <h1 className="m-0 font-display text-[30px] font-extrabold">Vòng quay gọi tên</h1>
             <span className="text-lg text-ink-soft">
-              {className} · Đã gọi {calledIds.length} / {students.length} bạn
+              {className && `${className} · `}Đã gọi {calledIds.length} / {students.length} bạn
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">

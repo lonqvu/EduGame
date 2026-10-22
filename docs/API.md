@@ -1,4 +1,4 @@
-# EduGame Platform – REST API
+# Lớp Vui – REST API
 
 Danh sách toàn bộ API backend: mục đích, vị trí code backend và nơi frontend gọi.
 Swagger UI (chạy thử trực tiếp): <http://localhost:8080/swagger-ui.html> · OpenAPI JSON: `/v3/api-docs`.
@@ -160,8 +160,8 @@ Ai có email cũng đăng ký được. Tài khoản **chỉ được tạo khi 
 { "email": "co.hoa@truong.edu.vn", "expiresIn": 600, "resendAfter": 60 }
 ```
 
-Lưu tạm tên + mật khẩu (đã băm BCrypt) cùng mã, gửi mail "Mã xác nhận EduGame: 123456". Email đã có tài khoản →
-**vẫn trả đúng câu trả lời trên** (không lộ email nào đã đăng ký), nhưng mail gửi tới là "Bạn đã có tài khoản EduGame".
+Lưu tạm tên + mật khẩu (đã băm BCrypt) cùng mã, gửi mail "Mã xác nhận Lớp Vui: 123456". Email đã có tài khoản →
+**vẫn trả đúng câu trả lời trên** (không lộ email nào đã đăng ký), nhưng mail gửi tới là "Bạn đã có tài khoản Lớp Vui".
 Mật khẩu ≥ 8 ký tự và **≤ 72 byte UTF-8** (giới hạn của BCrypt; chữ có dấu chiếm 2–3 byte, nên mật khẩu tiếng Việt
 có dấu khoảng 24–36 ký tự là tối đa). Email được chuẩn hoá chữ thường, bỏ khoảng trắng.
 
@@ -270,7 +270,7 @@ Cấu trúc `content` / `solution` theo template:
 | QUIZ | `SINGLE_CHOICE`, `TRUE_FALSE` | `{ text, image?, audio?, options: [{id, text}] }` | `{ correct: [optionId] }` |
 | MATCHING | `PAIR_SET` | `{ left: [{id, text}], right: [{id, text}] }` | `{ pairs: [[leftId, rightId]] }` |
 | MEMORY | `CARD_SET` | `{ cards: [{id, text?, image?}] }` | `{ pairs: [[cardId, cardId]] }` |
-| GOLDEN_BELL, BOAT_RACE | như QUIZ | như QUIZ | như QUIZ |
+| GOLDEN_BELL, BOAT_RACE, MILLIONAIRE, TUG_OF_WAR, FLOWER_PICK, WHACK_MOLE, TRUE_FALSE, LUCKY_STAR, SECRET_PICTURE, MOUNTAIN_CLIMB, POINT_WHEEL, TIC_TAC_TOE, CONNECT_FOUR, TREASURE_CHEST, BUILD_TOWER, BEE_FLOWER, BINGO | như QUIZ | như QUIZ | như QUIZ |
 | CROSSWORD | `CROSSWORD_ROW` | `{ clue, image? }` | `{ answer, keyIndex }` |
 | ORDERING | `ORDER_SET` | `{ text?, items: [{id, text}] }` | `{ order: [id] }` |
 | SORTING | `SORT_SET` | `{ text?, groups: [{id, text}], cards: [{id, text}] }` | `{ assign: [[cardId, groupId]] }` |
@@ -311,6 +311,15 @@ Xóa mềm (`status = ARCHIVED`): game biến mất khỏi thư viện, lịch s
 Khóa bản DRAFT thành `PUBLISHED`, đặt làm bản được chơi (`current_version_id`), game chuyển `PUBLISHED`.
 Không có DRAFT (chưa sửa gì sau lần publish trước) → `409 NOTHING_TO_PUBLISH`.
 
+### 8b. `POST /games/samples` — "Chơi ngay" với câu hỏi mẫu
+
+Body `{"templateCode": "QUIZ"}`. Trả về trò mẫu của giáo viên cho loại trò đó (như `GET /games/{code}`, có `sample: true`):
+lần đầu được tạo từ nội dung mẫu có sẵn (`backend/src/main/resources/samples/sample-games.json`, kiểm tra như nội dung
+giáo viên soạn), các lần sau trả lại đúng trò đó. Mỗi giáo viên có tối đa một trò mẫu còn dùng cho mỗi loại trò (lưu
+trữ trò mẫu thì lần sau tạo bản mới). Có cho 26 trò hỏi đáp: QUIZ, GOLDEN_BELL, BOAT_RACE, GRID_BOARD, MATCHING, MEMORY,
+CROSSWORD, ORDERING, SORTING, MILLIONAIRE, TUG_OF_WAR, FLOWER_PICK, WHACK_MOLE, TRUE_FALSE, LUCKY_STAR, SECRET_PICTURE, MOUNTAIN_CLIMB, POINT_WHEEL, TIC_TAC_TOE, CONNECT_FOUR, TREASURE_CHEST, BUILD_TOWER, BEE_FLOWER, BINGO, WORD_SCRAMBLE, HANGMAN; trò công cụ hoặc mã không có → `400 NO_SAMPLE`. `GET /games` và `GET /games/{code}` cũng
+có trường `sample`.
+
 ### 9–12. Câu hỏi (items)
 
 **Quan trọng — id câu hỏi có thể thay đổi.** Bản đã publish không bao giờ bị sửa. Lần sửa đầu tiên sau khi publish
@@ -342,7 +351,7 @@ Thêm vào cuối danh sách, theo thứ tự gửi. Dùng cho cả thêm 1 câu
 | QUIZ | `TRUE_FALSE` | như trên, đúng 2 phương án (Đúng / Sai) | `{correct: [optionId]}` |
 | MATCHING (Nối cặp) | `PAIR_SET` | `{left: [{id, text}], right: [{id, text}]}`, mỗi cột 1–12 ô | `{pairs: [[leftId, rightId]]}` |
 | MEMORY (Lật thẻ) | `CARD_SET` | `{cards: [{id, text}]}`, 2–24 thẻ | `{pairs: [[cardId, cardId]]}` |
-| GOLDEN_BELL (Rung chuông vàng), BOAT_RACE (Đua thuyền) | `SINGLE_CHOICE`, `TRUE_FALSE` | giống QUIZ | giống QUIZ |
+| GOLDEN_BELL (Rung chuông vàng), BOAT_RACE (Đua thuyền), MILLIONAIRE (Ai là triệu phú), TUG_OF_WAR (Kéo co), FLOWER_PICK (Hái hoa dân chủ), WHACK_MOLE (Đập chuột), TRUE_FALSE (Đúng hay sai), LUCKY_STAR (Ngôi sao may mắn), SECRET_PICTURE (Ô cửa bí mật), MOUNTAIN_CLIMB (Leo núi), POINT_WHEEL (Vòng quay điểm thưởng), TIC_TAC_TOE (Cờ ca-rô hỏi đáp), CONNECT_FOUR (Bốn ô liên tiếp), TREASURE_CHEST (Rương vàng), BUILD_TOWER (Xây tháp), BEE_FLOWER (Ong tìm hoa), BINGO | `SINGLE_CHOICE`, `TRUE_FALSE` | giống QUIZ | giống QUIZ |
 | CROSSWORD (Ô chữ bí mật) | `CROSSWORD_ROW` | `{clue, image?}`: một hàng ngang | `{answer, keyIndex}`: đáp án 1–15 chữ cái (không tính dấu cách); `keyIndex` là vị trí (từ 0) của chữ nằm ở cột từ khóa |
 | ORDERING (Sắp xếp) | `ORDER_SET` | `{text?, items: [{id, text}]}`, 2–8 thẻ | `{order: [id]}`: mọi id đúng một lần, theo thứ tự đúng |
 | SORTING (Phân loại) | `SORT_SET` | `{text?, groups: [{id, text}], cards: [{id, text}]}`, 2–4 giỏ, 1–16 thẻ | `{assign: [[cardId, groupId]]}`: mỗi thẻ vào nhiều nhất một giỏ |
@@ -499,8 +508,8 @@ Field của loại câu kia bị bỏ qua. Câu không chơi được → `400 I
 
 | Trò chơi | Câu được dùng |
 |---|---|
-| `QUIZ`, `GOLDEN_BELL`, `BOAT_RACE` | Các câu trắc nghiệm (thành `SINGLE_CHOICE`); câu tự luận bị bỏ qua (`skippedCount`) |
-| `GRID_BOARD` (Lật ô) | Mọi câu (thành `OPEN_QUESTION`, 10 điểm); đáp án là đáp án đúng hoặc câu trả lời tự luận |
+| `QUIZ`, `GOLDEN_BELL`, `BOAT_RACE` và các trò của V17, V19 (MILLIONAIRE, TUG_OF_WAR, FLOWER_PICK, WHACK_MOLE, TRUE_FALSE, LUCKY_STAR, SECRET_PICTURE, MOUNTAIN_CLIMB, POINT_WHEEL) | Các câu trắc nghiệm (thành `SINGLE_CHOICE`); câu tự luận bị bỏ qua (`skippedCount`) |
+| `GRID_BOARD` (Lật ô), `WORD_SCRAMBLE`, `HANGMAN` | Mọi câu (thành `OPEN_QUESTION`, 10 điểm); đáp án là đáp án đúng hoặc câu trả lời tự luận |
 
 Trò chơi mang tên `title` (không gửi thì lấy tên bộ), mô tả, môn và khối của bộ (khối 6–12 thì để trống, game là tiểu học). Câu hỏi được chép sang game:
 sửa bộ sau đó không đổi game, và ngược lại. Không có câu nào dùng được → `409 NO_USABLE_QUESTIONS`.
@@ -619,8 +628,36 @@ Trả `{"code": "fb-…", "createdAt": "…"}`. Backend lấy thêm `User-Agent`
 | `GET /admin/feedback/{code}/screenshot` | Ảnh đính kèm (cần token admin) |
 | `PATCH /admin/feedback/{code}` | `{"status": "NEW" \| "SEEN" \| "DONE"}`: đánh dấu đã xem / đã xử lý |
 
-Giáo viên gọi các API này → `403 FORBIDDEN`. Cấp quyền admin cho một tài khoản của đội EduGame bằng SQL:
-`UPDATE users SET role = 'ADMIN' WHERE email = 'ten@edugame.vn';` (đăng nhập lại để token mang vai trò mới).
+Giáo viên gọi các API này → `403 FORBIDDEN`. Đổi trạng thái (khi thực sự đổi) và mỗi lần tải CSV được ghi vào nhật ký
+quản trị (`FEEDBACK_STATUS_CHANGED`, `FEEDBACK_EXPORTED`).
+
+**Quản trị viên đầu tiên** trên một máy chủ mới cấp bằng SQL (những người sau cấp ngay trong trang Quản trị):
+`UPDATE users SET role = 'ADMIN' WHERE email = 'ten@edugame.vn';` rồi đăng nhập lại. Dữ liệu demo (profile `dev`) có
+sẵn `quantri` / `123456`.
+
+### 37–45. Quản trị (`/admin/...`, chỉ vai trò `ADMIN`)
+
+Trang `/admin` của web. Mọi API dưới đây: giáo viên → `403 FORBIDDEN`. Admin chỉ thấy **số** học sinh, không bao giờ
+thấy tên học sinh hay mật khẩu giáo viên.
+
+| API | |
+|---|---|
+| 37. `GET /admin/dashboard?days=30` | Tổng quan `days` ngày gần nhất (1–366, gồm hôm nay; sai → `400 INVALID_RANGE`): `{from, to, teachers {total, active, joined, locked, admins}, content {classrooms, students, games, questionSets}, plays, daily [{date, signUps, plays}], topTemplates [{templateCode, templateName, plays}], newFeedback}`. `active`: tài khoản đã đăng nhập hoặc mở trang trong kỳ |
+| 38. `GET /admin/teachers?q=&status=&role=&sort=NEWEST&page=0&size=20` | Danh sách tài khoản. `q`: một phần tên, tên đăng nhập hoặc email. `status` (lặp được): mặc định `ACTIVE` + `LOCKED`, tài khoản `DELETED` chỉ hiện khi hỏi. `role` (lặp được). `sort`: `NEWEST`, `LAST_ACTIVE`, `NAME`. `size` ≤ 100. Trả `{items: [{code, displayName, username, email, role, status, emailVerified, createdAt, lastActiveAt, classrooms, games}], total}` |
+| 39. `GET /admin/teachers/{code}` | Một tài khoản: thông tin trên + `phone`, `figures {classrooms, students, games, questionSets, plays, recentPlays}` (`recentPlays`: 30 ngày), `openSessions`, `loginBlockedUntil` (bị chặn do sai mật khẩu nhiều lần), `devices [{name, firstSeenAt, lastSeenAt}]`, `self`, `history` (20 thao tác quản trị gần nhất) |
+| 40. `POST /admin/teachers/{code}/lock` | `{"reason": "…"}` (không bắt buộc, ≤ 300). Không đăng nhập được nữa, mọi phiên kết thúc ngay. Khoá lại tài khoản đã khoá: không làm gì |
+| 41. `POST /admin/teachers/{code}/unlock` | Mở khoá |
+| 42. `POST /admin/teachers/{code}/sign-out` | Đăng xuất mọi thiết bị, mật khẩu giữ nguyên |
+| 43. `PUT /admin/teachers/{code}/role` | `{"role": "ADMIN" \| "TEACHER"}`. Bỏ quyền admin thì tài khoản bị đăng xuất mọi nơi; cấp quyền thì có hiệu lực từ lần tải trang sau |
+| 44. `POST /admin/teachers/{code}/login-unblock` | Mở chặn đăng nhập sau nhiều lần sai mật khẩu |
+| 45. `GET /admin/audit-log?action=&page=0&size=50` | Nhật ký quản trị, mới nhất trước (`size` ≤ 200, `action` lặp được): `{items: [{id, createdAt, actorName, action, targetType, targetCode, targetLabel, details}], total}` |
+
+- Mọi thao tác thay đổi trả lại tài khoản như ở `GET /admin/teachers/{code}` và được ghi vào nhật ký (bảng
+  `admin_audit_log`, chỉ thêm, không sửa / xoá) cùng transaction với thay đổi: `TEACHER_LOCKED`, `TEACHER_UNLOCKED`,
+  `TEACHER_SIGNED_OUT`, `ADMIN_GRANTED`, `ADMIN_REVOKED`, `LOGIN_UNBLOCKED`.
+- Không tự thao tác trên tài khoản của mình → `409 CANNOT_CHANGE_OWN_ACCOUNT`. Khoá một admin → `409
+  ADMIN_CANNOT_BE_LOCKED` (bỏ quyền trước). Cấp quyền cho tài khoản đang khoá → `409 TEACHER_LOCKED`. Bỏ quyền của
+  admin cuối cùng → `409 LAST_ADMIN`. Tài khoản không có hoặc đã xoá → `404`.
 
 ---
 
@@ -646,7 +683,7 @@ Mọi lỗi trả về dạng:
 | 409 | `TOO_MANY_QUESTION_SETS`, `TOO_MANY_QUESTIONS` | Quá 200 bộ / quá 200 câu một bộ | 17, 21, 22 |
 | 409 | `NO_USABLE_QUESTIONS` | Bộ không có câu nào trò chơi này chơi được | 26 |
 | 409 | `CLASSROOM_PAUSED` | Mở trò chơi cho lớp đang tạm ngưng | `POST /classrooms/{code}/sessions` |
-| 400 | `INVALID_RANGE` | Khoảng ngày của báo cáo: bắt đầu sau kết thúc, hoặc quá 366 ngày | 31 |
+| 400 | `INVALID_RANGE` | Khoảng ngày của báo cáo: bắt đầu sau kết thúc, hoặc quá 366 ngày | 31, 37 |
 | 400 | `INVALID_PARAMETER` | Tham số trên URL sai kiểu hoặc thiếu (vd. id không phải số), hoặc thiếu file tải lên | Mọi API |
 | 400 | `EMPTY_FILE` | File tải lên rỗng | 27 |
 | 413 | `FILE_TOO_LARGE` | Ảnh quá 5 MB | 27 |
@@ -670,9 +707,14 @@ Mọi lỗi trả về dạng:
 | 429 | `TOO_MANY_CODES` | Đã gửi 5 mã trong 1 giờ tới email này | 0d, 0e, 0g |
 | 401 | `UNAUTHENTICATED` | Không gửi access token, hoặc tài khoản đã bị khóa / xóa sau khi đăng nhập | Tất cả trừ 0, 2 |
 | 401 | `INVALID_TOKEN` | Access token sai định dạng, sai chữ ký, hết hạn, hoặc phiên đăng nhập của nó đã kết thúc (kèm header `WWW-Authenticate`) | Tất cả trừ 0, 2 |
-| 403 | `FORBIDDEN` | Đã đăng nhập nhưng vai trò không được phép | 33–36 |
+| 403 | `FORBIDDEN` | Đã đăng nhập nhưng vai trò không được phép | 33–45 |
+| 409 | `CANNOT_CHANGE_OWN_ACCOUNT` | Admin khoá / đăng xuất / đổi vai trò tài khoản của chính mình | 40–44 |
+| 409 | `ADMIN_CANNOT_BE_LOCKED` | Khoá một tài khoản admin (bỏ quyền trước) | 40 |
+| 409 | `TEACHER_LOCKED` | Cấp quyền admin cho tài khoản đang khoá | 43 |
+| 409 | `LAST_ADMIN` | Bỏ quyền của admin cuối cùng | 43 |
 | 429 | `TOO_MANY_FEEDBACK` | Đã gửi 10 góp ý trong 1 giờ | 32 |
 | 404 | `RESOURCE_NOT_FOUND` | Không tồn tại, không phải của mình, hoặc đã lưu trữ | Các API có `{code}` / `{id}`, 4 (template) |
+| 400 | `NO_SAMPLE` | Loại trò không có nội dung mẫu (công cụ, mã không có) | 8b |
 | 409 | `NOTHING_TO_PUBLISH` | Không có bản nháp để publish | 8 |
 | 500 | `INTERNAL_ERROR` | Lỗi không lường trước (xem log backend) | |
 
