@@ -127,3 +127,59 @@ test('the introduction of a game opened with "Chơi ngay" leads back to the choo
   await intro(tab).getByRole('button', { name: 'Quay lại' }).click()
   await expect(tab).toHaveURL(/\/games\/new$/)
 })
+
+test('"Đổi câu hỏi" on the introduction plays a question set instead of the sample, and back', async ({ page, api }) => {
+  const created = await (await api.post('question-sets', { data: { title: 'E2E Bảng nhân 7', subject: 'TOAN', grade: 3 } })).json()
+  const setCode: string = created.summary.code
+  await api.post(`question-sets/${setCode}/questions`, {
+    data: {
+      questions: [
+        { type: 'MULTIPLE_CHOICE', text: '7 x 2 = ?', options: ['14', '12'], correctOption: 0 },
+        { type: 'MULTIPLE_CHOICE', text: '7 x 3 = ?', options: ['21', '24'], correctOption: 0 },
+      ],
+    },
+  })
+  try {
+    await page.goto('/games/new')
+    await page.getByRole('button', { name: 'Chơi ngay Trắc nghiệm' }).click()
+    await expect(intro(page)).toContainText('Câu hỏi mẫu')
+    const sample = page.url()
+
+    await intro(page).getByRole('button', { name: 'Đổi câu hỏi' }).click()
+    const dialog = page.getByRole('dialog', { name: /Chơi với câu hỏi nào/ })
+    await expect(dialog.getByRole('listitem', { name: 'Câu hỏi mẫu' })).toContainText('Đang dùng')
+    // Enter belongs to the dialog: the game does not start behind it.
+    await page.keyboard.press('Enter')
+    await expect(intro(page)).toBeVisible()
+    if (!(await dialog.isVisible())) await intro(page).getByRole('button', { name: 'Đổi câu hỏi' }).click()
+    await dialog.getByRole('button', { name: 'Chọn E2E Bảng nhân 7' }).click()
+
+    // The set's game, on its introduction, in place of the sample.
+    await expect(page).toHaveURL(/\/play\/g-[a-z0-9]+$/)
+    await expect(page).not.toHaveURL(sample)
+    await expect(page.getByText('Đã đổi sang: E2E Bảng nhân 7')).toBeVisible()
+    await expect(intro(page)).toContainText('Câu hỏi của cô')
+    await expect(intro(page)).toContainText('Trắc nghiệm – E2E Bảng nhân 7')
+
+    // And back to the sample.
+    await intro(page).getByRole('button', { name: 'Đổi câu hỏi' }).click()
+    await expect(dialog.getByRole('listitem', { name: 'Trắc nghiệm – E2E Bảng nhân 7' })).toContainText('Đang dùng')
+    await dialog.getByRole('button', { name: 'Chọn Câu hỏi mẫu' }).click()
+    await expect(page).toHaveURL(sample)
+    await expect(intro(page)).toContainText('Câu hỏi mẫu')
+
+    // The switches replaced each other: "Quay lại" leaves the game.
+    await intro(page).getByRole('button', { name: 'Quay lại' }).click()
+    await expect(page).toHaveURL(/\/games\/new$/)
+  } finally {
+    await api.delete(`question-sets/${setCode}`)
+  }
+})
+
+test('"Đổi câu hỏi" can write new questions in the editor', async ({ page }) => {
+  await page.goto('/games/new')
+  await page.getByRole('button', { name: 'Chơi ngay Trắc nghiệm' }).click()
+  await intro(page).getByRole('button', { name: 'Đổi câu hỏi' }).click()
+  await page.getByRole('dialog').getByRole('button', { name: /Soạn câu hỏi/ }).click()
+  await expect(page).toHaveURL(/\/games\/g-[a-z0-9]+\/edit$/)
+})
