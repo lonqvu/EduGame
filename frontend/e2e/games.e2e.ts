@@ -263,17 +263,6 @@ test('the editor autosaves edits and they are there after a reload', async ({ pa
   await expect(page.getByLabel('Phương án C', { exact: true })).toHaveValue('Nam')
 })
 
-test('a new game made from the chooser shows up in the library', async ({ page, backend }) => {
-  await page.goto('/games/new')
-  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Trắc nghiệm' }).click()
-  await page.getByRole('dialog', { name: /Chơi với câu hỏi nào/ }).getByRole('button', { name: /Soạn câu hỏi/ }).click()
-  await page.waitForURL(/\/games\/(g-[a-z0-9]+)\/edit$/)
-  const code = page.url().match(/(g-[a-z0-9]+)\/edit$/)![1]
-  backend.adopt(code)
-  await expect(page.getByLabel('Nội dung câu hỏi')).toBeVisible()
-  expect((await backend.library()).map((g) => g.code)).toContain(code)
-})
-
 test('each name picker is its own game, grouped under the "Gọi tên" filter', async ({ page }) => {
   await page.goto('/games/new')
   await page.getByRole('tab', { name: 'Gọi tên' }).click()

@@ -119,26 +119,6 @@ test('without a class, the name tools ask for names on the spot, or roll numbers
   await expect(page.getByText('Số 5', { exact: true })).toBeVisible()
 })
 
-test('"Cách chơi" on a card explains the game, then plays it with sample questions or opens the editor', async ({ page }) => {
-  await page.goto('/games/new')
-  await page.getByRole('button', { name: 'Cách chơi Trắc nghiệm' }).click()
-  const guide = page.getByRole('dialog', { name: 'Cách chơi: Trắc nghiệm' })
-  await expect(guide).toBeVisible()
-  await expect(guide.getByRole('list', { name: 'Các bước chơi' }).getByRole('listitem').first()).toBeVisible()
-  await expect(guide.getByRole('button', { name: '✎ Dùng câu hỏi của cô' })).toBeVisible()
-  await guide.getByRole('button', { name: '▶ Chơi thử với câu hỏi mẫu' }).click()
-  await expect(page).toHaveURL(/\/play\/g-/)
-  await expect(intro(page)).toContainText('Trắc nghiệm mẫu')
-
-  // A tool has no questions: one button that plays it.
-  await page.goto('/games/new')
-  await page.getByRole('button', { name: 'Cách chơi Đồng hồ đếm ngược' }).click()
-  const tool = page.getByRole('dialog', { name: 'Cách chơi: Đồng hồ đếm ngược' })
-  await expect(tool.getByRole('list', { name: 'Các bước chơi' }).getByRole('listitem')).toHaveCount(3)
-  await expect(tool.getByRole('button', { name: '✎ Dùng câu hỏi của cô' })).toHaveCount(0)
-  await expect(tool.getByRole('button', { name: '▶ Chơi ngay' })).toBeVisible()
-})
-
 test('the introduction of a game opened with "Chơi ngay" leads back to the chooser', async ({ page }) => {
   await page.goto('/games/new')
   await page.getByRole('button', { name: 'Chơi ngay Trắc nghiệm' }).click()

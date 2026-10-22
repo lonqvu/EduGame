@@ -77,17 +77,6 @@ html[data-reduce-motion] *::after {
   }
 }
 
-/* "Cách chơi": the card art floats gently (off with "Giảm hiệu ứng chuyển động", see motion-safe). */
-@keyframes guide-float {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-6px) scale(1.02);
-  }
-}
-
 /* A page coming in (MainLayout): rises a little while it fades in. Off with "Giảm hiệu ứng chuyển động". */
 @keyframes page-in {
   from {
