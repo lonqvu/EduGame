@@ -187,9 +187,17 @@ test('"Chơi" makes a game from the set and plays it at once', async ({ page, ba
   await row(page, title).getByRole('button', { name: 'Chơi', exact: true }).click()
   const using = page.getByRole('dialog', { name: 'Chơi với bộ câu hỏi này' })
   await expect(using.getByRole('radio', { name: /Trắc nghiệm/ })).toHaveAttribute('aria-checked', 'true')
-  await expect(using.getByRole('radio', { name: /Trắc nghiệm/ })).toContainText('Dùng được 2/3 câu (câu trắc nghiệm)')
+  await expect(using.getByRole('radio', { name: /Trắc nghiệm/ })).toContainText('Dùng được 2/3 câu trắc nghiệm')
   await expect(using.getByRole('radio', { name: /Lật ô thi đua/ })).toContainText('Dùng được cả 3 câu')
+  // The games come a page at a time, the one picked kept across pages.
+  await expect(using.getByRole('radio')).toHaveCount(8)
+  await expect(using.getByRole('radio', { name: /Đoán chữ/ })).toHaveCount(0)
+  await using.getByRole('listitem', { name: '3' }).click()
+  await expect(using.getByRole('radio', { name: /Đoán chữ/ })).toBeVisible()
+  await expect(using).toContainText('đang chọn Trắc nghiệm')
+  await using.getByRole('listitem', { name: '1' }).click()
   await using.getByRole('radio', { name: /Rung chuông vàng/ }).click()
+  await expect(using).toContainText('đang chọn Rung chuông vàng')
   await using.getByRole('button', { name: '▶ Chơi ngay' }).click()
 
   await expect(page).toHaveURL(/\/play\/g-[a-z0-9]+$/)

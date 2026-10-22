@@ -1,4 +1,4 @@
-import { App, Modal, Select } from 'antd'
+import { App, Modal, Pagination, Select } from 'antd'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import * as questionSetApi from '@/api/questionSetApi'
@@ -10,6 +10,11 @@ import type { QuestionGameCode, QuestionSetSummaryResponse } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
 import { enterFullscreen } from '@/utils/fullscreen'
 import { usableCount, USE_GAMES } from '@/utils/questionSets'
+
+/** Games shown at once: two rows of four, so the dialog fits the screen without scrolling. */
+export const GAMES_PER_PAGE = 8
+/** The page of the dialog that shows this game. */
+const pageOf = (game?: QuestionGameCode) => Math.floor(Math.max(0, USE_GAMES.findIndex((g) => g.code === game)) / GAMES_PER_PAGE) + 1
 
 interface UseSetModalProps {
   open: boolean
@@ -39,13 +44,18 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
   const set = sets.find((s) => s.code === code)
   const firstUsable = (s?: QuestionSetSummaryResponse) => USE_GAMES.find((g) => s && usableCount(s, g.code) > 0)?.code
   const [game, setGame] = useState<QuestionGameCode | undefined>(firstUsable(set))
+  const [page, setPage] = useState(() => pageOf(game))
   const [making, setMaking] = useState(false)
   const fullscreenOnStart = useSettingsStore((s) => s.settings.display.fullscreenOnStart)
 
   const pickSet = (next: string) => {
     setCode(next)
     const nextSet = sets.find((s) => s.code === next)
-    if (!game || !nextSet || usableCount(nextSet, game) === 0) setGame(firstUsable(nextSet))
+    if (!game || !nextSet || usableCount(nextSet, game) === 0) {
+      const next = firstUsable(nextSet)
+      setGame(next)
+      setPage(pageOf(next))
+    }
   }
 
   const make = async () => {
@@ -77,7 +87,8 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
       confirmLoading={making}
       onOk={() => void make()}
       onCancel={onClose}
-      width={600}
+      width={1040}
+      style={{ top: 20 }}
     >
       <div className="flex flex-col gap-4 pt-1">
         {!presetCode && (
@@ -101,8 +112,8 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
               Chọn trò chơi cho <strong className="text-ink">{set.title}</strong>. Câu hỏi được chép sang trò chơi mới: sửa bộ câu hỏi
               sau này không làm đổi trò chơi.
             </p>
-            <div role="radiogroup" aria-label="Trò chơi" className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-              {USE_GAMES.map((g) => {
+            <div role="radiogroup" aria-label="Trò chơi" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {USE_GAMES.slice((page - 1) * GAMES_PER_PAGE, page * GAMES_PER_PAGE).map((g) => {
                 const usable = usableCount(set, g.code)
                 const checked = g.code === game
                 return (
@@ -117,26 +128,39 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
                       checked ? 'border-primary shadow-[0_6px_16px_rgba(53,99,233,0.18)]' : 'border-line-soft enabled:hover:border-[#C9D9F5]'
                     }`}
                   >
-                    <img src={gameThumb(g.code)} alt="" className="aspect-[5/2] w-full object-cover" />
+                    <img src={gameThumb(g.code)} alt="" className="aspect-[3/1] w-full object-cover" />
                     {checked && (
                       <span className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-primary text-white">
                         <CheckIcon size={14} />
                       </span>
                     )}
-                    <span className="flex flex-col gap-0.5 px-3 py-2.5">
+                    <span className="flex flex-col gap-0.5 px-3 py-2">
                       <span className="text-[15px] font-extrabold">{g.name}</span>
-                      <span className="text-[12.5px] leading-snug text-ink-muted">{g.description}</span>
+                      <span className="line-clamp-2 min-h-[2.6em] text-[12.5px] leading-snug text-ink-muted">{g.description}</span>
                       <span className={`mt-1 text-[12.5px] font-bold ${usable ? 'text-success' : 'text-danger'}`}>
                         {usable
                           ? usable === set.questionCount
                             ? `Dùng được cả ${usable} câu`
-                            : `Dùng được ${usable}/${set.questionCount} câu (câu trắc nghiệm)`
+                            : `Dùng được ${usable}/${set.questionCount} câu trắc nghiệm`
                           : 'Bộ chưa có câu trắc nghiệm'}
                       </span>
                     </span>
                   </button>
                 )
               })}
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[13.5px] text-ink-muted">
+                {USE_GAMES.length} trò chơi · đang chọn <strong className="text-ink">{USE_GAMES.find((g) => g.code === game)?.name ?? '—'}</strong>
+              </span>
+              <Pagination
+                current={page}
+                pageSize={GAMES_PER_PAGE}
+                total={USE_GAMES.length}
+                onChange={setPage}
+                showSizeChanger={false}
+                aria-label="Trang trò chơi"
+              />
             </div>
           </>
         )}
