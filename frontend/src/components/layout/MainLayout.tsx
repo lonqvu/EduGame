@@ -69,11 +69,14 @@ export function MainLayout() {
         </div>
 
         {fullWidth ? (
-          <main className="min-w-0 flex-1 px-4 pt-3 pb-20 lg:pr-5 lg:pl-[17px]">
+          <main key={pathname} className="min-w-0 flex-1 animate-[page-in_220ms_ease-out] px-4 pt-3 pb-20 lg:pr-5 lg:pl-[17px]">
             <Outlet />
           </main>
         ) : (
-          <main className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-1 flex-col px-4 pt-7 pb-20 sm:px-8">
+          <main
+            key={pathname}
+            className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-1 animate-[page-in_220ms_ease-out] flex-col px-4 pt-7 pb-20 sm:px-8"
+          >
             <Outlet />
           </main>
         )}

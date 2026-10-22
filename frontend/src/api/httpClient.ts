@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { refreshSession, toApiError } from '@/api/session'
+import { useLoadingStore } from '@/store/loadingStore'
 import type { ApiError } from '@/types/api'
 import { getAccessToken } from '@/utils/authToken'
 import { env } from '@/utils/env'
@@ -14,18 +15,31 @@ export const httpClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-httpClient.interceptors.request.use((config) => {
+type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean; _loading?: boolean }
+
+/** Every request shows in the top loading bar until it ends (once, whatever the outcome). */
+function settle(config: RetriableConfig | undefined) {
+  if (!config?._loading) return
+  config._loading = false
+  useLoadingStore.getState().end()
+}
+
+httpClient.interceptors.request.use((config: RetriableConfig) => {
   const token = getAccessToken()
   if (token) config.headers.Authorization = `Bearer ${token}`
+  config._loading = true
+  useLoadingStore.getState().begin()
   return config
 })
 
-type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean }
-
 httpClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    settle(response.config)
+    return response
+  },
   async (error: AxiosError<ApiError>) => {
     const config = error.config as RetriableConfig | undefined
+    settle(config)
     // Access token expired or its session ended: renew it once from the refresh token cookie and retry.
     if (error.response?.status === 401 && config && !config._retried) {
       config._retried = true

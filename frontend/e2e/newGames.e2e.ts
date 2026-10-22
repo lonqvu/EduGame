@@ -109,15 +109,13 @@ test('a quiz can be played as Rung chuông vàng or Đua thuyền from the edito
   await expect(page.getByText('Đội nào giành được quyền trả lời? Cô bấm vào tên đội.')).toBeVisible()
 })
 
-test('the chooser lists the new games, and a new Rung chuông vàng opens the quiz editor', async ({ page, backend }) => {
+test('the chooser lists the new games, and a Rung chuông vàng opens the quiz editor', async ({ page, backend }) => {
   await page.goto('/games/new')
   for (const name of ['Rung chuông vàng', 'Đua thuyền']) {
     await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
   }
-  await page.getByRole('button', { name: 'Dùng câu hỏi của cô cho Rung chuông vàng' }).click()
-  await page.getByRole('dialog', { name: /Chơi với câu hỏi nào/ }).getByRole('button', { name: /Soạn câu hỏi/ }).click()
-  await page.waitForURL(/\/games\/(g-[a-z0-9]+)\/edit$/)
-  backend.adopt(page.url().match(/(g-[a-z0-9]+)\/edit$/)![1])
+  const game = await backend.createGame('GOLDEN_BELL', 'E2E Rung chuông')
+  await page.goto(`/games/${game.code}/edit`)
   await expect(page.getByRole('button', { name: 'Thêm câu Đúng / Sai' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Chơi kiểu khác' })).toBeVisible()
 })

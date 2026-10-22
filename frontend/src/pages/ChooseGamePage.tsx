@@ -1,6 +1,6 @@
 import { App, Dropdown } from 'antd'
 import { useEffect, useState, type ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
 import {
   ArrowRightIcon,
@@ -11,12 +11,10 @@ import {
 } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { PICK_MODES, type PickMode } from '@/game-engine/name-picker/modes'
-import { editPath, gameRegistry, playPath, toolPath, type GameBadge } from '@/game-engine/registry'
+import { editPath, gameRegistry, playPath, type GameBadge } from '@/game-engine/registry'
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
-import { HowToPlayDrawer } from '@/pages/choose-game/HowToPlayDrawer'
-import { NewGameModal } from '@/pages/choose-game/NewGameModal'
 import { usePlayNow } from '@/pages/choose-game/usePlayNow'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { GameCategory, GameSummary, GameTemplate, GameType } from '@/types/game'
@@ -87,7 +85,6 @@ const fold = (text: string) =>
     .toLowerCase()
 
 export function ChooseGamePage() {
-  const navigate = useNavigate()
   const { message } = App.useApp()
   const templates = useCatalogStore((s) => s.templates)
   const status = useCatalogStore((s) => s.status)
@@ -100,14 +97,11 @@ export function ChooseGamePage() {
   const games = useGameLibraryStore((s) => s.games)
   const loadGames = useGameLibraryStore((s) => s.loadGames)
 
-  const [newGame, setNewGame] = useState<GameTemplate | null>(null)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('ALL')
   const [sort, setSort] = useState<Sort>('popular')
   const [allRecent, setAllRecent] = useState(false)
   const { playNow, busy } = usePlayNow()
-  /** The card whose "Cách chơi" is open. */
-  const [guideOf, setGuideOf] = useState<Entry | null>(null)
 
   useEffect(() => {
     void loadTemplates()
@@ -125,27 +119,6 @@ export function ChooseGamePage() {
     void playNow(template.type, pickMode ? `/tools/pick/${pickMode}` : undefined)
   }
 
-  /** "Dùng câu hỏi của cô": a question set, or new content in the editor. */
-  const choose = ({ template, pickMode }: Entry) => {
-    if (pickMode) {
-      navigate(`/tools/pick/${pickMode}`)
-      return
-    }
-    if (!gameRegistry[template.type].playable && !gameRegistry[template.type].hasEditor) {
-      message.info(`Trò "${template.name}" đang được hoàn thiện.`)
-      return
-    }
-    if (!gameRegistry[template.type].usesQuestions) {
-      navigate(toolPath(template.type))
-      return
-    }
-    if (!gameRegistry[template.type].hasEditor) {
-      message.info(`Trò "${template.name}" đang được hoàn thiện.`)
-      return
-    }
-    // Name it and pick how to start; the game is made only once the teacher confirms.
-    setNewGame(template)
-  }
 
   if (status === 'error') return <LoadError onRetry={() => void loadTemplates()} />
   if (status !== 'ready') return <PageLoading />
@@ -331,8 +304,6 @@ export function ChooseGamePage() {
                   entry={entry}
                   opening={busy === entry.template.type && !entry.pickMode}
                   onPlay={() => play(entry)}
-                  onChoose={() => choose(entry)}
-                  onGuide={() => setGuideOf(entry)}
                 />
               </li>
             ))}
@@ -340,24 +311,6 @@ export function ChooseGamePage() {
         )}
       </section>
 
-      <HowToPlayDrawer
-        game={guideOf && { type: guideOf.template.type, name: guideOf.name, description: guideOf.description, art: guideOf.art }}
-        opening={!!guideOf && busy === guideOf.template.type}
-        onClose={() => setGuideOf(null)}
-        onPlay={() => guideOf && play(guideOf)}
-        onWrite={() => {
-          if (!guideOf) return
-          choose(guideOf)
-          setGuideOf(null)
-        }}
-      />
-
-      <NewGameModal
-        template={newGame}
-        grade={grade ?? undefined}
-        className={className || undefined}
-        onClose={() => setNewGame(null)}
-      />
     </div>
   )
 }
@@ -367,18 +320,14 @@ interface GameCardProps {
   /** "Chơi ngay" is opening this game. */
   opening: boolean
   onPlay: () => void
-  onChoose: () => void
-  /** "Cách chơi" */
-  onGuide: () => void
 }
 
-function GameCard({ entry, opening, onPlay, onChoose, onGuide }: GameCardProps) {
+function GameCard({ entry, opening, onPlay }: GameCardProps) {
   const def = gameRegistry[entry.template.type]
   const badge = def.badge && BADGES[def.badge]
-  const ownContent = def.usesQuestions && !entry.pickMode
   return (
     // The picture keeps the 2:1 shape the card art is drawn in, so it is never cropped or blown up. The whole card plays
-    // the game ("Chơi ngay"'s ::after covers it); "Dùng câu hỏi của cô" sits above it.
+    // the game ("Chơi ngay"'s ::after covers it).
     <article className="group relative flex h-full flex-col rounded-[16px] border border-[#E6EBF3] bg-white p-[6px] pb-[10px] shadow-[0_1px_3px_rgba(31,42,68,0.05)] transition-[box-shadow,transform,border-color] duration-200 focus-within:border-primary hover:-translate-y-1 hover:border-[#C9D6F5] hover:shadow-[0_12px_28px_rgba(31,42,68,0.12)]">
       <div className="relative aspect-[2/1] shrink-0 overflow-hidden rounded-[12px]">
         <img
@@ -417,34 +366,12 @@ function GameCard({ entry, opening, onPlay, onChoose, onGuide }: GameCardProps) 
             <PlayTriangle />
             {opening ? 'Đang mở…' : 'Chơi ngay'}
           </button>
-          <div className="relative z-[1] flex h-[30px] items-center justify-center gap-1 pt-[6px]">
-            <button
-              type="button"
-              onClick={onGuide}
-              aria-label={`Cách chơi ${entry.name}`}
-              className={CARD_LINK}
-            >
-              ⓘ Cách chơi
-            </button>
-            {ownContent && (
-              <>
-                <span aria-hidden="true" className="text-line-strong">
-                  ·
-                </span>
-                <button type="button" onClick={onChoose} aria-label={`Dùng câu hỏi của cô cho ${entry.name}`} className={CARD_LINK}>
-                  ✎ Dùng câu hỏi của cô
-                </button>
-              </>
-            )}
-          </div>
         </div>
       </div>
     </article>
   )
 }
 
-const CARD_LINK =
-  'cursor-pointer rounded-[8px] border-0 bg-transparent px-1.5 py-1 font-[inherit] text-[13px] font-bold text-primary hover:bg-primary-soft hover:text-primary-ink focus-visible:ring-2 focus-visible:ring-primary'
 
 function PlayTriangle() {
   return (
