@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The question games added by V17, V19 and V20 (and the tools of V18), end to end against PostgreSQL: the catalog lists them as question games, they take
+ * The question games added by V17, V19 and V20 (and the tools of V18 and V21), end to end against PostgreSQL: the catalog lists them as question games, they take
  * the quiz items (and only those), start with their own rules, and question sets play them.
  */
 @SpringBootTest
@@ -72,7 +72,8 @@ class MoreQuizGamesApiTest {
         JsonNode templates = body(mockMvc.perform(get("/api/v1/game-templates")).andExpect(status().isOk()));
         Map<String, String> categoryOf = new HashMap<>();
         templates.forEach(t -> categoryOf.put(t.path("code").asText(), t.path("categoryCode").asText()));
-        for (String code : List.of("COIN_FLIP", "RANDOM_NUMBER", "SCOREBOARD", "NOISE_METER", "TRAFFIC_LIGHT")) {
+        for (String code : List.of("COIN_FLIP", "RANDOM_NUMBER", "SCOREBOARD", "NOISE_METER", "TRAFFIC_LIGHT", "STOPWATCH",
+                "CARD_DRAW", "SEATING")) {
             assertThat(categoryOf).as(code).containsEntry(code, "CLASS_TOOL");
         }
         // Tools have no sample content.

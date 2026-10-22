@@ -593,6 +593,32 @@ for i, (ch, col) in enumerate([('A', '#FFFFFF'), ('O', '#2E9E6A'), ('Ê', '#E548
 hm += text(380, 112, '?', 46, '#FFD15C')
 cards.append(card('hangman', '#2C3577', '#1E2457', '#3B4594', hm, '#FFD15C', '#FFFFFF'))
 
+# --- Bấm giờ: a stopwatch with a running time and a finish flag. ---
+sw = ('<circle cx="240" cy="132" r="76" fill="#FFFFFF" stroke="#3563E9" stroke-width="10"/>'
+      + rect(226, 38, 28, 22, 6, '#3563E9') + rect(300, 64, 22, 16, 5, '#3563E9', 'transform="rotate(40 311 72)"')
+      + '<path d="M240 132 L240 82" stroke="#1F2A44" stroke-width="6" stroke-linecap="round"/>'
+      + '<path d="M240 132 L280 152" stroke="#E5484D" stroke-width="5" stroke-linecap="round"/><circle cx="240" cy="132" r="8" fill="#1F2A44"/>'
+      + rect(176, 200, 128, 30, 15, '#1F2A44') + text(240, 222, '01:23.4', 18, '#FFFFFF'))
+cards.append(card('stopwatch', '#EAF1FE', '#D2DFFB', '#BFD1FA', sw, '#FFFFFF', '#3563E9'))
+
+# --- Bốc thăm: a fan of face-down cards, one turned over. ---
+cd = ''
+for i, rot in enumerate([-18, -6, 6, 18]):
+    cd += (f'<g transform="rotate({rot} 240 230)">' + rect(208, 70, 64, 92, 10, '#3563E9') + rect(214, 76, 52, 80, 7, '#4A75F0')
+           + text(240, 128, '?', 28, '#FFFFFF') + '</g>')
+cd += rect(270, 40, 84, 116, 12, '#FFFFFF', 'transform="rotate(10 312 98)"') + text(312, 106, '⭐', 30, '#F2A93B')
+cards.append(card('card-draw', '#FFF4E3', '#FFE2BC', '#FFD39C', cd, '#FFFFFF', '#F08C00'))
+
+# --- Sơ đồ chỗ ngồi: the board and rows of desks, two seats highlighted for a swap. ---
+seat = rect(170, 34, 140, 22, 8, '#2E5E4E')
+for r in range(3):
+    for c in range(4):
+        x, y = 128 + c * 58, 72 + r * 44
+        hi = (r, c) in ((0, 1), (2, 2))
+        seat += rect(x, y, 50, 32, 8, '#FFC93C' if hi else '#FFFFFF')
+seat += '<path d="M211 106 Q270 140 290 160" stroke="#F28C28" stroke-width="4" stroke-dasharray="6 6" fill="none"/>'
+cards.append(card('seating', '#E8F7EE', '#CDEED9', '#B4E4C8', seat, '#FFFFFF', '#2E9E6A'))
+
 for name, svg in cards:
     with open(f'{OUT}/card-{name}.svg', 'w') as f:
         f.write(svg)

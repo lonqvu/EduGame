@@ -60,6 +60,9 @@ export const gameRegistry: Record<GameType, GameDefinition> = {
   SCOREBOARD: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 34, itemUnit: 'đội', toolRoute: '/tools/scoreboard' },
   NOISE_METER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 35, itemUnit: 'lần', toolRoute: '/tools/noise' },
   TRAFFIC_LIGHT: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 36, itemUnit: 'đèn', toolRoute: '/tools/light' },
+  STOPWATCH: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 37, itemUnit: 'lần', toolRoute: '/tools/stopwatch' },
+  CARD_DRAW: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 38, itemUnit: 'lá', toolRoute: '/tools/draw' },
+  SEATING: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 39, itemUnit: 'chỗ', toolRoute: '/tools/seating' },
 }
 
 /** Games whose items are quiz questions: any of them can be played the way of the others. */

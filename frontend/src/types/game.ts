@@ -36,6 +36,9 @@ export type GameType =
   | 'SCOREBOARD'
   | 'NOISE_METER'
   | 'TRAFFIC_LIGHT'
+  | 'STOPWATCH'
+  | 'CARD_DRAW'
+  | 'SEATING'
 
 export type GameCategory = 'QUESTION' | 'PUZZLE' | 'RANDOM_TOOL' | 'CLASS_TOOL'
 

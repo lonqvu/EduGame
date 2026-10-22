@@ -20,11 +20,14 @@ import { ProfilePage } from '@/pages/ProfilePage'
 import { QuestionSetPage } from '@/pages/QuestionSetPage'
 import { QuestionSetsPage } from '@/pages/QuestionSetsPage'
 import {
+  CardDrawPage,
   CoinFlipPage,
   DicePage,
   NoiseMeterPage,
   RandomNumberPage,
   ScoreboardPage,
+  SeatingPage,
+  StopwatchPage,
   TeamMakerPage,
   TimerPage,
   TrafficLightPage,
@@ -88,6 +91,9 @@ export const router = createBrowserRouter([
       { path: 'tools/scoreboard', element: <ScoreboardPage /> },
       { path: 'tools/noise', element: <NoiseMeterPage /> },
       { path: 'tools/light', element: <TrafficLightPage /> },
+      { path: 'tools/stopwatch', element: <StopwatchPage /> },
+      { path: 'tools/draw', element: <CardDrawPage /> },
+      { path: 'tools/seating', element: <SeatingPage /> },
     ],
   },
 ])

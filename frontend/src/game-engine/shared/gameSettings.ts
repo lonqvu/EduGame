@@ -59,6 +59,9 @@ export type RulesGameType = Exclude<
   | 'SCOREBOARD'
   | 'NOISE_METER'
   | 'TRAFFIC_LIGHT'
+  | 'STOPWATCH'
+  | 'CARD_DRAW'
+  | 'SEATING'
 >
 
 /** What each projector plays with when `settings` leaves a rule out. */

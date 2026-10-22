@@ -101,4 +101,31 @@ export const TOOL_GUIDES: Partial<Record<GameType, ToolGuide>> = {
     ],
     tip: 'Nhấn phím 1, 2, 3 để đổi đèn nhanh khi đang giảng bài.',
   },
+  STOPWATCH: {
+    goal: 'Bấm giờ thật to trên màn chiếu cho các cuộc thi đua nhanh.',
+    steps: [
+      { title: 'Bắt đầu', text: 'Bấm Bắt đầu hoặc nhấn phím cách, đồng hồ chạy.' },
+      { title: 'Ghi thời gian', text: 'Nhóm nào xong thì bấm "Ghi thời gian".' },
+      { title: 'So kết quả', text: 'Danh sách cho biết nhóm nào nhanh nhất.' },
+    ],
+    tip: 'Hợp cho thi giải toán nhanh, xếp hình, đọc đúng và nhanh.',
+  },
+  CARD_DRAW: {
+    goal: 'Bốc thăm ngẫu nhiên chủ đề, câu hỏi hay nhiệm vụ cho học sinh.',
+    steps: [
+      { title: 'Viết lá thăm', text: 'Bấm "Sửa lá thăm", mỗi dòng một lá.' },
+      { title: 'Bốc thăm', text: 'Học sinh bấm Bốc thăm, một lá lật ra.' },
+      { title: 'Không trùng', text: 'Lá đã bốc không ra lại, bấm "Xáo lại" để bốc từ đầu.' },
+    ],
+    tip: 'Các lá thăm được giữ lại trên máy này cho tiết sau.',
+  },
+  SEATING: {
+    goal: 'Xếp chỗ ngồi ngẫu nhiên cho cả lớp và đổi chỗ dễ dàng.',
+    steps: [
+      { title: 'Chọn số chỗ', text: 'Chọn số chỗ mỗi hàng: 4, 6 hoặc 8.' },
+      { title: 'Xếp ngẫu nhiên', text: 'Bấm "Xếp ngẫu nhiên" để chia chỗ cho cả lớp.' },
+      { title: 'Đổi chỗ', text: 'Bấm hai bạn bất kỳ để đổi chỗ hai bạn đó.' },
+    ],
+    tip: CLASS_LIST,
+  },
 }
