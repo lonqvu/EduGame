@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { SoundStage } from '@/sound/SoundStage'
 
 const STAGE_WIDTH = 1280
@@ -24,15 +24,24 @@ function fitScale() {
  */
 export function ProjectorStage({ background, music, children }: ProjectorStageProps) {
   const [scale, setScale] = useState(fitScale)
+  const box = useRef<HTMLDivElement>(null)
 
+  // Fit the box the stage really has, not the window: an overlay put in full screen (the rules show) can be sized
+  // differently from what the window reports, and its new size can land after the window's resize event.
   useEffect(() => {
-    const onResize = () => setScale(fitScale())
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+    const el = box.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      if (width > 0 && height > 0) setScale(Math.min(width / STAGE_WIDTH, height / STAGE_HEIGHT))
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [])
 
   return (
     <div
+      ref={box}
       className="relative h-dvh w-full overflow-hidden bg-ink bg-cover bg-center"
       style={{ backgroundImage: background ? `url(${background})` : undefined }}
     >
