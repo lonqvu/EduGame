@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
+import { ChevronLeftIcon } from '@/components/ui/icons'
 import { gameGuide, type GuideGameType } from '@/game-engine/gameGuide'
 import { editPath, gameRegistry } from '@/game-engine/registry'
 import { PLAY_DEFAULTS, readPlaySettings, type PlaySettings } from '@/game-engine/shared/gameSettings'
@@ -40,6 +41,10 @@ export function GameIntro({ mode, game, kindName, settings, playable, paused, on
     (s): s is Extract<QuickSetting, { kind: 'select' }> => s.kind === 'select' && (INTRO_SETTINGS as readonly string[]).includes(s.key),
   )
   const ready = playable > 0
+  const navigate = useNavigate()
+  const location = useLocation()
+  // Back where the teacher came from (the game chooser, the home page...); opened directly, to the games.
+  const goBack = () => (location.key === 'default' ? navigate('/games/new') : navigate(-1))
 
   useEffect(() => {
     if (paused || !ready) return
@@ -55,6 +60,14 @@ export function GameIntro({ mode, game, kindName, settings, playable, paused, on
   return (
     <section aria-label={`Giới thiệu trò chơi ${game.title}`} className="flex h-full flex-col gap-4 px-10 py-7">
       <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={goBack}
+          aria-label="Quay lại"
+          className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-ink hover:text-primary-ink"
+        >
+          <ChevronLeftIcon size={22} />
+        </button>
         <span className="rounded-full bg-white px-5 py-2 text-[18px] font-extrabold">{kindName}</span>
         {game.sample && <span className="rounded-full bg-[#FFF1C2] px-4 py-2 text-[16px] font-bold text-[#7A5600]">Câu hỏi mẫu</span>}
         <button

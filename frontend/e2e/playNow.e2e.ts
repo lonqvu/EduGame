@@ -138,3 +138,18 @@ test('"Cách chơi" on a card explains the game, then plays it with sample quest
   await expect(tool.getByRole('button', { name: '✎ Dùng câu hỏi của cô' })).toHaveCount(0)
   await expect(tool.getByRole('button', { name: '▶ Chơi ngay' })).toBeVisible()
 })
+
+test('the introduction of a game opened with "Chơi ngay" leads back to the chooser', async ({ page }) => {
+  await page.goto('/games/new')
+  await page.getByRole('button', { name: 'Chơi ngay Trắc nghiệm' }).click()
+  await expect(intro(page)).toBeVisible()
+  const url = page.url()
+  await intro(page).getByRole('button', { name: 'Quay lại' }).click()
+  await expect(page).toHaveURL(/\/games\/new$/)
+
+  // Opened directly (a link, a new tab), it leads to the chooser too.
+  const tab = await page.context().newPage()
+  await tab.goto(url)
+  await intro(tab).getByRole('button', { name: 'Quay lại' }).click()
+  await expect(tab).toHaveURL(/\/games\/new$/)
+})
