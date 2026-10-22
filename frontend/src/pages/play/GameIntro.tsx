@@ -22,19 +22,15 @@ interface GameIntroProps {
   settings: Record<string, unknown>
   /** Items with enough content to play. */
   playable: number
-  /** The full rules are open over this screen: Enter is theirs. */
-  paused: boolean
   onChange: (patch: Partial<PlaySettings>) => void
   onStart: () => void
-  onShowRules: () => void
 }
 
 /**
  * The first screen of a game on the projector, for the whole class: what the game is, how a round goes (from the
  * settings it is played with), the number of teams and the time per question, and a big "Bắt đầu" (or Enter).
- * The full rules open as slides from here, and from the "?" button while playing.
  */
-export function GameIntro({ mode, game, kindName, settings, playable, paused, onChange, onStart, onShowRules }: GameIntroProps) {
+export function GameIntro({ mode, game, kindName, settings, playable, onChange, onStart }: GameIntroProps) {
   const guide = gameGuide(mode, settings)
   const current = readPlaySettings(settings, mode === 'GRID_BOARD' ? {} : PLAY_DEFAULTS[mode])
   const choices = QUICK_SETTINGS[mode].filter(
@@ -47,15 +43,17 @@ export function GameIntro({ mode, game, kindName, settings, playable, paused, on
   const goBack = () => (location.key === 'default' ? navigate('/games/new') : navigate(-1))
 
   useEffect(() => {
-    if (paused || !ready) return
+    if (!ready) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter' || e.repeat || e.target instanceof HTMLButtonElement) return
+      // Enter on a button presses it; on the team / time chips (just picked) it starts, as anywhere else.
+      const onButton = e.target instanceof HTMLButtonElement && e.target.getAttribute('role') !== 'radio'
+      if (e.key !== 'Enter' || e.repeat || onButton) return
       e.preventDefault()
       onStart()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [paused, ready, onStart])
+  }, [ready, onStart])
 
   return (
     <section aria-label={`Giới thiệu trò chơi ${game.title}`} className="flex h-full flex-col gap-4 px-10 py-7">
@@ -70,13 +68,6 @@ export function GameIntro({ mode, game, kindName, settings, playable, paused, on
         </button>
         <span className="rounded-full bg-white px-5 py-2 text-[18px] font-extrabold">{kindName}</span>
         {game.sample && <span className="rounded-full bg-[#FFF1C2] px-4 py-2 text-[16px] font-bold text-[#7A5600]">Câu hỏi mẫu</span>}
-        <button
-          type="button"
-          onClick={onShowRules}
-          className="ml-auto h-11 cursor-pointer rounded-full border-0 bg-white px-6 font-[inherit] text-[17px] font-extrabold text-primary-ink hover:brightness-95"
-        >
-          Xem luật chơi
-        </button>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-5 rounded-[32px] bg-white px-10 py-7">

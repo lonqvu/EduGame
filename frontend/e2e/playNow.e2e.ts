@@ -54,20 +54,14 @@ test('"Chơi ngay" puts a question game on the projector at once, with sample qu
   await expect(intro(page).getByRole('radio', { name: '2 đội' })).toHaveAttribute('aria-checked', 'true')
   await expect.poll(async () => (await (await api.get(`games/${code}`)).json()).settings.rules.participants.teams).toBe(2)
 
-  // The full rules, then Enter starts.
-  await intro(page).getByRole('button', { name: 'Xem luật chơi' }).click()
-  const rules = page.getByRole('dialog', { name: /^Luật chơi/ })
-  await expect(rules).toBeVisible()
-  await rules.getByRole('button', { name: 'Thoát' }).click()
-  await expect(rules).toBeHidden()
+  // No rules button: the introduction is the rules. Enter starts.
+  await expect(page.getByRole('button', { name: 'Xem luật chơi' })).toHaveCount(0)
   await page.keyboard.press('Enter')
   await expect(page.getByText('Câu 1 / 10')).toBeVisible()
   await expect(page.getByText('Đội Cam')).toBeVisible()
   await expect(page.getByText('Đội Lá')).toHaveCount(0)
-
-  // "?" shows the rules again while playing.
-  await page.getByRole('button', { name: 'Xem luật chơi' }).click()
-  await expect(page.getByRole('dialog', { name: /^Luật chơi/ })).toBeVisible()
+  // Nor while playing.
+  await expect(page.getByRole('button', { name: 'Xem luật chơi' })).toHaveCount(0)
 })
 
 test('the sample game is made once: playing again opens the same one', async ({ page, api }) => {
