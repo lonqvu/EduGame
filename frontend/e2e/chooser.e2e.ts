@@ -43,3 +43,20 @@ test('on a phone a long group shows six games, and the rest on demand', async ({
   await questions.getByRole('button', { name: /^Xem thêm \d+ trò/ }).click()
   await expect(questions.getByRole('button', { name: 'Chơi ngay Đoán chữ' })).toBeVisible()
 })
+
+test.describe('on a touch screen', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
+
+  test('a tap opens the game at once, with no preview popping up', async ({ page }) => {
+    await page.goto('/games/new')
+    const tile = page.getByRole('button', { name: 'Chơi ngay Vòng quay may mắn', exact: true })
+    await tile.scrollIntoViewIfNeeded()
+    // A finger passing over the card while scrolling is a fake hover: nothing pops up.
+    await tile.hover()
+    await page.waitForTimeout(800)
+    await expect(page.getByRole('tooltip')).toHaveCount(0)
+    await tile.tap()
+    await expect(page).toHaveURL(/\/tools\/wheel$/)
+    await expect(page.getByRole('tooltip')).toHaveCount(0)
+  })
+})

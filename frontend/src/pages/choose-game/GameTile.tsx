@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { gameGuide, isGuideGame } from '@/game-engine/gameGuide'
 import { gameRegistry } from '@/game-engine/registry'
 import type { ChooserEntry } from '@/pages/choose-game/chooserEntries'
+import { useHoverPointer } from '@/utils/pointer'
 import { isSetGame } from '@/utils/questionSets'
 
 const STEP_COLORS = ['#3563E9', '#F28C28', '#2E9E6A']
@@ -18,48 +19,56 @@ interface GameTileProps {
 
 /**
  * A small card of the chooser: picture, name, who plays and how long. The whole card plays the game; hovering it shows
- * what the game is and its first three steps (touch screens open the game at once, its introduction has the rules).
+ * what the game is and its first three steps, with a mouse only: a tap fakes a hover, so on touch screens the preview
+ * would pop up under the finger while scrolling. There a tap opens the game at once, its introduction has the rules.
  */
 export function GameTile({ entry, popular, opening, onPlay }: GameTileProps) {
   const def = gameRegistry[entry.template.type]
+  const hover = useHoverPointer()
+  const card = (
+    <button
+      type="button"
+      onClick={onPlay}
+      disabled={opening}
+      aria-busy={opening}
+      aria-label={`Chơi ngay ${entry.name}`}
+      className="group flex w-full min-w-0 cursor-pointer flex-col border-0 bg-transparent p-0 text-left font-[inherit] text-ink outline-none disabled:cursor-wait"
+    >
+      <span className="relative block overflow-hidden rounded-[14px] border-2 border-transparent transition group-hover:border-primary group-hover:shadow-[0_6px_16px_rgba(53,99,233,0.22)] group-focus-visible:border-primary">
+        <img src={entry.art} alt="" loading="lazy" className="block aspect-[2/1] w-full object-cover" />
+        {def.isNew ? (
+          <Ribbon className="bg-[#2E9E6A] text-white">Mới</Ribbon>
+        ) : (
+          popular && <Ribbon className="bg-[#FFE7A3] text-[#8A5A00]">Phổ biến</Ribbon>
+        )}
+        <span
+          aria-hidden="true"
+          className={`absolute inset-0 m-auto flex size-10 items-center justify-center rounded-full bg-primary text-white shadow-[0_4px_12px_rgba(53,99,233,0.45)] transition ${
+            opening ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100'
+          }`}
+        >
+          {opening ? <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <PlayTriangle />}
+        </span>
+      </span>
+      <span className="mt-[7px] px-0.5 text-[13px] leading-tight font-black max-sm:line-clamp-2 sm:truncate sm:text-[14.5px]">{entry.name}</span>
+      <span className="truncate px-0.5 text-[12px] text-ink-muted">
+        👥 {def.players}
+        <span className="max-sm:hidden"> · ⏱ {def.duration}</span>
+      </span>
+    </button>
+  )
+  if (!hover) return card
   return (
     <Popover
       content={<GamePreview entry={entry} />}
       placement="bottom"
-      mouseEnterDelay={0.4}
+      // Long enough for the mouse to cross the grid without a preview popping up at every card.
+      mouseEnterDelay={0.5}
+      mouseLeaveDelay={0}
       arrow
       styles={{ container: { padding: 0, borderRadius: 16 } }}
     >
-      <button
-        type="button"
-        onClick={onPlay}
-        disabled={opening}
-        aria-busy={opening}
-        aria-label={`Chơi ngay ${entry.name}`}
-        className="group flex w-full min-w-0 cursor-pointer flex-col border-0 bg-transparent p-0 text-left font-[inherit] text-ink outline-none disabled:cursor-wait"
-      >
-        <span className="relative block overflow-hidden rounded-[14px] border-2 border-transparent transition group-hover:border-primary group-hover:shadow-[0_6px_16px_rgba(53,99,233,0.22)] group-focus-visible:border-primary">
-          <img src={entry.art} alt="" loading="lazy" className="block aspect-[2/1] w-full object-cover" />
-          {def.isNew ? (
-            <Ribbon className="bg-[#2E9E6A] text-white">Mới</Ribbon>
-          ) : (
-            popular && <Ribbon className="bg-[#FFE7A3] text-[#8A5A00]">Phổ biến</Ribbon>
-          )}
-          <span
-            aria-hidden="true"
-            className={`absolute inset-0 m-auto flex size-10 items-center justify-center rounded-full bg-primary text-white shadow-[0_4px_12px_rgba(53,99,233,0.45)] transition ${
-              opening ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100'
-            }`}
-          >
-            {opening ? <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <PlayTriangle />}
-          </span>
-        </span>
-        <span className="mt-[7px] px-0.5 text-[13px] leading-tight font-black max-sm:line-clamp-2 sm:truncate sm:text-[14.5px]">{entry.name}</span>
-        <span className="truncate px-0.5 text-[12px] text-ink-muted">
-          👥 {def.players}
-          <span className="max-sm:hidden"> · ⏱ {def.duration}</span>
-        </span>
-      </button>
+      {card}
     </Popover>
   )
 }
