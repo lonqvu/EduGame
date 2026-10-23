@@ -1,7 +1,6 @@
 import { App, Drawer } from 'antd'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
-import { FeedbackButton } from '@/components/feedback/FeedbackButton'
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
 import {
   ChartIcon,
@@ -10,11 +9,13 @@ import {
   HelpIcon,
   HomeIcon,
   MenuIcon,
+  MessageIcon,
   SettingsIcon,
   ShieldIcon,
   UsersIcon,
 } from '@/components/ui/icons'
 import { BrandLogo } from '@/components/ui/BrandLogo'
+import { useFeedbackStore } from '@/store/feedbackStore'
 import { useTeacherStore } from '@/store/teacherStore'
 
 interface NavItem {
@@ -24,6 +25,10 @@ interface NavItem {
   to?: string
   /** Paths that light the item up. */
   match?: (path: string) => boolean
+  /** A button instead of a page ("Góp ý" opens its dialog). */
+  action?: () => void
+  /** Accessible name, when the label is not enough. */
+  ariaLabel?: string
 }
 
 const MAIN_NAV: NavItem[] = [
@@ -38,11 +43,17 @@ const MAIN_NAV: NavItem[] = [
 const ADMIN_NAV: NavItem = { label: 'Quản trị', icon: <ShieldIcon size={22} />, to: '/admin', match: (p) => p.startsWith('/admin') }
 
 const FOOTER_NAV: NavItem[] = [
+  {
+    label: 'Góp ý',
+    icon: <MessageIcon size={22} />,
+    ariaLabel: 'Góp ý cho Lớp Vui',
+    action: () => useFeedbackStore.getState().openFeedback(),
+  },
   { label: 'Cài đặt', icon: <SettingsIcon size={22} />, to: '/settings', match: (p) => p.startsWith('/settings') },
   { label: 'Trợ giúp', icon: <HelpIcon size={22} /> },
 ]
 
-/** Teacher screens: sidebar navigation (a drawer on small screens), the page, and "Góp ý" always at hand. */
+/** Teacher screens: sidebar navigation (a drawer on small screens), with "Góp ý" always at hand, and the page. */
 export function MainLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname } = useLocation()
@@ -51,8 +62,11 @@ export function MainLayout() {
 
   return (
     <div className="flex min-h-full bg-page text-ink">
-      <aside className="sticky top-0 hidden h-dvh w-[195px] shrink-0 flex-col bg-white px-2.5 pt-3.5 pb-6 lg:flex">
-        <Sidebar onNavigate={() => undefined} />
+      {/* White all the way down however long the page; the menu itself stays in view while it scrolls. */}
+      <aside className="hidden w-[195px] shrink-0 bg-white lg:block">
+        <div className="sticky top-0 flex h-dvh flex-col px-2.5 pt-3.5 pb-6">
+          <Sidebar onNavigate={() => undefined} />
+        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -93,7 +107,6 @@ export function MainLayout() {
         <Sidebar onNavigate={() => setMenuOpen(false)} />
       </Drawer>
 
-      <FeedbackButton />
       <FeedbackDialog />
     </div>
   )
@@ -132,7 +145,12 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
         ) : (
           <button
             type="button"
-            onClick={() => message.info(`Trang "${nav.label}" đang được hoàn thiện.`)}
+            aria-label={nav.ariaLabel}
+            onClick={() => {
+              onNavigate()
+              if (nav.action) nav.action()
+              else message.info(`Trang "${nav.label}" đang được hoàn thiện.`)
+            }}
             className={`cursor-pointer border-0 bg-transparent font-[inherit] ${className}`}
           >
             <span className="text-ink-soft">{nav.icon}</span>

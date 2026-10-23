@@ -15,7 +15,6 @@ import { classTitle, countByTab, filterClassrooms, MAX_CLASSROOMS, type ClassTab
 export function ClassesPage() {
   const navigate = useNavigate()
   const { message } = App.useApp()
-  const teacher = useTeacherStore((s) => s.teacher)
   const loadTeacher = useTeacherStore((s) => s.load)
   const status = useClassStore((s) => s.status)
   const classrooms = useClassStore((s) => s.classrooms)
@@ -45,7 +44,7 @@ export function ClassesPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+      <TopBar />
       <ClassesBanner onCreate={() => setCreating(true)} canCreate={canCreate} />
 
       <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">

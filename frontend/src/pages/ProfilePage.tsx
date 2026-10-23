@@ -21,7 +21,6 @@ export function ProfilePage() {
   const profile = useProfileStore((s) => s.profile)
   const status = useProfileStore((s) => s.status)
   const load = useProfileStore((s) => s.load)
-  const teacher = useTeacherStore((s) => s.teacher)
   const loadTeacher = useTeacherStore((s) => s.load)
   const logout = useAuthStore((s) => s.logout)
   const [dialog, setDialog] = useState<Dialog>(null)
@@ -100,7 +99,7 @@ export function ProfilePage() {
           <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">Quản lý thông tin cá nhân và tài khoản Lớp Vui của bạn.</p>
         </div>
         <div className="order-first ml-auto sm:order-none">
-          <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+          <TopBar />
         </div>
       </header>
 

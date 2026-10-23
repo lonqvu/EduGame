@@ -89,7 +89,6 @@ export function ChooseGamePage() {
   const templates = useCatalogStore((s) => s.templates)
   const status = useCatalogStore((s) => s.status)
   const loadTemplates = useCatalogStore((s) => s.load)
-  const teacher = useTeacherStore((s) => s.teacher)
   const loadTeacher = useTeacherStore((s) => s.load)
   const className = useClassStore((s) => s.className)
   const grade = useClassStore((s) => s.grade)
@@ -171,7 +170,7 @@ export function ChooseGamePage() {
           </p>
         </div>
         <div className="relative shrink-0 self-start">
-          <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+          <TopBar />
         </div>
       </header>
 

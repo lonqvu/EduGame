@@ -11,6 +11,8 @@ interface PraiseCornerProps {
   students: Student[]
   period: StarPeriod
   onPeriodChange: (period: StarPeriod) => void
+  /** "Khen học sinh": the class page, where stars are given. */
+  onPraise: () => void
 }
 
 interface Ranked {
@@ -32,8 +34,8 @@ const Star = ({ size = 18 }: { size?: number }) => (
   </span>
 )
 
-/** Weekly (or all-time) star ranking: podium for the top 3, then the next five. */
-export function PraiseCorner({ students, period, onPeriodChange }: PraiseCornerProps) {
+/** Weekly (or all-time) star ranking: podium for the top 3, then the next five; a nudge when nobody has a star yet. */
+export function PraiseCorner({ students, period, onPeriodChange, onPraise }: PraiseCornerProps) {
   const [fullOpen, setFullOpen] = useState(false)
   const [periodOpen, setPeriodOpen] = useState(false)
 
@@ -55,7 +57,7 @@ export function PraiseCorner({ students, period, onPeriodChange }: PraiseCornerP
               aria-haspopup="listbox"
               aria-expanded={periodOpen}
               onClick={() => setPeriodOpen((o) => !o)}
-              className="flex h-[32px] cursor-pointer items-center gap-3 rounded-[11px] border border-line bg-white px-3 font-[inherit] text-[13px] font-bold text-ink"
+              className="flex h-[32px] cursor-pointer items-center gap-2 rounded-[11px] whitespace-nowrap border border-line bg-white px-3 font-[inherit] text-[13px] font-bold text-ink"
             >
               {period === 'week' ? 'Tuần này' : 'Tất cả'}
               <ChevronDownIcon size={15} strokeWidth={2.6} />
@@ -91,6 +93,25 @@ export function PraiseCorner({ students, period, onPeriodChange }: PraiseCornerP
 
       {ranked.length === 0 ? (
         <p className="m-0 py-8 text-center text-ink-soft">Lớp chưa có học sinh.</p>
+      ) : ranked.every((r) => r.stars === 0) ? (
+        // A podium of zeros would rank the class by name: say what to do instead.
+        <div className="flex flex-col items-center gap-1 px-2 pt-4 pb-1 text-center">
+          <span aria-hidden="true" className="mb-2 flex">
+            {[1, 2, 3, 4].map((n) => (
+              <img key={n} src={kidAvatar(n)} alt="" className="-mx-1.5 size-[46px] rounded-full border-[3px] border-white bg-[#FFF4D6] object-cover" />
+            ))}
+          </span>
+          <span className="text-[15px] font-extrabold">{period === 'week' ? 'Tuần này chưa có bạn nào được khen' : 'Lớp chưa có bạn nào được khen'}</span>
+          <span className="text-[13.5px] text-ink-soft">Tặng sao khi lớp chơi trò, hoặc khen ngay trong trang lớp học.</span>
+          <button
+            type="button"
+            onClick={onPraise}
+            className="mt-3 flex h-10 cursor-pointer items-center gap-2 rounded-full border-0 bg-[#FFF1C2] px-5 font-[inherit] text-[14px] font-black text-[#7A5600] hover:brightness-95"
+          >
+            <Star size={17} />
+            Khen học sinh
+          </button>
+        </div>
       ) : (
         <>
           <div className="mt-[14px] grid grid-cols-3 items-end gap-0">

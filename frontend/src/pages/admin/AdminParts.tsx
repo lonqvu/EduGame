@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
 import { ChevronRightIcon, HomeIcon } from '@/components/ui/icons'
-import { useTeacherStore } from '@/store/teacherStore'
 import type { UserRole, UserStatus } from '@/types/api'
 import { ROLE_LABELS, USER_STATUS_LABELS } from '@/utils/admin'
 
@@ -16,7 +15,6 @@ const TABS = [
 
 /** Breadcrumb, title and the tabs of "Quản trị". `trail`: pages between "Quản trị" and this one. */
 export function AdminHeader({ title, text, trail = [] }: { title: string; text: string; trail?: { to: string; label: string }[] }) {
-  const teacher = useTeacherStore((s) => s.teacher)
   return (
     <header className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -43,7 +41,7 @@ export function AdminHeader({ title, text, trail = [] }: { title: string; text: 
           <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">{text}</p>
         </div>
         <div className="order-first ml-auto sm:order-none">
-          <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+          <TopBar />
         </div>
       </div>
       <nav aria-label="Mục quản trị" className="flex gap-1 overflow-x-auto border-b border-line">

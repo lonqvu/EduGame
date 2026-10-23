@@ -28,7 +28,6 @@ export function QuestionSetsPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { message } = App.useApp()
-  const teacher = useTeacherStore((s) => s.teacher)
   const loadTeacher = useTeacherStore((s) => s.load)
   const status = useQuestionSetStore((s) => s.status)
   const sets = useQuestionSetStore((s) => s.sets)
@@ -82,7 +81,7 @@ export function QuestionSetsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+      <TopBar />
 
       <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col gap-5">

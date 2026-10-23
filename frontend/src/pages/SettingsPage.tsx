@@ -27,7 +27,6 @@ export function SettingsPage() {
   const saving = useSettingsStore((s) => s.saving)
   const load = useSettingsStore((s) => s.load)
   const update = useSettingsStore((s) => s.update)
-  const teacher = useTeacherStore((s) => s.teacher)
   const loadTeacher = useTeacherStore((s) => s.load)
   const profile = useProfileStore((s) => s.profile)
   const loadProfile = useProfileStore((s) => s.load)
@@ -73,7 +72,7 @@ export function SettingsPage() {
           <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">Tùy chỉnh Lớp Vui theo cách cô dạy. Mọi thay đổi được lưu tự động.</p>
         </div>
         <div className="order-first ml-auto sm:order-none">
-          <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+          <TopBar />
         </div>
       </header>
 

@@ -186,6 +186,14 @@ export class Backend {
     this.questionSets.push(code)
   }
 
+  profile() {
+    return this.call<{ displayName: string; phone?: string; avatar?: string }>('get', 'me/profile')
+  }
+
+  saveProfile(profile: { displayName: string; phone: string; avatar: string }) {
+    return this.call('patch', 'me/profile', profile)
+  }
+
   settings() {
     return this.call<Settings>('get', 'me/settings')
   }

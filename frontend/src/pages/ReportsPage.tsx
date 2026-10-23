@@ -38,7 +38,6 @@ export function ReportsPage() {
   const currentCode = useClassStore((s) => s.classroomCode)
   const classStatus = useClassStore((s) => s.status)
   const loadClasses = useClassStore((s) => s.load)
-  const teacher = useTeacherStore((s) => s.teacher)
   const loadTeacher = useTeacherStore((s) => s.load)
   const [today] = useState(() => new Date())
 
@@ -106,7 +105,7 @@ export function ReportsPage() {
           <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">Lớp đã chơi những gì, kết quả ra sao và các em được khen bao nhiêu sao.</p>
         </div>
         <div className="order-first ml-auto sm:order-none">
-          <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+          <TopBar />
         </div>
       </header>
 
