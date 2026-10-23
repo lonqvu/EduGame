@@ -1,6 +1,5 @@
 import type { GameType } from '@/types/game'
 
-export type GameBadge = 'POPULAR' | 'EASY' | 'NEW'
 
 interface GameDefinition {
   /** Has a projector player in game-engine. */
@@ -13,8 +12,8 @@ interface GameDefinition {
   players: string
   /** Typical length of a round, e.g. "10–15 phút". */
   duration: string
-  /** Ribbon on the game card. */
-  badge?: GameBadge
+  /** Added lately: "Mới" on its card. Only the last games added, so the ribbon still means something. */
+  isNew?: boolean
   /** Order of "Phổ biến nhất": lower comes first. */
   popularity: number
   /** Unit of `itemCount` in the library, e.g. "24 câu". */
@@ -24,30 +23,30 @@ interface GameDefinition {
 }
 
 export const gameRegistry: Record<GameType, GameDefinition> = {
-  GRID_BOARD: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'POPULAR', popularity: 1, itemUnit: 'câu' },
-  QUIZ: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân hoặc đội', duration: '5–10 phút', badge: 'EASY', popularity: 2, itemUnit: 'câu' },
-  GOLDEN_BELL: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cả lớp', duration: '10–15 phút', badge: 'NEW', popularity: 3, itemUnit: 'câu' },
-  BOAT_RACE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', badge: 'NEW', popularity: 4, itemUnit: 'câu' },
-  MILLIONAIRE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '10–15 phút', badge: 'NEW', popularity: 5, itemUnit: 'câu' },
-  TUG_OF_WAR: { playable: true, usesQuestions: true, hasEditor: true, players: '2 đội', duration: '5–10 phút', badge: 'NEW', popularity: 6, itemUnit: 'câu' },
-  FLOWER_PICK: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 7, itemUnit: 'câu' },
-  WHACK_MOLE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', badge: 'NEW', popularity: 8, itemUnit: 'câu' },
-  TRUE_FALSE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cả lớp theo đội', duration: '5 phút', badge: 'NEW', popularity: 9, itemUnit: 'câu' },
-  LUCKY_STAR: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 10, itemUnit: 'câu' },
-  SECRET_PICTURE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 11, itemUnit: 'câu' },
-  MOUNTAIN_CLIMB: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', badge: 'NEW', popularity: 12, itemUnit: 'câu' },
-  POINT_WHEEL: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 13, itemUnit: 'câu' },
-  TIC_TAC_TOE: { playable: true, usesQuestions: true, hasEditor: true, players: '2 đội', duration: '5–10 phút', badge: 'NEW', popularity: 14, itemUnit: 'câu' },
-  CONNECT_FOUR: { playable: true, usesQuestions: true, hasEditor: true, players: '2 đội', duration: '10–15 phút', badge: 'NEW', popularity: 15, itemUnit: 'câu' },
-  TREASURE_CHEST: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 16, itemUnit: 'câu' },
-  BUILD_TOWER: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', badge: 'NEW', popularity: 17, itemUnit: 'câu' },
-  BEE_FLOWER: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', badge: 'NEW', popularity: 18, itemUnit: 'câu' },
-  BINGO: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 19, itemUnit: 'câu' },
-  WORD_SCRAMBLE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 20, itemUnit: 'từ' },
-  HANGMAN: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 21, itemUnit: 'từ' },
+  GRID_BOARD: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', popularity: 1, itemUnit: 'câu' },
+  QUIZ: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân hoặc đội', duration: '5–10 phút', popularity: 2, itemUnit: 'câu' },
+  GOLDEN_BELL: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cả lớp', duration: '10–15 phút', popularity: 3, itemUnit: 'câu' },
+  BOAT_RACE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 4, itemUnit: 'câu' },
+  MILLIONAIRE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '10–15 phút', popularity: 5, itemUnit: 'câu' },
+  TUG_OF_WAR: { playable: true, usesQuestions: true, hasEditor: true, players: '2 đội', duration: '5–10 phút', popularity: 6, itemUnit: 'câu' },
+  FLOWER_PICK: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', popularity: 7, itemUnit: 'câu' },
+  WHACK_MOLE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 8, itemUnit: 'câu' },
+  TRUE_FALSE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cả lớp theo đội', duration: '5 phút', popularity: 9, itemUnit: 'câu' },
+  LUCKY_STAR: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', popularity: 10, itemUnit: 'câu' },
+  SECRET_PICTURE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', popularity: 11, itemUnit: 'câu' },
+  MOUNTAIN_CLIMB: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 12, itemUnit: 'câu' },
+  POINT_WHEEL: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', popularity: 13, itemUnit: 'câu' },
+  TIC_TAC_TOE: { playable: true, usesQuestions: true, hasEditor: true, players: '2 đội', duration: '5–10 phút', popularity: 14, itemUnit: 'câu' },
+  CONNECT_FOUR: { playable: true, usesQuestions: true, hasEditor: true, players: '2 đội', duration: '10–15 phút', popularity: 15, itemUnit: 'câu' },
+  TREASURE_CHEST: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', popularity: 16, itemUnit: 'câu' },
+  BUILD_TOWER: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 17, itemUnit: 'câu' },
+  BEE_FLOWER: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 18, itemUnit: 'câu' },
+  BINGO: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', isNew: true, popularity: 19, itemUnit: 'câu' },
+  WORD_SCRAMBLE: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', isNew: true, popularity: 20, itemUnit: 'từ' },
+  HANGMAN: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', isNew: true, popularity: 21, itemUnit: 'từ' },
   MATCHING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 22, itemUnit: 'bộ' },
   MEMORY: { playable: true, usesQuestions: true, hasEditor: true, players: 'Cá nhân', duration: '5–10 phút', popularity: 23, itemUnit: 'bộ thẻ' },
-  CROSSWORD: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', badge: 'NEW', popularity: 24, itemUnit: 'hàng' },
+  CROSSWORD: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '10–15 phút', popularity: 24, itemUnit: 'hàng' },
   ORDERING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 25, itemUnit: 'bài' },
   SORTING: { playable: true, usesQuestions: true, hasEditor: true, players: 'Theo đội', duration: '5–10 phút', popularity: 26, itemUnit: 'bộ' },
   SPIN_WHEEL: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '2–5 phút', popularity: 27, itemUnit: 'ô', toolRoute: '/tools/wheel' },
@@ -55,14 +54,14 @@ export const gameRegistry: Record<GameType, GameDefinition> = {
   TEAM_MAKER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 29, itemUnit: 'nhóm', toolRoute: '/tools/groups' },
   TIMER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 30, itemUnit: 'phút', toolRoute: '/tools/timer' },
   DICE: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 31, itemUnit: 'lần', toolRoute: '/tools/dice' },
-  COIN_FLIP: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 32, itemUnit: 'lần', toolRoute: '/tools/coin' },
-  RANDOM_NUMBER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 33, itemUnit: 'số', toolRoute: '/tools/number' },
-  SCOREBOARD: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 34, itemUnit: 'đội', toolRoute: '/tools/scoreboard' },
-  NOISE_METER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 35, itemUnit: 'lần', toolRoute: '/tools/noise' },
-  TRAFFIC_LIGHT: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 36, itemUnit: 'đèn', toolRoute: '/tools/light' },
-  STOPWATCH: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', badge: 'NEW', popularity: 37, itemUnit: 'lần', toolRoute: '/tools/stopwatch' },
-  CARD_DRAW: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 38, itemUnit: 'lá', toolRoute: '/tools/draw' },
-  SEATING: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', badge: 'NEW', popularity: 39, itemUnit: 'chỗ', toolRoute: '/tools/seating' },
+  COIN_FLIP: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 32, itemUnit: 'lần', toolRoute: '/tools/coin' },
+  RANDOM_NUMBER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', popularity: 33, itemUnit: 'số', toolRoute: '/tools/number' },
+  SCOREBOARD: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 34, itemUnit: 'đội', toolRoute: '/tools/scoreboard' },
+  NOISE_METER: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 35, itemUnit: 'lần', toolRoute: '/tools/noise' },
+  TRAFFIC_LIGHT: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', popularity: 36, itemUnit: 'đèn', toolRoute: '/tools/light' },
+  STOPWATCH: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: 'Tùy chọn', isNew: true, popularity: 37, itemUnit: 'lần', toolRoute: '/tools/stopwatch' },
+  CARD_DRAW: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', isNew: true, popularity: 38, itemUnit: 'lá', toolRoute: '/tools/draw' },
+  SEATING: { playable: true, usesQuestions: false, hasEditor: false, players: 'Cả lớp', duration: '1 phút', isNew: true, popularity: 39, itemUnit: 'chỗ', toolRoute: '/tools/seating' },
 }
 
 /** Games whose items are quiz questions: any of them can be played the way of the others. */

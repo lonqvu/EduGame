@@ -263,16 +263,19 @@ test('the editor autosaves edits and they are there after a reload', async ({ pa
   await expect(page.getByLabel('Phương án C', { exact: true })).toHaveValue('Nam')
 })
 
-test('each name picker is its own game, grouped under the "Gọi tên" filter', async ({ page }) => {
+test('each name picker is its own game, grouped under "Gọi tên"', async ({ page }) => {
   await page.goto('/games/new')
-  await page.getByRole('tab', { name: 'Gọi tên' }).click()
-  await expect(page.getByText('Tổng 6 trò chơi')).toBeVisible()
+  await page.getByRole('navigation', { name: 'Nhóm trò chơi' }).getByRole('button', { name: /Gọi tên/ }).click()
+  const group = page.getByRole('region', { name: 'Gọi tên' })
+  await expect(group).toBeInViewport()
+  await expect(page.getByRole('navigation', { name: 'Nhóm trò chơi' }).getByRole('button', { name: /Gọi tên/ })).toHaveAttribute('aria-current', 'true')
   const names = ['Vòng quay may mắn', 'Đua ngựa', 'Bóng bay', 'Máy gắp thú', 'Câu cá', 'Tên lửa']
+  await expect(group.getByRole('button', { name: /^Chơi ngay / })).toHaveCount(names.length)
   for (const name of names) {
-    await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
+    await expect(group.getByRole('button', { name: `Chơi ngay ${name}`, exact: true })).toBeVisible()
   }
   // No folder card any more.
-  await expect(page.getByRole('heading', { name: 'Đua tên', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Chơi ngay Đua tên', exact: true })).toHaveCount(0)
 
   // Each card opens its own game.
   for (const [name, mode, start] of [
@@ -288,6 +291,7 @@ test('each name picker is its own game, grouped under the "Gọi tên" filter', 
   // Searching finds a name picker by its own name.
   await page.goto('/games/new')
   await page.getByLabel('Tìm kiếm trò chơi').fill('chum bong bay')
-  await expect(page.getByText('Tổng 1 trò chơi')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Bóng bay', exact: true })).toBeVisible()
+  const results = page.getByRole('region', { name: 'Kết quả tìm kiếm' })
+  await expect(results.getByRole('heading', { name: 'Tìm thấy 1 trò' })).toBeVisible()
+  await expect(results.getByRole('button', { name: 'Chơi ngay Bóng bay' })).toBeVisible()
 })
