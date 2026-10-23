@@ -1,13 +1,14 @@
-import { App, Modal, Pagination, Select } from 'antd'
+import { App, Input, Modal, Select } from 'antd'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import * as questionSetApi from '@/api/questionSetApi'
-import { CheckIcon } from '@/components/ui/icons'
+import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon } from '@/components/ui/icons'
 import { playPath } from '@/game-engine/registry'
 import { gameThumb } from '@/pages/home/homeAssets'
 import { useSettingsStore } from '@/store/settingsStore'
 import type { QuestionGameCode, QuestionSetSummaryResponse } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
+import { fold } from '@/utils/classrooms'
 import { enterFullscreen } from '@/utils/fullscreen'
 import { usableCount, USE_GAMES } from '@/utils/questionSets'
 
@@ -15,6 +16,11 @@ import { usableCount, USE_GAMES } from '@/utils/questionSets'
 export const GAMES_PER_PAGE = 8
 /** The page of the dialog that shows this game. */
 const pageOf = (game?: QuestionGameCode) => Math.floor(Math.max(0, USE_GAMES.findIndex((g) => g.code === game)) / GAMES_PER_PAGE) + 1
+/** The games whose name or description has every word searched, accents ignored. */
+const searchGames = (search: string) => {
+  const words = fold(search).split(/\s+/).filter(Boolean)
+  return USE_GAMES.filter((g) => words.every((w) => fold(`${g.name} ${g.description}`).includes(w)))
+}
 
 interface UseSetModalProps {
   open: boolean
@@ -45,6 +51,14 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
   const firstUsable = (s?: QuestionSetSummaryResponse) => USE_GAMES.find((g) => s && usableCount(s, g.code) > 0)?.code
   const [game, setGame] = useState<QuestionGameCode | undefined>(firstUsable(set))
   const [page, setPage] = useState(() => pageOf(game))
+  const [search, setSearch] = useState('')
+  const found = searchGames(search)
+  const pages = Math.max(1, Math.ceil(found.length / GAMES_PER_PAGE))
+  const onSearch = (text: string) => {
+    setSearch(text)
+    // Cleared: back to the page of the game picked.
+    setPage(text.trim() ? 1 : pageOf(game))
+  }
   const [making, setMaking] = useState(false)
   const fullscreenOnStart = useSettingsStore((s) => s.settings.display.fullscreenOnStart)
 
@@ -108,12 +122,29 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
         )}
         {set && (
           <>
-            <p className="m-0 text-[14.5px] text-ink-soft">
-              Chọn trò chơi cho <strong className="text-ink">{set.title}</strong>. Câu hỏi được chép sang trò chơi mới: sửa bộ câu hỏi
-              sau này không làm đổi trò chơi.
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="m-0 min-w-0 flex-[1_1_380px] text-[14.5px] text-ink-soft">
+                Chọn trò chơi cho <strong className="text-ink">{set.title}</strong>. Sửa bộ câu hỏi sau này không làm đổi trò chơi.
+              </p>
+              <Input
+                size="large"
+                allowClear
+                value={search}
+                onChange={(e) => onSearch(e.target.value)}
+                prefix={<SearchIcon size={18} className="text-ink-muted" />}
+                placeholder="Tìm trò chơi…"
+                aria-label="Tìm trò chơi"
+                className="w-full rounded-full text-[15px] sm:w-[280px]"
+              />
+            </div>
+            {found.length === 0 && (
+              <p className="m-0 flex min-h-[200px] flex-col items-center justify-center gap-1 rounded-[18px] bg-surface-soft text-center text-[15px] text-ink-muted">
+                <span aria-hidden="true" className="text-[34px]">🔍</span>
+                Không có trò nào khớp “{search.trim()}”.
+              </p>
+            )}
             <div role="radiogroup" aria-label="Trò chơi" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              {USE_GAMES.slice((page - 1) * GAMES_PER_PAGE, page * GAMES_PER_PAGE).map((g) => {
+              {found.slice((page - 1) * GAMES_PER_PAGE, page * GAMES_PER_PAGE).map((g) => {
                 const usable = usableCount(set, g.code)
                 const checked = g.code === game
                 return (
@@ -149,22 +180,46 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
                 )
               })}
             </div>
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-full bg-surface-soft py-1.5 pr-1.5 pl-4">
               <span className="text-[13.5px] text-ink-muted">
-                {USE_GAMES.length} trò chơi · đang chọn <strong className="text-ink">{USE_GAMES.find((g) => g.code === game)?.name ?? '—'}</strong>
+                {search.trim() ? `Tìm thấy ${found.length} trò` : `${USE_GAMES.length} trò chơi`} · đang chọn{' '}
+                <strong className="text-primary-ink">{USE_GAMES.find((g) => g.code === game)?.name ?? '—'}</strong>
               </span>
-              <Pagination
-                current={page}
-                pageSize={GAMES_PER_PAGE}
-                total={USE_GAMES.length}
-                onChange={setPage}
-                showSizeChanger={false}
-                aria-label="Trang trò chơi"
-              />
+              {pages > 1 && <Pager page={Math.min(page, pages)} pages={pages} onChange={setPage} />}
             </div>
           </>
         )}
       </div>
     </Modal>
+  )
+}
+
+/** Round, friendly page buttons: ‹ 1 2 3 ›, the current page filled. */
+function Pager({ page, pages, onChange }: { page: number; pages: number; onChange: (page: number) => void }) {
+  const arrow =
+    'flex size-9 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-ink shadow-[0_1px_3px_rgba(31,42,68,0.12)] transition enabled:hover:text-primary disabled:cursor-default disabled:opacity-40'
+  return (
+    <nav aria-label="Trang trò chơi" className="flex items-center gap-1.5">
+      <button type="button" aria-label="Trang trước" disabled={page <= 1} onClick={() => onChange(page - 1)} className={arrow}>
+        <ChevronLeftIcon size={18} />
+      </button>
+      {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
+        <button
+          key={n}
+          type="button"
+          aria-label={`Trang ${n}`}
+          aria-current={n === page ? 'page' : undefined}
+          onClick={() => onChange(n)}
+          className={`h-9 min-w-9 cursor-pointer rounded-full border-0 px-3 font-[inherit] text-[14.5px] font-extrabold transition ${
+            n === page ? 'bg-primary text-white shadow-[0_4px_10px_rgba(53,99,233,0.3)]' : 'bg-transparent text-ink-soft hover:bg-white hover:text-primary'
+          }`}
+        >
+          {n}
+        </button>
+      ))}
+      <button type="button" aria-label="Trang sau" disabled={page >= pages} onClick={() => onChange(page + 1)} className={arrow}>
+        <ChevronRightIcon size={18} />
+      </button>
+    </nav>
   )
 }
