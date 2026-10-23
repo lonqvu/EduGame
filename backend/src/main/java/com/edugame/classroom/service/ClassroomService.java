@@ -246,6 +246,7 @@ public class ClassroomService {
                 .collect(Collectors.toMap(StudentCount::getClassroomId, StudentCount::getStudentCount));
         Map<Long, SessionCount> sessions = gameSessionRepository.countByClassroom(ids).stream()
                 .collect(Collectors.toMap(SessionCount::getClassroomId, Function.identity()));
+        Map<Long, Long> stars = studentPointService.sumClassStars(ids, startOfWeek());
         return classrooms.stream().map(c -> {
             SessionCount played = sessions.get(c.getId());
             long playedCount = played == null ? 0 : played.getPlayedCount();
@@ -253,7 +254,7 @@ public class ClassroomService {
             int rate = playedCount == 0 ? 0 : (int) Math.round(endedCount * 100.0 / playedCount);
             return new ClassroomResponse(c.getCode(), c.getName(), c.getGrade(), c.getSchoolYear(), c.getSchoolName(),
                     c.getAvatar(), c.getStatus(), students.getOrDefault(c.getId(), 0L), playedCount, endedCount, rate,
-                    played == null ? null : played.getLastPlayedAt(), c.getCreatedAt());
+                    played == null ? null : played.getLastPlayedAt(), stars.getOrDefault(c.getId(), 0L), c.getCreatedAt());
         }).toList();
     }
 

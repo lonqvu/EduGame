@@ -33,6 +33,11 @@ export function classAvatar(classroom: Pick<ClassroomResponse, 'code' | 'avatar'
 
 export const avatarSrc = (avatar: ClassAvatar) => `/assets/classes/avatar-${avatar}.svg`
 
+/** A student's animal: the one chosen, else one picked from the id, so it stays the same. */
+export function studentAvatarSrc(student: Pick<StudentResponse, 'id' | 'avatar'>): string {
+  return avatarSrc(isClassAvatar(student.avatar) ? student.avatar : CLASS_AVATARS[student.id % CLASS_AVATARS.length])
+}
+
 /** "Lớp 1A" ("Lớp" is not repeated when the teacher typed it). */
 export const classTitle = (name: string) => (/^lớp\s/i.test(name) ? name : `Lớp ${name}`)
 

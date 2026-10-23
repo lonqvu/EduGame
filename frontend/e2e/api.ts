@@ -39,6 +39,7 @@ export interface Classroom {
   activityCount: number
   completedCount: number
   completionRate: number
+  weeklyStars: number
   schoolName?: string
   avatar?: string
 }
@@ -137,7 +138,10 @@ export class Backend {
   }
 
   classStudents(code: string) {
-    return this.call<{ id: number; displayName: string; rollNumber: number }[]>('get', `classrooms/${code}/students`)
+    return this.call<{ id: number; displayName: string; rollNumber: number; weeklyStars: number; totalStars: number }[]>(
+      'get',
+      `classrooms/${code}/students`,
+    )
   }
 
   /** A class made by the test (archived by `cleanUp`), with these students. */

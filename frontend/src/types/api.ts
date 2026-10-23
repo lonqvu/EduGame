@@ -205,6 +205,8 @@ export interface ClassroomResponse {
   /** completedCount / activityCount, in % (0 when nothing was played) */
   completionRate: number
   lastPlayedAt?: string
+  /** Stars given to its students since Monday */
+  weeklyStars: number
   createdAt: string
 }
 

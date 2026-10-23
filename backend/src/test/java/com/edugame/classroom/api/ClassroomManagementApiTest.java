@@ -388,6 +388,23 @@ class ClassroomManagementApiTest {
     }
 
     @Test
+    void aClassCountsTheStarsOfTheWeekOfItsStudents() throws Exception {
+        long before = body(mockMvc.perform(get(CLASSES + "/c-1a"))).path("weeklyStars").asLong();
+        JsonNode students = students("c-1a");
+        long first = students.get(0).path("id").asLong();
+        long second = students.get(1).path("id").asLong();
+        send(post(CLASSES + "/c-1a/students/" + first + "/points"), "{\"points\": 3}").andExpect(status().isCreated());
+        send(post(CLASSES + "/c-1a/students/" + second + "/points"), "{\"points\": 2}").andExpect(status().isCreated());
+        send(post(CLASSES + "/c-1a/students/" + second + "/points"), "{\"points\": -1}").andExpect(status().isCreated());
+        mockMvc.perform(get(CLASSES + "/c-1a")).andExpect(jsonPath("$.weeklyStars").value(before + 4));
+
+        // A student who left the class takes their stars along.
+        mockMvc.perform(delete(CLASSES + "/c-1a/students/" + first)).andExpect(status().isNoContent());
+        mockMvc.perform(get(CLASSES + "/c-1a")).andExpect(jsonPath("$.weeklyStars").value(before + 1));
+        mockMvc.perform(get(CLASSES)).andExpect(jsonPath("$[?(@.code == 'c-1a')].weeklyStars", contains((int) (before + 1))));
+    }
+
+    @Test
     void sessionsNeedAnActiveClassAndOwnGame() throws Exception {
         send(post(CLASSES + "/c-2b/sessions"), "{\"gameCode\": \"g-golden-bell\"}").andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("CLASSROOM_PAUSED"));

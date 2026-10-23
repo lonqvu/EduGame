@@ -32,6 +32,16 @@ public class StudentPointService {
                         sum -> new StarTotals(sum.getWeeklyStars(), sum.getTotalStars())));
     }
 
+    /** Stars of each class since {@code since}; classes without any are missing from the map. */
+    @Transactional(readOnly = true)
+    public Map<Long, Long> sumClassStars(Collection<Long> classroomIds, Instant since) {
+        if (classroomIds.isEmpty()) {
+            return Map.of();
+        }
+        return studentPointRepository.sumByClassroom(classroomIds, since).stream()
+                .collect(Collectors.toMap(StudentPointRepository.ClassStars::getClassroomId, StudentPointRepository.ClassStars::getStars));
+    }
+
     /** @param points never 0; negative takes stars away */
     @Transactional
     public void award(ClassroomStudent student, int points, String reason, User teacher) {

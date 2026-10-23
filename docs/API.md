@@ -402,11 +402,11 @@ trò chơi cho lớp được) và `ARCHIVED` (đã xóa). Lớp đã xóa và l
 ```json
 { "code": "c-3a", "name": "3A", "grade": 3, "schoolYear": "2026-2027", "schoolName": "Tiểu học Kim Đồng",
   "avatar": "bear", "status": "ACTIVE", "studentCount": 28, "activityCount": 12, "completedCount": 9,
-  "completionRate": 75, "lastPlayedAt": "...", "createdAt": "..." }
+  "completionRate": 75, "lastPlayedAt": "...", "weeklyStars": 42, "createdAt": "..." }
 ```
 
 - `activityCount`: số lần chơi trò chơi với lớp; `completedCount`: số lần chơi tới màn kết quả;
-  `completionRate` = phần trăm hoàn thành (0 khi chưa chơi). `lastPlayedAt`: lần chơi gần nhất (để mở đúng lớp đang dạy).
+  `completionRate` = phần trăm hoàn thành (0 khi chưa chơi). `lastPlayedAt`: lần chơi gần nhất (để mở đúng lớp đang dạy). `weeklyStars`: tổng sao học sinh đang trong lớp nhận từ thứ Hai tuần này.
 
 Tạo / sửa lớp:
 

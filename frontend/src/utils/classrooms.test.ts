@@ -23,6 +23,7 @@ const classroom = (code: string, overrides: Partial<ClassroomResponse> = {}): Cl
   activityCount: 0,
   completedCount: 0,
   completionRate: 0,
+  weeklyStars: 0,
   createdAt: '2026-09-01T00:00:00Z',
   ...overrides,
 })
