@@ -185,28 +185,32 @@ test('"Chơi" makes a game from the set and plays it at once', async ({ page, ba
 
   await page.goto('/question-sets')
   await row(page, title).getByRole('button', { name: 'Chơi', exact: true }).click()
-  const using = page.getByRole('dialog', { name: 'Chơi với bộ câu hỏi này' })
-  await expect(using.getByRole('radio', { name: /Trắc nghiệm/ })).toHaveAttribute('aria-checked', 'true')
-  await expect(using.getByRole('radio', { name: /Trắc nghiệm/ })).toContainText('Dùng được 2/3 câu trắc nghiệm')
-  await expect(using.getByRole('radio', { name: /Lật ô thi đua/ })).toContainText('Dùng được cả 3 câu')
+  const using = page.getByRole('dialog', { name: /với trò nào\?/ })
+  const games = using.getByRole('radiogroup', { name: 'Trò chơi', exact: true })
+  await expect(games.getByRole('radio', { name: 'Trắc nghiệm' })).toHaveAttribute('aria-checked', 'true')
+  // Games that play only multiple choice say how many questions they take.
+  await expect(games.getByRole('radio', { name: 'Trắc nghiệm' })).toContainText('2/3 câu')
+  await expect(games.getByRole('radio', { name: 'Lật ô thi đua' })).not.toContainText('/3 câu')
   // The games come a page at a time, the one picked kept across pages.
-  await expect(using.getByRole('radio')).toHaveCount(8)
-  await expect(using.getByRole('radio', { name: /Đoán chữ/ })).toHaveCount(0)
+  await expect(games.getByRole('radio')).toHaveCount(8)
+  await expect(games.getByRole('radio', { name: 'Đoán chữ' })).toHaveCount(0)
   await using.getByRole('button', { name: 'Trang 3' }).click()
-  await expect(using.getByRole('radio', { name: /Đoán chữ/ })).toBeVisible()
-  await expect(using).toContainText('đang chọn Trắc nghiệm')
-  await using.getByRole('button', { name: 'Trang 1' }).click()
-  // Or found by name, accents not needed.
+  await expect(games.getByRole('radio', { name: 'Đoán chữ' })).toBeVisible()
+  await expect(using.getByRole('button', { name: '▶ Chơi Trắc nghiệm' })).toBeVisible()
+  // By group...
+  await using.getByRole('radio', { name: /Trò chữ/ }).click()
+  await expect(games.getByRole('radio')).toHaveCount(2)
+  await expect(using.getByRole('button', { name: 'Trang 2' })).toHaveCount(0)
+  await using.getByRole('radio', { name: /Tất cả/ }).click()
+  // ... or by name, accents not needed.
   await using.getByRole('textbox', { name: 'Tìm trò chơi' }).fill('keo co')
-  await expect(using.getByRole('radio')).toHaveCount(1)
-  await expect(using).toContainText('Tìm thấy 1 trò')
+  await expect(games.getByRole('radio')).toHaveCount(1)
   await expect(using.getByRole('button', { name: 'Trang 2' })).toHaveCount(0)
   await using.getByRole('textbox', { name: 'Tìm trò chơi' }).fill('khong co tro nay')
   await expect(using).toContainText('Không có trò nào khớp')
   await using.getByRole('textbox', { name: 'Tìm trò chơi' }).fill('')
-  await using.getByRole('radio', { name: /Rung chuông vàng/ }).click()
-  await expect(using).toContainText('đang chọn Rung chuông vàng')
-  await using.getByRole('button', { name: '▶ Chơi ngay' }).click()
+  await games.getByRole('radio', { name: 'Rung chuông vàng' }).click()
+  await using.getByRole('button', { name: '▶ Chơi Rung chuông vàng' }).click()
 
   await expect(page).toHaveURL(/\/play\/g-[a-z0-9]+$/)
   const gameCode = page.url().split('/').at(-1)!
@@ -227,11 +231,14 @@ test('"Chơi" makes a game from the set and plays it at once', async ({ page, ba
   // A set of short answers only plays in Lật ô; "Chơi với bộ câu hỏi" lets the teacher pick the set.
   await page.goto('/question-sets')
   await page.getByRole('button', { name: /Chơi với bộ câu hỏi/ }).click()
+  await page.getByRole('dialog').getByRole('button', { name: '⇄ Đổi bộ' }).click()
   await pick(page, 'Bộ câu hỏi', `${onlyShort.summary.title} (1 câu)`)
-  const dialog = page.getByRole('dialog', { name: 'Chơi với bộ câu hỏi này' })
-  await expect(dialog.getByRole('radio', { name: /Trắc nghiệm/ })).toBeDisabled()
-  await expect(dialog.getByRole('radio', { name: /Lật ô thi đua/ })).toHaveAttribute('aria-checked', 'true')
-  await dialog.getByRole('button', { name: 'Hủy' }).click()
+  const dialog = page.getByRole('dialog', { name: /với trò nào\?/ })
+  await expect(dialog.getByRole('radio', { name: 'Trắc nghiệm' })).toBeDisabled()
+  await expect(dialog.getByRole('radio', { name: 'Trắc nghiệm' })).toContainText('Cần câu trắc nghiệm')
+  await expect(dialog.getByRole('radio', { name: 'Lật ô thi đua' })).toHaveAttribute('aria-checked', 'true')
+  await dialog.getByRole('button', { name: 'Đóng' }).click()
+  await expect(dialog).toBeHidden()
 })
 
 test('the home page shows the last changed sets and leads to the bank', async ({ page, backend }) => {

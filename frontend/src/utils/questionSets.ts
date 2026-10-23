@@ -147,33 +147,43 @@ export interface UseGame {
   name: string
   /** What the game does with the questions */
   description: string
+  group: UseGameGroup
 }
+
+/** How the class plays a game: the filter chips of the "Chơi" dialog. */
+export type UseGameGroup = 'TEAM' | 'CLASS' | 'WORD'
+
+export const USE_GAME_GROUPS: { code: UseGameGroup; label: string; icon: string }[] = [
+  { code: 'TEAM', label: 'Thi đua đội', icon: '🏁' },
+  { code: 'CLASS', label: 'Cả lớp', icon: '🙋' },
+  { code: 'WORD', label: 'Trò chữ', icon: '🔤' },
+]
 
 /** Navigation state that opens the "new set" form of /question-sets on arrival. */
 export const OPEN_CREATE_SET = { createSet: true }
 
 export const USE_GAMES: UseGame[] = [
-  { code: 'QUIZ', name: 'Trắc nghiệm', description: 'Các đội chọn đáp án đúng, cướp lượt khi đội trước sai.' },
-  { code: 'GOLDEN_BELL', name: 'Rung chuông vàng', description: 'Cả lớp cùng trả lời, sai thì ra ngoài, ai trụ lại cuối cùng?' },
-  { code: 'BOAT_RACE', name: 'Đua thuyền', description: 'Trả lời đúng để thuyền của đội tiến về đích.' },
-  { code: 'GRID_BOARD', name: 'Lật ô thi đua', description: 'Các đội chọn ô số và trả lời để ghi điểm. Dùng được mọi câu.' },
-  { code: 'MILLIONAIRE', name: 'Ai là triệu phú', description: 'Một bạn leo bậc thưởng, có 3 quyền trợ giúp.' },
-  { code: 'TUG_OF_WAR', name: 'Kéo co', description: 'Hai đội thi trả lời, mỗi câu đúng kéo dây về phía mình.' },
-  { code: 'FLOWER_PICK', name: 'Hái hoa dân chủ', description: 'Mỗi bông hoa trên cây là một câu hỏi.' },
-  { code: 'WHACK_MOLE', name: 'Đập chuột', description: 'Đập đúng chú chuột mang đáp án đúng.' },
-  { code: 'TRUE_FALSE', name: 'Đúng hay sai', description: 'Mọi đội cùng chọn Đúng hoặc Sai cho đáp án hiện ra.' },
-  { code: 'LUCKY_STAR', name: 'Ngôi sao may mắn', description: 'Chọn ngôi sao: câu hỏi hoặc điểm thưởng may mắn.' },
-  { code: 'SECRET_PICTURE', name: 'Ô cửa bí mật', description: 'Trả lời đúng để mở ô cửa và đoán bức tranh.' },
-  { code: 'MOUNTAIN_CLIMB', name: 'Leo núi', description: 'Trả lời đúng để người leo núi của đội lên đỉnh.' },
-  { code: 'POINT_WHEEL', name: 'Vòng quay điểm thưởng', description: 'Quay để biết câu hỏi đáng bao nhiêu điểm.' },
-  { code: 'TIC_TAC_TOE', name: 'Cờ ca-rô hỏi đáp', description: 'Trả lời đúng để đánh dấu ô, ba ô thẳng hàng là thắng.' },
-  { code: 'CONNECT_FOUR', name: 'Bốn ô liên tiếp', description: 'Trả lời đúng để thả quân, bốn quân liền nhau là thắng.' },
-  { code: 'TREASURE_CHEST', name: 'Rương vàng', description: 'Trả lời đúng để mở rương báu đầy bất ngờ.' },
-  { code: 'BUILD_TOWER', name: 'Xây tháp', description: 'Mỗi câu đúng thêm một khối, tháp nào cao nhất?' },
-  { code: 'BEE_FLOWER', name: 'Ong tìm hoa', description: 'Chỉ đường cho chú ong đến bông hoa có đáp án đúng.' },
-  { code: 'BINGO', name: 'Bingo', description: 'Đánh dấu đáp án trên thẻ, đủ một hàng là Bingo!' },
-  { code: 'WORD_SCRAMBLE', name: 'Vua Tiếng Việt', description: 'Xếp lại các chữ cái bị xáo trộn thành đáp án. Dùng được mọi câu.' },
-  { code: 'HANGMAN', name: 'Đoán chữ', description: 'Đoán từng chữ cái để mở ô chữ. Dùng được mọi câu.' },
+  { code: 'QUIZ', name: 'Trắc nghiệm', description: 'Các đội chọn đáp án đúng, cướp lượt khi đội trước sai.', group: 'TEAM' },
+  { code: 'GOLDEN_BELL', name: 'Rung chuông vàng', description: 'Cả lớp cùng trả lời, sai thì ra ngoài, ai trụ lại cuối cùng?', group: 'CLASS' },
+  { code: 'BOAT_RACE', name: 'Đua thuyền', description: 'Trả lời đúng để thuyền của đội tiến về đích.', group: 'TEAM' },
+  { code: 'GRID_BOARD', name: 'Lật ô thi đua', description: 'Các đội chọn ô số và trả lời để ghi điểm. Dùng được mọi câu.', group: 'TEAM' },
+  { code: 'MILLIONAIRE', name: 'Ai là triệu phú', description: 'Một bạn leo bậc thưởng, có 3 quyền trợ giúp.', group: 'CLASS' },
+  { code: 'TUG_OF_WAR', name: 'Kéo co', description: 'Hai đội thi trả lời, mỗi câu đúng kéo dây về phía mình.', group: 'TEAM' },
+  { code: 'FLOWER_PICK', name: 'Hái hoa dân chủ', description: 'Mỗi bông hoa trên cây là một câu hỏi.', group: 'CLASS' },
+  { code: 'WHACK_MOLE', name: 'Đập chuột', description: 'Đập đúng chú chuột mang đáp án đúng.', group: 'CLASS' },
+  { code: 'TRUE_FALSE', name: 'Đúng hay sai', description: 'Mọi đội cùng chọn Đúng hoặc Sai cho đáp án hiện ra.', group: 'CLASS' },
+  { code: 'LUCKY_STAR', name: 'Ngôi sao may mắn', description: 'Chọn ngôi sao: câu hỏi hoặc điểm thưởng may mắn.', group: 'TEAM' },
+  { code: 'SECRET_PICTURE', name: 'Ô cửa bí mật', description: 'Trả lời đúng để mở ô cửa và đoán bức tranh.', group: 'CLASS' },
+  { code: 'MOUNTAIN_CLIMB', name: 'Leo núi', description: 'Trả lời đúng để người leo núi của đội lên đỉnh.', group: 'TEAM' },
+  { code: 'POINT_WHEEL', name: 'Vòng quay điểm thưởng', description: 'Quay để biết câu hỏi đáng bao nhiêu điểm.', group: 'TEAM' },
+  { code: 'TIC_TAC_TOE', name: 'Cờ ca-rô hỏi đáp', description: 'Trả lời đúng để đánh dấu ô, ba ô thẳng hàng là thắng.', group: 'TEAM' },
+  { code: 'CONNECT_FOUR', name: 'Bốn ô liên tiếp', description: 'Trả lời đúng để thả quân, bốn quân liền nhau là thắng.', group: 'TEAM' },
+  { code: 'TREASURE_CHEST', name: 'Rương vàng', description: 'Trả lời đúng để mở rương báu đầy bất ngờ.', group: 'TEAM' },
+  { code: 'BUILD_TOWER', name: 'Xây tháp', description: 'Mỗi câu đúng thêm một khối, tháp nào cao nhất?', group: 'TEAM' },
+  { code: 'BEE_FLOWER', name: 'Ong tìm hoa', description: 'Chỉ đường cho chú ong đến bông hoa có đáp án đúng.', group: 'CLASS' },
+  { code: 'BINGO', name: 'Bingo', description: 'Đánh dấu đáp án trên thẻ, đủ một hàng là Bingo!', group: 'CLASS' },
+  { code: 'WORD_SCRAMBLE', name: 'Vua Tiếng Việt', description: 'Xếp lại các chữ cái bị xáo trộn thành đáp án. Dùng được mọi câu.', group: 'WORD' },
+  { code: 'HANGMAN', name: 'Đoán chữ', description: 'Đoán từng chữ cái để mở ô chữ. Dùng được mọi câu.', group: 'WORD' },
 ]
 
 /** Questions of the set the game can play: quiz games play multiple choice, Lật ô plays every question. */
