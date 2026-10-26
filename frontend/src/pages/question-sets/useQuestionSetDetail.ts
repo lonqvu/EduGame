@@ -60,14 +60,19 @@ export function useQuestionSetDetail(code: string) {
     addQuestions: async (questions: QuestionRequest[]) => saved(await questionSetApi.addQuestions(code, questions)),
     updateQuestion: async (id: number, question: QuestionRequest) => saved(await questionSetApi.updateQuestion(code, id, question)),
     deleteQuestion: async (id: number) => saved(await questionSetApi.deleteQuestion(code, id)),
-    /** Moves a question one place up (-1) or down (+1). */
-    moveQuestion: async (id: number, step: -1 | 1) => {
-      const ids = (data?.questions ?? []).map((q) => q.id)
-      const from = ids.indexOf(id)
-      const to = from + step
-      if (from < 0 || to < 0 || to >= ids.length) return data
-      ;[ids[from], ids[to]] = [ids[to], ids[from]]
-      return saved(await questionSetApi.reorderQuestions(code, ids))
+    /** The questions in a new order (every id once): shown at once, then saved; put back if saving fails. */
+    reorderQuestions: async (ids: number[]) => {
+      const before = data
+      if (before) {
+        const byId = new Map(before.questions.map((q) => [q.id, q]))
+        setData({ ...before, questions: ids.map((id) => byId.get(id)!).filter(Boolean) })
+      }
+      try {
+        return saved(await questionSetApi.reorderQuestions(code, ids))
+      } catch (error) {
+        setData(before)
+        throw error
+      }
     },
   }
 }

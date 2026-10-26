@@ -1,23 +1,28 @@
 import { App, Button, Dropdown } from 'antd'
-import { useEffect, useState, type ReactNode } from 'react'
-import { Link, useParams } from 'react-router'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { Link, useNavigate, useParams } from 'react-router'
+import * as questionSetApi from '@/api/questionSetApi'
 import { BackLink } from '@/components/ui/BackLink'
-import { CalendarIcon, MoreVerticalIcon, PencilIcon, PlayIcon, UserIcon } from '@/components/ui/icons'
+import { MoreVerticalIcon, PencilIcon, PlayIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
-import { editPath, isGameType } from '@/game-engine/registry'
+import { isGameType, playPath } from '@/game-engine/registry'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { gameThumb } from '@/pages/home/homeAssets'
 import { PasteQuestionsModal } from '@/pages/question-sets/PasteQuestionsModal'
-import { QuestionModal } from '@/pages/question-sets/QuestionModal'
-import { SetChips, SubjectThumb } from '@/pages/question-sets/qsUi'
+import { SubjectThumb } from '@/pages/question-sets/qsUi'
 import { SetQuestions } from '@/pages/question-sets/SetQuestions'
 import { useQuestionSetDetail } from '@/pages/question-sets/useQuestionSetDetail'
 import { useSetActions } from '@/pages/question-sets/useSetActions'
 import { useQuestionSetStore } from '@/store/questionSetStore'
-import type { QuestionResponse, QuestionSetGameResponse, QuestionType } from '@/types/api'
+import { useSettingsStore } from '@/store/settingsStore'
+import type { QuestionGameCode, QuestionResponse, QuestionSetGameResponse, QuestionSetSummaryResponse } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
 import { relativeTimeLabel } from '@/utils/dateLabels'
-import { compactNumber, dayLabel, USE_GAMES } from '@/utils/questionSets'
+import { enterFullscreen } from '@/utils/fullscreen'
+import { gradeText, subjectInfo, usableCount, USE_GAMES } from '@/utils/questionSets'
+
+/** Games offered at once beside the questions: the most played ones. */
+const QUICK_GAMES: QuestionGameCode[] = ['QUIZ', 'GOLDEN_BELL', 'BOAT_RACE', 'GRID_BOARD']
 
 /** /question-sets/:code — a set: its details and numbers, its questions, and the games made from it. */
 export function QuestionSetPage() {
@@ -28,11 +33,8 @@ export function QuestionSetPage() {
   const loadSets = useQuestionSetStore((s) => s.load)
   const actions = useSetActions({ onEdited: detail.setData, afterArchive: '/question-sets' })
 
-  /** The question in the form: an existing one, or a new one (number = where it goes). */
-  const [writing, setWriting] = useState<{ question?: QuestionResponse; number: number }>()
   const [pasting, setPasting] = useState(false)
   const [moving, setMoving] = useState(false)
-  const [lastType, setLastType] = useState<QuestionType>('MULTIPLE_CHOICE')
 
   // The bank list (to pick another set in "Chơi"), when the page is opened directly.
   useEffect(() => {
@@ -46,10 +48,10 @@ export function QuestionSetPage() {
   const { summary: set, questions, games } = detail.data
   const empty = questions.length === 0
 
-  const move = async (question: QuestionResponse, step: -1 | 1) => {
+  const reorder = async (ids: number[]) => {
     setMoving(true)
     try {
-      await detail.moveQuestion(question.id, step)
+      await detail.reorderQuestions(ids)
     } catch (error) {
       message.error(apiErrorMessage(error))
     } finally {
@@ -78,22 +80,14 @@ export function QuestionSetPage() {
     <div className="flex flex-col gap-5">
       <BackLink to="/question-sets" label="Bộ câu hỏi" />
 
-      <section className="@container rounded-[22px] bg-white p-4 sm:p-6">
-        <div className="flex flex-col gap-4 @min-[760px]:flex-row @min-[760px]:items-start">
+      <section className="@container rounded-[22px] bg-white p-4 sm:p-5">
+        <div className="flex flex-col gap-4 @min-[760px]:flex-row @min-[760px]:items-center">
           <div className="flex min-w-0 flex-1 gap-4">
-            <SubjectThumb subject={set.subject} className="w-[72px] self-start @min-[560px]:w-[120px]" />
-            <div className="flex min-w-0 flex-col gap-2">
-              <h1 className="m-0 text-[24px] leading-tight font-black break-words @min-[560px]:text-[28px]">{set.title}</h1>
-              <SetChips set={set} />
-              {set.description && <p className="m-0 text-[14.5px] leading-relaxed text-ink-muted">{set.description}</p>}
-              <p className="m-0 flex flex-wrap items-center gap-x-5 gap-y-1 text-[13px] text-ink-muted">
-                <span className="flex items-center gap-1.5">
-                  <UserIcon size={14} /> Tạo bởi: {set.ownerName}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <CalendarIcon size={14} /> Cập nhật: {dayLabel(set.updatedAt)}
-                </span>
-              </p>
+            <SubjectThumb subject={set.subject} className="w-[72px] self-start @min-[560px]:w-[92px]" />
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <h1 className="m-0 text-[24px] leading-tight font-black break-words @min-[560px]:text-[27px]">{set.title}</h1>
+              {set.description && <p className="m-0 text-[14px] leading-relaxed text-ink-muted">{set.description}</p>}
+              <SetFacts set={set} />
             </div>
           </div>
           <div className="flex items-center gap-2.5">
@@ -103,11 +97,11 @@ export function QuestionSetPage() {
               disabled={empty}
               title={empty ? 'Bộ chưa có câu hỏi' : undefined}
               onClick={() => actions.use(set)}
-              className="h-11 flex-1 rounded-[12px] px-5 font-extrabold @min-[760px]:flex-none"
+              className="h-11 flex-1 rounded-full px-5 font-extrabold @min-[760px]:flex-none"
             >
               Chơi
             </Button>
-            <Button icon={<PencilIcon size={17} />} onClick={() => actions.edit(set)} className="h-11 rounded-[12px] font-bold">
+            <Button icon={<PencilIcon size={17} />} onClick={() => actions.edit(set)} className="h-11 rounded-full font-bold">
               Sửa<span className="hidden @min-[560px]:inline"> thông tin</span>
             </Button>
             <Dropdown
@@ -121,49 +115,30 @@ export function QuestionSetPage() {
                 ],
               }}
             >
-              <Button aria-label="Thêm thao tác" icon={<MoreVerticalIcon size={19} />} className="size-11 shrink-0 rounded-[12px]" />
+              <Button aria-label="Thêm thao tác" icon={<MoreVerticalIcon size={19} />} className="size-11 shrink-0 rounded-full" />
             </Dropdown>
           </div>
         </div>
       </section>
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <Tile label="Câu hỏi" value={String(set.questionCount)} hint="trong bộ" accent="#3563E9" />
-        <Tile label="Trắc nghiệm" value={String(set.multipleChoiceCount)} hint="cho mọi trò hỏi đáp" accent="#8A2BA8" />
-        <Tile label="Tự luận" value={String(set.shortAnswerCount)} hint="cho Lật ô thi đua" accent="#F08A24" />
-        <Tile
-          label="Lượt sử dụng"
-          value={compactNumber(set.useCount)}
-          hint={set.useCount ? `chơi ${set.playCount} lần với lớp` : 'chưa tạo trò chơi nào'}
-          accent="#1E9E62"
-        />
-      </div>
-
       <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
         <SetQuestions
           questions={questions}
           busy={moving}
-          onAdd={() => setWriting({ number: questions.length + 1 })}
           onPaste={() => setPasting(true)}
-          onEdit={(question, number) => setWriting({ question, number })}
+          onSave={async (request, question) => {
+            if (question) await detail.updateQuestion(question.id, request)
+            else await detail.addQuestions([request])
+          }}
           onDelete={confirmDelete}
-          onMove={(question, step) => void move(question, step)}
+          onReorder={(ids) => void reorder(ids)}
         />
-        <MadeGames games={games} canUse={!empty} onUse={() => actions.use(set)} />
+        <div className="flex flex-col gap-5">
+          {!empty && <PlayWith set={set} onMore={() => actions.use(set)} />}
+          <MadeGames games={games} />
+        </div>
       </div>
 
-      <QuestionModal
-        open={!!writing}
-        question={writing?.question}
-        number={writing?.number ?? 1}
-        defaultType={lastType}
-        onClose={() => setWriting(undefined)}
-        onSave={async (request) => {
-          setLastType(request.type)
-          if (writing?.question) await detail.updateQuestion(writing.question.id, request)
-          else await detail.addQuestions([request])
-        }}
-      />
       <PasteQuestionsModal
         open={pasting}
         questionCount={questions.length}
@@ -175,54 +150,116 @@ export function QuestionSetPage() {
   )
 }
 
-function Tile({ label, value, hint, accent }: { label: string; value: string; hint: ReactNode; accent: string }) {
+/** Subject, grade, how many questions of each kind, how often played: one line of chips. */
+function SetFacts({ set }: { set: QuestionSetSummaryResponse }) {
+  const subject = subjectInfo(set.subject)
+  const kinds = [set.multipleChoiceCount && `${set.multipleChoiceCount} trắc nghiệm`, set.shortAnswerCount && `${set.shortAnswerCount} tự luận`]
+    .filter(Boolean)
+    .join(' · ')
   return (
-    <div className="flex min-w-0 flex-col gap-1 rounded-[18px] bg-white p-4 sm:p-5">
-      <span className="flex items-center gap-2 text-[14px] font-bold text-ink-soft">
-        <span aria-hidden="true" className="size-2.5 rounded-full" style={{ background: accent }} />
-        {label}
-      </span>
-      <span className="text-[24px] leading-tight font-black tabular-nums sm:text-[26px]">{value}</span>
-      <span className="truncate text-[13px] text-ink-muted">{hint}</span>
-    </div>
+    <span className="flex flex-wrap gap-1.5">
+      <Fact style={{ background: subject.tint, color: subject.ink }}>{subject.label}</Fact>
+      <Fact>{gradeText(set.grade)}</Fact>
+      <Fact>{set.questionCount ? `${set.questionCount} câu: ${kinds}` : 'Chưa có câu hỏi'}</Fact>
+      <Fact>{set.useCount ? `Đã tạo ${set.useCount} trò, chơi ${set.playCount} lần với lớp` : 'Chưa chơi lần nào'}</Fact>
+    </span>
   )
 }
 
-/** "Trò chơi đã tạo": games made from the set, to open in the editor or play. */
-function MadeGames({ games, canUse, onUse }: { games: QuestionSetGameResponse[]; canUse: boolean; onUse: () => void }) {
+function Fact({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return (
+    <span style={style} className="rounded-full bg-chip px-2.5 py-0.5 text-[12.5px] font-extrabold text-[#3D4766]">
+      {children}
+    </span>
+  )
+}
+
+/** "Chơi bộ này với": the most played games, each made from the set and opened on the projector in one tap. */
+function PlayWith({ set, onMore }: { set: QuestionSetSummaryResponse; onMore: () => void }) {
+  const navigate = useNavigate()
+  const { message } = App.useApp()
+  const fullscreenOnStart = useSettingsStore((s) => s.settings.display.fullscreenOnStart)
+  const upsert = useQuestionSetStore((s) => s.upsert)
+  const [making, setMaking] = useState<QuestionGameCode | null>(null)
+
+  const play = async (game: QuestionGameCode) => {
+    if (making) return
+    // Asked inside the click: browsers only allow full screen right after a click.
+    if (fullscreenOnStart) enterFullscreen()
+    setMaking(game)
+    try {
+      const used = await questionSetApi.useQuestionSet(set.code, game)
+      if (used.skippedCount) message.info(`Trò chơi dùng ${used.questionCount} câu (bỏ qua ${used.skippedCount} câu tự luận).`)
+      void questionSetApi.getQuestionSet(set.code).then((s) => upsert(s.summary), () => undefined)
+      navigate(playPath({ id: used.gameCode, type: game }))
+    } catch (error) {
+      message.error(apiErrorMessage(error))
+      setMaking(null)
+    }
+  }
+
+  const games = QUICK_GAMES.map((code) => USE_GAMES.find((g) => g.code === code)!).filter((g) => usableCount(set, g.code) > 0)
+  return (
+    <section aria-labelledby="play-with" className="rounded-[20px] bg-white p-4 sm:p-5">
+      <h2 id="play-with" className="m-0 text-[17px] font-black">
+        ▶ Chơi bộ này với
+      </h2>
+      <p className="m-0 mt-1 mb-3 text-[13px] text-ink-muted">Một chạm: tạo trò chơi từ các câu hỏi và mở màn chiếu.</p>
+      <ul className="m-0 flex list-none flex-col gap-2 p-0">
+        {games.map((g) => (
+          <li key={g.code}>
+            <button
+              type="button"
+              disabled={!!making}
+              aria-busy={making === g.code}
+              onClick={() => void play(g.code)}
+              aria-label={`Chơi bộ này với ${g.name}`}
+              className="flex w-full cursor-pointer items-center gap-3 rounded-[14px] border-2 border-transparent bg-surface-soft p-1.5 pr-3 text-left font-[inherit] text-[14.5px] font-extrabold text-ink transition hover:border-[#C9D9F5] disabled:cursor-wait"
+            >
+              <img src={gameThumb(g.code)} alt="" className="aspect-[2/1] w-[68px] shrink-0 rounded-[9px] object-cover" />
+              <span className="min-w-0 flex-1 truncate">{g.name}</span>
+              <span className="text-[12px] text-primary">{making === g.code ? 'Đang mở…' : '▶'}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <button
+        type="button"
+        onClick={onMore}
+        className="mt-3 cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-[14px] font-extrabold text-primary hover:text-primary-ink"
+      >
+        Xem cả {USE_GAMES.length} trò →
+      </button>
+    </section>
+  )
+}
+
+/** "Trò chơi đã tạo": games made from the set, to play again. */
+function MadeGames({ games }: { games: QuestionSetGameResponse[] }) {
+  if (games.length === 0) return null
   const gameName = (code: string) => USE_GAMES.find((g) => g.code === code)?.name ?? code
   return (
     <section aria-labelledby="made-games" className="rounded-[20px] bg-white p-4 sm:p-5">
       <h2 id="made-games" className="m-0 text-[17px] font-black">
-        Trò chơi đã tạo
+        Trò chơi đã tạo từ bộ này
       </h2>
-      {games.length === 0 ? (
-        <div className="mt-3 flex flex-col gap-3">
-          <p className="m-0 text-[14px] leading-relaxed text-ink-muted">
-            Chưa có trò chơi nào từ bộ này. Bấm “Chơi” để chơi các câu hỏi với Trắc nghiệm, Rung chuông vàng, Đua thuyền hay Lật ô.
-          </p>
-          <Button type="primary" ghost icon={<PlayIcon size={15} />} onClick={onUse} disabled={!canUse} className="w-fit rounded-full font-bold">
-            Chơi
-          </Button>
-        </div>
-      ) : (
-        <ul className="m-0 mt-3 flex list-none flex-col gap-2.5 p-0">
-          {games.map((g) => (
-            <li key={g.code}>
-              <Link
-                to={editPath(g.code)}
-                className="flex items-center gap-3 rounded-[14px] border border-line-soft p-2 pr-3 text-ink transition hover:border-[#C9D9F5] hover:text-ink"
-              >
-                {isGameType(g.templateCode) && <img src={gameThumb(g.templateCode)} alt="" className="aspect-[2/1] w-[88px] shrink-0 rounded-[10px]" />}
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-[14.5px] font-bold">{gameName(g.templateCode)}</span>
-                  <span className="truncate text-[12.5px] text-ink-muted">Tạo {relativeTimeLabel(g.createdAt)}</span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="m-0 mt-3 flex list-none flex-col gap-2 p-0">
+        {games.map((g) => (
+          <li key={g.code}>
+            <Link
+              to={isGameType(g.templateCode) ? playPath({ id: g.code, type: g.templateCode }) : `/play/${g.code}`}
+              className="flex items-center gap-3 rounded-[14px] border border-line-soft p-1.5 pr-3 text-ink transition hover:border-[#C9D9F5] hover:text-ink"
+            >
+              {isGameType(g.templateCode) && <img src={gameThumb(g.templateCode)} alt="" className="aspect-[2/1] w-[68px] shrink-0 rounded-[9px]" />}
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-[14px] font-bold">{gameName(g.templateCode)}</span>
+                <span className="truncate text-[12.5px] text-ink-muted">Tạo {relativeTimeLabel(g.createdAt).toLowerCase()}</span>
+              </span>
+              <span className="text-[12px] text-primary">▶</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }

@@ -1,4 +1,4 @@
-import { App, Button, Input, Modal, Segmented } from 'antd'
+import { App, Button, Input, Segmented } from 'antd'
 import { useState } from 'react'
 import { CloseIcon, PlusIcon } from '@/components/ui/icons'
 import type { QuestionRequest, QuestionResponse, QuestionType } from '@/types/api'
@@ -17,8 +17,7 @@ import {
   type QuestionDraft,
 } from '@/utils/questionSets'
 
-interface QuestionModalProps {
-  open: boolean
+interface QuestionFormProps {
   /** The question being edited; none to write a new one. */
   question?: QuestionResponse
   /** Its number in the set, for the title ("Câu 3") */
@@ -30,13 +29,11 @@ interface QuestionModalProps {
   onSave: (request: QuestionRequest) => Promise<unknown>
 }
 
-/** Write or edit one question: multiple choice with its right option, or short answer. */
-export function QuestionModal(props: QuestionModalProps) {
-  // Each opening starts from the question (or an empty one).
-  return props.open ? <QuestionDialog {...props} /> : null
-}
-
-function QuestionDialog({ question, number, defaultType, onClose, onSave }: QuestionModalProps) {
+/**
+ * Write or edit one question in place, in the list of the set: multiple choice with its right option, or short
+ * answer. Ctrl+Enter saves (and starts the next new question). Mounted afresh for each question.
+ */
+export function QuestionForm({ question, number, defaultType, onClose, onSave }: QuestionFormProps) {
   const { message } = App.useApp()
   const [draft, setDraft] = useState<QuestionDraft>(() => (question ? draftOf(question) : emptyDraft(defaultType)))
   const [count, setCount] = useState(number)
@@ -75,27 +72,25 @@ function QuestionDialog({ question, number, defaultType, onClose, onSave }: Ques
     }
   }
 
+  const title = editing ? `Sửa câu ${number}` : `Câu hỏi mới (câu ${count})`
+
   return (
-    <Modal
-      open
-      title={editing ? `Sửa câu ${number}` : `Câu hỏi mới (câu ${count})`}
-      onCancel={onClose}
-      width={620}
-      footer={[
-        <Button key="cancel" onClick={onClose}>
-          Hủy
-        </Button>,
-        !editing && (
-          <Button key="next" loading={saving} onClick={() => void save(true)}>
-            Thêm và soạn câu tiếp
-          </Button>
-        ),
-        <Button key="save" type="primary" loading={saving} onClick={() => void save(false)}>
-          {editing ? 'Lưu câu hỏi' : 'Thêm câu hỏi'}
-        </Button>,
-      ]}
+    <section
+      aria-label={title}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault()
+          void save(!editing)
+        }
+        if (e.key === 'Escape') onClose()
+      }}
+      className="rounded-[16px] border-2 border-primary bg-white p-3.5 shadow-[0_8px_22px_rgba(53,99,233,0.15)] sm:p-4"
     >
-      <div className="flex flex-col gap-4 pt-2">
+      <h3 className="m-0 mb-3 flex items-center gap-2 text-[15px] font-black">
+        <span className="flex size-7 items-center justify-center rounded-full bg-primary-soft text-[13px] text-primary tabular-nums">{editing ? number : count}</span>
+        {title}
+      </h3>
+      <div className="flex flex-col gap-3.5">
         <Segmented<QuestionType>
           block
           value={draft.type}
@@ -197,7 +192,21 @@ function QuestionDialog({ question, number, defaultType, onClose, onSave }: Ques
             {problem}
           </p>
         )}
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <span className="mr-auto hidden text-[12.5px] text-ink-muted sm:inline">Ctrl + Enter để lưu · Esc để hủy</span>
+          <Button onClick={onClose} className="rounded-full">
+            Hủy
+          </Button>
+          {!editing && (
+            <Button loading={saving} onClick={() => void save(true)} className="rounded-full font-bold">
+              Thêm và soạn câu tiếp
+            </Button>
+          )}
+          <Button type="primary" loading={saving} onClick={() => void save(false)} className="rounded-full font-extrabold">
+            {editing ? 'Lưu câu hỏi' : 'Thêm câu hỏi'}
+          </Button>
+        </div>
       </div>
-    </Modal>
+    </section>
   )
 }

@@ -40,14 +40,14 @@ const row = (page: Page, title: string) => page.getByRole('listitem').filter({ h
 test('the bank lists the sets with their numbers, and filters them', async ({ page, backend }) => {
   const total = (await backend.questionSetList()).length
   await page.goto('/question-sets')
-  await expect(page.getByRole('heading', { name: 'Bộ câu hỏi', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Bộ câu hỏi của cô' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Bộ câu hỏi', exact: true })).toHaveAttribute('aria-current', 'page')
   await expect(page.getByRole('tab', { name: `Tất cả (${total})` })).toHaveAttribute('aria-selected', 'true')
 
   const cong = row(page, 'Toán lớp 2 - Phép cộng trong phạm vi 100')
   await expect(cong).toContainText('Trắc nghiệm + tự luận')
-  await expect(cong).toContainText('8Câu hỏi')
-  await expect(cong).toContainText('Tạo bởi: Cô Lan')
+  await expect(cong).toContainText('8 câu')
+  await expect(cong).toContainText('Toán · Lớp 2')
   const doc = row(page, 'Tiếng Việt - Luyện đọc hiểu')
 
   // Subject tab, then search, kind and grade filters.
@@ -69,8 +69,7 @@ test('the bank lists the sets with their numbers, and filters them', async ({ pa
   await page.getByRole('button', { name: 'Xóa bộ lọc' }).last().click()
   await expect(cong).toBeVisible()
 
-  // "Chủ đề phổ biến" filters by subject too.
-  await page.getByRole('button', { name: /^Khoa học/ }).click()
+  await page.getByRole('tab', { name: /^Khoa học \(\d+\)$/ }).click()
   await expect(page.getByRole('tab', { name: /^Khoa học \(\d+\)$/ })).toHaveAttribute('aria-selected', 'true')
   await expect(row(page, 'Khoa học - Cơ thể người và sức khỏe')).toBeVisible()
   await expect(cong).toBeHidden()
@@ -83,7 +82,7 @@ test('the bank lists the sets with their numbers, and filters them', async ({ pa
 test('a teacher creates a set and writes, pastes, edits, moves and deletes its questions', async ({ page, backend }) => {
   const title = unique('E2E Bộ')
   await page.goto('/question-sets')
-  await page.getByRole('button', { name: /Tạo bộ câu hỏi mới/ }).first().click()
+  await page.getByRole('button', { name: 'Tạo bộ câu hỏi', exact: true }).first().click()
   const form = page.getByRole('dialog', { name: 'Tạo bộ câu hỏi mới' })
   await form.getByRole('button', { name: 'Tạo bộ câu hỏi' }).click()
   await expect(form.getByText('Cô đặt tên cho bộ câu hỏi nhé')).toBeVisible()
@@ -99,7 +98,7 @@ test('a teacher creates a set and writes, pastes, edits, moves and deletes its q
 
   // One multiple choice question, then a short answer one in the same dialog.
   await page.getByRole('button', { name: 'Thêm câu hỏi' }).first().click()
-  const writing = page.getByRole('dialog', { name: /Câu hỏi mới/ })
+  const writing = page.getByRole('region', { name: /Câu hỏi mới/ })
   await writing.getByRole('button', { name: 'Thêm câu hỏi' }).click()
   await expect(writing.getByRole('alert')).toHaveText('Cô nhập nội dung câu hỏi nhé.')
   await writing.getByRole('textbox').first().fill('5 + 3 = ?')
@@ -107,7 +106,7 @@ test('a teacher creates a set and writes, pastes, edits, moves and deletes its q
   await writing.getByLabel('Đáp án B', { exact: true }).fill('8')
   await writing.getByLabel('Đáp án B đúng').check()
   await writing.getByRole('button', { name: 'Thêm và soạn câu tiếp' }).click()
-  await expect(page.getByRole('dialog', { name: 'Câu hỏi mới (câu 2)' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Câu hỏi mới (câu 2)' })).toBeVisible()
   await writing.getByText('Tự luận (trả lời ngắn)').click()
   await writing.getByRole('textbox').first().fill('Thủ đô của Việt Nam?')
   await writing.getByPlaceholder('Cô dùng để chấm khi học sinh trả lời').fill('Hà Nội')
@@ -131,17 +130,19 @@ test('a teacher creates a set and writes, pastes, edits, moves and deletes its q
 
   // Edit: question 2 becomes multiple choice.
   await page.getByRole('button', { name: 'Sửa câu 2' }).click()
-  const editing = page.getByRole('dialog', { name: 'Sửa câu 2' })
+  const editing = page.getByRole('region', { name: 'Sửa câu 2' })
   await editing.getByText('Trắc nghiệm', { exact: true }).click()
   await editing.getByLabel('Đáp án A', { exact: true }).fill('Hà Nội')
   await editing.getByLabel('Đáp án B', { exact: true }).fill('Huế')
   await editing.getByRole('button', { name: 'Lưu câu hỏi' }).click()
   await expect(editing).toBeHidden()
 
-  // Move question 1 down, delete the last one.
-  await page.getByRole('button', { name: 'Đưa câu 1 xuống' }).click()
-  await expect(page.getByRole('button', { name: 'Đưa câu 1 xuống' })).toBeEnabled()
-  await page.getByRole('button', { name: 'Xóa câu 4' }).click()
+  // Move question 1 down (the menu, as on a touch screen), delete the last one.
+  await page.getByRole('button', { name: 'Thao tác với câu 1' }).click()
+  await page.getByRole('menuitem', { name: 'Đưa xuống' }).click()
+  await expect.poll(async () => (await backend.questionSet(code)).questions[0].text).toBe('Thủ đô của Việt Nam?')
+  await page.getByRole('button', { name: 'Thao tác với câu 4' }).click()
+  await page.getByRole('menuitem', { name: 'Xóa câu hỏi' }).click()
   await page.getByRole('dialog').getByRole('button', { name: 'Xóa câu hỏi' }).click()
   await expect(page.getByRole('heading', { name: 'Câu hỏi (3)' })).toBeVisible()
 
@@ -224,16 +225,18 @@ test('"Chơi" makes a game from the set and plays it at once', async ({ page, ba
   // The set lists the game and counts the use.
   await page.goto(`/question-sets/${set.summary.code}`)
   await expect(page.getByRole('link', { name: /Rung chuông vàng/ })).toBeVisible()
-  // The "Lượt sử dụng" tile: one game made, not played with a class yet.
-  await expect(page.getByText('chơi 0 lần với lớp')).toBeVisible()
+  // One game made, not played with a class yet.
+  await expect(page.getByText('Đã tạo 1 trò, chơi 0 lần với lớp')).toBeVisible()
   expect((await backend.questionSet(set.summary.code)).summary.useCount).toBe(1)
 
-  // A set of short answers only plays in Lật ô; "Chơi với bộ câu hỏi" lets the teacher pick the set.
+  // A set of short answers only plays in Lật ô; "Đổi bộ" picks another set in the dialog.
   await page.goto('/question-sets')
-  await page.getByRole('button', { name: /Chơi với bộ câu hỏi/ }).click()
+  await row(page, title).getByRole('button', { name: 'Chơi', exact: true }).click()
   await page.getByRole('dialog').getByRole('button', { name: '⇄ Đổi bộ' }).click()
-  await pick(page, 'Bộ câu hỏi', `${onlyShort.summary.title} (1 câu)`)
+  // Picking a set closes the list: the title names the set now.
+  await page.locator(`.ant-select-item-option[title="${onlyShort.summary.title} (1 câu)"]`).click()
   const dialog = page.getByRole('dialog', { name: /với trò nào\?/ })
+  await expect(dialog).toContainText(onlyShort.summary.title)
   await expect(dialog.getByRole('radio', { name: 'Trắc nghiệm' })).toBeDisabled()
   await expect(dialog.getByRole('radio', { name: 'Trắc nghiệm' })).toContainText('Cần câu trắc nghiệm')
   await expect(dialog.getByRole('radio', { name: 'Lật ô thi đua' })).toHaveAttribute('aria-checked', 'true')
@@ -247,4 +250,41 @@ test('the home page shows the last changed sets and leads to the bank', async ({
   await expect(page.getByRole('link', { name: last.title })).toBeVisible()
   await page.getByRole('link', { name: 'Xem tất cả' }).last().click()
   await expect(page).toHaveURL(/\/question-sets$/)
+})
+
+test('on the set page: questions dragged to another place, filtered by kind, and a game in one tap', async ({ page, backend }) => {
+  const title = unique('E2E Kéo')
+  const set = await backend.createQuestionSet(title, [
+    choice('Câu một?', ['A', 'B']),
+    choice('Câu hai?', ['A', 'B']),
+    shortAnswer('Câu ba?', 'Ba'),
+  ])
+  const code = set.summary.code
+  await page.goto(`/question-sets/${code}`)
+  await expect(page.getByText('3 câu: 2 trắc nghiệm · 1 tự luận')).toBeVisible()
+
+  // Drag question 3 above question 1.
+  const handle = page.getByRole('button', { name: 'Kéo để đổi chỗ câu 3' })
+  const target = page.getByText('Câu một?')
+  await page.getByText('Câu ba?').hover()
+  const from = (await handle.boundingBox())!
+  const to = (await target.boundingBox())!
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(from.x + from.width / 2, from.y - 10, { steps: 5 })
+  await page.mouse.move(from.x + from.width / 2, to.y - 4, { steps: 10 })
+  await page.mouse.up()
+  await expect.poll(async () => (await backend.questionSet(code)).questions.map((q) => q.text)).toEqual(['Câu ba?', 'Câu một?', 'Câu hai?'])
+
+  // Only the short answers.
+  await page.getByRole('radio', { name: 'Tự luận 1' }).click()
+  await expect(page.getByText('Câu một?')).toBeHidden()
+  await expect(page.getByText('Câu ba?')).toBeVisible()
+  await page.getByRole('radio', { name: 'Tất cả' }).click()
+
+  // "Chơi bộ này với": the game is made and opens on the projector.
+  await page.getByRole('button', { name: 'Chơi bộ này với Lật ô thi đua' }).click()
+  await expect(page).toHaveURL(/\/play\/g-[a-z0-9]+$/)
+  backend.adopt(page.url().split('/').at(-1)!)
+  await expect(page.getByRole('region', { name: /^Giới thiệu trò chơi/ })).toBeVisible()
 })
