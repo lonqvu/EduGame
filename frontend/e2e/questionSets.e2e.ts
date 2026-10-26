@@ -141,6 +141,8 @@ test('a teacher creates a set and writes, pastes, edits, moves and deletes its q
   await page.getByRole('button', { name: 'Thao tác với câu 1' }).click()
   await page.getByRole('menuitem', { name: 'Đưa xuống' }).click()
   await expect.poll(async () => (await backend.questionSet(code)).questions[0].text).toBe('Thủ đô của Việt Nam?')
+  // The first menu closes with an animation: wait for it, or the next menu's items are there twice.
+  await expect(page.getByRole('menu')).toHaveCount(0)
   await page.getByRole('button', { name: 'Thao tác với câu 4' }).click()
   await page.getByRole('menuitem', { name: 'Xóa câu hỏi' }).click()
   await page.getByRole('dialog').getByRole('button', { name: 'Xóa câu hỏi' }).click()
@@ -234,7 +236,9 @@ test('"Chơi" makes a game from the set and plays it at once', async ({ page, ba
   await row(page, title).getByRole('button', { name: 'Chơi', exact: true }).click()
   await page.getByRole('dialog').getByRole('button', { name: '⇄ Đổi bộ' }).click()
   // Picking a set closes the list: the title names the set now.
-  await page.locator(`.ant-select-item-option[title="${onlyShort.summary.title} (1 câu)"]`).click()
+  // Typed and picked with Enter: the list opens while the dialog still grows, a click could land beside an option.
+  await page.getByRole('combobox', { name: 'Bộ câu hỏi' }).fill(onlyShort.summary.title)
+  await page.keyboard.press('Enter')
   const dialog = page.getByRole('dialog', { name: /với trò nào\?/ })
   await expect(dialog).toContainText(onlyShort.summary.title)
   await expect(dialog.getByRole('radio', { name: 'Trắc nghiệm' })).toBeDisabled()

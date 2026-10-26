@@ -60,3 +60,16 @@ test.describe('on a touch screen', () => {
     await expect(page.getByRole('tooltip')).toHaveCount(0)
   })
 })
+
+test('"‹" in a game goes back to its introduction, not to the editor', async ({ page }) => {
+  await page.goto('/games/new')
+  await page.getByRole('button', { name: 'Chơi ngay Trắc nghiệm', exact: true }).click()
+  await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
+  const back = page.getByRole('button', { name: 'Quay lại màn giới thiệu' })
+  await back.click()
+  await expect(page).toHaveURL(/\/play\/[^/]+$/)
+  await expect(page.getByRole('button', { name: 'Bắt đầu', exact: true })).toBeVisible()
+  // The introduction's own "Quay lại" leaves for where the teacher came from.
+  await page.getByRole('button', { name: 'Quay lại' }).first().click()
+  await expect(page).toHaveURL(/\/games\/new$/)
+})

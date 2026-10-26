@@ -14,10 +14,9 @@ import {
   type MillionaireEnd,
 } from '@/game-engine/millionaire/millionaire'
 import { PLAY_DEFAULTS, readPlaySettings } from '@/game-engine/shared/gameSettings'
-import { NothingToPlay, playButtonClass } from '@/game-engine/shared/PlayFrame'
+import { GameBackButton, NothingToPlay, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import { useFinishPlaySession } from '@/game-engine/shared/usePlaySession'
 import { editPath } from '@/game-engine/registry'
-import { ChevronLeftIcon } from '@/components/ui/icons'
 import type { GameSummary, QuizQuestion } from '@/types/game'
 import { assetSrc } from '@/utils/images'
 import { useSound } from '@/sound/useSound'
@@ -89,13 +88,7 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <Link
-              to={backTo}
-              aria-label="Quay lại soạn câu hỏi"
-              className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 hover:text-white"
-            >
-              <ChevronLeftIcon size={22} />
-            </Link>
+            <GameBackButton backTo={backTo} className="bg-white/15 text-white hover:bg-white/25 hover:text-white" />
             <h1 className="m-0 truncate font-display text-[24px] font-extrabold">{game.title}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-3">

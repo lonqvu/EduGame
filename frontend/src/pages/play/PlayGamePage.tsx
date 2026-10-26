@@ -3,6 +3,7 @@ import { useLocation, useParams, useSearchParams } from 'react-router'
 import { PROJECTOR_BOARD_BG, ProjectorStage } from '@/components/projector/ProjectorStage'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { countPlayable, isGuideGame } from '@/game-engine/gameGuide'
+import { LeaveGameContext } from '@/game-engine/shared/leaveGame'
 import { useBeginPlaySession } from '@/game-engine/shared/usePlaySession'
 import { writePlaySettings } from '@/game-engine/shared/gameSettings'
 import { playMode } from '@/game-engine/registry'
@@ -41,6 +42,7 @@ export function PlayGamePage() {
     () => (location.state as { skipIntro?: boolean } | null)?.skipIntro === true || useGridBoardStore.getState().gameId === gameId,
   )
   const start = useCallback(() => setStarted(true), [])
+  const leave = useCallback(() => setStarted(false), [])
 
   // Coming from the editor, the store already holds the latest content: load only if it does not.
   useEffect(() => {
@@ -79,7 +81,9 @@ export function PlayGamePage() {
     <GridBoardPage screen="board" />
   ) : (
     <ProjectorStage background={PROJECTOR_BOARD_BG} music>
-      <GameScreen mode={mode} game={game} items={items} settings={settings} />
+      <LeaveGameContext value={leave}>
+        <GameScreen mode={mode} game={game} items={items} settings={settings} />
+      </LeaveGameContext>
     </ProjectorStage>
   )
 }
