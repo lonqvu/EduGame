@@ -1,8 +1,8 @@
 import { App, Slider } from 'antd'
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router'
-import { TopBar } from '@/components/layout/TopBar'
-import { BellIcon, ChevronRightIcon, GamepadIcon, GlobeIcon, HomeIcon, SpeakerIcon } from '@/components/ui/icons'
+import { useLocation } from 'react-router'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { BellIcon, GamepadIcon, GlobeIcon, SpeakerIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { SaveState, SettingItem, SettingSelect, SettingsSection, SettingSwitch } from '@/pages/settings/SettingsParts'
 import { playSound } from '@/sound/soundEngine'
@@ -53,28 +53,11 @@ export function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex min-w-[min(100%,300px)] flex-1 flex-col">
-          <nav aria-label="Đường dẫn" className="flex items-center gap-3 text-[14.5px] text-ink-soft">
-            <Link to="/" aria-label="Trang chủ" className="flex text-[#8A93A8] hover:text-primary">
-              <HomeIcon size={20} />
-            </Link>
-            <Link to="/" className="text-ink-soft hover:text-primary">
-              Trang chủ
-            </Link>
-            <ChevronRightIcon size={15} strokeWidth={2.4} />
-            <span className="font-semibold text-ink">Cài đặt</span>
-          </nav>
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <h1 className="m-0 text-[32px] leading-[1.1] font-black tracking-[-0.01em] text-[#1A2440]">Cài đặt</h1>
-            {ready && <SaveState saving={saving} />}
-          </div>
-          <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">Tùy chỉnh Lớp Vui theo cách cô dạy. Mọi thay đổi được lưu tự động.</p>
-        </div>
-        <div className="order-first ml-auto sm:order-none">
-          <TopBar />
-        </div>
-      </header>
+      <PageHeader
+        title="Cài đặt"
+        text="Tùy chỉnh Lớp Vui theo cách cô dạy. Mọi thay đổi được lưu tự động."
+        badge={ready && <SaveState saving={saving} />}
+      />
 
       {status === 'error' ? (
         <LoadError onRetry={() => void load()} />

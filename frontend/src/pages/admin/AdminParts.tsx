@@ -1,8 +1,8 @@
 import { Tag } from 'antd'
 import type { ReactNode } from 'react'
-import { Link, NavLink } from 'react-router'
-import { TopBar } from '@/components/layout/TopBar'
-import { ChevronRightIcon, HomeIcon } from '@/components/ui/icons'
+import { NavLink } from 'react-router'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { BackLink } from '@/components/ui/BackLink'
 import type { UserRole, UserStatus } from '@/types/api'
 import { ROLE_LABELS, USER_STATUS_LABELS } from '@/utils/admin'
 
@@ -13,37 +13,12 @@ const TABS = [
   { to: '/admin/audit-log', label: 'Nhật ký', end: false },
 ]
 
-/** Breadcrumb, title and the tabs of "Quản trị". `trail`: pages between "Quản trị" and this one. */
-export function AdminHeader({ title, text, trail = [] }: { title: string; text: string; trail?: { to: string; label: string }[] }) {
+/** Title and the tabs of "Quản trị". `back`: the page this one is inside, e.g. a teacher's in "Giáo viên". */
+export function AdminHeader({ title, text, back }: { title: string; text: string; back?: { to: string; label: string } }) {
   return (
-    <header className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex min-w-[min(100%,300px)] flex-1 flex-col">
-          <nav aria-label="Đường dẫn" className="flex flex-wrap items-center gap-3 text-[14.5px] text-ink-soft">
-            <Link to="/" aria-label="Trang chủ" className="flex text-[#8A93A8] hover:text-primary">
-              <HomeIcon size={20} />
-            </Link>
-            <Link to="/admin" className="text-ink-soft hover:text-primary">
-              Quản trị
-            </Link>
-            {trail.map((t) => (
-              <span key={t.to} className="flex items-center gap-3">
-                <ChevronRightIcon size={15} strokeWidth={2.4} />
-                <Link to={t.to} className="text-ink-soft hover:text-primary">
-                  {t.label}
-                </Link>
-              </span>
-            ))}
-            <ChevronRightIcon size={15} strokeWidth={2.4} />
-            <span className="font-semibold text-ink">{title}</span>
-          </nav>
-          <h1 className="m-0 mt-5 text-[32px] leading-[1.1] font-black tracking-[-0.01em] text-[#1A2440]">{title}</h1>
-          <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">{text}</p>
-        </div>
-        <div className="order-first ml-auto sm:order-none">
-          <TopBar />
-        </div>
-      </div>
+    <div className="flex flex-col gap-4">
+      {back && <BackLink to={back.to} label={back.label} />}
+      <PageHeader title={title} text={text} />
       <nav aria-label="Mục quản trị" className="flex gap-1 overflow-x-auto border-b border-line">
         {TABS.map((tab) => (
           <NavLink
@@ -60,7 +35,7 @@ export function AdminHeader({ title, text, trail = [] }: { title: string; text: 
           </NavLink>
         ))}
       </nav>
-    </header>
+    </div>
   )
 }
 

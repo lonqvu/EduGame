@@ -1,8 +1,8 @@
 import { App, Dropdown } from 'antd'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { TopBar } from '@/components/layout/TopBar'
-import { ArrowRightIcon, ChevronDownIcon, ChevronRightIcon, ClockIcon, HomeIcon, MoreVerticalIcon, SearchIcon } from '@/components/ui/icons'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { ArrowRightIcon, ChevronDownIcon, ClockIcon, MoreVerticalIcon, SearchIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { editPath, gameRegistry, playPath, startPath } from '@/game-engine/registry'
 import {
@@ -111,27 +111,7 @@ export function ChooseGamePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-col">
-          <nav aria-label="Đường dẫn" className="hidden items-center gap-2.5 text-[14px] text-ink-soft sm:flex">
-            <Link to="/" aria-label="Trang chủ" className="flex text-[#8A93A8] hover:text-primary">
-              <HomeIcon size={18} />
-            </Link>
-            <Link to="/" className="text-ink-soft hover:text-primary">
-              Trang chủ
-            </Link>
-            <ChevronRightIcon size={14} strokeWidth={2.4} />
-            <span className="font-semibold text-ink">Chọn trò chơi</span>
-          </nav>
-          <h1 className="m-0 mt-1 text-[28px] leading-tight font-black text-[#1A2440] sm:mt-3 sm:text-[32px]">Chọn trò chơi</h1>
-          <p className="m-0 mt-1 text-[14px] text-[#4A5470]">
-            Bấm vào trò để chơi ngay với câu hỏi mẫu, đổi sang câu hỏi của cô ở màn bắt đầu.
-          </p>
-        </div>
-        <div className="hidden shrink-0 sm:block">
-          <TopBar />
-        </div>
-      </header>
+      <PageHeader title="Chọn trò chơi" text="Bấm vào trò để chơi ngay với câu hỏi mẫu, đổi sang câu hỏi của cô ở màn bắt đầu." />
 
       <div className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-2 rounded-[16px] bg-white/95 p-2 shadow-[0_4px_14px_rgba(31,42,68,0.07)] backdrop-blur">
         <label className="flex h-10 min-w-0 flex-[1_1_100%] items-center gap-2.5 rounded-full bg-[#F2F5FA] px-4 focus-within:ring-2 focus-within:ring-primary/40 md:flex-[0_1_300px]">

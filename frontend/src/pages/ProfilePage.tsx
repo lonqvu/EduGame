@@ -1,8 +1,8 @@
 import { App } from 'antd'
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
-import { TopBar } from '@/components/layout/TopBar'
-import { BellIcon, ChevronRightIcon, GlobeIcon, HelpIcon, HomeIcon, SettingsIcon, ShieldIcon, UserIcon } from '@/components/ui/icons'
+import { useNavigate } from 'react-router'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { BellIcon, GlobeIcon, HelpIcon, SettingsIcon, ShieldIcon, UserIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { EditProfileModal } from '@/pages/profile/EditProfileModal'
 import { HelpModal } from '@/pages/profile/HelpModal'
@@ -83,25 +83,7 @@ export function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex min-w-[min(100%,300px)] flex-1 flex-col">
-          <nav aria-label="Đường dẫn" className="flex items-center gap-3 text-[14.5px] text-ink-soft">
-            <Link to="/" aria-label="Trang chủ" className="flex text-[#8A93A8] hover:text-primary">
-              <HomeIcon size={20} />
-            </Link>
-            <Link to="/" className="text-ink-soft hover:text-primary">
-              Trang chủ
-            </Link>
-            <ChevronRightIcon size={15} strokeWidth={2.4} />
-            <span className="font-semibold text-ink">Hồ sơ của tôi</span>
-          </nav>
-          <h1 className="m-0 mt-5 text-[32px] leading-[1.1] font-black tracking-[-0.01em] text-[#1A2440]">Hồ sơ của tôi</h1>
-          <p className="m-0 mt-2 text-[14.5px] text-[#4A5470]">Quản lý thông tin cá nhân và tài khoản Lớp Vui của bạn.</p>
-        </div>
-        <div className="order-first ml-auto sm:order-none">
-          <TopBar />
-        </div>
-      </header>
+      <PageHeader title="Hồ sơ của tôi" text="Quản lý thông tin cá nhân và tài khoản Lớp Vui của bạn." />
 
       {status === 'error' && !profile ? (
         <LoadError onRetry={() => void load()} />

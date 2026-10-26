@@ -57,7 +57,8 @@ const FOOTER_NAV: NavItem[] = [
 export function MainLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname } = useLocation()
-  // Pages laid out edge to edge, as in their designs; the others keep a centered column.
+  // Pages laid out edge to edge, as in their designs; the others keep a centered column. Both start at the same place, so the
+  // title does not jump when the menu goes from one to the other.
   const fullWidth = pathname === '/' || pathname === '/games/new' || pathname.startsWith('/classes') || pathname.startsWith('/question-sets')
 
   return (
@@ -89,7 +90,7 @@ export function MainLayout() {
         ) : (
           <main
             key={pathname}
-            className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-1 animate-[page-in_220ms_ease-out] flex-col px-4 pt-7 pb-20 sm:px-8"
+            className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-1 animate-[page-in_220ms_ease-out] flex-col px-4 pt-3 pb-20 lg:pr-5 lg:pl-[17px]"
           >
             <Outlet />
           </main>

@@ -1,7 +1,7 @@
 import { App, Button } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { TopBar } from '@/components/layout/TopBar'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { PlusIcon } from '@/components/ui/icons'
 import { ClassFormModal } from '@/pages/classes/ClassFormModal'
 import { ClassList } from '@/pages/classes/ClassList'
@@ -79,25 +79,22 @@ export function ClassesPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex flex-wrap items-start gap-x-4 gap-y-3">
-        <div className="flex min-w-0 flex-1 flex-col">
-          <h1 className="m-0 text-[28px] leading-tight font-black text-[#1A2440] sm:text-[32px]">Lớp học của cô</h1>
-          <p className="m-0 mt-1 text-[14px] text-ink-soft">Chọn lớp đang dạy, xem học sinh và khen thưởng</p>
-        </div>
-        <Button
-          type="primary"
-          icon={<PlusIcon size={16} />}
-          disabled={!canCreate}
-          title={status === 'ready' && !canCreate ? `Cô đã có ${MAX_CLASSROOMS} lớp` : undefined}
-          onClick={() => setCreating(true)}
-          className="h-11 rounded-full px-5 font-extrabold shadow-[0_6px_16px_rgba(53,99,233,0.3)]"
-        >
-          Tạo lớp học
-        </Button>
-        <div className="hidden sm:block">
-          <TopBar />
-        </div>
-      </header>
+      <PageHeader
+        title="Lớp học của cô"
+        text="Chọn lớp đang dạy, xem học sinh và khen thưởng"
+        actions={
+            <Button
+              type="primary"
+              icon={<PlusIcon size={16} />}
+              disabled={!canCreate}
+              title={status === 'ready' && !canCreate ? `Cô đã có ${MAX_CLASSROOMS} lớp` : undefined}
+              onClick={() => setCreating(true)}
+              className="h-11 rounded-full px-5 font-extrabold shadow-[0_6px_16px_rgba(53,99,233,0.3)]"
+            >
+              Tạo lớp học
+            </Button>
+        }
+      />
 
       <ClassList
         status={status}

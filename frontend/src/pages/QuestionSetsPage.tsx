@@ -1,7 +1,7 @@
 import { App, Button } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
-import { TopBar } from '@/components/layout/TopBar'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { PlusIcon } from '@/components/ui/icons'
 import { QuestionSetFormModal } from '@/pages/question-sets/QuestionSetFormModal'
 import { QuestionSetList } from '@/pages/question-sets/QuestionSetList'
@@ -76,27 +76,22 @@ export function QuestionSetsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex flex-wrap items-start gap-x-4 gap-y-3">
-        <div className="flex min-w-0 flex-1 flex-col">
-          <h1 className="m-0 text-[28px] leading-tight font-black text-[#1A2440] sm:text-[32px]">Bộ câu hỏi của cô</h1>
-          <p className="m-0 mt-1 text-[14px] text-ink-soft">
-            Soạn một lần, chơi với mọi trò hỏi đáp{ready && sets.length > 0 ? ` · ${totals.sets} bộ · ${totals.questions} câu` : ''}
-          </p>
-        </div>
-        <Button
-          type="primary"
-          icon={<PlusIcon size={16} />}
-          disabled={full}
-          title={full ? `Cô đã có ${MAX_SETS} bộ câu hỏi` : undefined}
-          onClick={() => setCreating(true)}
-          className="h-11 rounded-full px-5 font-extrabold shadow-[0_6px_16px_rgba(53,99,233,0.3)]"
-        >
-          Tạo bộ câu hỏi
-        </Button>
-        <div className="hidden sm:block">
-          <TopBar />
-        </div>
-      </header>
+      <PageHeader
+        title="Bộ câu hỏi của cô"
+        text={`Soạn một lần, chơi với mọi trò hỏi đáp${ready && sets.length > 0 ? ` · ${totals.sets} bộ · ${totals.questions} câu` : ''}`}
+        actions={
+            <Button
+              type="primary"
+              icon={<PlusIcon size={16} />}
+              disabled={full}
+              title={full ? `Cô đã có ${MAX_SETS} bộ câu hỏi` : undefined}
+              onClick={() => setCreating(true)}
+              className="h-11 rounded-full px-5 font-extrabold shadow-[0_6px_16px_rgba(53,99,233,0.3)]"
+            >
+              Tạo bộ câu hỏi
+            </Button>
+        }
+      />
 
       <QuestionSetList
         status={status}
