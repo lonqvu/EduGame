@@ -6,17 +6,23 @@ import {
   chartBuckets,
   completionRate,
   csvFileName,
+  dayHeading,
   daysBetween,
   durationLabel,
+  namesLabel,
   niceMax,
   periodLabel,
   presetRange,
   rangeProblem,
+  reportTips,
   resultLabel,
+  sessionDuration,
+  sessionsByDay,
   sessionsCsv,
   starsCsv,
   toCsv,
   trend,
+  trendPercent,
   weekdayDate,
 } from '@/utils/reports'
 
@@ -34,9 +40,20 @@ const session = (patch: Partial<ReportSession>): ReportSession => ({
 })
 
 describe('periods', () => {
-  it('the last N days end today, today included', () => {
-    expect(presetRange(7, new Date(2026, 9, 18))).toEqual({ from: '2026-10-12', to: '2026-10-18' })
-    expect(presetRange(30, new Date(2026, 2, 1))).toEqual({ from: '2026-01-31', to: '2026-03-01' })
+  it('this week runs from Monday, this month from the 1st, to today', () => {
+    // Wednesday 28/10/2026
+    expect(presetRange('week', new Date(2026, 9, 28))).toEqual({ from: '2026-10-26', to: '2026-10-28' })
+    // A Sunday ends the week begun on Monday.
+    expect(presetRange('week', new Date(2026, 10, 1))).toEqual({ from: '2026-10-26', to: '2026-11-01' })
+    expect(presetRange('month', new Date(2026, 9, 28))).toEqual({ from: '2026-10-01', to: '2026-10-28' })
+    expect(presetRange('month', new Date(2026, 9, 1))).toEqual({ from: '2026-10-01', to: '2026-10-01' })
+  })
+
+  it('term 1 runs from 1 September, term 2 from 16 January, the summer with term 2', () => {
+    expect(presetRange('term', new Date(2026, 9, 28)).from).toBe('2026-09-01')
+    expect(presetRange('term', new Date(2027, 0, 10)).from).toBe('2026-09-01')
+    expect(presetRange('term', new Date(2027, 0, 16)).from).toBe('2027-01-16')
+    expect(presetRange('term', new Date(2027, 6, 20)).from).toBe('2027-01-16')
   })
 
   it('counts days without being fooled by daylight saving or month ends', () => {
@@ -84,6 +101,18 @@ describe('figures', () => {
     expect(trend(5, 2)).toEqual({ direction: 'up', text: '+3 so với kỳ trước' })
     expect(trend(1, 4)).toEqual({ direction: 'down', text: '−3 so với kỳ trước' })
     expect(trend(4, 4)).toEqual({ direction: 'same', text: 'Bằng kỳ trước' })
+  })
+
+  it('says the move as a share, none without a period before to compare with', () => {
+    expect(trendPercent(112, 100)).toEqual({ direction: 'up', text: '▲ 12%' })
+    expect(trendPercent(45, 50)).toEqual({ direction: 'down', text: '▼ 10%' })
+    expect(trendPercent(50, 50)).toEqual({ direction: 'same', text: 'bằng kỳ trước' })
+    expect(trendPercent(677, 0)).toBeNull()
+  })
+
+  it('a game ended within the minute took "dưới 1 phút"', () => {
+    expect(sessionDuration(0)).toBe('dưới 1 phút')
+    expect(sessionDuration(12)).toBe('12 phút')
   })
 
   it('rounds the top of the axis up to 1, 2 or 5 times a power of ten', () => {
@@ -202,5 +231,75 @@ describe('CSV', () => {
 
   it('names the file after the class and the period, without accents', () => {
     expect(csvFileName(report, 'sao')).toBe('bao-cao-lop-3a-dac-biet-2026-10-12-2026-10-18-sao.csv')
+  })
+})
+
+describe('history by day', () => {
+  it('groups the sessions under the day they started, newest first', () => {
+    const days = sessionsByDay([
+      session({ id: 3, startedAt: new Date(2026, 9, 28, 9, 15).toISOString() }),
+      session({ id: 2, startedAt: new Date(2026, 9, 28, 8, 40).toISOString() }),
+      session({ id: 1, startedAt: new Date(2026, 9, 27, 14, 5).toISOString() }),
+    ])
+    expect(days.map((d) => [d.day, d.sessions.map((s) => s.id)])).toEqual([
+      ['2026-10-28', [3, 2]],
+      ['2026-10-27', [1]],
+    ])
+  })
+
+  it('names today and yesterday', () => {
+    const today = new Date(2026, 9, 28)
+    expect(dayHeading('2026-10-28', today)).toBe('Hôm nay · Thứ Tư 28/10')
+    expect(dayHeading('2026-10-27', today)).toBe('Hôm qua · Thứ Ba 27/10')
+    expect(dayHeading('2026-10-25', today)).toBe('Chủ nhật 25/10')
+  })
+
+  it('shortens a long list of names', () => {
+    expect(namesLabel(['Yến'])).toBe('Yến')
+    expect(namesLabel(['Yến', 'An'])).toBe('Yến và An')
+    expect(namesLabel(['Yến', 'An', 'Bình', 'Chi'])).toBe('Yến, An và 2 bạn khác')
+  })
+})
+
+describe('tips', () => {
+  const base = {
+    classroom: { code: 'c-3a', name: '3A', grade: 3, studentCount: 3 },
+    summary: { activities: 6, completed: 4, playMinutes: 30, stars: 4, correctAnswers: 0, games: 2 },
+    students: [
+      { id: 1, displayName: 'An', stars: 3 },
+      { id: 2, displayName: 'Bình', stars: 1 },
+      { id: 3, displayName: 'Yến', stars: 0 },
+    ],
+    byTemplate: [
+      { templateCode: 'QUIZ', templateName: 'Trắc nghiệm', activities: 5 },
+      { templateCode: 'GOLDEN_BELL', templateName: 'Rung chuông vàng', activities: 1 },
+    ],
+    sessions: [session({ id: 2, gameCode: 'g-2', gameTitle: 'Con vật', status: 'IN_PROGRESS' }), session({})],
+  } as unknown as ClassReport
+  const options = {
+    playPath: (code: string) => `/play/${code}`,
+    untried: (played: string[]) => (played.includes('BOAT_RACE') ? null : 'Đua thuyền'),
+  }
+
+  it('who was not praised, a game left halfway, one kind played far more than others', () => {
+    const tips = reportTips(base, 'trong tháng này', options)
+    expect(tips.map((t) => t.key)).toEqual(['praise', 'unfinished', 'variety'])
+    expect(tips[0].text).toEqual([{ strong: 'Yến' }, ' chưa được khen sao nào trong tháng này.'])
+    expect(tips[0].link).toEqual({ to: '/classes/c-3a', label: 'Khen ngay' })
+    expect(tips[1].link).toEqual({ to: '/play/g-2', label: 'Chơi lại' })
+    expect(tips[2].text).toContainEqual({ strong: 'Đua thuyền' })
+  })
+
+  it('nothing to say about a class praised and playing all sorts of games to the end', () => {
+    const report = {
+      ...base,
+      students: base.students.map((s) => ({ ...s, stars: 1 })),
+      sessions: [session({})],
+      byTemplate: [
+        { templateCode: 'QUIZ', templateName: 'Trắc nghiệm', activities: 3 },
+        { templateCode: 'BOAT_RACE', templateName: 'Đua thuyền', activities: 3 },
+      ],
+    }
+    expect(reportTips(report, 'trong tháng này', options)).toEqual([])
   })
 })

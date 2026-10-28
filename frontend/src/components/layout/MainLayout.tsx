@@ -59,7 +59,8 @@ export function MainLayout() {
   const { pathname } = useLocation()
   // Pages laid out edge to edge, as in their designs; the others keep a centered column. Both start at the same place, so the
   // title does not jump when the menu goes from one to the other.
-  const fullWidth = pathname === '/' || pathname === '/games/new' || pathname.startsWith('/classes') || pathname.startsWith('/question-sets')
+  const fullWidth =
+    pathname === '/' || pathname === '/games/new' || pathname === '/reports' || pathname.startsWith('/classes') || pathname.startsWith('/question-sets')
 
   return (
     <div className="flex min-h-full bg-page text-ink">
