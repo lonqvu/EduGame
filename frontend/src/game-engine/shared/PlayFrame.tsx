@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ChevronLeftIcon } from '@/components/ui/icons'
+import { usePlayBack } from '@/game-engine/shared/playBack'
 
 interface PlayFrameProps {
   title: string
@@ -19,13 +20,10 @@ export function PlayFrame({ title, progress, extra, backTo, children }: PlayFram
     <div className="flex h-full flex-col gap-4 px-9 py-6">
       <div className="flex items-center justify-between gap-6">
         <div className="flex min-w-0 items-center gap-3">
-          <Link
-            to={backTo}
-            aria-label="Quay lại soạn câu hỏi"
-            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-ink hover:text-primary-ink"
-          >
-            <ChevronLeftIcon size={22} />
-          </Link>
+          <BackButton
+            backTo={backTo}
+            className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-ink hover:text-primary-ink"
+          />
           <h1 className="m-0 truncate font-display text-[26px] font-extrabold">{title}</h1>
         </div>
         <div className="flex shrink-0 items-center gap-3">
@@ -35,6 +33,23 @@ export function PlayFrame({ title, progress, extra, backTo, children }: PlayFram
       </div>
       {children}
     </div>
+  )
+}
+
+/** Back button of a running game: to its introduction when the projector page gives one, else to the editor. */
+export function BackButton({ backTo, className }: { backTo: string; className: string }) {
+  const back = usePlayBack()
+  if (back) {
+    return (
+      <button type="button" onClick={back} aria-label="Quay lại" className={`font-[inherit] ${className}`}>
+        <ChevronLeftIcon size={22} />
+      </button>
+    )
+  }
+  return (
+    <Link to={backTo} aria-label="Quay lại soạn câu hỏi" className={className}>
+      <ChevronLeftIcon size={22} />
+    </Link>
   )
 }
 

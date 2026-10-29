@@ -128,6 +128,19 @@ test('the introduction of a game opened with "Chơi ngay" leads back to the choo
   await expect(tab).toHaveURL(/\/games\/new$/)
 })
 
+test('back from a started game shows its introduction again, not the editor', async ({ page }) => {
+  await page.goto('/games/new')
+  await page.getByRole('button', { name: 'Chơi ngay Trắc nghiệm' }).click()
+  await expect(intro(page)).toBeVisible()
+  const url = page.url()
+  await intro(page).getByRole('button', { name: 'Bắt đầu', exact: true }).click()
+  await expect(page.getByText('Câu 1 / 10')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Quay lại', exact: true }).click()
+  await expect(intro(page)).toBeVisible()
+  await expect(page).toHaveURL(url)
+})
+
 test('"Đổi câu hỏi" on the introduction plays a question set instead of the sample, and back', async ({ page, api }) => {
   const created = await (await api.post('question-sets', { data: { title: 'E2E Bảng nhân 7', subject: 'TOAN', grade: 3 } })).json()
   const setCode: string = created.summary.code
