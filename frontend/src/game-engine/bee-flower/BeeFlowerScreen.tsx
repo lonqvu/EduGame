@@ -16,7 +16,16 @@ import { streakRate } from '@/sound/streak'
 
 const MEADOW_WIDTH = 1208
 const MEADOW_HEIGHT = 290
-const PETALS = ['#FF8FB1', '#FFB547', '#B98CFF', '#5EC2FF', '#FF7A6B', '#7AD48A']
+const ART = '/assets/games/bee-flower'
+/** A flower per option; the fifth and sixth are the first two, turned the other way. */
+const FLOWERS = [
+  { src: `${ART}/flower-pink.png` },
+  { src: `${ART}/flower-orange.png` },
+  { src: `${ART}/flower-purple.png` },
+  { src: `${ART}/flower-blue.png` },
+  { src: `${ART}/flower-pink.png`, flip: true },
+  { src: `${ART}/flower-orange.png`, flip: true },
+]
 const LETTERS = 'ABCDEF'
 /** Where the bee waits between two flights. */
 const HOME = { x: MEADOW_WIDTH / 2, y: 40 }
@@ -68,6 +77,7 @@ export function BeeFlowerScreen({ game, questions, settings }: BeeFlowerScreenPr
       </div>
 
       <div className="relative shrink-0 overflow-hidden rounded-[28px] bg-[linear-gradient(#DDF3FF,#EFFAEA)]" style={{ width: MEADOW_WIDTH, height: MEADOW_HEIGHT }}>
+        <Clouds />
         <div className="absolute inset-x-0 bottom-0 h-[70px] bg-[#9ED37E]" />
         {question.options.map((option, i) => {
           const tried = state.tried[option.id]
@@ -93,10 +103,24 @@ export function BeeFlowerScreen({ game, questions, settings }: BeeFlowerScreenPr
               className={`absolute bottom-3 flex cursor-pointer flex-col items-center border-0 bg-transparent p-0 font-[inherit] disabled:cursor-default ${look === 'dim' ? 'opacity-45' : ''}`}
               style={{ left: x - 95, width: 190 }}
             >
-              <motion.span animate={look === 'wrong' ? { rotate: [0, -8, 8, 0] } : look === 'right' ? { scale: [1, 1.12, 1] } : {}} transition={{ duration: 0.6 }}>
-                <Flower color={look === 'wrong' ? '#C9CED8' : PETALS[i % PETALS.length]} />
+              <motion.span
+                className="relative -mb-1 block origin-bottom"
+                animate={look === 'wrong' ? { rotate: [0, -8, 8, 0] } : look === 'right' ? { scale: [1, 1.08, 1] } : {}}
+                transition={{ duration: 0.6 }}
+              >
+                <Flower index={i} wilted={look === 'wrong'} />
+                {look === 'right' && (
+                  <motion.img
+                    src={`${ART}/sparkles-effect.png`}
+                    alt=""
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -top-4 left-1/2 w-[170px] max-w-none -translate-x-1/2"
+                    initial={{ opacity: 0, scale: 0.6 }}
+                    animate={{ opacity: [0, 1, 0.85], scale: 1 }}
+                    transition={{ duration: 0.6 }}
+                  />
+                )}
               </motion.span>
-              <span className="h-[46px] w-[6px] rounded bg-[#4E9A4A]" aria-hidden="true" />
               <span
                 className={`max-w-[186px] truncate rounded-2xl border-[3px] px-3 py-1 font-display text-[22px] font-extrabold ${
                   look === 'right' ? 'border-success bg-[#E3F6EC]' : look === 'wrong' ? 'border-danger bg-[#FBE6E1]' : 'border-white bg-white'
@@ -111,13 +135,29 @@ export function BeeFlowerScreen({ game, questions, settings }: BeeFlowerScreenPr
         <motion.div
           className="pointer-events-none absolute"
           initial={false}
-          animate={{ x: bee.x - 40, y: bee.y - 30, rotate: flewTo >= 0 && !honey && state.tried[question.options[flewTo].id] === false ? [0, 360] : 0 }}
+          animate={{ x: bee.x - 45, y: bee.y - 40, rotate: flewTo >= 0 && !honey && state.tried[question.options[flewTo].id] === false ? [0, 360] : 0 }}
           transition={{ x: { type: 'spring', bounce: 0.25, duration: 0.7 }, y: { type: 'spring', bounce: 0.25, duration: 0.7 }, rotate: { duration: 0.8 } }}
           style={{ left: 0, top: 0 }}
           aria-hidden="true"
         >
-          <Bee />
-          {honey && state.revealed && <span className="absolute -top-2 -right-6 text-[34px]">🍯</span>}
+          {/* Hovers in place; faces the flower it flies to. */}
+          <motion.img
+            src={`${ART}/bee-facing-${flewTo >= 0 && bee.x < HOME.x ? 'left' : 'right'}.png`}
+            alt=""
+            className="block w-[90px] max-w-none"
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          {honey && state.revealed && (
+            <motion.img
+              src={`${ART}/honey-pot.png`}
+              alt=""
+              className="absolute -top-3 -right-10 w-[52px] max-w-none"
+              initial={{ scale: 0, rotate: -20 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', bounce: 0.5 }}
+            />
+          )}
         </motion.div>
       </div>
 
@@ -154,28 +194,47 @@ export function BeeFlowerScreen({ game, questions, settings }: BeeFlowerScreenPr
   )
 }
 
-function Flower({ color }: { color: string }) {
+/** The flower of option `index`, grey once a team picked it wrongly. */
+function Flower({ index, wilted }: { index: number; wilted: boolean }) {
+  const flower = FLOWERS[index % FLOWERS.length]
   return (
-    <svg width={96} height={96} viewBox="0 0 80 80" aria-hidden="true">
-      {[0, 60, 120, 180, 240, 300].map((deg) => (
-        <ellipse key={deg} cx={40} cy={18} rx={13} ry={18} fill={color} transform={`rotate(${deg} 40 40)`} />
-      ))}
-      <circle cx={40} cy={40} r={15} fill="#FFE27A" stroke="#F2B705" strokeWidth={3} />
-    </svg>
+    <img
+      src={flower.src}
+      alt=""
+      aria-hidden="true"
+      className="block h-[150px] w-auto max-w-none transition-[filter] duration-300"
+      style={{ filter: wilted ? 'grayscale(1) brightness(1.1) opacity(0.75)' : undefined, transform: flower.flip ? 'scaleX(-1)' : undefined }}
+    />
   )
 }
 
-function Bee() {
+const CLOUDS = [
+  { src: `${ART}/cloud-large.png`, width: 170, top: 14, from: 60, duration: 46 },
+  { src: `${ART}/cloud-small.png`, width: 110, top: 54, from: 820, duration: 38 },
+]
+
+/** Clouds drifting slowly across the sky, behind the flowers. */
+function Clouds() {
   return (
-    <svg width={84} height={66} viewBox="0 0 84 66" aria-hidden="true">
-      <ellipse cx="34" cy="14" rx="16" ry="11" fill="#E8F6FF" stroke="#9FD4F5" strokeWidth="2" opacity="0.9" />
-      <ellipse cx="52" cy="12" rx="15" ry="10" fill="#E8F6FF" stroke="#9FD4F5" strokeWidth="2" opacity="0.9" />
-      <ellipse cx="42" cy="40" rx="30" ry="22" fill="#FFD43B" />
-      <path d="M30 20 Q26 40 30 60 M44 18 Q40 40 44 62" stroke="#3F2A1E" strokeWidth="7" fill="none" />
-      <circle cx="66" cy="34" r="14" fill="#FFD43B" />
-      <circle cx="70" cy="31" r="3.5" fill="#1F2A44" />
-      <path d="M64 41 q5 4 10 0" stroke="#1F2A44" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      <path d="M12 40 l-10 4 l10 4 z" fill="#3F2A1E" />
-    </svg>
+    <>
+      {CLOUDS.map((c) => (
+        <motion.img
+          key={c.src}
+          src={c.src}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute max-w-none opacity-90"
+          style={{ top: c.top, width: c.width, left: 0 }}
+          initial={{ x: c.from }}
+          animate={{ x: [c.from, MEADOW_WIDTH, -c.width, c.from] }}
+          transition={{
+            duration: c.duration,
+            times: [0, (MEADOW_WIDTH - c.from) / (MEADOW_WIDTH + c.width), (MEADOW_WIDTH - c.from) / (MEADOW_WIDTH + c.width), 1],
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+      ))}
+    </>
   )
 }
