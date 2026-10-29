@@ -4,6 +4,7 @@ import { CheckIcon, UndoIcon } from '@/components/ui/icons'
 import { useGridBoardRound } from '@/game-engine/grid-board/useGridBoardRound'
 import { useGridBoardStore } from '@/store/gridBoardStore'
 import { useSound } from '@/sound/useSound'
+import { SoundToggle } from '@/sound/SoundToggle'
 
 /** Projector: team scores + numbered tiles. */
 export function GridBoardScreen({ gameId }: { gameId: string }) {
@@ -20,7 +21,10 @@ export function GridBoardScreen({ gameId }: { gameId: string }) {
   return (
     <div className="flex h-full flex-col gap-[18px] px-9 py-6">
       <div className="flex items-center justify-between gap-6">
-        <h1 className="m-0 truncate font-display text-[26px] font-extrabold">{game?.title}</h1>
+        <div className="flex min-w-0 items-center gap-3">
+          <SoundToggle />
+          <h1 className="m-0 truncate font-display text-[26px] font-extrabold">{game?.title}</h1>
+        </div>
         <span className="shrink-0 rounded-full bg-white px-4 py-1.5 text-lg font-extrabold">
           {remaining > 0 ? `Còn ${remaining} ô` : 'Đã lật hết ô'}
         </span>

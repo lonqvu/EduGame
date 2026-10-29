@@ -17,6 +17,7 @@ import { usePickRound } from '@/game-engine/name-picker/usePickRound'
 import { useClassStore } from '@/store/classStore'
 import { usePickerStore } from '@/store/pickerStore'
 import { useSound } from '@/sound/useSound'
+import { SoundToggle } from '@/sound/SoundToggle'
 
 const SCENES: Record<PickMode, ComponentType<PickSceneProps>> = {
   horse: HorseRaceScene,
@@ -104,6 +105,7 @@ export function PickerScreen({ mode }: { mode: PickMode }) {
           >
             <ChevronLeftIcon size={22} />
           </button>
+          <SoundToggle />
           <span className="rounded-full bg-white px-[18px] py-2 font-display text-[22px] font-extrabold">{config.title}</span>
           <span className="rounded-full bg-white/85 px-4 py-2 text-[17px] font-extrabold">{className}</span>
         </div>

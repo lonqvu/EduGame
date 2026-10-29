@@ -8,6 +8,7 @@ import { QUICK_SETTINGS, type QuickSetting } from '@/pages/game-start/quickSetti
 import { gameThumb } from '@/pages/home/homeAssets'
 import { QuestionSourceModal } from '@/pages/play/QuestionSourceModal'
 import type { GameSummary } from '@/types/game'
+import { SoundToggle } from '@/sound/SoundToggle'
 
 const STEP_COLORS = ['#3563E9', '#F28C28', '#2E9E6A', '#8B5CF6']
 /** Settings worth a choice right before playing; the start page keeps the others. */
@@ -69,6 +70,7 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
         >
           <ChevronLeftIcon size={22} />
         </button>
+        <SoundToggle />
         <span className="rounded-full bg-white px-5 py-2 text-[18px] font-extrabold">{kindName}</span>
         <span className={`rounded-full px-4 py-2 text-[16px] font-bold ${game.sample ? 'bg-[#FFF1C2] text-[#7A5600]' : 'bg-white text-ink'}`}>
           📚 {game.sample ? 'Câu hỏi mẫu' : 'Câu hỏi của cô'}

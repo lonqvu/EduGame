@@ -20,6 +20,7 @@ import { editPath } from '@/game-engine/registry'
 import type { GameSummary, QuizQuestion } from '@/types/game'
 import { assetSrc } from '@/utils/images'
 import { useSound } from '@/sound/useSound'
+import { SoundToggle } from '@/sound/SoundToggle'
 
 const LETTERS = 'ABCDEF'
 /** Pause between "Chốt đáp án" and the answer shown right or wrong, as on the show. */
@@ -89,6 +90,7 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
         <div className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
             <GameBackButton backTo={backTo} className="bg-white/15 text-white hover:bg-white/25 hover:text-white" />
+            <SoundToggle className="bg-white/15 text-white hover:bg-white/25" />
             <h1 className="m-0 truncate font-display text-[24px] font-extrabold">{game.title}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-3">

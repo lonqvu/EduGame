@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ChevronLeftIcon } from '@/components/ui/icons'
 import { useLeaveGame } from '@/game-engine/shared/leaveGame'
+import { SoundToggle } from '@/sound/SoundToggle'
 
 interface PlayFrameProps {
   title: string
@@ -21,6 +22,7 @@ export function PlayFrame({ title, progress, extra, backTo, children }: PlayFram
       <div className="flex items-center justify-between gap-6">
         <div className="flex min-w-0 items-center gap-3">
           <GameBackButton backTo={backTo} className="bg-white text-ink hover:text-primary-ink" />
+          <SoundToggle />
           <h1 className="m-0 truncate font-display text-[26px] font-extrabold">{title}</h1>
         </div>
         <div className="flex shrink-0 items-center gap-3">
