@@ -20,7 +20,19 @@ test.beforeEach(async ({ page, context }) => {
   })
 })
 
-const tile = (page: Page, label: string) => page.locator('div').filter({ has: page.getByText(label, { exact: true }) }).filter({ has: page.locator('span.text-\\[30px\\]') }).last()
+const tile = (page: Page, label: string | RegExp) => page.getByRole('group', { name: label })
+
+/** Picks a class with its pill, or in the list when the teacher has many. */
+async function pickClass(page: Page, name: string) {
+  const pills = page.getByRole('radiogroup', { name: 'Lớp' })
+  if (await pills.isVisible()) await pills.getByRole('radio', { name, exact: true }).click()
+  else {
+    await page.getByRole('combobox', { name: 'Lớp' }).click()
+    await page.locator(`.ant-select-item-option[title="${name}"]`).click()
+  }
+}
+
+const isoDay = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
 /** A class of three with what it played today: Trắc nghiệm to the end, Rung chuông vàng left open, and stars. */
 async function playedClass(backend: Backend) {
@@ -45,21 +57,14 @@ test('"Báo cáo" shows what a class played, how it ended, and the stars of each
   await expect(page.getByRole('link', { name: 'Báo cáo' })).toHaveAttribute('aria-current', 'page')
 
   // The class picker: another class, then this one, kept in the address.
-  const pickClass = async (name: string) => {
-    await page.getByRole('combobox', { name: 'Lớp' }).click()
-    await page.locator(`.ant-select-item-option[title="${name}"]`).click()
-  }
-  await pickClass('Lớp 3A')
+  await pickClass(page, 'Lớp 3A')
   await expect(page).toHaveURL(/class=c-3a/)
-  await pickClass('Lớp E2E Báo cáo')
+  await pickClass(page, 'Lớp E2E Báo cáo')
   await expect(page).toHaveURL(new RegExp(`class=${classroom.code}`))
 
-  await expect(tile(page, 'Hoạt động')).toContainText('2')
-  await expect(tile(page, 'Hoạt động')).toContainText('2 trò chơi khác nhau')
-  await expect(tile(page, 'Hoàn thành')).toContainText('50%')
-  await expect(tile(page, 'Hoàn thành')).toContainText('1/2 trò chơi đến cuối')
-  await expect(tile(page, 'Sao đã thưởng')).toContainText('3')
-  await expect(tile(page, 'Sao đã thưởng')).toContainText('1/3 học sinh được khen')
+  await expect(tile(page, 'lượt chơi')).toContainText('2')
+  await expect(tile(page, 'chơi đến cuối')).toContainText('50%')
+  await expect(tile(page, 'sao · 1/3 em được khen')).toContainText('3')
 
   // Today's column says what it holds (also to screen readers and the keyboard).
   const chart = page.getByRole('list', { name: 'Hoạt động theo ngày' })
@@ -68,29 +73,45 @@ test('"Báo cáo" shows what a class played, how it ended, and the stars of each
   await today.focus()
   await expect(page.getByRole('tooltip')).toContainText('2 hoạt động')
 
-  await expect(page.getByRole('region', { name: 'Loại trò chơi' })).toContainText('Trắc nghiệm')
-  await expect(page.getByRole('region', { name: 'Loại trò chơi' })).toContainText('Rung chuông vàng')
+  // What to do next: praise who was not, play again the game left halfway.
+  const tips = page.getByRole('region', { name: 'Gợi ý cho cô' })
+  await expect(tips).toContainText('Bình và Chi chưa được khen sao nào trong tháng này.')
+  await expect(tips.getByRole('link', { name: 'Khen ngay →' })).toHaveAttribute('href', `/classes/${classroom.code}`)
+  await expect(tips.getByRole('link', { name: 'Chơi lại →' })).toHaveAttribute('href', /^\/play\//)
 
-  const stars = page.getByRole('region', { name: 'Sao của học sinh' })
-  await expect(stars).toContainText('An')
-  await expect(stars).toContainText('3 sao')
+  const plays = page.getByRole('region', { name: 'Trò lớp hay chơi' })
+  await expect(plays.getByRole('list', { name: 'Loại trò chơi' })).toContainText('Trắc nghiệm')
+  await expect(plays.getByRole('list', { name: 'Loại trò chơi' })).toContainText('Rung chuông vàng')
+  await plays.getByRole('radio', { name: 'Trò của cô' }).click()
+  await expect(plays.getByRole('list', { name: 'Trò chơi được chơi nhiều' }).getByRole('listitem')).toHaveCount(2)
+
+  const stars = page.getByRole('region', { name: 'Ngôi sao của lớp' })
+  await expect(stars.getByRole('listitem', { name: '1. An: 3 sao' })).toBeVisible()
   await expect(page.getByRole('list', { name: 'Học sinh chưa được khen' }).getByRole('listitem')).toHaveText(['Bình', 'Chi'])
 
   const history = page.getByRole('region', { name: 'Lịch sử hoạt động' })
   await expect(history).toContainText('7 câu trả lời đúng của các đội')
-  await expect(history.getByRole('listitem').first()).toContainText('Dở dang')
+  await expect(history.getByRole('heading', { level: 3 }).first()).toContainText('Hôm nay')
+  await expect(history.getByRole('listitem').first()).toContainText('Dừng giữa chừng')
   await expect(history.getByRole('listitem').nth(1)).toContainText('Đội Đỏ thắng · 40 – 30')
-  await expect(history.getByRole('listitem').nth(1)).toContainText('Hoàn thành')
+  await expect(history.getByRole('listitem').nth(1)).toContainText('Đến cuối')
+  await history.getByRole('radio', { name: 'Chơi đến cuối' }).click()
+  await expect(history.getByRole('listitem')).toHaveCount(1)
 
   // The history and the stars download as CSV files Excel opens in Vietnamese.
-  const [historyFile] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Tải CSV lịch sử hoạt động' }).click()])
+  const downloadAs = async (item: string) => {
+    await page.getByRole('button', { name: /Tải báo cáo/ }).click()
+    const [file] = await Promise.all([page.waitForEvent('download'), page.getByRole('menuitem', { name: item }).click()])
+    return file
+  }
+  const historyFile = await downloadAs('Lịch sử hoạt động (CSV)')
   expect(historyFile.suggestedFilename()).toMatch(/^bao-cao-e2e-bao-cao-\d{4}-\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-lich-su\.csv$/)
   const historyCsv = await readFile((await historyFile.path())!, 'utf8')
-  expect(historyCsv.startsWith('﻿')).toBe(true)
+  expect(historyCsv.startsWith('\ufeff')).toBe(true)
   expect(historyCsv).toContain('Hoàn thành')
   expect(historyCsv).toContain('Đội Đỏ thắng · 40 – 30')
 
-  const [starsFile] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Tải CSV sao của học sinh' }).click()])
+  const starsFile = await downloadAs('Sao của học sinh (CSV)')
   const starsCsv = await readFile((await starsFile.path())!, 'utf8')
   expect(starsCsv.split('\r\n').slice(1, 4)).toEqual(['1,An,3', '2,Bình,0', '3,Chi,0'])
 })
@@ -98,18 +119,25 @@ test('"Báo cáo" shows what a class played, how it ended, and the stars of each
 test('the period is picked from presets or two dates, kept in the address, and checked', async ({ page, backend }) => {
   const classroom = await playedClass(backend)
   await page.goto(`/reports?class=${classroom.code}`)
-  await expect(tile(page, 'Hoạt động')).toContainText('2')
+  await expect(tile(page, 'lượt chơi')).toContainText('2')
 
-  await page.getByText('7 ngày', { exact: true }).click()
-  await expect(page).toHaveURL(/period=7/)
-  await expect(page.getByRole('list', { name: 'Hoạt động theo ngày' }).getByRole('button')).toHaveCount(7)
+  const periods = page.getByRole('radiogroup', { name: 'Khoảng thời gian' })
+  await periods.getByRole('radio', { name: 'Tuần này' }).click()
+  await expect(page).toHaveURL(/period=week/)
+  await expect(page.getByRole('list', { name: 'Hoạt động theo ngày' })).toBeVisible()
+  await periods.getByRole('radio', { name: 'Học kỳ này' }).click()
+  await expect(page).toHaveURL(/period=term/)
 
-  await page.getByText('90 ngày', { exact: true }).click()
-  // Beyond 45 days, one column per week.
-  await expect(page.getByRole('list', { name: 'Hoạt động theo tuần' }).getByRole('button')).toHaveCount(13)
-
-  await page.getByText('Tùy chọn', { exact: true }).click()
+  // Sixty days: a column per week, or per day on request.
+  await periods.getByRole('radio', { name: '📅 Tùy chọn' }).click()
   await expect(page).toHaveURL(/period=custom&from=\d{4}-\d{2}-\d{2}&to=\d{4}-\d{2}-\d{2}/)
+  const now = new Date()
+  await page.getByLabel('Đến ngày').fill(isoDay(now))
+  await page.getByLabel('Từ ngày').fill(isoDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 59)))
+  await expect(page.getByRole('list', { name: 'Hoạt động theo tuần' }).getByRole('button')).toHaveCount(9)
+  await page.getByRole('radio', { name: 'Theo ngày' }).click()
+  await expect(page.getByRole('list', { name: 'Hoạt động theo ngày' }).getByRole('button')).toHaveCount(60)
+
   await page.getByLabel('Từ ngày').fill('2030-01-10')
   await page.getByLabel('Đến ngày').fill('2030-01-01')
   await expect(page.getByRole('alert')).toHaveText('Ngày bắt đầu phải trước ngày kết thúc.')
@@ -137,5 +165,5 @@ test('a report that cannot load says so and loads again on request', async ({ pa
 
   fail = false
   await page.getByRole('button', { name: /Thử lại/ }).click()
-  await expect(tile(page, 'Hoạt động')).toContainText('2')
+  await expect(tile(page, 'lượt chơi')).toContainText('2')
 })

@@ -1,6 +1,6 @@
 import { Dropdown } from 'antd'
 import { Link } from 'react-router'
-import { ClockIcon, MoreVerticalIcon } from '@/components/ui/icons'
+import { ClockIcon, MoreVerticalIcon, PlayIcon } from '@/components/ui/icons'
 import { editPath, gameRegistry, playPath, startPath } from '@/game-engine/registry'
 import { gameThumb } from '@/pages/home/homeAssets'
 import { Panel, PanelHeader, SubjectTag, TextAction } from '@/pages/home/homeUi'
@@ -33,7 +33,7 @@ export function RecentActivity({
     <Panel className="@container flex flex-col gap-3 px-4 pt-[18px] pb-4">
       <PanelHeader
         icon={<ClockIcon size={23} className="text-primary" />}
-        title="Hoạt động gần đây"
+        title="Chơi gần đây"
         action={
           games.length > 0 && <TextAction label={expanded ? 'Thu gọn' : 'Xem tất cả'} onClick={onToggleExpanded} />
         }
@@ -87,16 +87,18 @@ export function RecentActivity({
               {unfinished ? (
                 <Link
                   to={editPath(game.id)}
-                  className="flex h-[38px] w-[85px] shrink-0 items-center justify-center rounded-full border-[1.5px] border-primary bg-white text-[15px] font-extrabold text-primary-ink hover:text-primary-ink"
+                  className="flex h-[38px] shrink-0 items-center justify-center rounded-full border-2 border-[#DCE5F5] bg-white px-3.5 text-[14.5px] font-extrabold text-primary-ink hover:border-primary hover:text-primary-ink"
                 >
                   Tiếp tục
                 </Link>
               ) : (
                 <Link
                   to={playPath(game)}
-                  className="flex h-[38px] w-[85px] shrink-0 items-center justify-center rounded-full bg-primary text-[15px] font-extrabold text-white hover:text-white hover:brightness-110"
+                  aria-label={`Chơi lại ${game.title}`}
+                  className="flex h-[38px] shrink-0 items-center justify-center gap-1.5 rounded-full border-2 border-[#DCE5F5] bg-white px-3.5 text-[14.5px] font-extrabold text-primary-ink hover:border-primary hover:text-primary-ink"
                 >
-                  Chơi lại
+                  <PlayIcon size={14} className="fill-current" />
+                  <span className="hidden @min-[380px]:inline">Chơi lại</span>
                 </Link>
               )}
               <Dropdown

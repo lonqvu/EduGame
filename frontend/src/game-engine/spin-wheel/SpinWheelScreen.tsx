@@ -11,6 +11,7 @@ import { useClassStore } from '@/store/classStore'
 import { usePickerStore } from '@/store/pickerStore'
 import type { Student } from '@/types/game'
 import { useSound } from '@/sound/useSound'
+import { SoundToggle } from '@/sound/SoundToggle'
 
 /** Projector: spin to call a random student from the class list. */
 export function SpinWheelScreen() {
@@ -91,6 +92,7 @@ export function SpinWheelScreen() {
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <SoundToggle />
             <PickModeMenu current="wheel" />
             <button
               type="button"

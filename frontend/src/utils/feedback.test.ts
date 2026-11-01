@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { EMPTY_DRAFT, feedbackRequest, liftsFeedbackButton, MAX_FEEDBACK_MESSAGE, screenshotProblem } from '@/utils/feedback'
+import { EMPTY_DRAFT, feedbackRequest, MAX_FEEDBACK_MESSAGE, screenshotProblem } from '@/utils/feedback'
 
 describe('feedbackRequest', () => {
   const where = { pathname: '/games/g-abc/edit', search: '?tab=2', width: 1366, height: 768 }
@@ -47,11 +47,3 @@ describe('screenshotProblem', () => {
   })
 })
 
-describe('liftsFeedbackButton', () => {
-  it('only on the start page, whose bar holds "Bắt đầu trò chơi"', () => {
-    expect(liftsFeedbackButton('/games/g-abc/start')).toBe(true)
-    expect(liftsFeedbackButton('/games/g-abc/edit')).toBe(false)
-    expect(liftsFeedbackButton('/games/new')).toBe(false)
-    expect(liftsFeedbackButton('/')).toBe(false)
-  })
-})

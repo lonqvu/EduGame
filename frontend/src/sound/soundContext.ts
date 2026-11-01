@@ -20,3 +20,9 @@ export const SoundContext = createContext<SoundApi>({
   setMusicMood: silent,
   stopMusic: silent,
 })
+
+/**
+ * Lets the speaker button sit in the header of a screen: a `SoundToggle` there registers itself, and the stage drops
+ * its own floating one, which would otherwise sit over the screen's buttons.
+ */
+export const SoundToggleSlot = createContext<(() => () => void) | null>(null)

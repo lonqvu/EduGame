@@ -14,12 +14,13 @@ import {
   type MillionaireEnd,
 } from '@/game-engine/millionaire/millionaire'
 import { PLAY_DEFAULTS, readPlaySettings } from '@/game-engine/shared/gameSettings'
-import { BackButton, NothingToPlay, playButtonClass } from '@/game-engine/shared/PlayFrame'
+import { GameBackButton, NothingToPlay, playButtonClass } from '@/game-engine/shared/PlayFrame'
 import { useFinishPlaySession } from '@/game-engine/shared/usePlaySession'
 import { editPath } from '@/game-engine/registry'
 import type { GameSummary, QuizQuestion } from '@/types/game'
 import { assetSrc } from '@/utils/images'
 import { useSound } from '@/sound/useSound'
+import { SoundToggle } from '@/sound/SoundToggle'
 
 const LETTERS = 'ABCDEF'
 /** Pause between "Chốt đáp án" and the answer shown right or wrong, as on the show. */
@@ -88,10 +89,8 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <BackButton
-              backTo={backTo}
-              className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-white/15 text-white hover:bg-white/25 hover:text-white"
-            />
+            <GameBackButton backTo={backTo} className="bg-white/15 text-white hover:bg-white/25 hover:text-white" />
+            <SoundToggle className="bg-white/15 text-white hover:bg-white/25" />
             <h1 className="m-0 truncate font-display text-[24px] font-extrabold">{game.title}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-3">

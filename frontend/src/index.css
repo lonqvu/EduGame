@@ -78,6 +78,22 @@ html[data-reduce-motion] *::after {
 }
 
 /* A page coming in (MainLayout): rises a little while it fades in. Off with "Giảm hiệu ứng chuyển động". */
+/* "+1 ⭐" rising from a student just praised. */
+@keyframes star-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px) scale(0.7);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -18px) scale(1);
+  }
+}
+
 @keyframes page-in {
   from {
     opacity: 0;

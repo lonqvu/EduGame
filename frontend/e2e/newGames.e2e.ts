@@ -112,7 +112,7 @@ test('a quiz can be played as Rung chuông vàng or Đua thuyền from the edito
 test('the chooser lists the new games, and a Rung chuông vàng opens the quiz editor', async ({ page, backend }) => {
   await page.goto('/games/new')
   for (const name of ['Rung chuông vàng', 'Đua thuyền']) {
-    await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: `Chơi ngay ${name}`, exact: true })).toBeVisible()
   }
   const game = await backend.createGame('GOLDEN_BELL', 'E2E Rung chuông')
   await page.goto(`/games/${game.code}/edit`)
@@ -285,10 +285,10 @@ test('Xúc xắc: rolls the chosen number of dice and keeps the last rolls', asy
   await expect(page.getByLabel('Các lần gieo trước')).toContainText(`${faces.join(' + ')} = `)
 })
 
-test('the "Công cụ" filter lists the classroom tools, and each opens', async ({ page }) => {
+test('"Công cụ lớp học" lists the classroom tools, and each opens', async ({ page }) => {
   await page.goto('/games/new')
-  await page.getByRole('tab', { name: 'Công cụ' }).click()
-  await expect(page.getByText('Tổng 11 trò chơi')).toBeVisible()
-  await page.getByRole('button', { name: 'Chơi ngay Xúc xắc' }).click()
+  const tools = page.getByRole('region', { name: 'Công cụ lớp học' })
+  await expect(tools.getByRole('button', { name: /^Chơi ngay / })).toHaveCount(11)
+  await tools.getByRole('button', { name: 'Chơi ngay Xúc xắc' }).click()
   await expect(page).toHaveURL(/\/tools\/dice$/)
 })

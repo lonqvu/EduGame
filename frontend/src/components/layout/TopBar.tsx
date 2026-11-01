@@ -2,21 +2,23 @@ import { App, Dropdown } from 'antd'
 import { useNavigate } from 'react-router'
 import { BellIcon, ChevronDownIcon } from '@/components/ui/icons'
 import { useAuthStore } from '@/store/authStore'
+import { useTeacherStore } from '@/store/teacherStore'
 
-/** Bell + the teacher's chip. */
-export function TopBar({ teacherName, initial }: { teacherName: string; initial: string }) {
+/** Bell + the teacher's chip: the picture of "Hồ sơ của tôi" and the name, with the account menu. */
+export function TopBar() {
   const { message } = App.useApp()
   const navigate = useNavigate()
   const logout = useAuthStore((s) => s.logout)
+  const teacher = useTeacherStore((s) => s.teacher)
   return (
-    <div className="flex h-[48px] items-center justify-end gap-[22px] pr-1">
+    <div className="flex h-[48px] items-center justify-end gap-3 pr-1">
       <button
         type="button"
         aria-label="Thông báo"
         onClick={() => message.info('Chưa có thông báo mới.')}
-        className="flex size-10 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-[#3F4B68] hover:bg-white"
+        className="flex size-10 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-[#3F4B68] hover:text-primary"
       >
-        <BellIcon size={25} />
+        <BellIcon size={22} />
       </button>
       <Dropdown
         trigger={['click']}
@@ -28,12 +30,18 @@ export function TopBar({ teacherName, initial }: { teacherName: string; initial:
           ],
         }}
       >
-        <button type="button" className="flex cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 font-[inherit] text-ink">
-          <span className="flex size-[37px] items-center justify-center rounded-full bg-[#FFCBB7] text-[16px] font-extrabold">{initial}</span>
-          <span className="flex h-[37px] items-center gap-3 rounded-full bg-white pr-3.5 pl-4 text-[15px] font-bold">
-            {teacherName}
-            <ChevronDownIcon size={17} strokeWidth={2.6} />
-          </span>
+        <button
+          type="button"
+          aria-label={`Tài khoản ${teacher?.name ?? ''}`}
+          className="flex h-10 cursor-pointer items-center gap-2 rounded-full border-0 bg-white py-1 pr-3.5 pl-1 font-[inherit] text-[15px] font-bold text-ink hover:text-primary"
+        >
+          {teacher ? (
+            <img src={teacher.avatar} alt="" className="size-8 rounded-full bg-[#FFE3D3] object-cover" />
+          ) : (
+            <span className="size-8 rounded-full bg-surface-soft" />
+          )}
+          {teacher?.name}
+          <ChevronDownIcon size={16} strokeWidth={2.6} />
         </button>
       </Dropdown>
     </div>

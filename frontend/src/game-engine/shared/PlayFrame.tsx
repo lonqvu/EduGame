@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ChevronLeftIcon } from '@/components/ui/icons'
-import { usePlayBack } from '@/game-engine/shared/playBack'
+import { useLeaveGame } from '@/game-engine/shared/leaveGame'
+import { SoundToggle } from '@/sound/SoundToggle'
 
 interface PlayFrameProps {
   title: string
@@ -9,7 +10,7 @@ interface PlayFrameProps {
   progress: string
   /** Extra chips on the right of the header (timer...). */
   extra?: ReactNode
-  /** Where "back" leads: the editor of this game. */
+  /** Where "back" leads when the page gives no way to leave the round: the editor of this game. */
   backTo: string
   children: ReactNode
 }
@@ -20,10 +21,8 @@ export function PlayFrame({ title, progress, extra, backTo, children }: PlayFram
     <div className="flex h-full flex-col gap-4 px-9 py-6">
       <div className="flex items-center justify-between gap-6">
         <div className="flex min-w-0 items-center gap-3">
-          <BackButton
-            backTo={backTo}
-            className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-ink hover:text-primary-ink"
-          />
+          <GameBackButton backTo={backTo} className="bg-white text-ink hover:text-primary-ink" />
+          <SoundToggle />
           <h1 className="m-0 truncate font-display text-[26px] font-extrabold">{title}</h1>
         </div>
         <div className="flex shrink-0 items-center gap-3">
@@ -36,18 +35,16 @@ export function PlayFrame({ title, progress, extra, backTo, children }: PlayFram
   )
 }
 
-/** Back button of a running game: to its introduction when the projector page gives one, else to the editor. */
-export function BackButton({ backTo, className }: { backTo: string; className: string }) {
-  const back = usePlayBack()
-  if (back) {
-    return (
-      <button type="button" onClick={back} aria-label="Quay lại" className={`font-[inherit] ${className}`}>
-        <ChevronLeftIcon size={22} />
-      </button>
-    )
-  }
-  return (
-    <Link to={backTo} aria-label="Quay lại soạn câu hỏi" className={className}>
+/** "‹" of a game screen: back to the game's introduction, or to the editor where there is none. */
+export function GameBackButton({ backTo, className }: { backTo: string; className: string }) {
+  const leave = useLeaveGame()
+  const look = `flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 ${className}`
+  return leave ? (
+    <button type="button" onClick={leave} aria-label="Quay lại màn giới thiệu" className={look}>
+      <ChevronLeftIcon size={22} />
+    </button>
+  ) : (
+    <Link to={backTo} aria-label="Quay lại soạn câu hỏi" className={look}>
       <ChevronLeftIcon size={22} />
     </Link>
   )

@@ -24,15 +24,18 @@ const uniqueName = (prefix: string) => `${prefix} ${Date.now().toString(36).slic
 
 test('the class list shows each class with its numbers, and filters by status and search', async ({ page }) => {
   await page.goto('/classes')
-  await expect(page.getByRole('heading', { name: 'Quản lý lớp học' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Lớp học của cô' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Lớp học', exact: true })).toHaveAttribute('aria-current', 'page')
 
   const oneA = page.getByRole('link', { name: /^Lớp 1A, 25 học sinh/ })
-  await expect(oneA).toContainText('Đang hoạt động')
-  await expect(oneA).toContainText('8Hoạt động')
-  await expect(oneA).toContainText('63%Hoàn thành')
+  const oneARow = page.getByRole('listitem').filter({ has: oneA })
+  await expect(oneARow).toContainText('Chơi gần nhất')
+  await expect(oneARow).toContainText('sao tuần này')
+  await expect(oneARow.getByRole('button', { name: 'Chơi cùng lớp' })).toBeVisible()
   const twoB = page.getByRole('link', { name: /^Lớp 2B, 20 học sinh/ })
-  await expect(twoB).toContainText('Tạm ngưng')
+  const twoBRow = page.getByRole('listitem').filter({ has: twoB })
+  await expect(twoBRow).toContainText('Tạm ngưng')
+  await expect(twoBRow.getByRole('button', { name: 'Kích hoạt lại' })).toBeVisible()
 
   await page.getByRole('tab', { name: 'Tạm ngưng (1)' }).click()
   await expect(twoB).toBeVisible()
@@ -50,7 +53,7 @@ test('the class list shows each class with its numbers, and filters by status an
   await oneA.click()
   await expect(page).toHaveURL(/\/classes\/c-1a$/)
   await expect(page.getByRole('heading', { name: 'Lớp 1A' })).toBeVisible()
-  await expect(page.getByText('5/8 trò chơi đến cuối')).toBeVisible()
+  await expect(page.getByText('sao tuần này của lớp')).toBeVisible()
 })
 
 test('a teacher creates a class, fills its class list and manages it', async ({ page, backend }) => {
@@ -87,7 +90,8 @@ test('a teacher creates a class, fills its class list and manages it', async ({ 
   await expect(page.getByRole('heading', { name: 'Học sinh (3)' })).toBeVisible()
   expect((await backend.classStudents(code)).map((s) => s.displayName)).toEqual(['Trần Minh Đức', 'Lê Bảo An', 'Nguyễn Thu Hà'])
 
-  await page.getByRole('button', { name: 'Đổi tên Lê Bảo An' }).click()
+  await page.getByRole('button', { name: 'Tùy chọn cho Lê Bảo An' }).click()
+  await page.getByRole('menuitem', { name: 'Đổi tên' }).click()
   const renaming = page.getByRole('dialog', { name: 'Đổi tên học sinh' })
   await renaming.getByLabel('Tên học sinh').fill('Lê Bảo Anh')
   await renaming.getByRole('button', { name: 'Lưu' }).click()
@@ -103,12 +107,13 @@ test('a teacher creates a class, fills its class list and manages it', async ({ 
     '3. Nguyễn Thu Hà',
   ])
 
-  await page.getByRole('button', { name: 'Xóa Nguyễn Thu Hà khỏi lớp' }).click()
+  await page.getByRole('button', { name: 'Tùy chọn cho Nguyễn Thu Hà' }).click()
+  await page.getByRole('menuitem', { name: 'Xóa khỏi lớp' }).click()
   await page.getByRole('dialog').getByRole('button', { name: 'Xóa khỏi lớp' }).click()
   await expect(page.getByRole('heading', { name: 'Học sinh (2)' })).toBeVisible()
   expect((await backend.classroom(code)).studentCount).toBe(2)
 
-  await page.getByRole('button', { name: 'Sửa' }).click()
+  await page.getByRole('button', { name: 'Sửa lớp' }).click()
   const editing = page.getByRole('dialog', { name: 'Sửa thông tin lớp' })
   await expect(editing.getByLabel('Tên lớp')).toHaveValue(name)
   await editing.getByLabel('Trường').fill('Tiểu học Hòa Bình')
@@ -155,8 +160,8 @@ test('the class picked on the home page plays the games, and its numbers count t
   expect(await backend.classroom(classroom.code)).toMatchObject({ activityCount: 1, completionRate: 100 })
 
   await page.goto(`/classes/${classroom.code}`)
-  await expect(page.getByText('Lớp đang dạy', { exact: true })).toBeVisible()
-  await expect(page.getByText('1/1 trò chơi đến cuối')).toBeVisible()
+  await expect(page.getByText('Đang dạy', { exact: true })).toBeVisible()
+  await expect(page.getByText('lần chơi gần nhất')).toBeVisible()
 })
 
 const FIXTURES = 'src/utils/__fixtures__/class-lists'
@@ -249,4 +254,40 @@ test('"Tạo và nhập từ file" creates the class and opens the import, "Họ
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Học sinh (3)' })).toBeVisible()
   await expect(dialog).toBeHidden()
+})
+
+test('the teacher praises students on the class page: one tap, several at once, or a star taken back', async ({ page, backend }) => {
+  const name = uniqueName('E2E khen')
+  const classroom = await backend.createClassroom(name, ['An', 'Bình', 'Chi'])
+  const stars = async () => Object.fromEntries((await backend.classStudents(classroom.code)).map((s) => [s.displayName, s.weeklyStars]))
+  await page.goto(`/classes/${classroom.code}`)
+  await expect(page.getByText('3 bạn', { exact: true })).toBeVisible()
+
+  // One tap: one star, shown at once and saved.
+  const an = page.getByRole('button', { name: 'Khen An' })
+  await an.click()
+  await expect(an).toContainText('1')
+  await expect.poll(stars).toMatchObject({ An: 1, 'Bình': 0, Chi: 0 })
+  await expect(page.getByText('được khen nhiều nhất (1 ⭐)')).toBeVisible()
+
+  // Several at once.
+  await page.getByRole('button', { name: '☑ Khen nhiều bạn' }).click()
+  await page.getByRole('button', { name: 'Chọn Bình' }).click()
+  await page.getByRole('button', { name: 'Chọn Chi' }).click()
+  const bar = page.getByRole('toolbar', { name: 'Khen các bạn đã chọn' })
+  await expect(bar).toContainText('Đã chọn 2 bạn')
+  await bar.getByRole('button', { name: '+2 ⭐' }).click()
+  await expect.poll(stars).toMatchObject({ An: 1, 'Bình': 2, Chi: 2 })
+  await page.getByRole('button', { name: 'Xong' }).click()
+  await expect(page.getByText('cả lớp đã được khen!')).toBeVisible()
+
+  // A star taken back, from the card's menu.
+  await page.getByRole('button', { name: 'Tùy chọn cho Chi' }).click()
+  await page.getByRole('menuitem', { name: '−1 ⭐' }).click()
+  await expect.poll(stars).toMatchObject({ Chi: 1 })
+  expect((await backend.classroom(classroom.code)).weeklyStars).toBe(4)
+
+  // The class list counts them too.
+  await page.goto('/classes')
+  await expect(page.getByRole('listitem').filter({ has: page.getByRole('link', { name: new RegExp(`^Lớp ${name}`) }) })).toContainText('4 sao tuần này')
 })

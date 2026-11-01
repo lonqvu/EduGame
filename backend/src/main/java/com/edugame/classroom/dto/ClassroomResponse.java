@@ -12,6 +12,7 @@ import com.edugame.classroom.domain.ClassroomStatus;
  * @param completedCount of those, played to the results screen
  * @param completionRate completedCount / activityCount in percent (0 when nothing was played)
  * @param lastPlayedAt   when the last game with the class started (null when none)
+ * @param weeklyStars    stars given to its students since Monday 00:00 (school time zone)
  */
 public record ClassroomResponse(
         String code,
@@ -26,5 +27,6 @@ public record ClassroomResponse(
         long completedCount,
         int completionRate,
         Instant lastPlayedAt,
+        long weeklyStars,
         Instant createdAt) {
 }

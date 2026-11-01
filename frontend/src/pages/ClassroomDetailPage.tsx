@@ -150,12 +150,14 @@ export function ClassroomDetailPage() {
         <div className="flex min-w-[200px] flex-1 flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
             <h1 className="m-0 text-[28px] leading-tight font-black">{title}</h1>
-            <StatusChip status={classroom.status} />
+            {paused && <StatusChip status={classroom.status} />}
             {current && (
-              <span className="rounded-full bg-sun-soft px-2.5 py-0.5 text-[12.5px] font-extrabold text-sun-ink">Lớp đang dạy</span>
+              <span className="flex items-center gap-1 rounded-full bg-[#E2F6E8] px-2.5 py-0.5 text-[12.5px] font-extrabold text-success">
+                <CheckIcon size={13} /> Đang dạy
+              </span>
             )}
           </div>
-          <p className="m-0 text-[15px] text-ink-muted">{details.join(' · ')}</p>
+          <p className="m-0 text-[15px] text-ink-muted">{[`${classroom.studentCount} học sinh`, ...details].join(' · ')}</p>
         </div>
         <div className="flex w-full items-center gap-2.5 @min-[760px]:w-auto">
           <Button
@@ -168,7 +170,7 @@ export function ClassroomDetailPage() {
             Chơi cùng lớp
           </Button>
           <Button icon={<PencilIcon size={17} />} onClick={() => setEditing(true)} className="h-11 rounded-[12px] font-bold">
-            Sửa
+            Sửa lớp
           </Button>
           <Dropdown
             trigger={['click']}
@@ -202,23 +204,7 @@ export function ClassroomDetailPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <Tile label="Học sinh" value={String(classroom.studentCount)} hint="trong danh sách lớp" accent="#3563E9" />
-        <Tile label="Hoạt động" value={String(classroom.activityCount)} hint="trò chơi đã mở với lớp" accent="#2E9E6A" />
-        <Tile
-          label="Hoàn thành"
-          value={classroom.activityCount ? `${classroom.completionRate}%` : '–'}
-          hint={classroom.activityCount ? `${classroom.completedCount}/${classroom.activityCount} trò chơi đến cuối` : 'chưa chơi trò nào'}
-          accent="#F5A524"
-          progress={classroom.activityCount ? classroom.completionRate : undefined}
-        />
-        <Tile
-          label="Chơi gần nhất"
-          value={relativeTimeLabel(classroom.lastPlayedAt) || 'Chưa chơi'}
-          hint={classroom.lastPlayedAt ? new Date(classroom.lastPlayedAt).toLocaleDateString('vi-VN') : 'mở một trò chơi để bắt đầu'}
-          accent="#8B5CF6"
-        />
-      </div>
+      <ClassNumbers classroom={classroom} students={students} />
 
       <StudentsCard
         students={students}
@@ -227,6 +213,7 @@ export function ClassroomDetailPage() {
         onRename={setRenaming}
         onRemove={confirmRemove}
         onSortByName={confirmSort}
+        onAward={detail.awardStars}
       />
 
       <ClassFormModal
@@ -261,27 +248,45 @@ export function ClassroomDetailPage() {
   )
 }
 
-function Tile({ label, value, hint, accent, progress }: { label: string; value: string; hint: ReactNode; accent: string; progress?: number }) {
+/** What the teacher wants to know about the class this week: its stars, who shines, who is waiting, the last game. */
+function ClassNumbers({ classroom, students }: { classroom: ClassroomResponse; students: StudentResponse[] }) {
+  const top = students.reduce<StudentResponse | undefined>((best, s) => (s.weeklyStars > (best?.weeklyStars ?? 0) ? s : best), undefined)
+  const waiting = students.filter((s) => s.weeklyStars <= 0).length
   return (
-    <div className="flex min-w-0 flex-col gap-1 rounded-[18px] bg-white p-4 sm:p-5">
-      <span className="flex items-center gap-2 text-[14px] font-bold text-ink-soft">
-        <span aria-hidden="true" className="size-2.5 rounded-full" style={{ background: accent }} />
-        {label}
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <Tile icon="⭐" tint="#FFF4D6" value={String(classroom.weeklyStars)} hint="sao tuần này của lớp" />
+      <Tile
+        icon="🏆"
+        tint="#E2F6E8"
+        value={top ? top.displayName : 'Chưa có'}
+        hint={top ? `được khen nhiều nhất (${top.weeklyStars} ⭐)` : 'bạn được khen nhiều nhất'}
+      />
+      <Tile
+        icon="🙋"
+        tint="#FDE7EC"
+        value={students.length ? `${waiting} bạn` : '–'}
+        hint={waiting ? 'chưa được khen tuần này' : students.length ? 'cả lớp đã được khen!' : 'chưa có học sinh nào'}
+      />
+      <Tile
+        icon="🎮"
+        tint="#E8EFFD"
+        value={relativeTimeLabel(classroom.lastPlayedAt) || 'Chưa chơi'}
+        hint={classroom.lastPlayedAt ? 'lần chơi gần nhất' : 'mở một trò chơi để bắt đầu'}
+      />
+    </div>
+  )
+}
+
+function Tile({ icon, tint, value, hint }: { icon: string; tint: string; value: string; hint: ReactNode }) {
+  return (
+    <div className="flex min-w-0 items-center gap-3 rounded-[18px] bg-white p-3.5 sm:p-4">
+      <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-[14px] text-[22px]" style={{ background: tint }}>
+        {icon}
       </span>
-      <span className="truncate text-[22px] leading-tight font-black sm:text-[26px]">{value}</span>
-      {progress !== undefined && (
-        <span
-          role="progressbar"
-          aria-label={`${label} ${progress}%`}
-          aria-valuenow={progress}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          className="my-0.5 h-1.5 overflow-hidden rounded-full bg-chip"
-        >
-          <span className="block h-full rounded-full bg-[#F5A524]" style={{ width: `${progress}%` }} />
-        </span>
-      )}
-      <span className="truncate text-[13px] text-ink-muted">{hint}</span>
+      <span className="flex min-w-0 flex-col">
+        <span className="line-clamp-2 text-[17px] leading-tight font-black break-words sm:text-[22px]">{value}</span>
+        <span className="text-[12.5px] leading-snug text-ink-muted">{hint}</span>
+      </span>
     </div>
   )
 }

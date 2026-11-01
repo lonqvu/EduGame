@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { ChevronLeftIcon } from '@/components/ui/icons'
+import { SoundToggle } from '@/sound/SoundToggle'
 
 interface ToolFrameProps {
   title: string
@@ -27,6 +28,7 @@ export function ToolFrame({ title, subtitle, actions, children }: ToolFrameProps
           >
             <ChevronLeftIcon size={22} />
           </button>
+          <SoundToggle />
           <div className="flex min-w-0 flex-col">
             <h1 className="m-0 truncate font-display text-[30px] leading-tight font-extrabold">{title}</h1>
             {subtitle && <span className="text-lg text-ink-soft">{subtitle}</span>}

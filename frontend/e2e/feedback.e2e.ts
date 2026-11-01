@@ -61,22 +61,15 @@ async function sentForm(page: Page): Promise<SentForm> {
   })
 }
 
-test('"Góp ý" is on every teacher screen, above the start bar, and not on the projector', async ({ page, backend }) => {
+test('"Góp ý" is in the menu of every teacher screen, and not on the projector', async ({ page, backend }) => {
   const game = await backend.createGame('QUIZ', 'E2E Góp ý', [quizItem('1 + 1 = ?', ['2', '3'], 0)])
 
-  for (const path of ['/', '/games/new', '/question-sets', '/classes', '/reports', '/settings', '/profile']) {
+  for (const path of ['/', '/games/new', '/question-sets', '/classes', '/reports', '/settings', '/profile', `/games/${game.code}/start`]) {
     await page.goto(path)
-    await expect(feedbackButton(page)).toBeVisible()
+    await expect(page.getByRole('navigation', { name: 'Điều hướng chính' }).getByRole('button', { name: 'Góp ý cho Lớp Vui' })).toBeVisible()
   }
 
-  // The start page: it does not cover "Bắt đầu trò chơi".
-  await page.goto(`/games/${game.code}/start`)
-  const start = await page.getByRole('link', { name: 'Bắt đầu trò chơi' }).boundingBox()
-  const button = await feedbackButton(page).boundingBox()
-  expect(start && button).toBeTruthy()
-  expect(button!.y + button!.height).toBeLessThanOrEqual(start!.y)
-
-  // The class sees the projector: no button there.
+  // The class sees the projector: no menu there.
   await page.getByRole('link', { name: 'Bắt đầu trò chơi' }).click()
   await expect(page.getByText('Câu 1 / 1')).toBeVisible()
   await expect(feedbackButton(page)).toHaveCount(0)

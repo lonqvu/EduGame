@@ -41,7 +41,6 @@ export function GameStartPage() {
   const updateSettings = useGameLibraryStore((s) => s.updateSettings)
   const templates = useCatalogStore((s) => s.templates)
   const loadTemplates = useCatalogStore((s) => s.load)
-  const teacher = useTeacherStore((s) => s.teacher)
   const loadTeacher = useTeacherStore((s) => s.load)
   const [showing, setShowing] = useState(false)
   const closeShow = useCallback(() => setShowing(false), [])
@@ -98,7 +97,7 @@ export function GameStartPage() {
         </div>
         {/* Above the title on phones, so the title keeps the full width. */}
         <div className="order-first ml-auto sm:order-none">
-          <TopBar teacherName={teacher?.name ?? ''} initial={teacher?.shortName.charAt(0).toUpperCase() ?? ''} />
+          <TopBar />
         </div>
       </header>
 

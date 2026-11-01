@@ -88,6 +88,30 @@ export function useClassroomDetail(code: string) {
       changed(0)
     },
 
+    /**
+     * Stars (taken away when negative) for some students, shown at once and saved; the students' real totals come
+     * back from the server. If saving fails the stars are taken back and the error rethrown.
+     */
+    awardStars: async (ids: number[], points: number) => {
+      const add = (sign: number) =>
+        setStudents((list) =>
+          list.map((s) =>
+            ids.includes(s.id) ? { ...s, weeklyStars: s.weeklyStars + sign * points, totalStars: s.totalStars + sign * points } : s,
+          ),
+        )
+      add(1)
+      setClassroom((c) => (c ? { ...c, weeklyStars: c.weeklyStars + ids.length * points } : c))
+      try {
+        await Promise.all(ids.map((id) => classroomApi.awardStars(code, id, points)))
+      } catch (error) {
+        add(-1)
+        setClassroom((c) => (c ? { ...c, weeklyStars: c.weeklyStars - ids.length * points } : c))
+        throw error
+      }
+      // The praise corner of the home page shows the class being taught.
+      if (useClassStore.getState().classroomCode === code) void refreshShared()
+    },
+
     /** The class after an edit made through the shared store (rename, pause...). */
     setClassroom,
   }

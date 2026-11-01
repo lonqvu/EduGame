@@ -39,6 +39,7 @@ export interface Classroom {
   activityCount: number
   completedCount: number
   completionRate: number
+  weeklyStars: number
   schoolName?: string
   avatar?: string
 }
@@ -137,7 +138,10 @@ export class Backend {
   }
 
   classStudents(code: string) {
-    return this.call<{ id: number; displayName: string; rollNumber: number }[]>('get', `classrooms/${code}/students`)
+    return this.call<{ id: number; displayName: string; rollNumber: number; weeklyStars: number; totalStars: number }[]>(
+      'get',
+      `classrooms/${code}/students`,
+    )
   }
 
   /** A class made by the test (archived by `cleanUp`), with these students. */
@@ -184,6 +188,14 @@ export class Backend {
   /** A set the test made in the browser, archived by `cleanUp`. */
   adoptQuestionSet(code: string) {
     this.questionSets.push(code)
+  }
+
+  profile() {
+    return this.call<{ displayName: string; phone?: string; avatar?: string }>('get', 'me/profile')
+  }
+
+  saveProfile(profile: { displayName: string; phone: string; avatar: string }) {
+    return this.call('patch', 'me/profile', profile)
   }
 
   settings() {

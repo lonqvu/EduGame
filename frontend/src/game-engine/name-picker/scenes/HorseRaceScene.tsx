@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { useState, useEffect } from 'react'
 import { BLEED, BLEED_W, BLEED_X, Cloud, Countdown, Crown, SceneSvg } from '@/game-engine/name-picker/effects'
+import { horseRacePlan, RACE_STRETCHES } from '@/game-engine/name-picker/horseRace'
 import { fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
 import { useSound } from '@/sound/useSound'
@@ -13,14 +14,9 @@ const START_LEFT = 56
 const WIN_X = 960
 const COUNT_MS = 750
 const GO_AT = COUNT_MS * 3
-const RACE_S = 4
-
-const LOSER_EASES: [number, number, number, number][] = [
-  [0.15, 0.75, 0.35, 1],
-  [0.25, 0.6, 0.4, 1],
-  [0.2, 0.9, 0.5, 1],
-  [0.55, 0.2, 0.45, 1],
-]
+const RACE_S = 7
+/** When each stretch of the race ends, 0 to 1. */
+const STRETCH_TIMES = Array.from({ length: RACE_STRETCHES + 1 }, (_, i) => i / RACE_STRETCHES)
 
 const BUNTING = ['#F28C28', '#3563E9', '#2E9E6A', '#8B5CF6', '#E5484D', '#FFD15C']
 /** Bunting flags are 58 wide, strung across the stage and its side bleed. */
@@ -31,14 +27,8 @@ export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickScene
   const running = phase === 'run'
   const done = phase === 'done'
   const [go, setGo] = useState(false)
-  // Losers stop short of the line; some sprint early and fade, so the winner overtakes late.
-  const [plan] = useState(() =>
-    slots.map((_, i) =>
-      i === winnerSlot
-        ? { x: WIN_X, ease: [0.55, 0.05, 0.3, 1] as [number, number, number, number] }
-        : { x: 560 + Math.round(Math.random() * 320), ease: randomLoserEase() },
-    ),
-  )
+  // Every horse speeds up and slows down at random along the way; the winner crosses the line at the very end.
+  const [plan] = useState(() => horseRacePlan(slots.length, winnerSlot, WIN_X))
 
   useSceneTimeline(running, [
     [GO_AT, () => setGo(true)],
@@ -64,8 +54,8 @@ export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickScene
             className="absolute h-[91px] w-[136px]"
             style={{ left: START_LEFT, top: LANE_TOP + i * LANE_GAP }}
             initial={{ x: 0 }}
-            animate={{ x: moving ? plan[i].x : 0 }}
-            transition={{ duration: RACE_S, ease: plan[i].ease }}
+            animate={{ x: moving ? plan[i] : 0 }}
+            transition={{ duration: RACE_S, times: STRETCH_TIMES, ease: 'linear' }}
           >
             {gallop && <Dust />}
             <motion.div
@@ -90,10 +80,6 @@ export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickScene
       {running && <Countdown steps={['3', '2', '1', 'Chạy!']} stepMs={COUNT_MS} left={540} top={260} accent="#FFD15C" ink="#E5484D" />}
     </>
   )
-}
-
-function randomLoserEase() {
-  return LOSER_EASES[Math.floor(Math.random() * LOSER_EASES.length)]
 }
 
 function Dust() {

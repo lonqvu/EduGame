@@ -70,8 +70,5 @@ export async function prepareScreenshot(file: File): Promise<File> {
   return prepared
 }
 
-/** Pages with their own bar at the bottom right ("Bắt đầu trò chơi"): the feedback button sits above it. */
-export const liftsFeedbackButton = (pathname: string) => /^\/games\/[^/]+\/start\/?$/.test(pathname)
-
-/** Elements marked so are left out of screenshots (the feedback button itself). */
+/** Elements marked so are left out of screenshots. */
 export const SKIP_IN_SCREENSHOT = 'data-screenshot-skip'

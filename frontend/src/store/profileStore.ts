@@ -34,7 +34,9 @@ export const useProfileStore = create<ProfileState>()((set, get) => ({
   save: async (request, picture) => {
     if (picture) {
       // Shown at once: if the rest of the form is then refused, the new picture is already the teacher's.
-      set({ profile: await userApi.uploadAvatar(picture), status: 'ready' })
+      const uploaded = await userApi.uploadAvatar(picture)
+      set({ profile: uploaded, status: 'ready' })
+      useTeacherStore.getState().update(uploaded)
     }
     const profile = await userApi.updateProfile({
       displayName: request.displayName.trim(),
@@ -42,7 +44,7 @@ export const useProfileStore = create<ProfileState>()((set, get) => ({
       avatar: picture ? UPLOADED : request.avatar,
     })
     set({ profile, status: 'ready' })
-    useTeacherStore.getState().rename(profile.displayName)
+    useTeacherStore.getState().update(profile)
     return profile
   },
 }))

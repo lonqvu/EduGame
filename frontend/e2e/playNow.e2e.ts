@@ -71,21 +71,11 @@ test('the sample game is made once: playing again opens the same one', async ({ 
   const first = page.url()
 
   await page.goto('/')
-  // "Trò chơi nổi bật" plays at once too.
   await page.goto('/games/new')
   await page.getByRole('button', { name: 'Chơi ngay Ô chữ' }).click()
   await expect(page).toHaveURL(first)
   const games = (await (await api.get('games')).json()) as { templateCode: string; sample: boolean }[]
   expect(games.filter((g) => g.templateCode === 'CROSSWORD')).toEqual([expect.objectContaining({ sample: true })])
-})
-
-test('"Trò chơi nổi bật" on the home page plays the game at once', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('button', { name: /Lật ô thi đua/ }).first().click()
-  await expect(page).toHaveURL(/\/play\/g-/)
-  await expect(intro(page)).toContainText('Lật ô mẫu')
-  await page.getByRole('button', { name: 'Bắt đầu', exact: true }).click()
-  await expect(page.getByRole('button', { name: /^Ô 1\b/ }).or(page.getByText('1', { exact: true }).first())).toBeVisible()
 })
 
 test('without a class, the name tools ask for names on the spot, or roll numbers', async ({ page }) => {

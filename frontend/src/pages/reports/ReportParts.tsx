@@ -1,7 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { ArrowRightIcon } from '@/components/ui/icons'
-import type { ReportSession } from '@/types/api'
-import { axisLabelIndexes, niceMax, resultLabel, sessionTime, shortDate, durationLabel, weekdayDate, type ChartBucket } from '@/utils/reports'
+import { axisLabelIndexes, niceMax, shortDate, weekdayDate, type ChartBucket } from '@/utils/reports'
 
 /** White block of the reports page. */
 export function ReportCard({
@@ -88,10 +86,13 @@ export function ActivityChart({
   buckets,
   unit,
   labels = ACTIVITY_LABELS,
+  stacked = false,
 }: {
   buckets: ChartBucket[]
   unit: 'day' | 'week'
   labels?: ChartLabels
+  /** The second figure is a part of the first: shown dark at the foot of each column, the rest light. */
+  stacked?: boolean
 }) {
   const [hovered, setHovered] = useState<number | null>(null)
   const top = niceMax(Math.max(0, ...buckets.map((b) => b.activities)))
@@ -130,12 +131,21 @@ export function ActivityChart({
                   onBlur={() => setHovered(null)}
                   className={`flex h-full w-full cursor-default items-end justify-center rounded-md border-0 bg-transparent p-0 outline-none focus-visible:bg-primary-soft ${hovered === i ? 'bg-[#F1F5FD]' : ''}`}
                 >
-                  {b.activities > 0 && (
-                    <span
-                      className={`block w-full max-w-6 rounded-t-[4px] bg-primary transition-[filter] ${hovered === i ? 'brightness-110' : ''}`}
-                      style={{ height: `${(b.activities / top) * 100}%` }}
-                    />
-                  )}
+                  {b.activities > 0 &&
+                    (stacked ? (
+                      <span
+                        className={`flex w-full max-w-6 flex-col overflow-hidden rounded-t-[4px] transition-[filter] ${hovered === i ? 'brightness-110' : ''}`}
+                        style={{ height: `${(b.activities / top) * 100}%` }}
+                      >
+                        <span className="basis-0 bg-[#C9D7FA]" style={{ flexGrow: Math.max(0, b.activities - b.completed) }} />
+                        <span className="basis-0 bg-primary" style={{ flexGrow: b.completed }} />
+                      </span>
+                    ) : (
+                      <span
+                        className={`block w-full max-w-6 rounded-t-[4px] bg-primary transition-[filter] ${hovered === i ? 'brightness-110' : ''}`}
+                        style={{ height: `${(b.activities / top) * 100}%` }}
+                      />
+                    ))}
                 </button>
               </li>
             ))}
@@ -209,64 +219,5 @@ export function BarList({ rows, unit }: { rows: { key: string; label: ReactNode;
         </li>
       ))}
     </ul>
-  )
-}
-
-const PAGE = 10
-
-/** Games played, newest first, ten more at a time. */
-export function SessionHistory({ sessions }: { sessions: ReportSession[] }) {
-  const [count, setCount] = useState(PAGE)
-  return (
-    <div className="flex flex-col gap-3">
-      <ul className="m-0 flex list-none flex-col p-0">
-        {sessions.slice(0, count).map((s) => (
-          <li
-            key={s.id}
-            className="flex flex-col gap-1.5 border-b border-line-soft py-3 last:border-b-0 md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)_200px] md:items-center md:gap-4"
-          >
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <span className="truncate text-[15px] font-bold">{s.gameTitle}</span>
-              <span className="text-[13px] text-ink-muted">
-                {s.templateName} · {sessionTime(s.startedAt)}
-              </span>
-            </div>
-            <span className="min-w-0 text-[14px] text-ink-soft">{resultLabel(s)}</span>
-            <span className="flex shrink-0 items-center gap-3 md:justify-end">
-              {s.minutes !== undefined && <span className="text-[13.5px] text-ink-muted tabular-nums">{durationLabel(s.minutes)}</span>}
-              <span
-                className={`rounded-full px-2.5 py-1 text-[12.5px] font-bold ${s.status === 'ENDED' ? 'bg-[#E3F6EA] text-success' : 'bg-chip text-ink-soft'}`}
-              >
-                {s.status === 'ENDED' ? '✓ Hoàn thành' : 'Dở dang'}
-              </span>
-            </span>
-          </li>
-        ))}
-      </ul>
-      {sessions.length > count && (
-        <button
-          type="button"
-          onClick={() => setCount((n) => n + PAGE * 2)}
-          className="flex cursor-pointer items-center gap-1.5 self-center rounded-full border border-line bg-white px-4 py-2 font-[inherit] text-[14px] font-bold text-primary hover:border-primary"
-        >
-          Xem thêm ({sessions.length - count})
-          <ArrowRightIcon size={16} className="rotate-90" />
-        </button>
-      )}
-    </div>
-  )
-}
-
-/** "Tải CSV" of a block. */
-export function CsvButton({ onClick, label }: { onClick: () => void; label: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="cursor-pointer rounded-full border border-line bg-white px-3.5 py-1.5 font-[inherit] text-[13.5px] font-bold text-ink-soft hover:border-primary hover:text-primary"
-    >
-      Tải CSV
-    </button>
   )
 }

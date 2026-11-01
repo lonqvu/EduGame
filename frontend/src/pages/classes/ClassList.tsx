@@ -1,10 +1,11 @@
-import { Button, Input } from 'antd'
+import { Button, Dropdown, Input } from 'antd'
 import type { ReactNode } from 'react'
-import { Link } from 'react-router'
-import { ChevronRightIcon, PlusIcon, SearchIcon, UsersIcon } from '@/components/ui/icons'
-import { AnimalAvatar, CLASS_ASSETS, StatusChip } from '@/pages/classes/classUi'
+import { Link, useNavigate } from 'react-router'
+import { CheckIcon, MoreVerticalIcon, PlayIcon, PlusIcon, SearchIcon } from '@/components/ui/icons'
+import { AnimalAvatar, CLASS_ASSETS } from '@/pages/classes/classUi'
 import type { ClassroomResponse, LoadStatus } from '@/types/api'
 import { classAvatar, classTitle, type ClassTab } from '@/utils/classrooms'
+import { relativeTimeLabel } from '@/utils/dateLabels'
 
 const TABS: { key: ClassTab; label: string }[] = [
   { key: 'ALL', label: 'Tất cả' },
@@ -25,18 +26,32 @@ interface ClassListProps {
   currentCode: string | null
   onCreate: () => void
   onRetry: () => void
+  actions: ClassActions
 }
 
-/** "Danh sách lớp học": tabs by status, search, one row per class leading to its page. */
+/** What a class card can do without opening the class. */
+export interface ClassActions {
+  teach: (classroom: ClassroomResponse) => void
+  play: (classroom: ClassroomResponse) => void
+  setStatus: (classroom: ClassroomResponse, status: ClassroomResponse['status']) => void
+  archive: (classroom: ClassroomResponse) => void
+}
+
+/** The classes: search, tabs by status, one card per class with its main actions. */
 export function ClassList(props: ClassListProps) {
   const { counts, tab, onTabChange, search, onSearchChange } = props
   return (
-    <section aria-labelledby="class-list-title" className="@container min-w-0 rounded-[20px] bg-white p-4 sm:p-5">
-      <header className="flex flex-wrap items-center gap-x-5 gap-y-3">
-        <h2 id="class-list-title" className="m-0 flex items-center gap-2.5 text-[19px] font-black">
-          <UsersIcon size={24} className="text-ink-soft" />
-          Danh sách lớp học
-        </h2>
+    <section aria-label="Danh sách lớp học" className="@container flex min-w-0 flex-col gap-3">
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
+        <Input
+          allowClear
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          prefix={<SearchIcon size={18} className="text-ink-muted" />}
+          placeholder="Tìm lớp, trường..."
+          aria-label="Tìm kiếm lớp học"
+          className="h-10 w-full rounded-full border-0 shadow-[0_1px_3px_rgba(31,42,68,0.06)] sm:w-[300px]"
+        />
         {/* Narrow screens: the tabs scroll sideways rather than wrapping. */}
         <div
           role="tablist"
@@ -52,8 +67,8 @@ export function ClassList(props: ClassListProps) {
                 role="tab"
                 aria-selected={selected}
                 onClick={() => onTabChange(t.key)}
-                className={`h-[34px] shrink-0 cursor-pointer rounded-full border-0 px-4 font-[inherit] text-[14px] font-bold transition ${
-                  selected ? 'bg-primary text-white shadow-[0_3px_8px_rgba(53,99,233,0.25)]' : 'bg-chip text-ink-soft hover:bg-primary-soft hover:text-primary-ink'
+                className={`h-[36px] shrink-0 cursor-pointer rounded-full border-0 px-4 font-[inherit] text-[14px] font-extrabold transition ${
+                  selected ? 'bg-primary text-white' : 'bg-white text-ink-soft hover:text-primary-ink'
                 }`}
               >
                 {t.label} ({counts[t.key]})
@@ -61,30 +76,19 @@ export function ClassList(props: ClassListProps) {
             )
           })}
         </div>
-        <Input
-          allowClear
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          prefix={<SearchIcon size={18} className="text-ink-muted" />}
-          placeholder="Tìm lớp, trường..."
-          aria-label="Tìm kiếm lớp học"
-          className="h-10 min-w-[170px] flex-1 basis-[170px] rounded-full @min-[810px]:ml-auto @min-[810px]:max-w-[280px]"
-        />
       </header>
 
-      <div className="mt-4">
-        <ListBody {...props} />
-      </div>
+      <ListBody {...props} />
     </section>
   )
 }
 
-function ListBody({ status, classrooms, counts, tab, search, onSearchChange, onTabChange, currentCode, onCreate, onRetry }: ClassListProps) {
+function ListBody({ status, classrooms, counts, tab, search, onSearchChange, onTabChange, currentCode, onCreate, onRetry, actions }: ClassListProps) {
   if (status === 'idle' || status === 'loading') {
     return (
       <ul aria-busy="true" aria-label="Đang tải danh sách lớp" className="m-0 flex list-none flex-col gap-3 p-0">
         {[0, 1, 2].map((i) => (
-          <li key={i} className="flex h-[84px] animate-pulse items-center gap-4 rounded-2xl border border-line-soft px-4">
+          <li key={i} className="flex h-[96px] animate-pulse items-center gap-4 rounded-[20px] bg-white px-4">
             <span className="size-14 rounded-[16px] bg-chip" />
             <span className="flex flex-1 flex-col gap-2">
               <span className="h-4 w-24 rounded bg-chip" />
@@ -131,67 +135,109 @@ function ListBody({ status, classrooms, counts, tab, search, onSearchChange, onT
   return (
     <ul className="m-0 flex list-none flex-col gap-3 p-0">
       {classrooms.map((c) => (
-        <ClassRow key={c.code} classroom={c} current={c.code === currentCode} />
+        <ClassRow key={c.code} classroom={c} current={c.code === currentCode} actions={actions} />
       ))}
     </ul>
   )
 }
 
 /**
- * One class: animal, name, school and size, status, activities and completion, chevron. Wide: one line; narrow:
- * status and numbers go on a second line.
+ * One class: animal, name (to its page), size and school, when it last played and its stars of the week, and what
+ * the teacher does with it most: teach it ("Đang dạy" when it is), play with it, the rest in the menu.
  */
-function ClassRow({ classroom: c, current }: { classroom: ClassroomResponse; current: boolean }) {
+function ClassRow({ classroom: c, current, actions }: { classroom: ClassroomResponse; current: boolean; actions: ClassActions }) {
+  const navigate = useNavigate()
+  const page = `/classes/${encodeURIComponent(c.code)}`
+  const paused = c.status === 'PAUSED'
   // The class size first: the school name may be long and is cut on narrow screens.
   const details = [`${c.studentCount} học sinh`, c.schoolName].filter(Boolean).join(' · ')
   return (
-    <li>
-      <Link
-        to={`/classes/${encodeURIComponent(c.code)}`}
-        aria-label={`${classTitle(c.name)}, ${details}`}
-        className="group grid grid-cols-[52px_minmax(0,1fr)_20px] items-center gap-x-4 gap-y-2.5 rounded-2xl border border-line-soft bg-white px-3.5 py-3 text-ink transition hover:-translate-y-px hover:border-[#C9D9F5] hover:text-ink hover:shadow-[0_6px_18px_rgba(31,42,68,0.07)] @min-[720px]:grid-cols-[56px_minmax(0,1fr)_auto_200px_20px] @min-[720px]:py-3.5"
-      >
-        <AnimalAvatar avatar={classAvatar(c)} size={56} className="row-span-2 size-[52px] self-start @min-[720px]:row-span-1 @min-[720px]:size-14 @min-[720px]:self-center" />
-        <div className="col-start-2 row-start-1 flex min-w-0 flex-col gap-0.5">
-          <span className="flex items-center gap-2">
-            <span className="truncate text-[17px] font-black">{classTitle(c.name)}</span>
-            {current && (
-              <span className="shrink-0 rounded-full bg-sun-soft px-2 py-px text-[11.5px] font-extrabold text-sun-ink">Đang dạy</span>
-            )}
-          </span>
-          <span className="truncate text-[14px] text-ink-muted">{details}</span>
-        </div>
-        <ChevronRightIcon
-          size={20}
-          className="col-start-3 row-start-1 text-ink-muted transition group-hover:translate-x-0.5 group-hover:text-primary @min-[720px]:col-start-5"
-        />
-        <div className="col-span-2 col-start-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 @min-[720px]:contents">
-          <span className="@min-[720px]:col-start-3 @min-[720px]:row-start-1 @min-[720px]:px-4">
-            <StatusChip status={c.status} />
-          </span>
-          <span className="flex items-center @min-[720px]:col-start-4 @min-[720px]:row-start-1">
-            <Stat value={String(c.activityCount)} label="Hoạt động" />
-            <span aria-hidden="true" className="mx-4 h-8 w-px bg-line-soft @min-[720px]:mx-5" />
-            <Stat value={c.activityCount ? `${c.completionRate}%` : '–'} label="Hoàn thành" />
-          </span>
-        </div>
+    <li
+      className={`flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[20px] border-2 border-transparent bg-white px-4 py-3.5 transition hover:border-[#C9D9F5] ${
+        paused ? 'bg-white/70' : ''
+      }`}
+    >
+      <Link to={page} tabIndex={-1} aria-hidden="true" className={paused ? 'opacity-70' : ''}>
+        <AnimalAvatar avatar={classAvatar(c)} size={60} className="size-[52px] rounded-[18px] sm:size-[60px]" />
       </Link>
+      <div className="flex min-w-0 flex-1 basis-[220px] flex-col gap-0.5">
+        <span className="flex items-center gap-2">
+          <Link to={page} aria-label={`${classTitle(c.name)}, ${details}`} className="truncate text-[19px] font-black text-ink hover:text-primary-ink">
+            {classTitle(c.name)}
+          </Link>
+          {paused && <span className="shrink-0 rounded-full bg-chip px-2.5 py-0.5 text-[12px] font-extrabold text-ink-muted">Tạm ngưng</span>}
+        </span>
+        <span className="truncate text-[13.5px] text-ink-muted">{details}</span>
+        <span className="mt-1 flex flex-wrap gap-1.5">
+          <Fact>
+            🎮 Chơi gần nhất: <b className="font-extrabold">{relativeTimeLabel(c.lastPlayedAt) || 'chưa chơi'}</b>
+          </Fact>
+          <Fact>
+            ⭐ <b className="font-extrabold">{c.weeklyStars}</b> sao tuần này
+          </Fact>
+        </span>
+      </div>
+      <div className="flex w-full items-center gap-2 sm:w-auto">
+        {paused ? (
+          <Button shape="round" onClick={() => actions.setStatus(c, 'ACTIVE')} className="h-10 flex-1 font-extrabold sm:flex-none">
+            Kích hoạt lại
+          </Button>
+        ) : (
+          <>
+            {current ? (
+              <span className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#E2F6E8] px-4 text-[14px] font-extrabold whitespace-nowrap text-success sm:flex-none">
+                <CheckIcon size={15} /> Đang dạy
+              </span>
+            ) : (
+              <Button shape="round" onClick={() => actions.teach(c)} className="h-10 flex-1 border-2 font-extrabold text-primary-ink sm:flex-none">
+                Dạy lớp này
+              </Button>
+            )}
+            <Button
+              type="primary"
+              shape="round"
+              icon={<PlayIcon size={15} className="fill-current" />}
+              onClick={() => actions.play(c)}
+              className="h-10 flex-1 font-extrabold sm:flex-none"
+            >
+              Chơi cùng lớp
+            </Button>
+          </>
+        )}
+        <Dropdown
+          trigger={['click']}
+          placement="bottomRight"
+          menu={{
+            items: [
+              { key: 'open', label: 'Mở lớp', onClick: () => navigate(page) },
+              paused
+                ? { key: 'resume', label: 'Kích hoạt lại lớp', onClick: () => actions.setStatus(c, 'ACTIVE') }
+                : { key: 'pause', label: 'Tạm ngưng lớp', onClick: () => actions.setStatus(c, 'PAUSED') },
+              { type: 'divider' },
+              { key: 'archive', label: 'Xóa lớp', danger: true, onClick: () => actions.archive(c) },
+            ],
+          }}
+        >
+          <button
+            type="button"
+            aria-label={`Thao tác với ${classTitle(c.name)}`}
+            className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-ink-muted hover:bg-surface-soft"
+          >
+            <MoreVerticalIcon size={19} />
+          </button>
+        </Dropdown>
+      </div>
     </li>
   )
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <span className="flex min-w-[72px] flex-col items-center leading-tight">
-      <span className="text-[17px] font-black">{value}</span>
-      <span className="text-[13px] text-ink-muted">{label}</span>
-    </span>
-  )
+function Fact({ children }: { children: ReactNode }) {
+  return <span className="rounded-full bg-[#F6F8FC] px-2.5 py-1 text-[12.5px] whitespace-nowrap text-[#5B6580]">{children}</span>
 }
 
 function Empty({ title, text, art, children }: { title: string; text: string; art?: boolean; children: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-line px-6 py-9 text-center">
+    <div className="flex flex-col items-center gap-2 rounded-[20px] bg-white px-6 py-9 text-center">
       {art && <img src={`${CLASS_ASSETS}/teacher.svg`} alt="" className="mb-1 size-[120px]" />}
       <p className="m-0 text-[17px] font-black">{title}</p>
       <p className="m-0 max-w-[380px] text-[14.5px] text-ink-muted">{text}</p>

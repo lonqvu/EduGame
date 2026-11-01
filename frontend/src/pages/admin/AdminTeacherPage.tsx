@@ -18,6 +18,8 @@ import { adminErrorMessage, count, dateTime, ROLE_LABELS } from '@/utils/admin'
 import { relativeTimeLabel } from '@/utils/dateLabels'
 
 const MAX_REASON = 300
+/** Where a teacher's page sits. */
+const TEACHERS = { to: '/admin/teachers', label: 'Giáo viên' }
 
 /** /admin/teachers/:code — one account: what the teacher made, where they sign in, and what an admin can do to it. */
 export function AdminTeacherPage() {
@@ -48,7 +50,7 @@ export function AdminTeacherPage() {
   if (!teacher) {
     return (
       <div className="flex flex-col gap-5">
-        <AdminHeader title="Giáo viên" text="" trail={[]} />
+        <AdminHeader title="Giáo viên" text="" back={TEACHERS} />
         {error ? <LoadError onRetry={reload} /> : <PageLoading />}
       </div>
     )
@@ -64,7 +66,7 @@ export function AdminTeacherPage() {
       <AdminHeader
         title={teacher.displayName}
         text={teacher.email ?? teacher.username}
-        trail={[{ to: '/admin/teachers', label: 'Giáo viên' }]}
+        back={TEACHERS}
       />
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">

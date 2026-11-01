@@ -1,6 +1,7 @@
 import { create } from 'zustand'
-import { getMe } from '@/api/userApi'
-import type { LoadStatus } from '@/types/api'
+import { getProfile } from '@/api/userApi'
+import type { LoadStatus, ProfileResponse } from '@/types/api'
+import { avatarSrc } from '@/utils/profile'
 
 export interface Teacher {
   /** "Cô Lan" */
@@ -11,26 +12,31 @@ export interface Teacher {
   shortName: string
   /** Role ADMIN: the "Quản trị" pages. */
   isAdmin: boolean
+  /** The picture chosen in "Hồ sơ của tôi" (uploaded, an animal or the teacher drawing). */
+  avatar: string
 }
 
 const HONORIFIC = /^(cô|thầy)\s+/i
 
-function toTeacher(displayName: string, isAdmin: boolean): Teacher {
+type ProfilePart = Pick<ProfileResponse, 'displayName' | 'role' | 'avatar' | 'avatarUrl'>
+
+function toTeacher({ displayName, role, avatar, avatarUrl }: ProfilePart): Teacher {
   return {
-    isAdmin,
+    isAdmin: role === 'ADMIN',
+    avatar: avatarSrc(avatar, avatarUrl),
     name: displayName,
     greetingName: HONORIFIC.test(displayName) ? displayName.charAt(0).toLowerCase() + displayName.slice(1) : displayName,
     shortName: displayName.replace(HONORIFIC, ''),
   }
 }
 
-/** The signed-in teacher (GET /me). */
+/** The signed-in teacher (GET /me/profile: the name and the picture). */
 interface TeacherState {
   teacher: Teacher | null
   status: LoadStatus
   load: () => Promise<void>
-  /** After the profile was saved: the greeting and the top bar use the new name at once. */
-  rename: (displayName: string) => void
+  /** After the profile was saved: the greeting and the top bar use the new name and picture at once. */
+  update: (profile: ProfilePart) => void
 }
 
 export const useTeacherStore = create<TeacherState>()((set, get) => ({
@@ -40,11 +46,10 @@ export const useTeacherStore = create<TeacherState>()((set, get) => ({
     if (get().status !== 'idle' && get().status !== 'error') return
     set({ status: 'loading' })
     try {
-      const me = await getMe()
-      set({ teacher: toTeacher(me.displayName, me.role === 'ADMIN'), status: 'ready' })
+      set({ teacher: toTeacher(await getProfile()), status: 'ready' })
     } catch {
       set({ status: 'error' })
     }
   },
-  rename: (displayName) => set((s) => ({ teacher: toTeacher(displayName, s.teacher?.isAdmin ?? false), status: 'ready' })),
+  update: (profile) => set({ teacher: toTeacher(profile), status: 'ready' }),
 }))

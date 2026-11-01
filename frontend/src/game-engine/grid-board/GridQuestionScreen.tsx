@@ -6,6 +6,7 @@ import { useGridBoardRound } from '@/game-engine/grid-board/useGridBoardRound'
 import { useGridBoardStore } from '@/store/gridBoardStore'
 import { assetSrc } from '@/utils/images'
 import { useSound } from '@/sound/useSound'
+import { SoundToggle } from '@/sound/SoundToggle'
 
 interface GridQuestionScreenProps {
   gameId: string
@@ -42,13 +43,16 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
   return (
     <div className="flex h-full flex-col gap-5 px-9 py-6">
       <div className="flex items-center justify-between">
-        <Link
-          to={boardPath}
-          className="flex h-12 items-center gap-2 rounded-full bg-white pr-5 pl-3.5 text-[17px] font-extrabold text-ink hover:text-primary-ink"
-        >
-          <ChevronLeftIcon size={20} strokeWidth={2.4} />
-          Bảng ô
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            to={boardPath}
+            className="flex h-12 items-center gap-2 rounded-full bg-white pr-5 pl-3.5 text-[17px] font-extrabold text-ink hover:text-primary-ink"
+          >
+            <ChevronLeftIcon size={20} strokeWidth={2.4} />
+            Bảng ô
+          </Link>
+          <SoundToggle />
+        </div>
         <div className="flex items-center gap-3">
           <span className="rounded-full bg-white px-[18px] py-2 text-lg font-extrabold">
             Ô số {tileNo} · {question.points} điểm

@@ -3,9 +3,9 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 import { PROJECTOR_BOARD_BG, ProjectorStage } from '@/components/projector/ProjectorStage'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { countPlayable, isGuideGame } from '@/game-engine/gameGuide'
+import { LeaveGameContext } from '@/game-engine/shared/leaveGame'
 import { useBeginPlaySession } from '@/game-engine/shared/usePlaySession'
 import { writePlaySettings } from '@/game-engine/shared/gameSettings'
-import { PlayBackContext } from '@/game-engine/shared/playBack'
 import { playMode } from '@/game-engine/registry'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { GameIntro } from '@/pages/play/GameIntro'
@@ -44,8 +44,8 @@ export function PlayGamePage() {
   const start = useCallback(() => setStarted(true), [])
   const navigate = useNavigate()
   const skippedIntro = (location.state as { skipIntro?: boolean } | null)?.skipIntro === true
-  // Back from the game: to the start page it was started from, else to the introduction shown here.
-  const back = useCallback(
+  // Leaving the game: to the start page it was started from, else to the introduction shown here.
+  const leave = useCallback(
     () => (skippedIntro && location.key !== 'default' ? navigate(-1) : setStarted(false)),
     [skippedIntro, location.key, navigate],
   )
@@ -87,9 +87,9 @@ export function PlayGamePage() {
     <GridBoardPage screen="board" />
   ) : (
     <ProjectorStage background={PROJECTOR_BOARD_BG} music>
-      <PlayBackContext value={back}>
+      <LeaveGameContext value={leave}>
         <GameScreen mode={mode} game={game} items={items} settings={settings} />
-      </PlayBackContext>
+      </LeaveGameContext>
     </ProjectorStage>
   )
 }
