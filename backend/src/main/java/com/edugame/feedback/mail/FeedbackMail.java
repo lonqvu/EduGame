@@ -8,6 +8,7 @@ import com.edugame.feedback.domain.FeedbackKind;
  * A new feedback, published inside the transaction that stores it and mailed to the team by {@link FeedbackMailer}
  * once it commits.
  *
+ * @param teacherName       none: sent by a visitor who had not signed in
  * @param teacherEmail      reply address, only when the teacher agreed to be written back to
  * @param screenshot        the picture, or none
  * @param screenshotType    its media type

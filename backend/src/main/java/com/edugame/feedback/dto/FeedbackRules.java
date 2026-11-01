@@ -8,6 +8,8 @@ public final class FeedbackRules {
     public static final int MAX_SCREENSHOT_BYTES = 3 * 1024 * 1024;
     /** Feedback one teacher can send in an hour, so a stuck button or a script cannot flood the team's inbox. */
     public static final int MAX_PER_HOUR = 10;
+    /** Feedback all visitors together (no account to count by) can send in an hour. */
+    public static final int MAX_GUEST_PER_HOUR = 30;
 
     private FeedbackRules() {
     }

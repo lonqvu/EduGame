@@ -108,7 +108,7 @@ public class FeedbackMailer {
     }
 
     private static String teacher(FeedbackMail mail) {
-        return mail.teacherName() == null ? "Giáo viên" : mail.teacherName();
+        return mail.teacherName() == null ? "Khách (chưa đăng nhập)" : mail.teacherName();
     }
 
     private static String stars(Short rating) {
@@ -127,6 +127,9 @@ public class FeedbackMailer {
     }
 
     private static String replyNote(FeedbackMail mail) {
+        if (mail.teacherName() == null) {
+            return "Gửi từ khách chưa đăng nhập: không có email để liên hệ lại.";
+        }
         return mail.teacherEmail() != null
                 ? "Giáo viên đồng ý được liên hệ lại: trả lời email này để viết cho giáo viên."
                 : "Giáo viên không muốn được liên hệ lại.";

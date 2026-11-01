@@ -211,8 +211,35 @@ class FeedbackApiTest {
     }
 
     @Test
-    void signingInIsNeeded() throws Exception {
-        mockMvc.perform(multipart(SEND).file(feedbackPart(feedback()))).andExpect(status().isUnauthorized());
+    void aVisitorSendsFeedbackWithoutAnAccountAndCannotBeWrittenBack() throws Exception {
+        String code = code(send(null, feedback(), screenshot(PNG, "image/png")));
+
+        entityManager.flush();
+        Map<String, Object> row = jdbcTemplate.queryForMap("SELECT * FROM feedback WHERE code = ?", code);
+        assertThat(row).containsEntry("user_id", null).containsEntry("from_guest", true).containsEntry("contact_ok", false);
+        FeedbackMail mail = events.stream(FeedbackMail.class).findFirst().orElseThrow();
+        assertThat(mail.teacherName()).isNull();
+        assertThat(mail.teacherEmail()).isNull();
+        assertThat(mail.screenshot()).isEqualTo(PNG);
+
+        JsonNode listed = body(mockMvc.perform(get(ADMIN).param("size", "1").header(HttpHeaders.AUTHORIZATION, admin))
+                .andExpect(status().isOk())).get("items").get(0);
+        assertThat(listed.get("code").asText()).isEqualTo(code);
+        assertThat(listed.get("guest").asBoolean()).isTrue();
+        assertThat(listed.has("teacher")).isFalse();
+    }
+
+    @Test
+    void visitorsTogetherSendAtMostThirtyAnHour() throws Exception {
+        entityManager.flush();
+        jdbcTemplate.update("""
+                INSERT INTO feedback (code, kind, message, from_guest)
+                SELECT 'fb-guest-' || i, 'IDEA', 'Hay', TRUE FROM generate_series(1, ?) AS i
+                """, FeedbackRules.MAX_GUEST_PER_HOUR);
+        send(null, feedback(), null).andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value("TOO_MANY_FEEDBACK"));
+        // A teacher's own limit is apart.
+        send(hoa, feedback(), null).andExpect(status().isCreated());
     }
 
     // --- Admin -----------------------------------------------------------------------------------------------------
@@ -339,7 +366,10 @@ class FeedbackApiTest {
         if (screenshot != null) {
             request.file(screenshot);
         }
-        return mockMvc.perform(request.header(HttpHeaders.AUTHORIZATION, token).header(HttpHeaders.USER_AGENT, CHROME_WINDOWS));
+        if (token != null) {
+            request.header(HttpHeaders.AUTHORIZATION, token);
+        }
+        return mockMvc.perform(request.header(HttpHeaders.USER_AGENT, CHROME_WINDOWS));
     }
 
     private String code(ResultActions sent) throws Exception {

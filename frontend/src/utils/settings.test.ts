@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AUTO, fromChoice, GAME_DEFAULT_OPTIONS, hasGameDefaults, toChoice, withDefaults } from '@/utils/settings'
+import { applyGameDefaults, AUTO, fromChoice, GAME_DEFAULT_OPTIONS, hasGameDefaults, toChoice, withDefaults } from '@/utils/settings'
 
 describe('game default choices', () => {
   it('shows a missing default as "Theo từng trò"', () => {
@@ -56,5 +56,27 @@ describe('withDefaults', () => {
       newSignInEmail: false,
       passwordChangedEmail: true,
     })
+  })
+})
+
+describe('defaults for new games (a visitor\'s, as the server applies a teacher\'s)', () => {
+  it('changes only the rules the game plays by', () => {
+    const quiz = { timeLimitSec: 20, shuffleItems: false, rules: { participants: { teams: 2, assign: 'RANDOM' }, scoring: { allowSteal: false } } }
+    expect(applyGameDefaults(quiz, { teams: 4, timeLimitSec: 45, allowSteal: true, shuffleItems: true })).toEqual({
+      timeLimitSec: 45,
+      shuffleItems: true,
+      rules: { participants: { teams: 4, assign: 'RANDOM' }, scoring: { allowSteal: true } },
+    })
+  })
+
+  it('leaves teams set by hand, and rules a game does not have', () => {
+    const gridBoard = { rules: { participants: { teams: 2, assign: 'MANUAL' } } }
+    expect(applyGameDefaults(gridBoard, { teams: 4, timeLimitSec: 30, allowSteal: true, shuffleItems: true })).toEqual({
+      rules: { participants: { teams: 2, assign: 'MANUAL' } },
+    })
+  })
+
+  it('"Theo từng trò" (null) keeps the game\'s own default', () => {
+    expect(applyGameDefaults({ timeLimitSec: 20 }, { timeLimitSec: null })).toEqual({ timeLimitSec: 20 })
   })
 })

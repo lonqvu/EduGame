@@ -81,6 +81,16 @@ describe('httpClient', () => {
     expect(refresh).toHaveBeenCalledTimes(1)
   })
 
+  it('leaves a visitor (no token) where they are when a request is refused', async () => {
+    setAccessToken(null)
+    const seen = fakeServer({ status: 401, data: { status: 401, code: 'UNAUTHORIZED', message: '' } })
+
+    await expect(httpClient.get('/v1/classrooms')).rejects.toMatchObject({ status: 401 })
+    expect(seen).toEqual([undefined])
+    expect(refresh).not.toHaveBeenCalled()
+    expect(assign).not.toHaveBeenCalled()
+  })
+
   it('passes other errors through without touching the session', async () => {
     fakeServer({ status: 403, data: { status: 403, code: 'FORBIDDEN', message: 'no' } }, 'network-error', { status: 500 })
 

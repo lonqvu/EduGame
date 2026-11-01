@@ -60,26 +60,31 @@ public class FeedbackService {
     private final ApplicationEventPublisher events;
     private final AdminAuditService auditService;
 
-    /** Stores the teacher's feedback (and screenshot), then mails it to the team once committed. */
+    /**
+     * Stores the feedback (and screenshot) of a teacher, or of a visitor who has not signed in, then mails it to the
+     * team once committed. A visitor has no email to be written back to.
+     */
     @Transactional
     public FeedbackResponse send(FeedbackRequest request, MultipartFile screenshotFile, String userAgent) {
-        User user = currentUserService.getCurrentUser();
+        User user = currentUserService.findCurrentUser().orElse(null);
         Instant now = Instant.now();
-        if (feedbackRepository.countSentSince(user.getId(), now.minus(Duration.ofHours(1))) >= FeedbackRules.MAX_PER_HOUR) {
-            throw new BusinessException(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_FEEDBACK",
-                    "At most %d feedback an hour".formatted(FeedbackRules.MAX_PER_HOUR));
+        Instant hourAgo = now.minus(Duration.ofHours(1));
+        int limit = user == null ? FeedbackRules.MAX_GUEST_PER_HOUR : FeedbackRules.MAX_PER_HOUR;
+        long sent = user == null ? feedbackRepository.countGuestSentSince(hourAgo) : feedbackRepository.countSentSince(user.getId(), hourAgo);
+        if (sent >= limit) {
+            throw new BusinessException(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_FEEDBACK", "At most %d feedback an hour".formatted(limit));
         }
         Screenshot screenshot = readScreenshot(screenshotFile);
 
         Short rating = request.rating() == null ? null : request.rating().shortValue();
         Feedback feedback = feedbackRepository.save(Feedback.create(newCode(), user, request.kind(), rating, request.message())
-                .from(request.page(), request.viewport(), request.appVersion(), userAgent, request.contactOk()));
+                .from(request.page(), request.viewport(), request.appVersion(), userAgent, user != null && request.contactOk()));
         if (screenshot != null) {
             screenshotRepository.save(FeedbackScreenshot.of(feedback.getId(), screenshot.format().mimeType(), screenshot.bytes()));
         }
 
         events.publishEvent(new FeedbackMail(feedback.getCode(), feedback.getKind(), feedback.getRating(), feedback.getMessage(),
-                user.getDisplayName(), feedback.isContactOk() ? user.getEmail() : null, feedback.getPage(),
+                user == null ? null : user.getDisplayName(), feedback.isContactOk() ? user.getEmail() : null, feedback.getPage(),
                 DeviceNames.of(userAgent), feedback.getViewport(), feedback.getAppVersion(), now,
                 screenshot == null ? null : screenshot.bytes(), screenshot == null ? null : screenshot.format().mimeType()));
         return new FeedbackResponse(feedback.getCode(), now);
@@ -126,7 +131,7 @@ public class FeedbackService {
         return responses(List.of(feedback)).getFirst();
     }
 
-    /** "Báo lỗi – Cô Lan", as the admin log keeps it. */
+    /** "Báo lỗi – Cô Lan" (a visitor's: "Báo lỗi"), as the admin log keeps it. */
     private static String label(Feedback feedback) {
         return feedback.getKind().label() + (feedback.getUser() == null ? "" : " – " + feedback.getUser().getDisplayName());
     }
@@ -149,7 +154,7 @@ public class FeedbackService {
                     : null;
             return new AdminFeedbackResponse(f.getCode(), f.getKind(), f.getRating(), f.getMessage(), f.getPage(), f.getViewport(),
                     f.getAppVersion(), DeviceNames.of(f.getUserAgent()), f.isContactOk(), f.getStatus(), f.getCreatedAt(), teacher,
-                    screenshotUrl);
+                    f.isFromGuest(), screenshotUrl);
         }).toList();
     }
 

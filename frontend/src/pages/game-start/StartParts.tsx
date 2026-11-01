@@ -55,8 +55,11 @@ export function GameInfoCard({ mode, game, kind, description, items }: {
         <img src={gameThumb(mode)} alt="" className="aspect-[2/1] w-full shrink-0 rounded-[14px] sm:w-[220px]" />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2.5">
-            <h3 className="m-0 text-[21px] leading-tight font-black break-words">{game.title}</h3>
-            {kind && <span className="rounded-full bg-[#EDE4FF] px-2.5 py-[3px] text-[12.5px] font-bold text-[#7448D6]">{kind}</span>}
+            {/* A sample is named by its game alone, with "Câu hỏi mẫu" beside it. */}
+            <h3 className="m-0 text-[21px] leading-tight font-black break-words">{game.sample && kind ? kind : game.title}</h3>
+            {game.sample ? (
+              <span className="rounded-full bg-[#FFF1C2] px-2.5 py-[3px] text-[12.5px] font-bold text-[#7A5600]">Câu hỏi mẫu</span>
+            ) : kind && <span className="rounded-full bg-[#EDE4FF] px-2.5 py-[3px] text-[12.5px] font-bold text-[#7448D6]">{kind}</span>}
           </div>
           {description && <p className="m-0 text-[14.5px] leading-[1.5] text-ink-soft">{description}</p>}
         </div>

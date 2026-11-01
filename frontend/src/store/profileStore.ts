@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import * as userApi from '@/api/userApi'
+import { isGuest } from '@/store/authStore'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { LoadStatus, ProfileResponse, UpdateProfileRequest } from '@/types/api'
 import { UPLOADED } from '@/utils/profile'
@@ -22,6 +23,8 @@ export const useProfileStore = create<ProfileState>()((set, get) => ({
   status: 'idle',
 
   load: async () => {
+    // A visitor has no profile.
+    if (isGuest()) return
     if (!get().profile) set({ status: 'loading' })
     try {
       set({ profile: await userApi.getProfile(), status: 'ready' })

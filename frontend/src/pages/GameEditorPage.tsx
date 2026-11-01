@@ -8,6 +8,7 @@ import { EDITOR_DEFINITIONS } from '@/editor/editorDefinitions'
 import { QuestionList } from '@/editor/QuestionList'
 import { countPlayable, isGuideGame } from '@/game-engine/gameGuide'
 import { alsoPlayableAs, gameRegistry, playPath, startPath } from '@/game-engine/registry'
+import { useAuthStore } from '@/store/authStore'
 import { useCatalogStore, useTemplateName } from '@/store/catalogStore'
 import { useGameLibraryStore, type SaveState } from '@/store/gameLibraryStore'
 import { useSettingsStore } from '@/store/settingsStore'
@@ -44,6 +45,7 @@ export function GameEditorPage() {
   const loadTemplates = useCatalogStore((s) => s.load)
   const templates = useCatalogStore((s) => s.templates)
   const templateName = useTemplateName(game?.type)
+  const guest = useAuthStore((s) => s.status !== 'signedIn')
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   // "Dán từ Word / Excel" from the game chooser opens the paste dialog at once.
@@ -161,7 +163,7 @@ export function GameEditorPage() {
               className="w-full min-w-0 rounded-lg border-0 bg-transparent font-display text-[28px] leading-[1.15] font-extrabold text-ink outline-none focus:bg-white"
             />
             <span className={`text-base ${saveState === 'error' ? 'text-danger' : 'text-ink-soft'}`}>
-              {[templateName, SAVE_LABELS[saveState]].filter(Boolean).join(' · ')}
+              {[templateName, guest ? 'Chưa lưu (chưa đăng nhập)' : SAVE_LABELS[saveState]].filter(Boolean).join(' · ')}
             </span>
           </div>
         </div>
@@ -211,6 +213,18 @@ export function GameEditorPage() {
           </Tooltip>
         </div>
       </header>
+      {guest && (
+        // Not signed in: what is typed here plays at once, but is not kept.
+        <p role="note" className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-[16px] bg-[#FFF4D6] px-5 py-3.5 text-[15px] text-[#6B4A00]">
+          <span>
+            <strong>Bạn đang chơi thử, chưa đăng nhập.</strong> Câu hỏi soạn ở đây chỉ dùng được trong tab này và kết quả chơi không
+            được lưu lại.
+          </span>
+          <Link to="/login" className="font-extrabold text-primary-ink underline">
+            Đăng nhập để soạn câu hỏi được lưu lại
+          </Link>
+        </p>
+      )}
 
       <div className="flex flex-wrap items-start gap-6">
         <QuestionList

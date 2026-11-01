@@ -41,6 +41,8 @@ const backend = vi.hoisted(() => {
 })
 
 vi.mock('@/api/userApi', () => backend.api)
+// Signed in.
+vi.mock('@/store/authStore', () => ({ isGuest: () => false }))
 
 type ProfileStore = typeof import('@/store/profileStore').useProfileStore
 type TeacherStore = typeof import('@/store/teacherStore').useTeacherStore

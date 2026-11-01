@@ -124,7 +124,7 @@ function FeedbackItem({ feedback: f, onStatus }: { feedback: AdminFeedback; onSt
                 {rating.emoji} <span className="sr-only">{rating.label}</span>
               </span>
             )}
-            <span className="font-bold">{f.teacher?.displayName ?? 'Tài khoản đã xoá'}</span>
+            <span className="font-bold">{f.teacher?.displayName ?? (f.guest ? 'Khách (chưa đăng nhập)' : 'Tài khoản đã xoá')}</span>
             {f.teacher?.email &&
               (f.contactOk ? (
                 <a href={`mailto:${f.teacher.email}?subject=${encodeURIComponent('Lớp Vui trả lời góp ý ' + f.code)}`} className="text-[14px]">

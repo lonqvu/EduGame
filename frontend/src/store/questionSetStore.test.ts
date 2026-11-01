@@ -34,6 +34,9 @@ const fake = vi.hoisted(() => {
 })
 
 vi.mock('@/api/questionSetApi', () => fake.api)
+// Signed in, unless a test plays as a visitor.
+const auth = vi.hoisted(() => ({ guest: false }))
+vi.mock('@/store/authStore', () => ({ isGuest: () => auth.guest }))
 
 type Store = typeof import('@/store/questionSetStore').useQuestionSetStore
 let store: Store
@@ -42,11 +45,19 @@ const codes = () => store.getState().sets.map((s) => s.code)
 beforeEach(async () => {
   vi.resetModules()
   vi.clearAllMocks()
+  auth.guest = false
   fake.state.fail = false
   store = (await import('@/store/questionSetStore')).useQuestionSetStore
 })
 
 describe('question bank store', () => {
+  it('a visitor has no question sets: nothing is asked of the server', async () => {
+    auth.guest = true
+    await store.getState().load()
+    expect(fake.api.listQuestionSets).not.toHaveBeenCalled()
+    expect(store.getState()).toMatchObject({ status: 'idle', sets: [] })
+  })
+
   it('loads the sets once even when several pages ask at the same time', async () => {
     await Promise.all([store.getState().load(), store.getState().load()])
     expect(store.getState().status).toBe('ready')

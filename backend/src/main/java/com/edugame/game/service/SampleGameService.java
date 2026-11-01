@@ -13,6 +13,7 @@ import com.edugame.game.dto.AddGameItemsRequest;
 import com.edugame.game.dto.CreateGameItemRequest;
 import com.edugame.game.dto.CreateGameRequest;
 import com.edugame.game.dto.GameResponse;
+import com.edugame.game.dto.SampleContentResponse;
 import com.edugame.game.repository.GameRepository;
 import com.edugame.user.domain.User;
 import com.edugame.user.repository.UserRepository;
@@ -57,11 +58,7 @@ public class SampleGameService {
      */
     @Transactional
     public GameResponse playSample(String templateCode) {
-        Sample sample = samples().get(templateCode);
-        if (sample == null) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "NO_SAMPLE",
-                    "No sample content for %s".formatted(templateCode));
-        }
+        Sample sample = sampleOf(templateCode);
         User owner = currentUserService.getCurrentUser();
         // Two quick clicks must not make two sample games: requests of one teacher wait for each other here.
         userRepository.lockById(owner.getId());
@@ -76,6 +73,25 @@ public class SampleGameService {
         game.setSample(true);
         game.setSubject(sample.subject());
         return gameItemService.addItems(created.code(), new AddGameItemsRequest(sample.items()));
+    }
+
+    /**
+     * The sample content of this game type, without making a game: what visitors who have not signed in play.
+     *
+     * @throws BusinessException 400 {@code NO_SAMPLE} for a game type without sample content (tools)
+     */
+    public SampleContentResponse sampleContent(String templateCode) {
+        Sample sample = sampleOf(templateCode);
+        return new SampleContentResponse(templateCode, sample.title(), sample.subject(), sample.items());
+    }
+
+    private Sample sampleOf(String templateCode) {
+        Sample sample = samples().get(templateCode);
+        if (sample == null) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "NO_SAMPLE",
+                    "No sample content for %s".formatted(templateCode));
+        }
+        return sample;
     }
 
     private Map<String, Sample> samples() {

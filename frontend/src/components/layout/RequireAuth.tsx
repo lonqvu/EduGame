@@ -1,14 +1,18 @@
 import { useEffect } from 'react'
-import { Navigate, Outlet, useLocation } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import { DisplayPreferences } from '@/components/layout/DisplayPreferences'
+import { LoginPrompt, LoginRequiredPage } from '@/components/layout/LoginPrompt'
 import { PageLoading } from '@/components/ui/LoadState'
 import { useAuthStore } from '@/store/authStore'
+import { loginOnlyFeature } from '@/store/loginPromptStore'
 
-/** Routes inside need a signed-in teacher; otherwise go to /login and come back afterwards. */
-export function RequireAuth() {
+/**
+ * Around every screen of the app: resumes the session first (the stores need to know whether a teacher or a visitor
+ * is here), then shows the page to both. A visitor plays games; pages that need an account say so (`RequireAuth`).
+ */
+export function AuthGate() {
   const status = useAuthStore((s) => s.status)
   const restore = useAuthStore((s) => s.restore)
-  const { pathname, search } = useLocation()
 
   useEffect(() => {
     void restore()
@@ -21,12 +25,18 @@ export function RequireAuth() {
       </div>
     )
   }
-  if (status === 'signedOut') {
-    return <Navigate to={`/login?from=${encodeURIComponent(pathname + search)}`} replace />
-  }
   return (
     <DisplayPreferences>
       <Outlet />
+      <LoginPrompt />
     </DisplayPreferences>
   )
+}
+
+/** Routes inside need a signed-in teacher; a visitor sees "Cần đăng nhập" in their place. */
+export function RequireAuth() {
+  const status = useAuthStore((s) => s.status)
+  const { pathname } = useLocation()
+  if (status !== 'signedIn') return <LoginRequiredPage feature={loginOnlyFeature(pathname) ?? 'trang này'} />
+  return <Outlet />
 }

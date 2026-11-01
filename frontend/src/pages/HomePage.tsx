@@ -9,9 +9,11 @@ import { QuickTiles } from '@/pages/home/QuickTiles'
 import { RecentActivity } from '@/pages/home/RecentActivity'
 import { ClassTools, QuestionSets } from '@/pages/home/RightColumn'
 import { UseSetModal } from '@/pages/question-sets/UseSetModal'
+import { useAuthStore } from '@/store/authStore'
 import { useCatalogStore } from '@/store/catalogStore'
 import { useClassStore } from '@/store/classStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
+import { needsLogin } from '@/store/loginPromptStore'
 import { useQuestionSetStore } from '@/store/questionSetStore'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { QuestionSetSummaryResponse } from '@/types/api'
@@ -42,6 +44,7 @@ export function HomePage() {
   const navigate = useNavigate()
   const { message, modal } = App.useApp()
   const teacher = useTeacherStore((s) => s.teacher)
+  const guest = useAuthStore((s) => s.status !== 'signedIn')
   const loadTeacher = useTeacherStore((s) => s.load)
   const templates = useCatalogStore((s) => s.templates)
   const loadTemplates = useCatalogStore((s) => s.load)
@@ -83,7 +86,7 @@ export function HomePage() {
     [classLabel(game), countLabel(game), relativeTimeLabel(game.updatedAt)].filter(Boolean).join(' · ')
 
   const pickClass = async (code: string) => {
-    if (code === currentCode) return
+    if (code === currentCode || needsLogin('/classes')) return
     try {
       await selectClass(code)
     } catch (error) {
@@ -121,7 +124,7 @@ export function HomePage() {
       <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
         <div className="flex min-w-0 flex-col gap-5">
           <HomeHero
-            greetingName={teacher?.greetingName ?? 'cô'}
+            greetingName={teacher?.greetingName ?? (guest ? 'bạn' : 'cô')}
             className={className}
             studentCount={students.length}
             classes={classrooms
@@ -129,9 +132,12 @@ export function HomePage() {
               .map((c) => ({ code: c.code, label: classTitle(c.name), studentCount: c.studentCount }))}
             currentCode={currentCode}
             onPickClass={(code) => void pickClass(code)}
-            onManageClasses={() => navigate('/classes')}
+            onManageClasses={() => needsLogin('/classes') || navigate('/classes')}
           />
-          <QuickTiles onCreate={() => navigate('/question-sets', { state: OPEN_CREATE_SET })} onOpenClass={() => navigate(classPage)} />
+          <QuickTiles
+            onCreate={() => needsLogin('/question-sets') || navigate('/question-sets', { state: OPEN_CREATE_SET })}
+            onOpenClass={() => needsLogin(classPage) || navigate(classPage)}
+          />
           <RecentActivity
             games={recent}
             status={gamesStatus}
@@ -146,7 +152,7 @@ export function HomePage() {
 
         <div className="flex min-w-0 flex-col gap-5">
           <ClassTools />
-          <PraiseCorner students={students} period={period} onPeriodChange={setPeriod} onPraise={() => navigate(classPage)} />
+          <PraiseCorner students={students} period={period} onPeriodChange={setPeriod} onPraise={() => needsLogin(classPage) || navigate(classPage)} />
           <QuestionSets sets={questionSets.slice(0, SETS_LIMIT)} onPlay={setPlaying} />
         </div>
       </div>

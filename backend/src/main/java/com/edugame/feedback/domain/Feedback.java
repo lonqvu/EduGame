@@ -25,10 +25,14 @@ public class Feedback extends CreatedEntity {
     @Column(name = "code", nullable = false, length = 32, updatable = false)
     private String code;
 
-    /** Null once the account is deleted. */
+    /** Null once the account is deleted, or when a visitor sent it ({@link #fromGuest}). */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", updatable = false)
     private User user;
+
+    /** Sent by a visitor who had not signed in. */
+    @Column(name = "from_guest", nullable = false, updatable = false)
+    private boolean fromGuest;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "kind", nullable = false, length = 20, updatable = false)
@@ -64,10 +68,12 @@ public class Feedback extends CreatedEntity {
     @Column(name = "status", nullable = false, length = 20)
     private FeedbackStatus status = FeedbackStatus.NEW;
 
+    /** {@code user} null: a visitor's. */
     public static Feedback create(String code, User user, FeedbackKind kind, Short rating, String message) {
         Feedback feedback = new Feedback();
         feedback.code = code;
         feedback.user = user;
+        feedback.fromGuest = user == null;
         feedback.kind = kind;
         feedback.rating = rating;
         feedback.message = message;

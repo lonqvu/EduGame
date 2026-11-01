@@ -6,6 +6,7 @@ import com.edugame.game.dto.CreateGameRequest;
 import com.edugame.game.dto.GameResponse;
 import com.edugame.game.dto.GameSummaryResponse;
 import com.edugame.game.dto.PlaySampleRequest;
+import com.edugame.game.dto.SampleContentResponse;
 import com.edugame.game.dto.UpdateGameRequest;
 import com.edugame.game.service.GameService;
 import com.edugame.game.service.SampleGameService;
@@ -51,6 +52,13 @@ public class GameController {
     @PostMapping("/samples")
     public GameResponse playSample(@Valid @RequestBody PlaySampleRequest request) {
         return sampleGameService.playSample(request.templateCode());
+    }
+
+    @Operation(summary = "Built-in sample content of a game type, nothing saved (public: played without signing in)",
+            description = "400 NO_SAMPLE for game types without sample content (tools).")
+    @GetMapping("/samples/{templateCode}")
+    public SampleContentResponse sampleContent(@PathVariable String templateCode) {
+        return sampleGameService.sampleContent(templateCode);
     }
 
     @Operation(summary = "A game with the settings and items of the version being edited")

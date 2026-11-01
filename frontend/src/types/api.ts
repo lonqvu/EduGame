@@ -549,7 +549,10 @@ export interface AdminFeedback {
   contactOk: boolean
   status: FeedbackStatus
   createdAt: string
+  /** None once the account is deleted, or from a visitor (`guest`). */
   teacher?: { code: string; displayName: string; email?: string }
+  /** Sent by a visitor who had not signed in. */
+  guest: boolean
   /** /api/v1/admin/feedback/{code}/screenshot, read with the admin's token. */
   screenshotUrl?: string
 }

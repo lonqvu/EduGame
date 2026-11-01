@@ -40,8 +40,9 @@ httpClient.interceptors.response.use(
   async (error: AxiosError<ApiError>) => {
     const config = error.config as RetriableConfig | undefined
     settle(config)
-    // Access token expired or its session ended: renew it once from the refresh token cookie and retry.
-    if (error.response?.status === 401 && config && !config._retried) {
+    // Access token expired or its session ended: renew it once from the refresh token cookie and retry. A visitor's
+    // request (no token) is only refused: they stay where they are.
+    if (error.response?.status === 401 && config?.headers.Authorization && !config._retried) {
       config._retried = true
       if (await refreshSession()) {
         config.headers.Authorization = `Bearer ${getAccessToken()}`

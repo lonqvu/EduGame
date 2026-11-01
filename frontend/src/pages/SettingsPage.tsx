@@ -1,11 +1,12 @@
 import { App, Slider } from 'antd'
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { BellIcon, GamepadIcon, GlobeIcon, SpeakerIcon } from '@/components/ui/icons'
+import { BellIcon, GamepadIcon, GlobeIcon, LockIcon, SpeakerIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { SaveState, SettingItem, SettingSelect, SettingsSection, SettingSwitch } from '@/pages/settings/SettingsParts'
 import { playSound } from '@/sound/soundEngine'
+import { useAuthStore } from '@/store/authStore'
 import { useProfileStore } from '@/store/profileStore'
 import { useSettingsStore, type SettingsPatch } from '@/store/settingsStore'
 import { useTeacherStore } from '@/store/teacherStore'
@@ -19,7 +20,10 @@ const GAME_DEFAULTS: { key: GameDefaultKey; label: string; hint: string }[] = [
   { key: 'shuffleItems', label: 'Xáo trộn thứ tự câu hỏi', hint: 'Mỗi lần chơi một thứ tự khác.' },
 ]
 
-/** /settings — "Cài đặt": display, defaults of new games, notification mails. Every change saves by itself. */
+/**
+ * /settings — "Cài đặt": display, defaults of new games, notification mails. Every change saves by itself; a visitor's
+ * in their browser (the mails need an account).
+ */
 export function SettingsPage() {
   const { message } = App.useApp()
   const settings = useSettingsStore((s) => s.settings)
@@ -31,6 +35,7 @@ export function SettingsPage() {
   const profile = useProfileStore((s) => s.profile)
   const loadProfile = useProfileStore((s) => s.load)
   const { hash } = useLocation()
+  const guest = useAuthStore((s) => s.status !== 'signedIn')
 
   useEffect(() => {
     void load()
@@ -55,7 +60,11 @@ export function SettingsPage() {
     <div className="flex flex-col gap-5">
       <PageHeader
         title="Cài đặt"
-        text="Tùy chỉnh Lớp Vui theo cách cô dạy. Mọi thay đổi được lưu tự động."
+        text={
+          guest
+            ? 'Tùy chỉnh Lớp Vui theo cách bạn dạy. Chưa đăng nhập: cài đặt được lưu trên trình duyệt này.'
+            : 'Tùy chỉnh Lớp Vui theo cách cô dạy. Mọi thay đổi được lưu tự động.'
+        }
         badge={ready && <SaveState saving={saving} />}
       />
 
@@ -190,36 +199,57 @@ export function SettingsPage() {
             icon={<BellIcon size={17} />}
             title="Thông báo qua email"
             text={
-              profile && !profile.email
-                ? 'Tài khoản chưa có email nên Lớp Vui chưa gửi được thông báo.'
-                : `Gửi tới ${profile?.email ?? 'email của tài khoản'} để cô biết ngay khi tài khoản có thay đổi.`
+              guest
+                ? 'Thông báo được gửi tới email của tài khoản, nên cần đăng nhập.'
+                : profile && !profile.email
+                  ? 'Tài khoản chưa có email nên Lớp Vui chưa gửi được thông báo.'
+                  : `Gửi tới ${profile?.email ?? 'email của tài khoản'} để cô biết ngay khi tài khoản có thay đổi.`
             }
             highlighted={highlighted('notifications')}
           >
-            <SettingItem
-              id="set-new-sign-in"
-              label="Đăng nhập trên thiết bị mới"
-              hint="Khi tài khoản đăng nhập trên trình duyệt hoặc máy chưa dùng bao giờ."
-              control={
-                <SettingSwitch
-                  labelledBy="set-new-sign-in"
-                  checked={notifications.newSignInEmail}
-                  onChange={(newSignInEmail) => void change({ notifications: { newSignInEmail } })}
+            {guest ? (
+              <SettingItem
+                id="set-notifications-sign-in"
+                label="Đăng nhập để nhận thông báo"
+                hint="Khi tài khoản đăng nhập trên thiết bị mới, hoặc khi mật khẩu được đổi."
+                control={
+                  <Link
+                    to="/login?from=%2Fsettings%23notifications"
+                    className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 font-extrabold text-white hover:bg-primary-ink hover:text-white"
+                  >
+                    <LockIcon size={16} strokeWidth={2.2} />
+                    Đăng nhập
+                  </Link>
+                }
+              />
+            ) : (
+              <>
+                <SettingItem
+                  id="set-new-sign-in"
+                  label="Đăng nhập trên thiết bị mới"
+                  hint="Khi tài khoản đăng nhập trên trình duyệt hoặc máy chưa dùng bao giờ."
+                  control={
+                    <SettingSwitch
+                      labelledBy="set-new-sign-in"
+                      checked={notifications.newSignInEmail}
+                      onChange={(newSignInEmail) => void change({ notifications: { newSignInEmail } })}
+                    />
+                  }
                 />
-              }
-            />
-            <SettingItem
-              id="set-password-changed"
-              label="Mật khẩu được thay đổi"
-              hint="Khi mật khẩu được đổi trong Hồ sơ của tôi."
-              control={
-                <SettingSwitch
-                  labelledBy="set-password-changed"
-                  checked={notifications.passwordChangedEmail}
-                  onChange={(passwordChangedEmail) => void change({ notifications: { passwordChangedEmail } })}
+                <SettingItem
+                  id="set-password-changed"
+                  label="Mật khẩu được thay đổi"
+                  hint="Khi mật khẩu được đổi trong Hồ sơ của tôi."
+                  control={
+                    <SettingSwitch
+                      labelledBy="set-password-changed"
+                      checked={notifications.passwordChangedEmail}
+                      onChange={(passwordChangedEmail) => void change({ notifications: { passwordChangedEmail } })}
+                    />
+                  }
                 />
-              }
-            />
+              </>
+            )}
           </SettingsSection>
         </>
       )}

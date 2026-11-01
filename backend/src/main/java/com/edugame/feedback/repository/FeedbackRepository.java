@@ -21,6 +21,10 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     @Query("select count(f) from Feedback f where f.user.id = :userId and f.createdAt > :since")
     long countSentSince(Long userId, Instant since);
 
+    /** Sent by visitors (all of them together) since then. */
+    @Query("select count(f) from Feedback f where f.fromGuest = true and f.createdAt > :since")
+    long countGuestSentSince(Instant since);
+
     /** Newest first, with their teacher. */
     @EntityGraph(attributePaths = "user")
     Page<Feedback> findByStatusIn(Collection<FeedbackStatus> statuses, Pageable pageable);

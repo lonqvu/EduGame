@@ -26,7 +26,7 @@ public final class FeedbackCsv {
                     f.kind().label(),
                     f.rating() == null ? "" : f.rating().toString(),
                     f.message(),
-                    f.teacher() == null ? "" : nullToEmpty(f.teacher().displayName()),
+                    f.teacher() == null ? (f.guest() ? "Khách (chưa đăng nhập)" : "") : nullToEmpty(f.teacher().displayName()),
                     f.teacher() == null ? "" : nullToEmpty(f.teacher().email()),
                     f.contactOk() ? "Có" : "Không",
                     nullToEmpty(f.page()),

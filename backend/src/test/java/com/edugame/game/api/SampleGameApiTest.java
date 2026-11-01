@@ -138,6 +138,21 @@ class SampleGameApiTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void visitorsReadTheSampleContentWithoutSigningInAndNothingIsSaved() throws Exception {
+        Long gamesBefore = jdbcTemplate.queryForObject("SELECT count(*) FROM game", Long.class);
+
+        JsonNode sample = body(mockMvc.perform(get(SAMPLES + "/QUIZ")).andExpect(status().isOk()));
+        assertThat(sample.get("templateCode").asText()).isEqualTo("QUIZ");
+        assertThat(sample.get("title").asText()).isNotBlank();
+        assertThat(sample.get("items").size()).isPositive();
+        assertThat(sample.at("/items/0/itemType").asText()).isNotBlank();
+
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM game", Long.class)).isEqualTo(gamesBefore);
+        mockMvc.perform(get(SAMPLES + "/SPIN_WHEEL")).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("NO_SAMPLE"));
+    }
+
     private ResultActions play(String templateCode) throws Exception {
         return mockMvc.perform(post(SAMPLES).header(HttpHeaders.AUTHORIZATION, hoa)
                 .contentType(MediaType.APPLICATION_JSON).content("{\"templateCode\":\"%s\"}".formatted(templateCode)));

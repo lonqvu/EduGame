@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
-import { ChevronLeftIcon } from '@/components/ui/icons'
+import { ChevronLeftIcon, ClockIcon, UsersIcon } from '@/components/ui/icons'
 import { gameGuide, type GuideGameType } from '@/game-engine/gameGuide'
 import { editPath, gameRegistry } from '@/game-engine/registry'
 import { PLAY_DEFAULTS, readPlaySettings, type PlaySettings } from '@/game-engine/shared/gameSettings'
@@ -13,8 +13,8 @@ import { SoundToggle } from '@/sound/SoundToggle'
 const STEP_COLORS = ['#3563E9', '#F28C28', '#2E9E6A', '#8B5CF6']
 /** Settings worth a choice right before playing; the start page keeps the others. */
 const INTRO_SETTINGS = ['teams', 'timeLimitSec'] as const
-/** Time choices shown as chips (the start page offers them all). */
-const INTRO_TIMES = [0, 15, 30, 60]
+/** Time choices shown as chips, with the game's default (the start page offers them all). */
+const INTRO_TIMES = [0, 10, 20, 30, 60]
 
 interface GameIntroProps {
   mode: GuideGameType
@@ -34,10 +34,13 @@ interface GameIntroProps {
  */
 export function GameIntro({ mode, game, kindName, settings, playable, onChange, onStart }: GameIntroProps) {
   const guide = gameGuide(mode, settings)
-  const current = readPlaySettings(settings, mode === 'GRID_BOARD' ? {} : PLAY_DEFAULTS[mode])
+  const defaults = mode === 'GRID_BOARD' ? {} : PLAY_DEFAULTS[mode]
+  const current = readPlaySettings(settings, defaults)
   const choices = QUICK_SETTINGS[mode].filter(
     (s): s is Extract<QuickSetting, { kind: 'select' }> => s.kind === 'select' && (INTRO_SETTINGS as readonly string[]).includes(s.key),
   )
+  // A sample is named by its game alone ("Đua thuyền", not "Đua thuyền mẫu – Tính nhẩm"): the badge says it is the sample.
+  const title = game.sample ? kindName : game.title
   const ready = playable > 0
   const navigate = useNavigate()
   const location = useLocation()
@@ -60,7 +63,7 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
   }, [ready, choosing, onStart])
 
   return (
-    <section aria-label={`Giới thiệu trò chơi ${game.title}`} className="flex h-full flex-col gap-4 px-10 py-7">
+    <section aria-label={`Giới thiệu trò chơi ${title}`} className="flex h-full flex-col gap-4 px-10 py-7">
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -71,7 +74,7 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
           <ChevronLeftIcon size={22} />
         </button>
         <SoundToggle />
-        <span className="rounded-full bg-white px-5 py-2 text-[18px] font-extrabold">{kindName}</span>
+        {!game.sample && <span className="rounded-full bg-white px-5 py-2 text-[18px] font-extrabold">{kindName}</span>}
         <span className={`rounded-full px-4 py-2 text-[16px] font-bold ${game.sample ? 'bg-[#FFF1C2] text-[#7A5600]' : 'bg-white text-ink'}`}>
           📚 {game.sample ? 'Câu hỏi mẫu' : 'Câu hỏi của cô'}
         </span>
@@ -90,7 +93,7 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
         <div className="flex items-center gap-7">
           <img src={gameThumb(mode)} alt="" className="aspect-[2/1] w-[200px] shrink-0 rounded-[20px]" />
           <div className="flex min-w-0 flex-col gap-2">
-            <h1 className="m-0 font-display text-[40px] leading-tight font-extrabold text-[#1A2440]">{game.title}</h1>
+            <h1 className="m-0 font-display text-[40px] leading-tight font-extrabold text-[#1A2440]">{title}</h1>
             <p className="m-0 text-[21px] leading-snug text-ink-soft">{guide.goal}</p>
           </div>
         </div>
@@ -111,9 +114,15 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
         </ol>
 
         {choices.length > 0 && (
-          <div className="mt-auto flex flex-wrap items-center gap-x-10 gap-y-3 border-t border-line-soft pt-5">
+          <div aria-label="Cài đặt nhanh" role="group" className="mt-auto flex flex-wrap gap-4">
             {choices.map((setting) => (
-              <Choice key={setting.key} setting={setting} value={current[setting.key]} onChange={(value) => onChange({ [setting.key]: value })} />
+              <Choice
+                key={setting.key}
+                setting={setting}
+                value={current[setting.key]}
+                fallback={defaults[setting.key]}
+                onChange={(value) => onChange({ [setting.key]: value })}
+              />
             ))}
           </div>
         )}
@@ -148,40 +157,51 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
   )
 }
 
-/** One setting as big chips the teacher can click on the projector. */
+/** One setting, on its own tile: its name and a row of big segments the teacher clicks on the projector. */
 function Choice({
   setting,
   value,
+  fallback,
   onChange,
 }: {
   setting: Extract<QuickSetting, { kind: 'select' }>
   value: number | undefined
+  /** The game's own default, always among the choices. */
+  fallback: number | undefined
   onChange: (value: number) => void
 }) {
+  // The value the game opened with stays a choice after another is picked, so the row does not change under the click.
+  const [opened] = useState(value)
   const options =
     setting.key === 'timeLimitSec'
-      ? setting.options.filter((o) => INTRO_TIMES.includes(o.value) || o.value === value)
+      ? setting.options.filter((o) => INTRO_TIMES.includes(o.value) || o.value === fallback || o.value === opened)
       : setting.options
+  const time = setting.key === 'timeLimitSec'
   return (
-    <div role="radiogroup" aria-label={setting.label} className="flex items-center gap-2">
-      <span className="mr-1 text-[17px] font-extrabold text-ink-soft">{setting.label}</span>
-      {options.map((o) => {
-        const checked = o.value === value
-        return (
-          <button
-            key={o.value}
-            type="button"
-            role="radio"
-            aria-checked={checked}
-            onClick={() => onChange(o.value)}
-            className={`h-11 cursor-pointer rounded-full border-0 px-4 font-[inherit] text-[16px] font-extrabold ${
-              checked ? 'bg-primary text-white' : 'bg-[#EEF2F8] text-ink hover:text-primary-ink'
-            }`}
-          >
-            {o.value === 0 && setting.key === 'timeLimitSec' ? 'Không giới hạn' : o.label}
-          </button>
-        )
-      })}
+    <div className="flex min-w-0 flex-col gap-2.5 rounded-[22px] bg-projector px-5 py-4">
+      <span className="flex items-center gap-2 text-[17px] font-extrabold text-ink-soft">
+        {time ? <ClockIcon size={20} /> : <UsersIcon size={20} />}
+        {setting.label}
+      </span>
+      <div role="radiogroup" aria-label={setting.label} className="flex flex-wrap gap-1.5 self-start rounded-full bg-white p-1.5">
+        {options.map((o) => {
+          const checked = o.value === value
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={checked}
+              onClick={() => onChange(o.value)}
+              className={`h-11 cursor-pointer rounded-full border-0 px-5 font-[inherit] text-[17px] font-extrabold whitespace-nowrap transition ${
+                checked ? 'bg-primary text-white shadow-[0_4px_12px_rgba(53,99,233,0.35)]' : 'bg-transparent text-ink hover:bg-[#EEF2F8] hover:text-primary-ink'
+              }`}
+            >
+              {o.value === 0 && time ? 'Không giới hạn' : o.label}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

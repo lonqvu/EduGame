@@ -89,3 +89,45 @@ export function forgetCachedDisplay() {
     // Nothing to forget.
   }
 }
+
+// --- A visitor's settings: kept in this browser, as they have no account ------------------------------------------
+
+const GUEST_KEY = 'edugame.guestSettings'
+
+export function readGuestSettings(): UserSettings {
+  try {
+    const raw = localStorage.getItem(GUEST_KEY)
+    return withDefaults(raw ? (JSON.parse(raw) as Partial<UserSettings>) : { display: readCachedDisplay() })
+  } catch {
+    return withDefaults(null)
+  }
+}
+
+export function saveGuestSettings(settings: UserSettings) {
+  try {
+    localStorage.setItem(GUEST_KEY, JSON.stringify(settings))
+  } catch {
+    // Storage blocked: the settings last while the page stays open.
+  }
+}
+
+type Json = Record<string, unknown>
+const objectAt = (value: unknown): Json | undefined =>
+  value && typeof value === 'object' && !Array.isArray(value) ? (value as Json) : undefined
+
+/**
+ * The defaults for new games written into the settings a game starts with, as the server does for a teacher
+ * (GameDefaults.java): a rule is only changed where the game's template has it.
+ */
+export function applyGameDefaults(config: Json, defaults: GameDefaults): Json {
+  const rules = objectAt(config.rules)
+  const participants = objectAt(rules?.participants)
+  if (defaults.teams != null && participants && 'teams' in participants && participants.assign === 'RANDOM') {
+    participants.teams = defaults.teams
+  }
+  if (defaults.timeLimitSec != null && 'timeLimitSec' in config) config.timeLimitSec = defaults.timeLimitSec
+  const scoring = objectAt(rules?.scoring)
+  if (defaults.allowSteal != null && scoring && 'allowSteal' in scoring) scoring.allowSteal = defaults.allowSteal
+  if (defaults.shuffleItems != null && 'shuffleItems' in config) config.shuffleItems = defaults.shuffleItems
+  return config
+}

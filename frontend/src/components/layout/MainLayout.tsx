@@ -8,6 +8,7 @@ import {
   GamepadIcon,
   HelpIcon,
   HomeIcon,
+  LockIcon,
   MenuIcon,
   MessageIcon,
   SettingsIcon,
@@ -15,7 +16,9 @@ import {
   UsersIcon,
 } from '@/components/ui/icons'
 import { BrandLogo } from '@/components/ui/BrandLogo'
+import { useAuthStore } from '@/store/authStore'
 import { useFeedbackStore } from '@/store/feedbackStore'
+import { loginOnlyFeature } from '@/store/loginPromptStore'
 import { useTeacherStore } from '@/store/teacherStore'
 
 interface NavItem {
@@ -47,6 +50,7 @@ const FOOTER_NAV: NavItem[] = [
     label: 'Góp ý',
     icon: <MessageIcon size={22} />,
     ariaLabel: 'Góp ý cho Lớp Vui',
+    // Visitors too: a teacher's goes with their account, a visitor's without one.
     action: () => useFeedbackStore.getState().openFeedback(),
   },
   { label: 'Cài đặt', icon: <SettingsIcon size={22} />, to: '/settings', match: (p) => p.startsWith('/settings') },
@@ -127,6 +131,8 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
   const { message } = App.useApp()
   const isAdmin = useTeacherStore((s) => s.teacher?.isAdmin ?? false)
   const loadTeacher = useTeacherStore((s) => s.load)
+  // A visitor sees every page, those that need an account with a lock (clicking one says so: LoginPrompt).
+  const guest = useAuthStore((s) => s.status !== 'signedIn')
 
   useEffect(() => {
     void loadTeacher()
@@ -143,6 +149,7 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
           <Link to={nav.to} onClick={onNavigate} aria-current={active ? 'page' : undefined} className={className}>
             <span className={active ? 'text-primary' : 'text-ink-soft'}>{nav.icon}</span>
             {nav.label}
+            {guest && loginOnlyFeature(nav.to) && <LockIcon size={15} className="ml-auto text-ink-muted" />}
           </Link>
         ) : (
           <button

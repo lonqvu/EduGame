@@ -26,8 +26,8 @@ import org.springframework.security.web.SecurityFilterChain;
  * header, which browsers never add on their own, hence no CSRF tokens. The one cookie, the refresh token, is
  * {@code SameSite=Strict} and only sent to {@code /api/v1/auth}. CORS follows {@code WebConfig}.
  * <p>
- * Public: sign-in (login, refresh, logout), sign-up, password reset, the game template catalogue and the API docs.
- * Everything else needs a signed-in user.
+ * Public: sign-in (login, refresh, logout), sign-up, password reset, the game template catalogue, the built-in
+ * sample content (visitors play without signing in) and the API docs. Everything else needs a signed-in user.
  * <p>
  * Role checks go on the controller method: {@code @PreAuthorize("hasRole('ADMIN')")} (403 {@code FORBIDDEN}
  * otherwise). Ownership of games and classrooms is checked in their services.
@@ -61,6 +61,10 @@ public class SecurityConfig {
                                 "/api/v1/auth/register/verify", "/api/v1/auth/password/forgot",
                                 "/api/v1/auth/password/reset").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/game-templates/**").permitAll()
+                        // "Góp ý": visitors may write to the team too (a token, when sent, still names the teacher).
+                        .requestMatchers(HttpMethod.POST, "/api/v1/feedback").permitAll()
+                        // Sample content, read only: what visitors who have not signed in play.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/games/samples/*").permitAll()
                         // Uploaded profile pictures: shown by <img>, which sends no token (random addresses).
                         .requestMatchers(HttpMethod.GET, "/api/v1/avatars/*").permitAll()
                         // Uploaded images, shown by <img> tags that send no token (the URLs are unguessable).

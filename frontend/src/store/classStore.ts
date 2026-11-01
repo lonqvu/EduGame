@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { isGuest } from '@/store/authStore'
 import * as classroomApi from '@/api/classroomApi'
 import type { ClassroomResponse, CreateClassroomRequest, LoadStatus, UpdateClassroomRequest } from '@/types/api'
 import type { Student } from '@/types/game'
@@ -80,6 +81,8 @@ export const useClassStore = create<ClassState>()((set, get) => ({
   quickList: false,
 
   load: () => {
+    // A visitor has no classes (they need an account): the game screens play without one.
+    if (isGuest()) return Promise.resolve()
     inflight ??= (async () => {
       if (get().status !== 'ready') set({ status: 'loading' })
       try {

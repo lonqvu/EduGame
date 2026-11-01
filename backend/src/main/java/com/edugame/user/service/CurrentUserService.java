@@ -1,5 +1,7 @@
 package com.edugame.user.service;
 
+import java.util.Optional;
+
 import com.edugame.common.exception.BusinessException;
 import com.edugame.user.domain.User;
 import com.edugame.user.domain.UserStatus;
@@ -39,6 +41,17 @@ public class CurrentUserService {
         return userRepository.findByCode(authentication.getName())
                 .filter(user -> user.getStatus() == UserStatus.ACTIVE)
                 .orElseThrow(CurrentUserService::unauthenticated);
+    }
+
+    /** For the few requests a visitor may make too: empty without a token. */
+    @Transactional(readOnly = true)
+    public Optional<User> findCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            return Optional.empty();
+        }
+        return Optional.of(getCurrentUser());
     }
 
     @Transactional(readOnly = true)

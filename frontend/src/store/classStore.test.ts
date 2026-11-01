@@ -47,6 +47,9 @@ const backend = vi.hoisted(() => {
 const THREE_A = backend.threeA
 
 vi.mock('@/api/classroomApi', () => backend.api)
+// Signed in, unless a test plays as a visitor.
+const auth = vi.hoisted(() => ({ guest: false }))
+vi.mock('@/store/authStore', () => ({ isGuest: () => auth.guest }))
 
 /** The device's storage (tests run in Node). */
 const saved = new Map<string, string>()
@@ -65,6 +68,7 @@ const flushPromises = () => new Promise((r) => setTimeout(r, 0))
 beforeEach(async () => {
   vi.resetModules()
   vi.clearAllMocks()
+  auth.guest = false
   backend.state.stars = new Map([
     [1, { weekly: 5, total: 20 }],
     [2, { weekly: 0, total: 3 }],
@@ -76,6 +80,16 @@ beforeEach(async () => {
 })
 
 describe('class store', () => {
+  it('a visitor has no class: nothing is asked of the server', async () => {
+    vi.resetModules()
+    vi.clearAllMocks()
+    auth.guest = true
+    const guestStore = (await import('@/store/classStore')).useClassStore
+    await guestStore.getState().load()
+    expect(backend.api.listClassrooms).not.toHaveBeenCalled()
+    expect(guestStore.getState()).toMatchObject({ status: 'idle', classrooms: [], students: [] })
+  })
+
   it('loads the first class and its students', () => {
     expect(store.getState()).toMatchObject({ status: 'ready', classroomCode: 'c-3a', className: 'Lớp 3A', grade: 3 })
     expect(store.getState().students.map((s) => s.stars)).toEqual([5, 0])

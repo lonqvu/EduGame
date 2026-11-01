@@ -3,7 +3,7 @@ import { createBrowserRouter } from 'react-router'
 import { AppLoading, AppShell } from '@/components/layout/AppShell'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { RequireAdmin } from '@/components/layout/RequireAdmin'
-import { RequireAuth } from '@/components/layout/RequireAuth'
+import { AuthGate, RequireAuth } from '@/components/layout/RequireAuth'
 
 /**
  * A page loaded when it is first opened (its code is a chunk of its own): the first screen comes up sooner, and the
@@ -22,7 +22,8 @@ export const router = createBrowserRouter([
       { path: 'register', lazy: page(() => import('@/pages/RegisterPage'), 'RegisterPage') },
       { path: 'forgot-password', lazy: page(() => import('@/pages/ForgotPasswordPage'), 'ForgotPasswordPage') },
       {
-        element: <RequireAuth />,
+        // Open to visitors too: they play with the sample questions or their own (kept in the tab only).
+        element: <AuthGate />,
         children: [
           {
             // Teacher screens
@@ -32,23 +33,30 @@ export const router = createBrowserRouter([
               { path: 'games/new', lazy: page(() => import('@/pages/ChooseGamePage'), 'ChooseGamePage') },
               { path: 'games/:gameId/edit', lazy: page(() => import('@/pages/GameEditorPage'), 'GameEditorPage') },
               { path: 'games/:gameId/start', lazy: page(() => import('@/pages/GameStartPage'), 'GameStartPage') },
-              { path: 'question-sets', lazy: page(() => import('@/pages/QuestionSetsPage'), 'QuestionSetsPage') },
-              { path: 'question-sets/:code', lazy: page(() => import('@/pages/QuestionSetPage'), 'QuestionSetPage') },
-              { path: 'classes', lazy: page(() => import('@/pages/ClassesPage'), 'ClassesPage') },
-              { path: 'profile', lazy: page(() => import('@/pages/ProfilePage'), 'ProfilePage') },
+              // A visitor's settings are kept in their browser; the email ones need an account.
               { path: 'settings', lazy: page(() => import('@/pages/SettingsPage'), 'SettingsPage') },
-              { path: 'reports', lazy: page(() => import('@/pages/ReportsPage'), 'ReportsPage') },
-              { path: 'classes/:code', lazy: page(() => import('@/pages/ClassroomDetailPage'), 'ClassroomDetailPage') },
               {
-                // "Quản trị": accounts with the role ADMIN only.
-                path: 'admin',
-                element: <RequireAdmin />,
+                // The teacher's data on the server: a visitor sees "Cần đăng nhập" instead.
+                element: <RequireAuth />,
                 children: [
-                  { index: true, lazy: page(() => import('@/pages/admin/AdminOverviewPage'), 'AdminOverviewPage') },
-                  { path: 'teachers', lazy: page(() => import('@/pages/admin/AdminTeachersPage'), 'AdminTeachersPage') },
-                  { path: 'teachers/:code', lazy: page(() => import('@/pages/admin/AdminTeacherPage'), 'AdminTeacherPage') },
-                  { path: 'feedback', lazy: page(() => import('@/pages/admin/AdminFeedbackPage'), 'AdminFeedbackPage') },
-                  { path: 'audit-log', lazy: page(() => import('@/pages/admin/AdminAuditLogPage'), 'AdminAuditLogPage') },
+                  { path: 'question-sets', lazy: page(() => import('@/pages/QuestionSetsPage'), 'QuestionSetsPage') },
+                  { path: 'question-sets/:code', lazy: page(() => import('@/pages/QuestionSetPage'), 'QuestionSetPage') },
+                  { path: 'classes', lazy: page(() => import('@/pages/ClassesPage'), 'ClassesPage') },
+                  { path: 'profile', lazy: page(() => import('@/pages/ProfilePage'), 'ProfilePage') },
+                  { path: 'reports', lazy: page(() => import('@/pages/ReportsPage'), 'ReportsPage') },
+                  { path: 'classes/:code', lazy: page(() => import('@/pages/ClassroomDetailPage'), 'ClassroomDetailPage') },
+                  {
+                    // "Quản trị": accounts with the role ADMIN only.
+                    path: 'admin',
+                    element: <RequireAdmin />,
+                    children: [
+                      { index: true, lazy: page(() => import('@/pages/admin/AdminOverviewPage'), 'AdminOverviewPage') },
+                      { path: 'teachers', lazy: page(() => import('@/pages/admin/AdminTeachersPage'), 'AdminTeachersPage') },
+                      { path: 'teachers/:code', lazy: page(() => import('@/pages/admin/AdminTeacherPage'), 'AdminTeacherPage') },
+                      { path: 'feedback', lazy: page(() => import('@/pages/admin/AdminFeedbackPage'), 'AdminFeedbackPage') },
+                      { path: 'audit-log', lazy: page(() => import('@/pages/admin/AdminAuditLogPage'), 'AdminAuditLogPage') },
+                    ],
+                  },
                 ],
               },
               { path: '*', lazy: page(() => import('@/pages/NotFoundPage'), 'NotFoundPage') },

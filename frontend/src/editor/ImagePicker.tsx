@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ClipboardEvent, type DragEvent } from 'react'
 import { uploadGameImage } from '@/api/assetApi'
+import { needsLogin } from '@/store/loginPromptStore'
 import { apiErrorMessage } from '@/utils/apiError'
 import { ACCEPTED_IMAGE_TYPES, assetSrc, ImageFileError, prepareImage } from '@/utils/images'
 
@@ -41,8 +42,11 @@ export function ImagePicker({ gameId, value, onChange }: ImagePickerProps) {
     [],
   )
 
+  // Images are uploaded to the teacher's account: a visitor is asked to sign in first.
+  const signInFirst = () => needsLogin(window.location.pathname + window.location.search, 'Tải ảnh lên')
+
   const pick = async (file: File | undefined) => {
-    if (!file || upload) return
+    if (!file || upload || signInFirst()) return
     setError(undefined)
     const controller = new AbortController()
     const preview = URL.createObjectURL(file)
@@ -133,7 +137,7 @@ export function ImagePicker({ gameId, value, onChange }: ImagePickerProps) {
             ) : (
               <button
                 type="button"
-                onClick={() => inputRef.current?.click()}
+                onClick={() => signInFirst() || inputRef.current?.click()}
                 className="min-h-12 cursor-pointer self-start rounded-full border-2 border-line bg-white px-5 py-2.5 font-[inherit] font-extrabold text-ink hover:border-primary"
               >
                 {value ? 'Đổi ảnh' : 'Chọn ảnh từ máy'}

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { getProfile } from '@/api/userApi'
+import { isGuest } from '@/store/authStore'
 import type { LoadStatus, ProfileResponse } from '@/types/api'
 import { avatarSrc } from '@/utils/profile'
 
@@ -43,6 +44,8 @@ export const useTeacherStore = create<TeacherState>()((set, get) => ({
   teacher: null,
   status: 'idle',
   load: async () => {
+    // A visitor has no profile: the top bar offers to sign in instead.
+    if (isGuest()) return
     if (get().status !== 'idle' && get().status !== 'error') return
     set({ status: 'loading' })
     try {

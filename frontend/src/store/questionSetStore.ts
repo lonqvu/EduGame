@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { isGuest } from '@/store/authStore'
 import * as questionSetApi from '@/api/questionSetApi'
 import type { LoadStatus, QuestionSetRequest, QuestionSetResponse, QuestionSetSummaryResponse } from '@/types/api'
 
@@ -31,6 +32,8 @@ export const useQuestionSetStore = create<QuestionSetState>()((set, get) => ({
   sets: [],
 
   load: () => {
+    // Question sets need an account.
+    if (isGuest()) return Promise.resolve()
     inflight ??= (async () => {
       if (get().status !== 'ready') set({ status: 'loading' })
       try {

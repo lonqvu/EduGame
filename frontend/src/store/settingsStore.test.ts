@@ -28,6 +28,9 @@ const backend = vi.hoisted(() => {
 })
 
 vi.mock('@/api/settingsApi', () => backend.api)
+// Signed in, unless a test plays as a visitor.
+const auth = vi.hoisted(() => ({ guest: false }))
+vi.mock('@/store/authStore', () => ({ isGuest: () => auth.guest, useAuthStore: { subscribe: () => () => undefined } }))
 
 const storage = new Map<string, string>()
 vi.stubGlobal('localStorage', {
@@ -59,9 +62,25 @@ beforeEach(() => {
   backend.state.failSave = false
   backend.state.gate = null
   vi.clearAllMocks()
+  auth.guest = false
 })
 
 describe('load', () => {
+  it("a visitor's settings are kept in this browser: nothing is asked of the server", async () => {
+    auth.guest = true
+    let store = await freshStore()
+    await store.getState().load()
+    expect(store.getState().status).toBe('ready')
+    await store.getState().update({ sound: { volume: 30 }, games: { teams: 4 } })
+
+    // Back another day: the same settings.
+    store = await freshStore()
+    await store.getState().load()
+    expect(store.getState().settings).toMatchObject({ sound: { volume: 30 }, games: { teams: 4 } })
+    expect(backend.api.getSettings).not.toHaveBeenCalled()
+    expect(backend.api.saveSettings).not.toHaveBeenCalled()
+  })
+
   it('starts from the defaults, then holds the server settings and caches the display ones', async () => {
     const store = await freshStore()
     expect(store.getState().settings.display).toEqual({ reduceMotion: false, fullscreenOnStart: false })

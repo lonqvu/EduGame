@@ -165,7 +165,7 @@ export function GameStartPage() {
         </div>
       </div>
 
-      {showing && <RulesShow mode={mode} title={game.title} guide={guide} onClose={closeShow} />}
+      {showing && <RulesShow mode={mode} title={game.sample && template ? template.name : game.title} guide={guide} onClose={closeShow} />}
     </div>
   )
 }

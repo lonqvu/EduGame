@@ -1,13 +1,14 @@
 import { PICK_MODES, type PickMode } from '@/game-engine/name-picker/modes'
 import { gameRegistry } from '@/game-engine/registry'
-import type { GameCategory, GameTemplate, GameType } from '@/types/game'
+import type { GameCategory, GameTemplate } from '@/types/game'
 import { fold } from '@/utils/classrooms'
+import { gameCardArt } from '@/utils/gameAssets'
 import { isSetGame } from '@/utils/questionSets'
 
 const ASSETS = '/assets/games'
 
-/** Card picture of each game: vector art (scripts/make_card_art.py), sharp at any size and pixel density. */
-export const cardArt = (type: GameType) => `${ASSETS}/card-${type.toLowerCase().replace(/_/g, '-')}.svg`
+/** Card picture of each game: mostly vector art (scripts/make_card_art.py), a few painted ones. */
+export const cardArt = gameCardArt
 
 /** One card of the chooser: a template, or one name picker of NAME_RACE (each is its own game). */
 export interface ChooserEntry {

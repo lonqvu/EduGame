@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import * as gameApi from '@/api/gameApi'
+import { useAuthStore } from '@/store/authStore'
 import type { GameResponse, LoadStatus } from '@/types/api'
 import type { GameItem, GameSummary, GameType, ItemDraft } from '@/types/game'
 import { isNotFound } from '@/utils/apiError'
@@ -287,5 +288,12 @@ export const useGameLibraryStore = create<GameLibraryState>()((set, get) => {
       )
       fireAndForget(gameId, () => gameApi.reorderItems(gameId, orderedIds.map(Number)))
     },
+  }
+})
+
+// A visitor signed in: their guest games leave the library, the teacher's own are loaded instead.
+useAuthStore.subscribe((state, previous) => {
+  if (state.status === 'signedIn' && previous.status === 'signedOut') {
+    useGameLibraryStore.setState({ games: [], gamesStatus: 'idle', items: {}, settings: {}, gameStatus: {}, saveState: 'saved' })
   }
 })
