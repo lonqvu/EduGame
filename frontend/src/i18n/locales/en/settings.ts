@@ -15,11 +15,6 @@ export const settings: Strings<typeof vi> = {
     fullscreenHint: 'Clicking “Start game” opens the projector screen in full screen. Press Esc to exit.',
   },
 
-  language: {
-    label: 'Language',
-    hint: 'The language of the Lớp Vui screens. Your questions, class names and student names stay as you wrote them.',
-    beta: 'beta',
-  },
 
   games: {
     title: 'New games',

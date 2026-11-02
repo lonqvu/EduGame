@@ -91,6 +91,10 @@ export const app = {
     signOut: 'Đăng xuất',
     /** Accessible name of the account button; {{name}} is the teacher's. */
     account: 'Tài khoản {{name}}',
+    /** Accessible name of the language button; {{name}} is the language shown now. */
+    language: 'Ngôn ngữ: {{name}}',
+    /** Next to English while its translation is not finished. */
+    languageBeta: 'đang thử nghiệm',
   },
 
   /** The speaker button of the projector screens. */

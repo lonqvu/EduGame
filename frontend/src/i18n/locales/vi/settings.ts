@@ -14,12 +14,6 @@ export const settings = {
     fullscreenHint: 'Bấm “Bắt đầu trò chơi” là màn chiếu mở toàn màn hình. Nhấn Esc để thoát.',
   },
 
-  language: {
-    label: 'Ngôn ngữ',
-    hint: 'Ngôn ngữ của các màn hình Lớp Vui. Câu hỏi, tên lớp và tên học sinh cô soạn được giữ nguyên.',
-    /** Shown next to English while its translation is not finished. */
-    beta: 'đang thử nghiệm',
-  },
 
   games: {
     title: 'Trò chơi mới',

@@ -1,13 +1,14 @@
 import { App, Dropdown } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router'
+import { LanguageSwitch } from '@/components/layout/LanguageSwitch'
 import { BellIcon, ChevronDownIcon, UserIcon } from '@/components/ui/icons'
 import { useAuthStore } from '@/store/authStore'
 import { useTeacherStore } from '@/store/teacherStore'
 
 /**
- * Bell + the teacher's chip: the picture of "Hồ sơ của tôi" and the name, with the account menu. For a visitor,
- * "Đăng ký" and "Đăng nhập" (back to this page afterwards).
+ * Language, bell and the teacher's chip: the picture of "Hồ sơ của tôi" and the name, with the account menu. For a
+ * visitor, the language, "Đăng ký" and "Đăng nhập" (back to this page afterwards).
  */
 export function TopBar() {
   const { t } = useTranslation()
@@ -20,8 +21,9 @@ export function TopBar() {
 
   if (!signedIn) {
     return (
-      <div className="flex h-[48px] items-center justify-end gap-4 pr-1">
-        <Link to="/register" className="text-[15px] font-bold text-ink hover:text-primary">
+      <div className="flex h-[48px] items-center justify-end gap-3 pr-1">
+        <LanguageSwitch />
+        <Link to="/register" className="ml-1 text-[15px] font-bold text-ink hover:text-primary">
           {t('topBar.signUp')}
         </Link>
         <Link
@@ -35,7 +37,8 @@ export function TopBar() {
     )
   }
   return (
-    <div className="flex h-[48px] items-center justify-end gap-3 pr-1">
+    <div className="flex h-[48px] items-center justify-end gap-2.5 pr-1">
+      <LanguageSwitch />
       <button
         type="button"
         aria-label={t('topBar.notifications')}

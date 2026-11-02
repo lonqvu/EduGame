@@ -5,7 +5,6 @@ import { Link, useLocation } from 'react-router'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { BellIcon, GamepadIcon, GlobeIcon, LockIcon, SpeakerIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
-import { LANGUAGES, shownLanguage } from '@/i18n'
 import { SaveState, SettingItem, SettingSelect, SettingsSection, SettingSwitch } from '@/pages/settings/SettingsParts'
 import { playSound } from '@/sound/soundEngine'
 import { useAuthStore } from '@/store/authStore'
@@ -97,27 +96,6 @@ export function SettingsPage() {
                   checked={display.fullscreenOnStart}
                   onChange={(fullscreenOnStart) => void change({ display: { fullscreenOnStart } })}
                 />
-              }
-            />
-            <SettingItem
-              id="set-language"
-              label={t('settings.language.label')}
-              hint={t('settings.language.hint')}
-              control={
-                LANGUAGES.length > 1 ? (
-                  <SettingSelect
-                    labelledBy="set-language"
-                    value={shownLanguage(display.language)}
-                    options={LANGUAGES.map((l) => ({
-                      value: l,
-                      // English is offered (in development) before it is finished.
-                      label: l === 'en' ? `${t('languages.en')} (${t('settings.language.beta')})` : t(`languages.${l}`),
-                    }))}
-                    onChange={(language) => void change({ display: { language } })}
-                  />
-                ) : (
-                  <span className="text-[15px] font-bold text-ink-soft">{t('languages.vi')}</span>
-                )
               }
             />
           </SettingsSection>

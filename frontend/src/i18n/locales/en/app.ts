@@ -80,6 +80,8 @@ export const app: Strings<typeof vi> = {
     profile: 'My profile',
     signOut: 'Sign out',
     account: 'Account: {{name}}',
+    language: 'Language: {{name}}',
+    languageBeta: 'beta',
   },
 
   sound: {

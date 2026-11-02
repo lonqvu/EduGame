@@ -8,7 +8,7 @@ const test = base.extend<{ backend: Backend }>({
     const backend = await Backend.signIn()
     await backend.keepSettings()
     await backend.saveSettings({
-      display: { reduceMotion: false, fullscreenOnStart: false },
+      display: { reduceMotion: false, fullscreenOnStart: false, language: 'vi' },
       games: {},
       notifications: { newSignInEmail: true, passwordChangedEmail: true },
       sound: { enabled: true, volume: 80, music: true },
@@ -50,7 +50,7 @@ test('"Cài đặt" in the menu opens the settings, and every change is saved by
   await expect
     .poll(() => backend.settings())
     .toEqual({
-      display: { reduceMotion: false, fullscreenOnStart: true },
+      display: { reduceMotion: false, fullscreenOnStart: true, language: 'vi' },
       games: { timeLimitSec: 45, allowSteal: false },
       notifications: { newSignInEmail: true, passwordChangedEmail: false },
       sound: { enabled: true, volume: 80, music: true },
@@ -167,14 +167,14 @@ test('"Bắt đầu trò chơi" opens the projector in full screen when asked, a
   await expect.poll(fullscreen).toBe(false)
 })
 
-test('the profile rows "Thông báo" and "Ngôn ngữ & hiển thị" lead to their settings', async ({ page }) => {
+test('the profile rows "Thông báo" and "Hiển thị & trình chiếu" lead to their settings', async ({ page }) => {
   await page.goto('/profile')
   await page.getByRole('button', { name: /^Thông báo Email/ }).click()
   await expect(page).toHaveURL(/\/settings#notifications$/)
   await expect(page.getByRole('region', { name: 'Thông báo qua email' })).toBeInViewport()
 
   await page.goto('/profile')
-  await page.getByRole('button', { name: /Ngôn ngữ & hiển thị/ }).click()
+  await page.getByRole('button', { name: /Hiển thị & trình chiếu/ }).click()
   await expect(page).toHaveURL(/\/settings#display$/)
   await expect(page.getByRole('region', { name: 'Hiển thị & trình chiếu' })).toBeInViewport()
 })

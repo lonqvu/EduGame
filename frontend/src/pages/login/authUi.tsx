@@ -2,6 +2,7 @@ import { App } from 'antd'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import { LanguageSwitch } from '@/components/layout/LanguageSwitch'
 import { BrandLogo } from '@/components/ui/BrandLogo'
 import { ArrowLeftIcon, CheckIcon, HelpIcon } from '@/components/ui/icons'
 import { AuthShowcase, type ShowcaseContent } from '@/pages/login/AuthShowcase'
@@ -19,7 +20,7 @@ export const primaryButtonClass =
 
 interface AuthLayoutProps {
   showcase: ShowcaseContent
-  /** "Cần trợ giúp?" above the card (sign-in page). */
+  /** "Cần trợ giúp?" above the card (sign-in page), next to the language. */
   showHelp?: boolean
   children: ReactNode
 }
@@ -33,8 +34,8 @@ export function AuthLayout({ showcase, showHelp = false, children }: AuthLayoutP
       <AuthShowcase content={showcase} />
 
       <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-[radial-gradient(ellipse_340px_220px_at_100%_8%,#E6F1FC_0%,transparent_70%),radial-gradient(ellipse_420px_260px_at_96%_100%,#E6F1FC_0%,transparent_70%),radial-gradient(ellipse_280px_200px_at_0%_96%,#EAF4FD_0%,transparent_70%)] px-4 pt-[clamp(12px,3vh,40px)] pb-[clamp(12px,2.4vh,32px)] sm:px-8">
-        {showHelp && (
-          <div className="flex justify-end xl:pr-[clamp(0px,1.5vw,40px)]">
+        <div className="flex items-center justify-end gap-4 xl:pr-[clamp(0px,1.5vw,40px)]">
+          {showHelp && (
             <button
               type="button"
               onClick={() => message.info(t('auth.helpText'))}
@@ -43,8 +44,9 @@ export function AuthLayout({ showcase, showHelp = false, children }: AuthLayoutP
               <HelpIcon size={30} className="text-primary" />
               {t('auth.help')}
             </button>
-          </div>
-        )}
+          )}
+          <LanguageSwitch />
+        </div>
         <div className="flex flex-1 items-center justify-center py-[clamp(8px,1.6vh,24px)]">{children}</div>
       </main>
     </div>
