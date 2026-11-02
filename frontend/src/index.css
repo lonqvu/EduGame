@@ -104,3 +104,13 @@ html[data-reduce-motion] *::after {
     transform: none;
   }
 }
+
+/*
+ * A textarea with a character count (showCount): antd draws "0 / 500" under the box, outside it, without keeping
+ * room for it, so it ran into what came next (the dialog's buttons). The box keeps that room below itself.
+ */
+@layer components {
+  .ant-input-textarea-show-count {
+    margin-bottom: 1.75em;
+  }
+}

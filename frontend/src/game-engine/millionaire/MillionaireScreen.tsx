@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useEffect, useReducer, useState } from 'react'
 import { Link } from 'react-router'
@@ -64,7 +65,7 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
   }, [state.locked, state.selected, question, sound])
 
   if (!question) {
-    return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   }
 
   const restart = () => {
@@ -96,7 +97,7 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
           <div className="flex shrink-0 items-center gap-3">
             {friendKey !== null && !state.locked && (
               <span className="flex items-center gap-2 rounded-full bg-white/15 py-1 pl-3 text-lg font-extrabold">
-                📞 Hỏi bạn
+                {i18n.t('play.millionaire.askFriend')}
                 <Countdown key={friendKey} seconds={FRIEND_SECONDS} paused={state.locked} />
               </span>
             )}
@@ -106,10 +107,10 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
           </div>
         </div>
 
-        <div className="flex gap-3" role="group" aria-label="Quyền trợ giúp">
+        <div className="flex gap-3" role="group" aria-label={i18n.t('play.millionaire.lifelines')}>
           <Lifeline
             label="50:50"
-            title="Bỏ đi 2 đáp án sai"
+            title={i18n.t('play.millionaire.fiftyFifty')}
             used={state.used.fifty || fiftyFifty(question).length === 0}
             disabled={state.locked}
             onUse={() => {
@@ -119,7 +120,7 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
           />
           <Lifeline
             label="👥"
-            title="Hỏi ý kiến cả lớp"
+            title={i18n.t('play.millionaire.askClass')}
             used={state.used.poll}
             disabled={state.locked}
             onUse={() => {
@@ -129,7 +130,7 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
           />
           <Lifeline
             label="📞"
-            title="Hỏi một bạn"
+            title={i18n.t('play.millionaire.phone')}
             used={state.used.friend}
             disabled={state.locked}
             onUse={() => {
@@ -199,8 +200,8 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
         </div>
 
         {state.poll && !state.locked && (
-          <div className="flex items-center gap-3 rounded-full bg-white/10 px-4 py-2" role="group" aria-label="Đếm số bạn giơ tay">
-            <span className="text-lg font-extrabold">✋ Cả lớp giơ tay:</span>
+          <div className="flex items-center gap-3 rounded-full bg-white/10 px-4 py-2" role="group" aria-label={i18n.t('play.millionaire.count')}>
+            <span className="text-lg font-extrabold">{i18n.t('play.millionaire.hands')}</span>
             {question.options.map((option, i) =>
               state.hidden.includes(option.id) ? null : (
                 <button
@@ -210,7 +211,7 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
                     sound.play('pop')
                     dispatch({ type: 'vote', optionId: option.id })
                   }}
-                  aria-label={`Thêm một bạn chọn ${LETTERS[i]}`}
+                  aria-label={i18n.t('play.millionaire.addHand', { letter: LETTERS[i] })}
                   className="flex h-10 cursor-pointer items-center gap-2 rounded-full border-2 border-[#C9A13B] bg-[#14215E] px-4 font-[inherit] text-lg font-extrabold text-white hover:bg-[#1C2B78]"
                 >
                   <span className="text-[#FFD15C]">{LETTERS[i]}</span>+1
@@ -225,21 +226,21 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
             {shown
               ? right
                 ? isLast
-                  ? 'Chính xác! Bạn đã chinh phục bậc cao nhất!'
-                  : `Chính xác! Bạn đạt ${formatPrize(prizes[state.level])} điểm.`
-                : 'Rất tiếc, đáp án chưa đúng.'
+                  ? i18n.t('play.millionaire.top')
+                  : i18n.t('play.millionaire.reached', { prize: formatPrize(prizes[state.level]) })
+                : i18n.t('play.millionaire.wrong')
               : state.locked
-                ? 'Câu trả lời cuối cùng…'
+                ? i18n.t('play.millionaire.finalAnswer')
                 : state.poll && !state.selected
-                  ? 'Cả lớp giơ tay cho từng đáp án, cô bấm +1 để đếm.'
+                  ? i18n.t('play.millionaire.voting')
                   : state.selected
-                    ? 'Bạn chắc chắn chứ? Bấm "Chốt đáp án".'
-                    : 'Bạn chọn đáp án nào?'}
+                    ? i18n.t('play.millionaire.sure')
+                    : i18n.t('play.millionaire.choose')}
           </span>
           <div className="flex shrink-0 gap-3">
             {!state.locked && (
               <button type="button" onClick={() => dispatch({ type: 'stop', levels })} className={`${playButtonClass} bg-white/15 text-white`}>
-                Dừng cuộc chơi
+                {i18n.t('play.millionaire.stop')}
               </button>
             )}
             {shown ? (
@@ -253,7 +254,7 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
                 }}
                 className={`${playButtonClass} bg-[#FFD15C] text-ink`}
               >
-                {right && !isLast ? 'Câu tiếp theo' : 'Xem kết quả'}
+                {right && !isLast ? i18n.t('play.common.nextQuestion') : i18n.t('play.common.seeResults')}
               </button>
             ) : (
               <button
@@ -265,14 +266,14 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
                 }}
                 className={`${playButtonClass} bg-[#FFD15C] text-ink`}
               >
-                Chốt đáp án
+                {i18n.t('play.millionaire.lockIn')}
               </button>
             )}
           </div>
         </div>
       </div>
 
-      <ol aria-label="Bậc thưởng" className="m-0 flex w-[290px] shrink-0 list-none flex-col-reverse justify-center gap-1 rounded-[26px] bg-black/25 p-3">
+      <ol aria-label={i18n.t('play.millionaire.ladder')} className="m-0 flex w-[290px] shrink-0 list-none flex-col-reverse justify-center gap-1 rounded-[26px] bg-black/25 p-3">
         {prizes.map((prize, i) => {
           const current = i === state.level
           const passed = i < state.level
@@ -287,7 +288,7 @@ export function MillionaireScreen({ game, questions, settings }: MillionaireScre
             >
               <span className="w-7 opacity-80">{i + 1}</span>
               <span className="flex items-center gap-1.5">
-                {safe && <span aria-label="Mốc an toàn">◆</span>}
+                {safe && <span aria-label={i18n.t('play.millionaire.safe')}>◆</span>}
                 {formatPrize(prize)}
               </span>
             </li>
@@ -305,7 +306,7 @@ function Lifeline({ label, title, used, disabled, onUse }: { label: string; titl
       onClick={onUse}
       disabled={used || disabled}
       title={title}
-      aria-label={`${title}${used ? ' (đã dùng)' : ''}`}
+      aria-label={used ? i18n.t('play.millionaire.used', { title }) : title}
       className={`relative flex h-[50px] w-[92px] cursor-pointer items-center justify-center rounded-full border-[3px] border-[#C9A13B] bg-[#14215E] font-[inherit] text-[22px] font-extrabold text-white hover:bg-[#1C2B78] disabled:cursor-default ${
         used ? 'opacity-35' : ''
       }`}
@@ -342,21 +343,21 @@ function MillionaireResult({ end, question, backTo, onPlayAgain }: MillionaireRe
       </motion.span>
       <h1 className="m-0 font-display text-[54px] leading-tight font-extrabold">
         {end.reason === 'won'
-          ? 'Chúc mừng triệu phú của lớp!'
+          ? i18n.t('play.millionaire.millionaire')
           : end.reason === 'stopped'
-            ? 'Một quyết định khôn ngoan!'
-            : 'Rất tiếc! Câu trả lời chưa đúng'}
+            ? i18n.t('play.millionaire.wise')
+            : i18n.t('play.millionaire.sorry')}
       </h1>
-      {end.reason === 'wrong' && right && <span className="text-[26px] font-extrabold text-[#7CF0A8]">Đáp án đúng: {right.text}</span>}
+      {end.reason === 'wrong' && right && <span className="text-[26px] font-extrabold text-[#7CF0A8]">{i18n.t('play.common.rightAnswer', { answer: right.text })}</span>}
       <span className="rounded-full border-[3px] border-[#C9A13B] bg-[#14215E] px-10 py-3 font-display text-[44px] font-extrabold text-[#FFD15C]">
-        {formatPrize(end.prize)} điểm
+        {i18n.t('play.millionaire.prize', { prize: formatPrize(end.prize) })}
       </span>
       <div className="mt-2 flex gap-4">
         <Link to={backTo} className={`${playButtonClass} bg-white/15 text-white hover:text-white`}>
-          Về trình soạn
+          {i18n.t('play.millionaire.toEditor')}
         </Link>
         <button type="button" onClick={playAgain} className={`${playButtonClass} bg-[#FFD15C] text-ink`}>
-          Chơi lại với bạn khác
+          {i18n.t('play.millionaire.again')}
         </button>
       </div>
     </div>

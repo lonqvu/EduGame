@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useEffect, useReducer, useState } from 'react'
 import { CheckIcon, ChevronRightIcon } from '@/components/ui/icons'
@@ -50,7 +51,7 @@ export function MemoryScreen({ game, sets, settings }: MemoryScreenProps) {
   }, [showingMiss, rules.flipBackDelayMs])
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có bộ thẻ nào có ít nhất 2 cặp điền đủ hai thẻ để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.memory')} backTo={backTo} />
   }
 
   const restart = () => {
@@ -59,7 +60,7 @@ export function MemoryScreen({ game, sets, settings }: MemoryScreenProps) {
   }
 
   if (state.finished) {
-    return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="Tìm được nhiều cặp nhất" streakUnit="cặp" />
+    return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="memoryPairs" streakUnit="pair" />
   }
 
   const set = playable[state.setIndex]
@@ -86,7 +87,7 @@ export function MemoryScreen({ game, sets, settings }: MemoryScreenProps) {
   }
 
   return (
-    <PlayFrame title={game.title} progress={`Bộ ${state.setIndex + 1} / ${playable.length}`} backTo={backTo}>
+    <PlayFrame title={game.title} progress={i18n.t('play.common.set', { number: state.setIndex + 1, total: playable.length })} backTo={backTo}>
       <TeamBar teams={state.teams} activeId={complete ? null : team.id} />
 
       <div
@@ -102,7 +103,7 @@ export function MemoryScreen({ game, sets, settings }: MemoryScreenProps) {
             <button
               key={card.key}
               type="button"
-              aria-label={faceUp ? card.text : `Thẻ ${i + 1}`}
+              aria-label={faceUp ? card.text : i18n.t('play.memory.card', { number: i + 1 })}
               disabled={faceUp || showingMiss || complete}
               onClick={() => flip(card)}
               className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] [perspective:900px] disabled:cursor-default"
@@ -140,18 +141,18 @@ export function MemoryScreen({ game, sets, settings }: MemoryScreenProps) {
           {complete ? (
             <>
               <CheckIcon size={22} className="text-success" />
-              Đã tìm hết các cặp!
+              {i18n.t('play.memory.done')}
             </>
           ) : (
             <>
               <span className="size-5 rounded-full" style={{ background: team.color }} />
-              {showingMiss ? 'Chưa đúng cặp, thẻ sẽ úp lại.' : `${team.name}: lật hai thẻ để tìm một cặp.`}
+              {showingMiss ? i18n.t('play.memory.miss') : i18n.t('play.memory.turn', { team: team.name })}
             </>
           )}
         </span>
         <div className="flex shrink-0 gap-3">
           <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} bg-white text-ink`}>
-            Kết thúc
+            {i18n.t('play.common.finish')}
           </button>
           <button
             type="button"
@@ -162,7 +163,7 @@ export function MemoryScreen({ game, sets, settings }: MemoryScreenProps) {
             }}
             className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
           >
-            {isLast ? 'Xem kết quả' : 'Bộ tiếp theo'}
+            {isLast ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextSet')}
             <ChevronRightIcon size={20} />
           </button>
         </div>

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useCallback, useEffect, useState } from 'react'
 import { flipCoin, type CoinSide } from '@/game-engine/tools/classTools'
@@ -6,7 +7,14 @@ import { useSound } from '@/sound/useSound'
 
 const FLIP_S = 1.4
 const HISTORY = 12
-const LABEL: Record<CoinSide, string> = { HEADS: 'Sấp', TAILS: 'Ngửa' }
+const LABEL: Record<CoinSide, string> = {
+  get HEADS() {
+    return i18n.t('play.tools.coin.heads')
+  },
+  get TAILS() {
+    return i18n.t('play.tools.coin.tails')
+  },
+}
 
 /** Projector: toss a big coin (Space tosses too), with the tally of both sides and the last tosses. */
 export function CoinFlipScreen() {
@@ -38,7 +46,7 @@ export function CoinFlipScreen() {
 
   const heads = history.filter((s) => s === 'HEADS').length
   return (
-    <ToolFrame title="Tung đồng xu" subtitle="Chọn đội đi trước, chia phe hay quyết định nhanh">
+    <ToolFrame title={i18n.t('play.tools.coin.title')} subtitle={i18n.t('play.tools.coin.subtitle')}>
       <div className="flex flex-1 items-center justify-center gap-20">
         <div className="flex flex-col items-center gap-6">
           <div className="[perspective:1200px]">
@@ -59,15 +67,15 @@ export function CoinFlipScreen() {
             </motion.div>
           </div>
           <span role="status" className="font-display text-[56px] leading-none font-extrabold">
-            {flipping ? '…' : history.length ? `Mặt ${LABEL[side].toLowerCase()}!` : 'Sẵn sàng'}
+            {flipping ? '…' : history.length ? i18n.t('play.tools.coin.side', { side: LABEL[side] }) : i18n.t('play.tools.coin.ready')}
           </span>
         </div>
 
         <div className="flex w-[340px] flex-col gap-4">
           <button type="button" onClick={toss} disabled={flipping} className={`${toolButtonClass} h-16 bg-primary text-[22px] text-white hover:brightness-110`}>
-            🪙 Tung đồng xu
+            {i18n.t('play.tools.coin.flip')}
           </button>
-          <span className="text-center text-base font-bold text-ink-soft">hoặc nhấn phím cách</span>
+          <span className="text-center text-base font-bold text-ink-soft">{i18n.t('play.tools.coin.space')}</span>
           <div className="grid grid-cols-2 gap-3">
             {(['HEADS', 'TAILS'] as const).map((s) => (
               <div key={s} className="flex flex-col items-center rounded-3xl bg-white py-4">
@@ -77,7 +85,7 @@ export function CoinFlipScreen() {
             ))}
           </div>
           {history.length > 0 && (
-            <ol aria-label="Các lần tung gần đây" className="m-0 flex list-none flex-wrap gap-2 p-0">
+            <ol aria-label={i18n.t('play.tools.coin.recent')} className="m-0 flex list-none flex-wrap gap-2 p-0">
               {history.map((s, i) => (
                 <li
                   key={i}

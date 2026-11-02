@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { Countdown } from '@/game-engine/quiz/QuizParts'
 import { useBuzzerQuiz } from '@/game-engine/quiz/useBuzzerQuiz'
@@ -30,8 +31,8 @@ export function BuildTowerScreen({ game, questions, settings }: BuildTowerScreen
   const sound = useSound()
   const backTo = editPath(game.id)
 
-  if (playable.length === 0) return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
-  if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="Tháp cao nhất" />
+  if (playable.length === 0) return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
+  if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="tower" />
 
   const question = playable[state.index]
   const answering = state.teams.find((t) => t.id === state.answeringTeamId)
@@ -40,7 +41,7 @@ export function BuildTowerScreen({ game, questions, settings }: BuildTowerScreen
   return (
     <PlayFrame
       title={game.title}
-      progress={`Câu ${state.index + 1} / ${playable.length}`}
+      progress={i18n.t('play.common.question', { number: state.index + 1, total: playable.length })}
       extra={rules.timeLimitSec > 0 && !state.revealed && <Countdown key={`${round}-${state.index}`} seconds={rules.timeLimitSec} paused={state.revealed} />}
       backTo={backTo}
     >
@@ -73,12 +74,12 @@ export function BuildTowerScreen({ game, questions, settings }: BuildTowerScreen
           />
           <PlayFooter
             clearCorner={false}
-            message={state.revealed ? 'Đáp án đúng đã hiện.' : answering ? `${answering.name} chọn đáp án nào?` : 'Đội nào giành quyền?'}
+            message={state.revealed ? i18n.t('play.common.answerShown') : answering ? i18n.t('play.common.whichAnswerShort', { team: answering.name }) : i18n.t('play.common.whoBuzzedShort')}
             revealed={state.revealed}
             onReveal={() => dispatch({ type: 'reveal' })}
             onFinish={() => dispatch({ type: 'finish' })}
             onNext={() => dispatch({ type: 'next', total: playable.length })}
-            nextLabel={isLast ? 'Xem kết quả' : 'Câu tiếp theo'}
+            nextLabel={isLast ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextQuestion')}
           />
         </div>
       </div>
@@ -132,7 +133,7 @@ function Site({ teams, most, answeringId, triedIds, onPick }: SiteProps) {
               onClick={() => onPick(team.id)}
               disabled={done}
               aria-pressed={active}
-              aria-label={`${team.name}, tháp ${team.correct} khối`}
+              aria-label={i18n.t('play.tower.height', { team: team.name, count: team.correct })}
               className="absolute bottom-3 flex cursor-pointer flex-col items-center rounded-2xl border-[3px] bg-white px-1 py-1.5 font-[inherit] text-ink disabled:cursor-default"
               style={{ left: column * i + 6, width: column - 12, borderColor: active ? team.color : '#FFFFFF', opacity: done && !active ? 0.6 : 1 }}
             >
@@ -140,7 +141,7 @@ function Site({ teams, most, answeringId, triedIds, onPick }: SiteProps) {
                 <span className="size-4 shrink-0 rounded-full" style={{ background: team.color }} />
                 <span className="truncate text-[17px] font-extrabold">{team.name}</span>
               </span>
-              <span className="text-[13px] font-bold text-ink-soft">{active ? 'Đang trả lời' : `${team.correct} khối`}</span>
+              <span className="text-[13px] font-bold text-ink-soft">{active ? i18n.t('play.common.answering') : i18n.t('play.tower.blocks', { count: team.correct })}</span>
             </button>
           </div>
         )

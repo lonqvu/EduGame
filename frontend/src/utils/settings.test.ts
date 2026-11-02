@@ -47,7 +47,7 @@ describe('game default choices', () => {
 describe('withDefaults', () => {
   it('fills every missing key', () => {
     expect(withDefaults(undefined)).toEqual({
-      display: { reduceMotion: false, fullscreenOnStart: false },
+      display: { reduceMotion: false, fullscreenOnStart: false, language: 'vi' },
       games: {},
       notifications: { newSignInEmail: true, passwordChangedEmail: true },
       sound: { enabled: true, volume: 80, music: true },

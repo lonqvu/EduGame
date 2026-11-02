@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { fold, MAX_NAME_LENGTH } from '@/utils/classrooms'
 
 /**
@@ -15,19 +16,23 @@ export type Rows = string[][]
 export const MAX_FILE_BYTES = 2 * 1024 * 1024
 
 /** A problem with the file itself, said to the teacher. */
-export class ClassListFileError extends Error {}
+export class SheetFileError extends Error {}
+export { SheetFileError as ClassListFileError }
 
 const ZIP = [0x50, 0x4b] // .xlsx is a zip archive
 const OLE = [0xd0, 0xcf, 0x11, 0xe0] // old .xls
 const startsWith = (bytes: Uint8Array, magic: number[]) => magic.every((b, i) => bytes[i] === b)
 
-/** The rows of the file's first sheet (or of the CSV), every cell as trimmed text; rows keep their place. */
-export async function readClassListFile(file: Blob): Promise<Rows> {
-  if (file.size > MAX_FILE_BYTES) throw new ClassListFileError('File lớn quá (tối đa 2 MB). Cô chọn file danh sách lớp nhé.')
+/**
+ * The rows of the file's first sheet (or of the CSV), every cell as trimmed text; rows keep their place. Also reads
+ * the question files of the question sets (utils/questionFile).
+ */
+export async function readSheetFile(file: Blob): Promise<Rows> {
+  if (file.size > MAX_FILE_BYTES) throw new SheetFileError(i18n.t('classes.sheet.tooLarge'))
   const buffer = await file.arrayBuffer()
   const bytes = new Uint8Array(buffer)
   if (startsWith(bytes, OLE)) {
-    throw new ClassListFileError('Đây là file Excel đời cũ (.xls). Cô mở file, chọn Lưu thành (Save As) dạng .xlsx rồi chọn lại nhé.')
+    throw new SheetFileError(i18n.t('classes.sheet.oldExcel'))
   }
   let rows: Rows
   if (startsWith(bytes, ZIP)) {
@@ -36,15 +41,17 @@ export async function readClassListFile(file: Blob): Promise<Rows> {
       const { readSheet } = await import('read-excel-file/universal')
       rows = (await readSheet(buffer)).map((row) => row.map(cellText))
     } catch {
-      throw new ClassListFileError('Không đọc được file Excel này. Cô kiểm tra lại file (.xlsx) nhé.')
+      throw new SheetFileError(i18n.t('classes.sheet.unreadable'))
     }
   } else {
     rows = parseCsv(decodeText(bytes))
   }
-  // Empty rows stay: the preview tells the teacher which row of the file each name comes from.
-  if (!rows.some((row) => row.some(Boolean))) throw new ClassListFileError('File không có dữ liệu.')
+  // Empty rows stay: the preview tells the teacher which row of the file each name (or question) comes from.
+  if (!rows.some((row) => row.some(Boolean))) throw new SheetFileError(i18n.t('classes.sheet.empty'))
   return rows
 }
+
+export const readClassListFile = readSheetFile
 
 function cellText(value: unknown): string {
   if (value === null || value === undefined) return ''
@@ -176,7 +183,7 @@ export function detectNameColumns(rows: Rows): Detection {
   const used = Array.from({ length: width }, (_, c) => c).filter((c) => dataRows.some((row) => row[c]))
   const choices: ColumnChoice[] = used.map((c) => {
     const title = headerRow >= 0 && rows[headerRow][c] ? rows[headerRow][c] : (dataRows.find((row) => row[c])?.[c] ?? '')
-    return { key: String(c), label: `Cột ${columnLetter(c)}: ${title}`, columns: { first: c } }
+    return { key: String(c), label: i18n.t('classes.import.columnOne', { letter: columnLetter(c), title }), columns: { first: c } }
   })
 
   let choice: ColumnChoice | null = null
@@ -188,7 +195,12 @@ export function detectNameColumns(rows: Rows): Detection {
     if (family >= 0 && given >= 0 && full < 0) {
       const split: ColumnChoice = {
         key: `${family}+${given}`,
-        label: `Cột ${columnLetter(family)} + ${columnLetter(given)}: ${rows[headerRow][family]} + ${rows[headerRow][given]}`,
+        label: i18n.t('classes.import.columnTwo', {
+          first: columnLetter(family),
+          second: columnLetter(given),
+          firstTitle: rows[headerRow][family],
+          secondTitle: rows[headerRow][given],
+        }),
         columns: { first: family, second: given },
       }
       choices.unshift(split)
@@ -266,9 +278,15 @@ export interface Candidate extends ImportedName {
 }
 
 export const STATUS_NOTES: Record<Exclude<CandidateStatus, 'new'>, string> = {
-  'in-class': 'Đã có trong lớp',
-  repeated: 'Trùng tên ở dòng trên',
-  'too-long': `Dài quá ${MAX_NAME_LENGTH} ký tự`,
+  get 'in-class'() {
+    return i18n.t('classes.import.inClass')
+  },
+  get repeated() {
+    return i18n.t('classes.import.repeated')
+  },
+  get 'too-long'() {
+    return i18n.t('classes.import.nameTooLong', { count: MAX_NAME_LENGTH })
+  },
 }
 
 /**

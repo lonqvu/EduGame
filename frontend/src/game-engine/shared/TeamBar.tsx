@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import type { TeamScore } from '@/game-engine/shared/teamScore'
 import { useSound } from '@/sound/useSound'
@@ -17,7 +18,7 @@ interface TeamBarProps {
 }
 
 /** Projector: one card per team with its score. */
-export function TeamBar({ teams, activeId, activeLabel = 'Đến lượt', onPick, disabledIds = [], columns = teams.length }: TeamBarProps) {
+export function TeamBar({ teams, activeId, activeLabel = i18n.t('play.common.yourTurn'), onPick, disabledIds = [], columns = teams.length }: TeamBarProps) {
   const sound = useSound()
   return (
     <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
@@ -30,7 +31,7 @@ export function TeamBar({ teams, activeId, activeLabel = 'Đến lượt', onPic
             <span className="flex min-w-0 flex-1 flex-col text-left">
               <span className="truncate text-xl font-extrabold">{team.name}</span>
               {active && <span className="text-[15px] font-extrabold text-[#9A4A00]">{activeLabel}</span>}
-              {disabled && <span className="text-[15px] font-bold text-ink-soft">Đã trả lời</span>}
+              {disabled && <span className="text-[15px] font-bold text-ink-soft">{i18n.t('play.common.answered')}</span>}
             </span>
             <motion.span
               key={team.score}

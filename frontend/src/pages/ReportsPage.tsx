@@ -1,5 +1,6 @@
 import { Dropdown, Select } from 'antd'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 import { getClassReport } from '@/api/reportApi'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -40,6 +41,7 @@ const CLASS_PILLS = 5
  * so a report can be bookmarked or reloaded.
  */
 export function ReportsPage() {
+  const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
   const classrooms = useClassStore((s) => s.classrooms)
   const currentCode = useClassStore((s) => s.classroomCode)
@@ -98,13 +100,13 @@ export function ReportsPage() {
   const report = loaded?.report
   const loading = !problem && loaded?.key !== key
   const failed = loaded?.key === key && loaded.error !== undefined
-  const during = preset ? `trong ${preset.name}` : 'trong kỳ này'
+  const during = preset ? preset.during : t('reports.during.custom')
 
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title="Báo cáo"
-        text="Lớp đã chơi gì, kết quả ra sao và các em được khen bao nhiêu sao"
+        title={t('reports.title')}
+        text={t('reports.text')}
         actions={report && <DownloadButton report={report} />}
       />
 
@@ -120,13 +122,13 @@ export function ReportsPage() {
         <>
           <div
             role="group"
-            aria-label="Bộ lọc báo cáo"
+            aria-label={t('reports.filters')}
             className="z-20 flex flex-wrap items-center gap-2 rounded-[16px] bg-white/95 p-2 shadow-[0_4px_14px_rgba(31,42,68,0.07)] backdrop-blur sm:sticky sm:top-0"
           >
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="px-2 text-[13px] font-extrabold text-ink-muted">Lớp</span>
+              <span className="px-2 text-[13px] font-extrabold text-ink-muted">{t('reports.class')}</span>
               {classrooms.length <= CLASS_PILLS ? (
-                <div role="radiogroup" aria-label="Lớp" className="flex flex-wrap gap-1.5">
+                <div role="radiogroup" aria-label={t('reports.class')} className="flex flex-wrap gap-1.5">
                   {classrooms.map((c) => (
                     <Pill key={c.code} on={c.code === code} label={classTitle(c.name)} onClick={() => update({ class: c.code })}>
                       {c.name}
@@ -135,7 +137,7 @@ export function ReportsPage() {
                 </div>
               ) : (
                 <Select
-                  aria-label="Lớp"
+                  aria-label={t('reports.class')}
                   value={code}
                   onChange={(value: string) => update({ class: value })}
                   options={classrooms.map((c) => ({ value: c.code, label: classTitle(c.name) }))}
@@ -145,15 +147,15 @@ export function ReportsPage() {
             </div>
             <span aria-hidden="true" className="mx-1 hidden h-[26px] w-px bg-line sm:block" />
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="px-2 text-[13px] font-extrabold text-ink-muted sm:pl-0">Thời gian</span>
-              <div role="radiogroup" aria-label="Khoảng thời gian" className="flex flex-wrap gap-1.5">
+              <span className="px-2 text-[13px] font-extrabold text-ink-muted sm:pl-0">{t('reports.period')}</span>
+              <div role="radiogroup" aria-label={t('reports.periodLabel')} className="flex flex-wrap gap-1.5">
                 {PERIOD_PRESETS.map((p) => (
                   <Pill key={p.key} on={period === p.key} onClick={() => pickPeriod(p.key)}>
                     {p.label}
                   </Pill>
                 ))}
                 <Pill on={period === 'custom'} onClick={() => pickPeriod('custom')}>
-                  📅 Tùy chọn
+                  {t('reports.custom')}
                 </Pill>
               </div>
             </div>
@@ -161,16 +163,16 @@ export function ReportsPage() {
               <span className="flex flex-wrap items-center gap-2 px-1 text-[14px] text-ink-soft">
                 <input
                   type="date"
-                  aria-label="Từ ngày"
+                  aria-label={t('reports.from')}
                   value={range.from}
                   max={range.to || undefined}
                   onChange={(e) => update({ from: e.target.value })}
                   className="h-9 rounded-[10px] border border-line bg-white px-2.5 font-[inherit] text-ink"
                 />
-                đến
+                {t('reports.to')}
                 <input
                   type="date"
-                  aria-label="Đến ngày"
+                  aria-label={t('reports.toLabel')}
                   value={range.to}
                   min={range.from || undefined}
                   onChange={(e) => update({ to: e.target.value })}
@@ -210,6 +212,7 @@ function replayPath(gameCode: string, templateCode: string): string | null {
 }
 
 function ReportBody({ report, during }: { report: ClassReport; during: string }) {
+  const { t } = useTranslation()
   const { summary, previous } = report
   const days = report.daily.length
   const [chartUnit, setChartUnit] = useState<'day' | 'week'>(days <= 45 ? 'day' : 'week')
@@ -225,16 +228,16 @@ function ReportBody({ report, during }: { report: ClassReport; during: string })
           icon="🎮"
           tint="#E3ECFF"
           value={summary.activities.toLocaleString('vi-VN')}
-          label="lượt chơi"
+          label={t('reports.plays')}
           trend={trendPercent(summary.activities, previous.activities)}
         />
-        <NumberTile icon="✅" tint="#DDF5E8" value={`${completionRate(summary.completed, summary.activities)}%`} label="chơi đến cuối" />
-        <NumberTile icon="⏱" tint="#EDE4FF" value={shortDuration(summary.playMinutes)} label="thời gian chơi" />
+        <NumberTile icon="✅" tint="#DDF5E8" value={`${completionRate(summary.completed, summary.activities)}%`} label={t('reports.completed')} />
+        <NumberTile icon="⏱" tint="#EDE4FF" value={shortDuration(summary.playMinutes)} label={t('reports.playTime')} />
         <NumberTile
           icon="⭐"
           tint="#FFF1C9"
           value={summary.stars.toLocaleString('vi-VN')}
-          label={`sao · ${starred}/${report.students.length} em được khen`}
+          label={t('reports.stars', { starred, total: report.students.length })}
           trend={trendPercent(summary.stars, previous.stars)}
         />
       </div>
@@ -246,25 +249,25 @@ function ReportBody({ report, during }: { report: ClassReport; during: string })
           {summary.activities === 0 ? (
             <section className="flex flex-col items-center gap-3 rounded-[20px] bg-white p-8 text-center">
               <img src="/assets/illustrations/thanh-tich.png" alt="" className="h-[150px] w-auto" />
-              <h2 className="m-0 text-[20px] font-black">Chưa có hoạt động nào trong khoảng thời gian này</h2>
+              <h2 className="m-0 text-[20px] font-black">{t('reports.emptyTitle')}</h2>
               <p className="m-0 max-w-[460px] text-[14.5px] text-ink-muted">
-                Mỗi trò chơi cô mở cho lớp trên màn chiếu sẽ được ghi lại ở đây, cùng kết quả của các đội.
+                {t('reports.emptyText')}
               </p>
               <Link to="/games/new" className="mt-1 rounded-[12px] bg-primary px-5 py-2.5 font-bold text-white hover:text-white hover:brightness-110">
-                Tổ chức trò chơi
+                {t('reports.play')}
               </Link>
             </section>
           ) : (
             <>
               <ReportCard
-                title="Lớp chơi khi nào"
+                title={t('reports.when')}
                 action={
                   <Switch
-                    label="Mỗi cột là"
+                    label={t('reports.bar')}
                     value={unit}
                     options={[
-                      { value: 'day', label: 'Theo ngày', disabled: days > MAX_CHART_DAYS },
-                      { value: 'week', label: 'Theo tuần', disabled: days <= 7 },
+                      { value: 'day', label: t('reports.byDay'), disabled: days > MAX_CHART_DAYS },
+                      { value: 'week', label: t('reports.byWeek'), disabled: days <= 7 },
                     ]}
                     onChange={setChartUnit}
                   />
@@ -274,11 +277,11 @@ function ReportBody({ report, during }: { report: ClassReport; during: string })
                 <div className="flex flex-wrap gap-4 text-[12.5px] font-bold text-ink-muted">
                   <span className="flex items-center gap-1.5">
                     <span className="size-2.5 rounded-[3px] bg-primary" />
-                    Chơi đến cuối
+                    {t('reports.ended')}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="size-2.5 rounded-[3px] bg-[#C9D7FA]" />
-                    Dừng giữa chừng
+                    {t('reports.stopped')}
                   </span>
                 </div>
               </ReportCard>
@@ -294,7 +297,7 @@ function ReportBody({ report, during }: { report: ClassReport; during: string })
             action={
               report.students.length > 0 && (
                 <Link to={`/classes/${report.classroom.code}`} className="text-[14px] font-black whitespace-nowrap text-primary hover:underline">
-                  Khen thưởng →
+                  {t('reports.praise')}
                 </Link>
               )
             }
@@ -308,6 +311,7 @@ function ReportBody({ report, during }: { report: ClassReport; during: string })
 
 /** "Tải báo cáo": the stars of the students or the history, as CSV files Excel opens in Vietnamese. */
 function DownloadButton({ report }: { report: ClassReport }) {
+  const { t } = useTranslation()
   return (
     <Dropdown
       trigger={['click']}
@@ -316,15 +320,15 @@ function DownloadButton({ report }: { report: ClassReport }) {
         items: [
           {
             key: 'stars',
-            label: 'Sao của học sinh (CSV)',
+            label: t('reports.starsCsv'),
             disabled: report.students.length === 0,
-            onClick: () => download(csvFileName(report, 'sao'), starsCsv(report)),
+            onClick: () => download(csvFileName(report, 'stars'), starsCsv(report)),
           },
           {
             key: 'history',
-            label: 'Lịch sử hoạt động (CSV)',
+            label: t('reports.historyCsv'),
             disabled: report.sessions.length === 0,
-            onClick: () => download(csvFileName(report, 'lich-su'), sessionsCsv(report)),
+            onClick: () => download(csvFileName(report, 'history'), sessionsCsv(report)),
           },
         ],
       }}
@@ -333,19 +337,20 @@ function DownloadButton({ report }: { report: ClassReport }) {
         type="button"
         className="flex h-11 cursor-pointer items-center gap-2 rounded-full border-2 border-[#DCE5F5] bg-white px-4 font-[inherit] text-[14.5px] font-black text-primary hover:border-primary"
       >
-        ⬇ Tải báo cáo ▾
+        {t('reports.download')}
       </button>
     </Dropdown>
   )
 }
 
 function NoClass() {
+  const { t } = useTranslation()
   return (
     <section className="flex flex-col items-center gap-3 rounded-[20px] bg-white p-8 text-center">
-      <h2 className="m-0 text-[20px] font-black">Cô chưa có lớp nào</h2>
-      <p className="m-0 text-ink-muted">Báo cáo được lập theo từng lớp. Cô tạo lớp và chơi cùng các em để xem báo cáo nhé.</p>
+      <h2 className="m-0 text-[20px] font-black">{t('reports.noClassTitle')}</h2>
+      <p className="m-0 text-ink-muted">{t('reports.noClassText')}</p>
       <Link to="/classes" className="rounded-[12px] bg-primary px-5 py-2.5 font-bold text-white hover:text-white hover:brightness-110">
-        Đến trang Lớp học
+        {t('reports.toClasses')}
       </Link>
     </section>
   )

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { ChevronLeftIcon, ClockIcon, UsersIcon } from '@/components/ui/icons'
 import { gameGuide, type GuideGameType } from '@/game-engine/gameGuide'
-import { editPath, gameRegistry } from '@/game-engine/registry'
+import { editPath, itemWord } from '@/game-engine/registry'
 import { PLAY_DEFAULTS, readPlaySettings, type PlaySettings } from '@/game-engine/shared/gameSettings'
 import { QUICK_SETTINGS, type QuickSetting } from '@/pages/game-start/quickSettings'
 import { gameThumb } from '@/pages/home/homeAssets'
@@ -33,6 +34,7 @@ interface GameIntroProps {
  * settings it is played with), the number of teams and the time per question, and a big "Bắt đầu" (or Enter).
  */
 export function GameIntro({ mode, game, kindName, settings, playable, onChange, onStart }: GameIntroProps) {
+  const { t } = useTranslation()
   const guide = gameGuide(mode, settings)
   const defaults = mode === 'GRID_BOARD' ? {} : PLAY_DEFAULTS[mode]
   const current = readPlaySettings(settings, defaults)
@@ -63,12 +65,12 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
   }, [ready, choosing, onStart])
 
   return (
-    <section aria-label={`Giới thiệu trò chơi ${title}`} className="flex h-full flex-col gap-4 px-10 py-7">
+    <section aria-label={t('start.intro.label', { title })} className="flex h-full flex-col gap-4 px-10 py-7">
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={goBack}
-          aria-label="Quay lại"
+          aria-label={t('start.back')}
           className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-ink hover:text-primary-ink"
         >
           <ChevronLeftIcon size={22} />
@@ -76,7 +78,7 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
         <SoundToggle />
         {!game.sample && <span className="rounded-full bg-white px-5 py-2 text-[18px] font-extrabold">{kindName}</span>}
         <span className={`rounded-full px-4 py-2 text-[16px] font-bold ${game.sample ? 'bg-[#FFF1C2] text-[#7A5600]' : 'bg-white text-ink'}`}>
-          📚 {game.sample ? 'Câu hỏi mẫu' : 'Câu hỏi của cô'}
+          {game.sample ? t('start.intro.sample') : t('start.intro.mine')}
         </span>
         <button
           type="button"
@@ -84,7 +86,7 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
           aria-haspopup="dialog"
           className="h-11 cursor-pointer rounded-full border-2 border-primary bg-white px-5 font-[inherit] text-[16px] font-extrabold text-primary-ink hover:bg-primary hover:text-white"
         >
-          Đổi câu hỏi
+          {t('start.intro.change')}
         </button>
       </div>
       <QuestionSourceModal open={choosing} mode={mode} kindName={kindName} current={game} onClose={() => setChoosing(false)} />
@@ -98,7 +100,7 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
           </div>
         </div>
 
-        <ol aria-label="Cách chơi" className="m-0 grid list-none grid-cols-4 gap-4 p-0">
+        <ol aria-label={t('start.intro.steps')} className="m-0 grid list-none grid-cols-4 gap-4 p-0">
           {guide.steps.slice(0, 4).map((step, i) => (
             <li key={step.title} className="flex flex-col items-center gap-2 rounded-[22px] bg-projector px-4 py-5 text-center">
               <span
@@ -114,7 +116,7 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
         </ol>
 
         {choices.length > 0 && (
-          <div aria-label="Cài đặt nhanh" role="group" className="mt-auto flex flex-wrap gap-4">
+          <div aria-label={t('start.intro.settings')} role="group" className="mt-auto flex flex-wrap gap-4">
             {choices.map((setting) => (
               <Choice
                 key={setting.key}
@@ -131,7 +133,7 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
       <div className="flex min-h-[72px] items-center justify-end gap-5">
         {ready ? (
           <>
-            <span className="text-[17px] font-bold text-ink-soft">Nhấn Enter hoặc</span>
+            <span className="text-[17px] font-bold text-ink-soft">{t('start.intro.pressEnter')}</span>
             <button
               type="button"
               autoFocus
@@ -141,14 +143,14 @@ export function GameIntro({ mode, game, kindName, settings, playable, onChange, 
               <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" />
               </svg>
-              Bắt đầu
+              {t('start.intro.start')}
             </button>
           </>
         ) : (
           <div role="alert" className="flex items-center gap-4 rounded-[20px] bg-white px-6 py-4">
-            <span className="text-[18px] font-bold">Chưa có {gameRegistry[mode].itemUnit} nào đủ nội dung để chơi.</span>
+            <span className="text-[18px] font-bold">{t('start.noneReady', { item: itemWord(mode) })}</span>
             <Link to={editPath(game.id)} className="rounded-full bg-primary px-6 py-3 text-[18px] font-extrabold text-white hover:text-white">
-              Soạn nội dung
+              {t('start.intro.write')}
             </Link>
           </div>
         )}
@@ -170,6 +172,7 @@ function Choice({
   fallback: number | undefined
   onChange: (value: number) => void
 }) {
+  const { t } = useTranslation()
   // The value the game opened with stays a choice after another is picked, so the row does not change under the click.
   const [opened] = useState(value)
   const options =
@@ -197,7 +200,7 @@ function Choice({
                 checked ? 'bg-primary text-white shadow-[0_4px_12px_rgba(53,99,233,0.35)]' : 'bg-transparent text-ink hover:bg-[#EEF2F8] hover:text-primary-ink'
               }`}
             >
-              {o.value === 0 && time ? 'Không giới hạn' : o.label}
+              {o.value === 0 && time ? t('start.settings.noLimit') : o.label}
             </button>
           )
         })}

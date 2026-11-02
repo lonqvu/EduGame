@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { CloseIcon, PlusIcon } from '@/components/ui/icons'
 import { fieldClass } from '@/editor/QuestionForm'
 import type { Draft, PairSet, TextPair } from '@/types/game'
@@ -6,6 +7,8 @@ import { localId, MAX_PAIRS } from '@/utils/gameItems'
 export interface PairSetLabels {
   /** "Bộ nối cặp", "Bộ thẻ" */
   noun: string
+  /** "bộ nối cặp", in a sentence. */
+  nounLower: string
   sideA: string
   sideB: string
   placeholderA: string
@@ -26,6 +29,7 @@ interface PairSetFormProps {
 
 /** Edit form of a set of pairs: MATCHING (left ↔ right) or MEMORY (card ↔ matching card). */
 export function PairSetForm({ set, number, isLast, labels, onChange, onDelete, onNext }: PairSetFormProps) {
+  const { t } = useTranslation()
   const { pairs } = set
 
   const update = (id: string, patch: Partial<TextPair>) =>
@@ -42,7 +46,7 @@ export function PairSetForm({ set, number, isLast, labels, onChange, onDelete, o
           {labels.noun} {number}
         </h2>
         <span className="text-base font-bold text-ink-soft">
-          {complete} / {MAX_PAIRS} cặp
+          {t('editor.form.pairs', { complete, max: MAX_PAIRS })}
         </span>
       </div>
       <span className="text-base text-ink-soft">{labels.hint}</span>
@@ -70,7 +74,7 @@ export function PairSetForm({ set, number, isLast, labels, onChange, onDelete, o
             />
             <button
               type="button"
-              aria-label={`Xóa cặp ${i + 1}`}
+              aria-label={t('editor.form.removePair', { number: i + 1 })}
               onClick={() => remove(p.id)}
               disabled={pairs.length <= 1}
               className="col-start-2 row-span-2 row-start-1 flex size-11 cursor-pointer items-center justify-center self-center rounded-full border-0 bg-transparent text-ink-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-30 sm:col-start-3 sm:row-span-1"
@@ -86,13 +90,13 @@ export function PairSetForm({ set, number, isLast, labels, onChange, onDelete, o
             className="flex min-h-12 cursor-pointer items-center gap-2 self-start rounded-full border-2 border-dashed border-[#A9BDEB] bg-[#F5F8FF] px-5 font-[inherit] font-extrabold text-primary-ink hover:border-primary"
           >
             <PlusIcon size={20} />
-            Thêm cặp
+            {t('editor.form.addPair')}
           </button>
         )}
       </div>
 
       {complete < 2 && (
-        <span className="text-base font-bold text-[#9A4A00]">Cần ít nhất 2 cặp điền đủ hai bên để chơi được.</span>
+        <span className="text-base font-bold text-[#9A4A00]">{t('editor.form.fewPairs')}</span>
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t-2 border-line-soft pt-1.5">
@@ -101,14 +105,14 @@ export function PairSetForm({ set, number, isLast, labels, onChange, onDelete, o
           onClick={onDelete}
           className="min-h-12 cursor-pointer border-0 bg-transparent px-2 font-[inherit] font-bold text-danger hover:underline"
         >
-          Xóa {labels.noun.toLowerCase()} này
+          {t('editor.form.deleteThis', { noun: labels.nounLower })}
         </button>
         <button
           type="button"
           onClick={onNext}
           className="min-h-[52px] cursor-pointer rounded-full border-0 bg-sun px-7 py-3 font-[inherit] font-extrabold text-ink hover:brightness-95"
         >
-          {isLast ? `Thêm ${labels.noun.toLowerCase()} mới` : `${labels.noun} tiếp theo`}
+          {isLast ? t('editor.form.addNew', { noun: labels.nounLower }) : t('editor.form.nextOne', { noun: labels.noun })}
         </button>
       </div>
     </form>

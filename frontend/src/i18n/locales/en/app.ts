@@ -1,0 +1,121 @@
+import type { Strings } from '@/i18n/locales/types'
+import type { app as vi } from '@/i18n/locales/vi/app'
+
+export const app: Strings<typeof vi> = {
+  nav: {
+    home: 'Home',
+    games: 'Games',
+    questionSets: 'Question sets',
+    classes: 'Classes',
+    reports: 'Reports',
+    admin: 'Admin',
+    feedback: 'Feedback',
+    feedbackLabel: 'Send feedback to Lớp Vui',
+    settings: 'Settings',
+    help: 'Help',
+    main: 'Main navigation',
+    openMenu: 'Open menu',
+    comingSoon: 'The “{{page}}” page is coming soon.',
+  },
+
+  languages: {
+    vi: 'Tiếng Việt',
+    en: 'English',
+  },
+
+  common: {
+    cancel: 'Cancel',
+    close: 'Close',
+    save: 'Save',
+    saveChanges: 'Save changes',
+    saving: 'Saving…',
+    saved: 'Saved',
+    delete: 'Delete',
+    edit: 'Edit',
+    add: 'Add',
+    create: 'Create',
+    retry: 'Try again',
+    back: 'Back',
+    next: 'Continue',
+    done: 'Done',
+    later: 'Later',
+    search: 'Search',
+    loading: 'Loading',
+    optional: 'optional',
+    more: 'More actions',
+    goHome: 'Back to home',
+    yes: 'Yes',
+    no: 'No',
+    error: 'Something went wrong. Please try again.',
+    newGame: 'New game',
+  },
+
+  time: {
+    justNow: 'Just now',
+    today: 'Today {{time}}',
+    yesterday: 'Yesterday {{time}}',
+    daysAgo_one: '{{count}} day ago',
+    daysAgo_other: '{{count}} days ago',
+    weeksAgo_one: '{{count}} week ago',
+    weeksAgo_other: '{{count}} weeks ago',
+    monthsAgo_one: '{{count}} month ago',
+    monthsAgo_other: '{{count}} months ago',
+    overAYear: 'Over a year ago',
+  },
+
+  load: {
+    logoLoading: 'Lớp Vui is loading',
+    errorTitle: 'Couldn’t load the data',
+    errorText: 'Check your internet connection and try again.',
+    notFound: 'The page you’re looking for doesn’t exist.',
+    adminOnlyTitle: 'This page is for administrators',
+    adminOnlyText: 'Your account doesn’t have admin access.',
+  },
+
+  topBar: {
+    signUp: 'Sign up',
+    signIn: 'Sign in',
+    notifications: 'Notifications',
+    noNotifications: 'No new notifications.',
+    profile: 'My profile',
+    signOut: 'Sign out',
+    account: 'Account: {{name}}',
+  },
+
+  sound: {
+    turnOff: 'Turn sound off (M key)',
+    turnOn: 'Turn sound on (M key)',
+    turnOffShort: 'Sound off (M)',
+    turnOnShort: 'Sound on (M)',
+  },
+
+  loginPrompt: {
+    features: {
+      questionSets: 'Question sets',
+      classes: 'Class management',
+      reports: 'Reports',
+      profile: 'Profile',
+      admin: 'Admin',
+      upload: 'Image upload',
+      feedback: 'Feedback',
+      page: 'this page',
+    },
+    why: {
+      questionSets: 'Write questions once and use them in every game.',
+      classes: 'Save your class lists to pick names, make groups and give praise.',
+      reports: 'Look back at your class’s results after each session.',
+      upload: 'Images are saved to your account so you can reuse them in other games.',
+    },
+    badge: 'For teacher accounts',
+    title: 'Sign in to use <feature>{{feature}}</feature>',
+    benefits: {
+      classes: 'Save classes and student lists',
+      questionSets: 'Write question sets for many games',
+      reports: 'Review results and reports',
+    },
+    signIn: 'Sign in',
+    signUp: 'Create a free account',
+    later: 'Not now, I’ll try it without an account',
+    tryWithout: 'Try it without an account',
+  },
+}

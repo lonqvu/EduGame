@@ -1,13 +1,25 @@
+import i18n from 'i18next'
+import type { Translation } from '@/i18n/locales/vi'
 /** The pictures hidden behind the doors (public/assets/illustrations), with what the class should guess. */
+type Answer = keyof Translation['play']['picture']['answers']
+
+/** A picture; what it shows is read in the current language. */
+const picture = (file: string, answer: Answer) => ({
+  src: `/assets/illustrations/${file}.png`,
+  get answer() {
+    return i18n.t(`play.picture.answers.${answer}`)
+  },
+})
+
 export const SECRET_PICTURES = [
-  { src: '/assets/illustrations/dua-ngua.png', answer: 'Bạn nhỏ cưỡi ngựa' },
-  { src: '/assets/illustrations/hen-gio.png', answer: 'Chiếc đồng hồ' },
-  { src: '/assets/illustrations/thanh-tich.png', answer: 'Chiếc cúp vàng' },
-  { src: '/assets/illustrations/tro-choi-dua-thuyen.png', answer: 'Các bạn đua thuyền' },
-  { src: '/assets/illustrations/tro-choi-rung-chuong-vang.png', answer: 'Chiếc chuông vàng' },
-  { src: '/assets/illustrations/vong-quay.png', answer: 'Vòng quay may mắn' },
-  { src: '/assets/illustrations/xuc-xac.png', answer: 'Con xúc xắc' },
-  { src: '/assets/illustrations/chia-nhom.png', answer: 'Các bạn đoàn kết' },
+  picture('dua-ngua', 'horse'),
+  picture('hen-gio', 'clock'),
+  picture('thanh-tich', 'cup'),
+  picture('tro-choi-dua-thuyen', 'boats'),
+  picture('tro-choi-rung-chuong-vang', 'bell'),
+  picture('vong-quay', 'wheel'),
+  picture('xuc-xac', 'dice'),
+  picture('chia-nhom', 'together'),
 ]
 
 /** Most doors in front of the picture. */

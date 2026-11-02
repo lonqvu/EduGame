@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { PROJECTOR_BOARD_BG, ProjectorStage } from '@/components/projector/ProjectorStage'
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, FilledStarIcon } from '@/components/ui/icons'
 import type { GameGuide, GuideGameType } from '@/game-engine/gameGuide'
@@ -33,6 +34,7 @@ function Slide({ heading, children }: { heading: string; children: ReactNode }) 
  * wins). Only what the class needs: no settings, no teacher notes, no answers. ←/→ change page, Esc closes.
  */
 export function RulesShow({ mode, title, guide, onClose, fullscreen = true }: RulesShowProps) {
+  const { t } = useTranslation()
   const [page, setPage] = useState(0)
   const root = useRef<HTMLDivElement>(null)
   // Up to six rules must fit the board: longer lists get smaller type and tighter rows.
@@ -45,7 +47,7 @@ export function RulesShow({ mode, title, guide, onClose, fullscreen = true }: Ru
       <h2 className="m-0 font-display text-[64px] leading-tight font-extrabold">{title}</h2>
       <p className="m-0 max-w-[960px] text-[36px] leading-snug text-ink-soft">{guide.goal}</p>
     </div>,
-    <Slide key="rules" heading="Luật chơi">
+    <Slide key="rules" heading={t('start.show.rules')}>
       <ol className={`m-0 flex list-none flex-col p-0 ${ruleSize}`}>
         {guide.rules.map((rule, i) => (
           <li key={rule} className="flex items-center gap-5 leading-snug">
@@ -59,7 +61,7 @@ export function RulesShow({ mode, title, guide, onClose, fullscreen = true }: Ru
         ))}
       </ol>
     </Slide>,
-    <Slide key="steps" heading="Cách chơi">
+    <Slide key="steps" heading={t('start.show.steps')}>
       <ol className="m-0 grid list-none grid-cols-4 gap-6 p-0">
         {guide.steps.map((step, i) => (
           <li key={step.title} className="flex flex-col items-center gap-4 rounded-[28px] bg-projector px-5 py-8 text-center">
@@ -77,9 +79,9 @@ export function RulesShow({ mode, title, guide, onClose, fullscreen = true }: Ru
     </Slide>,
     <div key="winner" className="flex h-full flex-col items-center justify-center gap-8 rounded-[40px] bg-white px-16 text-center">
       <FilledStarIcon size={120} stroke="#F5B400" fill="#FFC928" />
-      <h2 className="m-0 font-display text-[54px] font-extrabold text-primary-ink">Ai chiến thắng?</h2>
+      <h2 className="m-0 font-display text-[54px] font-extrabold text-primary-ink">{t('start.show.winner')}</h2>
       <p className="m-0 max-w-[1000px] text-[40px] leading-snug">{guide.winner}</p>
-      <p className="m-0 text-[30px] font-bold text-success">Chúc cả lớp chơi thật vui!</p>
+      <p className="m-0 text-[30px] font-bold text-success">{t('start.show.haveFun')}</p>
     </div>,
   ]
   const last = pages.length - 1
@@ -118,29 +120,29 @@ export function RulesShow({ mode, title, guide, onClose, fullscreen = true }: Ru
   const navButton = 'flex h-14 cursor-pointer items-center gap-2 rounded-full border-0 px-6 font-[inherit] text-[20px] font-extrabold disabled:cursor-not-allowed disabled:opacity-40'
 
   return (
-    <div ref={root} role="dialog" aria-modal="true" aria-label={`Luật chơi: ${title}`} className="fixed inset-0 z-[1100]">
+    <div ref={root} role="dialog" aria-modal="true" aria-label={t('start.show.label', { title })} className="fixed inset-0 z-[1100]">
       <ProjectorStage background={PROJECTOR_BOARD_BG}>
         <div className="flex h-full flex-col gap-5 px-10 py-7">
           <div className="flex items-center justify-between">
             <span className="rounded-full bg-white px-5 py-2 text-[20px] font-extrabold">{title}</span>
             <button type="button" onClick={onClose} className={`${navButton} bg-white text-ink hover:text-primary-ink`}>
               <CloseIcon size={22} />
-              Thoát
+              {t('start.show.exit')}
             </button>
           </div>
           <div className="min-h-0 flex-1">{pages[page]}</div>
           <div className="flex items-center justify-between">
             <button type="button" onClick={() => setPage(page - 1)} disabled={page === 0} className={`${navButton} bg-white text-ink`}>
               <ChevronLeftIcon size={24} />
-              Trước
+              {t('start.show.previous')}
             </button>
-            <div className="flex items-center gap-3" aria-label={`Trang ${page + 1} / ${pages.length}`}>
+            <div className="flex items-center gap-3" aria-label={t('start.show.page', { page: page + 1, total: pages.length })}>
               {pages.map((_, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => setPage(i)}
-                  aria-label={`Trang ${i + 1}`}
+                  aria-label={t('questionSets.use.page', { page: i + 1 })}
                   aria-current={i === page}
                   className={`h-4 cursor-pointer rounded-full border-0 p-0 transition-all ${i === page ? 'w-10 bg-primary' : 'w-4 bg-white'}`}
                 />
@@ -148,7 +150,7 @@ export function RulesShow({ mode, title, guide, onClose, fullscreen = true }: Ru
             </div>
             {page < last ? (
               <button type="button" onClick={() => setPage(page + 1)} className={`${navButton} bg-primary text-white`}>
-                Tiếp
+                {t('start.show.next')}
                 <ChevronRightIcon size={24} />
               </button>
             ) : (

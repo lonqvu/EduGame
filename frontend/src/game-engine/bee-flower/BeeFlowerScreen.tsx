@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { Countdown } from '@/game-engine/quiz/QuizParts'
@@ -48,8 +49,8 @@ export function BeeFlowerScreen({ game, questions, settings }: BeeFlowerScreenPr
   const sound = useSound()
   const backTo = editPath(game.id)
 
-  if (playable.length === 0) return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
-  if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="Lấy nhiều mật nhất" />
+  if (playable.length === 0) return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
+  if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="nectar" />
 
   const question = playable[state.index]
   const answering = state.teams.find((t) => t.id === state.answeringTeamId)
@@ -65,7 +66,7 @@ export function BeeFlowerScreen({ game, questions, settings }: BeeFlowerScreenPr
   return (
     <PlayFrame
       title={game.title}
-      progress={`Câu ${state.index + 1} / ${playable.length}`}
+      progress={i18n.t('play.common.question', { number: state.index + 1, total: playable.length })}
       extra={rules.timeLimitSec > 0 && !state.revealed && <Countdown key={`${round}-${state.index}`} seconds={rules.timeLimitSec} paused={state.revealed} />}
       backTo={backTo}
     >
@@ -164,7 +165,7 @@ export function BeeFlowerScreen({ game, questions, settings }: BeeFlowerScreenPr
       <TeamBar
         teams={state.teams}
         activeId={state.answeringTeamId}
-        activeLabel="Đang trả lời"
+        activeLabel={i18n.t('play.common.answering')}
         disabledIds={state.revealed ? state.teams.map((t) => t.id) : state.triedTeams}
         onPick={(teamId) => {
           setTarget(null)
@@ -175,11 +176,11 @@ export function BeeFlowerScreen({ game, questions, settings }: BeeFlowerScreenPr
         message={
           state.revealed
             ? honey
-              ? 'Chú ong lấy được mật rồi!'
-              : 'Đáp án đúng đã hiện.'
+              ? i18n.t('play.bee.nectar')
+              : i18n.t('play.common.answerShown')
             : answering
-              ? `${answering.name} chỉ đường cho ong bay đến bông hoa nào?`
-              : 'Đội nào giành quyền? Cô bấm tên đội.'
+              ? i18n.t('play.bee.whichFlower', { team: answering.name })
+              : i18n.t('play.common.whoBuzzed')
         }
         revealed={state.revealed}
         onReveal={() => dispatch({ type: 'reveal' })}
@@ -188,7 +189,7 @@ export function BeeFlowerScreen({ game, questions, settings }: BeeFlowerScreenPr
           setTarget(null)
           dispatch({ type: 'next', total: playable.length })
         }}
-        nextLabel={isLast ? 'Xem kết quả' : 'Câu tiếp theo'}
+        nextLabel={isLast ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextQuestion')}
       />
     </PlayFrame>
   )

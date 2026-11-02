@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { env } from '@/utils/env'
 
 /** "Hồ sơ của tôi": the rules the backend checks too (ProfileRules), and how the profile is shown. */
@@ -8,17 +9,8 @@ export const MAX_DISPLAY_NAME = 100
 export const AVATARS = ['teacher', 'bear', 'rabbit', 'lion', 'cat', 'fox', 'panda', 'owl', 'frog'] as const
 export type AvatarKey = (typeof AVATARS)[number]
 
-export const AVATAR_LABELS: Record<AvatarKey, string> = {
-  teacher: 'Cô giáo',
-  bear: 'Gấu',
-  rabbit: 'Thỏ',
-  lion: 'Sư tử',
-  cat: 'Mèo',
-  fox: 'Cáo',
-  panda: 'Gấu trúc',
-  owl: 'Cú mèo',
-  frog: 'Ếch',
-}
+/** The name of a picture, in the current language. */
+export const avatarLabel = (key: AvatarKey) => i18n.t(`profile.avatars.${key}`)
 
 const isAvatar = (value: string | undefined): value is AvatarKey => !!value && (AVATARS as readonly string[]).includes(value)
 
@@ -43,8 +35,8 @@ export const AVATAR_SIDE = 512
 
 /** Form rule for a picked file: false or the message to show. */
 export function pictureError(file: { type: string; size: number }): string | false {
-  if (!PICTURE_TYPES.includes(file.type)) return 'Cô chọn ảnh JPG, PNG, WEBP hoặc GIF nhé.'
-  if (file.size > MAX_PICTURE_BYTES) return 'Ảnh lớn quá (tối đa 15 MB), cô chọn ảnh khác nhé.'
+  if (!PICTURE_TYPES.includes(file.type)) return i18n.t('profile.edit.pictureType')
+  if (file.size > MAX_PICTURE_BYTES) return i18n.t('profile.edit.pictureTooLarge')
   return false
 }
 
@@ -66,7 +58,7 @@ export function normalizePhone(value: string): string | null {
 
 /** Form rule: false or the message to show. */
 export function phoneError(value: string): string | false {
-  return normalizePhone(value) === null ? 'Số điện thoại gồm 9–15 chữ số, ví dụ 0987 654 321.' : false
+  return normalizePhone(value) === null ? i18n.t('profile.edit.phoneInvalid') : false
 }
 
 /** "0987 654 321" for a 10-digit Vietnamese number; other numbers as they are. */
@@ -81,11 +73,13 @@ export function joinedLabel(iso?: string): string {
   if (!iso) return ''
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return ''
+  // "15/08/2025" in Vietnamese; "August 15, 2025" in English (day and month in that order would be ambiguous).
+  if (i18n.language === 'en') return date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
   return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`
 }
 
 /** "Giáo viên" for teachers, "Quản trị viên" for admins. */
-export const roleLabel = (role: 'ADMIN' | 'TEACHER') => (role === 'ADMIN' ? 'Quản trị viên' : 'Giáo viên')
+export const roleLabel = (role: 'ADMIN' | 'TEACHER') => (role === 'ADMIN' ? i18n.t('profile.card.admin') : i18n.t('profile.card.teacher'))
 
 /** 1234 -> "1.234" (Vietnamese grouping). */
-export const countLabel = (n: number) => n.toLocaleString('vi-VN')
+export const countLabel = (n: number) => n.toLocaleString(i18n.language === 'en' ? 'en-US' : 'vi-VN')

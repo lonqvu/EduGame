@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { MAX_SCOREBOARD_TEAMS, MIN_SCOREBOARD_TEAMS } from '@/game-engine/tools/classTools'
@@ -37,11 +38,11 @@ export function ScoreboardScreen() {
 
   return (
     <ToolFrame
-      title="Bảng điểm"
-      subtitle="Bấm vào tên đội để đổi tên"
+      title={i18n.t('play.tools.score.title')}
+      subtitle={i18n.t('play.tools.score.subtitle')}
       actions={
         <>
-          <span className="text-lg font-bold text-ink-soft">Số đội</span>
+          <span className="text-lg font-bold text-ink-soft">{i18n.t('play.tools.score.teams')}</span>
           {Array.from({ length: MAX_SCOREBOARD_TEAMS - MIN_SCOREBOARD_TEAMS + 1 }, (_, i) => i + MIN_SCOREBOARD_TEAMS).map((n) => (
             <button
               key={n}
@@ -60,7 +61,7 @@ export function ScoreboardScreen() {
             onClick={() => setTeams((current) => current.map((t) => ({ ...t, score: 0 })))}
             className="h-12 cursor-pointer rounded-full border-0 bg-white px-5 font-[inherit] text-lg font-extrabold text-danger"
           >
-            Về 0 hết
+            {i18n.t('play.tools.score.reset')}
           </button>
         </>
       }
@@ -80,7 +81,7 @@ export function ScoreboardScreen() {
                 <input
                   value={team.name}
                   maxLength={24}
-                  aria-label={`Tên ${team.name}`}
+                  aria-label={i18n.t('play.tools.score.name', { team: team.name })}
                   onChange={(e) => setTeams((current) => current.map((t) => (t.id === team.id ? { ...t, name: e.target.value } : t)))}
                   onBlur={(e) => {
                     if (!e.target.value.trim()) setTeams((current) => current.map((t, i) => (t.id === team.id ? { ...t, name: scoreboardTeams(6)[i].name } : t)))
@@ -88,7 +89,7 @@ export function ScoreboardScreen() {
                   className="min-w-0 flex-1 rounded-xl border-0 bg-transparent px-1 font-display text-[28px] font-extrabold text-ink outline-none focus:bg-surface-soft"
                 />
                 {lead && (
-                  <span className="text-[30px]" aria-label="Đang dẫn đầu">
+                  <span className="text-[30px]" aria-label={i18n.t('play.tools.score.leading')}>
                     👑
                   </span>
                 )}
@@ -99,7 +100,7 @@ export function ScoreboardScreen() {
                 animate={{ scale: 1 }}
                 className="font-display leading-none font-extrabold"
                 style={{ color: team.color, fontSize: teams.length > 4 ? 84 : 110 }}
-                aria-label={`${team.name}: ${team.score} điểm`}
+                aria-label={i18n.t('play.tools.score.score', { team: team.name, score: team.score })}
               >
                 {team.score}
               </motion.span>
@@ -108,7 +109,7 @@ export function ScoreboardScreen() {
                   <button
                     key={step}
                     type="button"
-                    aria-label={`${step > 0 ? 'Cộng' : 'Trừ'} ${Math.abs(step)} điểm cho ${team.name}`}
+                    aria-label={i18n.t(step > 0 ? 'play.tools.score.add' : 'play.tools.score.take', { points: Math.abs(step), team: team.name })}
                     onClick={() => {
                       sound.play(step > 0 ? 'correct' : 'pop')
                       setTeams((current) => addPoints(current, team.id, step))

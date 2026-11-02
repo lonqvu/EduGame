@@ -1,5 +1,6 @@
 import { App, Button } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { PlusIcon } from '@/components/ui/icons'
@@ -24,6 +25,7 @@ const PAGE = 12
 
 /** /question-sets — the teacher's question bank: find, create, use, edit, copy, delete sets. */
 export function QuestionSetsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { message } = App.useApp()
@@ -67,7 +69,7 @@ export function QuestionSetsPage() {
 
   const create = async (request: QuestionSetRequest) => {
     const created = await createSet(request)
-    message.success('Đã tạo bộ câu hỏi. Cô thêm câu hỏi cho bộ nhé!')
+    message.success(t('questionSets.page.created'))
     navigate(`/question-sets/${encodeURIComponent(created.summary.code)}`)
   }
 
@@ -77,18 +79,18 @@ export function QuestionSetsPage() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title="Bộ câu hỏi của cô"
-        text={`Soạn một lần, chơi với mọi trò hỏi đáp${ready && sets.length > 0 ? ` · ${totals.sets} bộ · ${totals.questions} câu` : ''}`}
+        title={t('questionSets.page.title')}
+        text={t('questionSets.page.text') + (ready && sets.length > 0 ? t('questionSets.page.totals', { sets: totals.sets, questions: totals.questions }) : '')}
         actions={
             <Button
               type="primary"
               icon={<PlusIcon size={16} />}
               disabled={full}
-              title={full ? `Cô đã có ${MAX_SETS} bộ câu hỏi` : undefined}
+              title={full ? t('questionSets.full', { count: MAX_SETS }) : undefined}
               onClick={() => setCreating(true)}
               className="h-11 rounded-full px-5 font-extrabold shadow-[0_6px_16px_rgba(53,99,233,0.3)]"
             >
-              Tạo bộ câu hỏi
+              {t('questionSets.create')}
             </Button>
         }
       />

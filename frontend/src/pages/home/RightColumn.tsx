@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { ArrowRightIcon, PlayIcon } from '@/components/ui/icons'
 import { toolPath } from '@/game-engine/registry'
@@ -8,32 +9,29 @@ import type { GameType } from '@/types/game'
 import { subjectArt, subjectInfo } from '@/utils/questionSets'
 
 /** What a teacher reaches for in the middle of a lesson. */
-const CLASS_TOOLS: { type: GameType; name: string; text: string }[] = [
-  { type: 'SPIN_WHEEL', name: 'Gọi tên', text: 'Vòng quay' },
-  { type: 'TIMER', name: 'Đồng hồ', text: 'Bấm giờ' },
-  { type: 'TEAM_MAKER', name: 'Chia nhóm', text: 'Ngẫu nhiên' },
-  { type: 'NOISE_METER', name: 'Tiếng ồn', text: 'Giữ trật tự' },
-]
+/** The tools of the home page; name and line in home.tools.* (`TYPE`, `TYPE_text`). */
+const CLASS_TOOLS = ['SPIN_WHEEL', 'TIMER', 'TEAM_MAKER', 'NOISE_METER'] as const satisfies readonly GameType[]
 
 /** Four classroom tools, each opened in one tap. */
 export function ClassTools() {
+  const { t } = useTranslation()
   return (
     <Panel className="flex flex-col gap-3 px-[15px] pt-[16px] pb-[15px]">
       <PanelHeader
         icon={<span aria-hidden="true" className="text-[22px] leading-none">🧰</span>}
-        title="Công cụ lớp học"
-        action={<MoreLink to="/games/new" label="Tất cả" />}
+        title={t('home.tools.title')}
+        action={<MoreLink to="/games/new" label={t('home.tools.all')} />}
       />
-      <ul aria-label="Công cụ lớp học" className="m-0 grid list-none grid-cols-2 gap-2.5 p-0">
+      <ul aria-label={t('home.tools.title')} className="m-0 grid list-none grid-cols-2 gap-2.5 p-0">
         {CLASS_TOOLS.map((tool) => (
-          <li key={tool.type}>
+          <li key={tool}>
             <Link
-              to={toolPath(tool.type)}
+              to={toolPath(tool)}
               className="flex flex-col overflow-hidden rounded-[16px] border-2 border-transparent bg-[#F6F8FC] text-ink transition hover:-translate-y-0.5 hover:border-[#C9D9F5] hover:text-ink"
             >
-              <img src={gameThumb(tool.type)} alt="" className="block aspect-[12/5] w-full object-cover" />
-              <span className="px-[11px] pt-[7px] text-[14.5px] font-black">{tool.name}</span>
-              <span className="px-[11px] pb-[9px] text-[12.5px] text-ink-muted">{tool.text}</span>
+              <img src={gameThumb(tool)} alt="" className="block aspect-[12/5] w-full object-cover" />
+              <span className="px-[11px] pt-[7px] text-[14.5px] font-black">{t(`home.tools.${tool}`)}</span>
+              <span className="px-[11px] pb-[9px] text-[12.5px] text-ink-muted">{t(`home.tools.${tool}_text`)}</span>
             </Link>
           </li>
         ))}
@@ -44,16 +42,17 @@ export function ClassTools() {
 
 /** The teacher's last changed question sets: open one, or play it at once ("▶ Chơi" picks the game). */
 export function QuestionSets({ sets, onPlay }: { sets: QuestionSetSummaryResponse[]; onPlay: (set: QuestionSetSummaryResponse) => void }) {
+  const { t } = useTranslation()
   return (
     <Panel className="flex flex-col gap-[6px] px-[15px] pt-[17px] pb-[11px]">
       <PanelHeader
         icon={<Art name="icon-folder" className="h-[26px] w-[28px]" />}
-        title="Bộ câu hỏi"
-        action={<MoreLink to="/question-sets" label="Xem tất cả" />}
+        title={t('home.sets.title')}
+        action={<MoreLink to="/question-sets" label={t('home.sets.showAll')} />}
       />
       {sets.length === 0 && (
         <p className="m-0 px-1 pt-2 pb-1 text-[14px] text-ink-soft">
-          Chưa có bộ câu hỏi nào. <Link to="/question-sets">Tạo bộ câu hỏi</Link>
+          <Trans i18nKey="home.sets.empty" components={{ link: <Link to="/question-sets" /> }} />
         </p>
       )}
       <ul className="m-0 flex list-none flex-col p-0">
@@ -67,7 +66,7 @@ export function QuestionSets({ sets, onPlay }: { sets: QuestionSetSummaryRespons
               <span className="flex min-w-0 flex-col gap-[2px]">
                 <span className="truncate text-[14.5px] font-bold">{set.title}</span>
                 <span className="text-[12.5px] text-ink-soft">
-                  {set.questionCount} câu · {subjectInfo(set.subject).label}
+                  {t('questionSets.count', { count: set.questionCount })} · {subjectInfo(set.subject).label}
                 </span>
               </span>
             </Link>
@@ -75,11 +74,11 @@ export function QuestionSets({ sets, onPlay }: { sets: QuestionSetSummaryRespons
               <button
                 type="button"
                 onClick={() => onPlay(set)}
-                aria-label={`Chơi với ${set.title}`}
+                aria-label={t('home.sets.playWith', { title: set.title })}
                 className="flex h-8 shrink-0 cursor-pointer items-center gap-1 rounded-full border-0 bg-transparent px-1.5 font-[inherit] text-[13.5px] font-black text-primary hover:text-primary-ink"
               >
                 <PlayIcon size={13} className="fill-current" />
-                Chơi
+                {t('home.sets.play')}
               </button>
             )}
           </li>

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ChevronLeftIcon } from '@/components/ui/icons'
@@ -40,11 +41,11 @@ export function GameBackButton({ backTo, className }: { backTo: string; classNam
   const leave = useLeaveGame()
   const look = `flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 ${className}`
   return leave ? (
-    <button type="button" onClick={leave} aria-label="Quay lại màn giới thiệu" className={look}>
+    <button type="button" onClick={leave} aria-label={i18n.t('play.common.backToIntro')} className={look}>
       <ChevronLeftIcon size={22} />
     </button>
   ) : (
-    <Link to={backTo} aria-label="Quay lại soạn câu hỏi" className={look}>
+    <Link to={backTo} aria-label={i18n.t('play.common.backToEditor')} className={look}>
       <ChevronLeftIcon size={22} />
     </Link>
   )
@@ -59,7 +60,7 @@ export function NothingToPlay({ message, backTo }: { message: string; backTo: st
         to={backTo}
         className="flex h-[60px] items-center rounded-full bg-primary px-8 text-[20px] font-extrabold text-white hover:text-white hover:brightness-110"
       >
-        Mở trình soạn
+        {i18n.t('play.common.openEditor')}
       </Link>
     </div>
   )

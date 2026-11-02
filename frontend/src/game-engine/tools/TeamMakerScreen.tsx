@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { RefreshIcon } from '@/components/ui/icons'
@@ -35,27 +36,27 @@ export function TeamMakerScreen() {
 
   return (
     <ToolFrame
-      title="Chia nhóm ngẫu nhiên"
-      subtitle={[className, `${students.length} bạn`].filter(Boolean).join(' · ')}
+      title={i18n.t('play.tools.teams.title')}
+      subtitle={[className, i18n.t('play.tools.teams.students', { count: students.length })].filter(Boolean).join(' · ')}
       actions={
         <>
-          <span className="text-lg font-extrabold">Số nhóm</span>
+          <span className="text-lg font-extrabold">{i18n.t('play.tools.teams.count')}</span>
           <div className="flex items-center rounded-full bg-white p-1">
             <button
               type="button"
-              aria-label="Bớt một nhóm"
+              aria-label={i18n.t('play.tools.teams.fewer')}
               disabled={count <= MIN_GROUPS}
               onClick={() => changeCount(count - 1)}
               className="size-12 cursor-pointer rounded-full border-0 bg-transparent font-[inherit] text-2xl font-extrabold disabled:opacity-30"
             >
               −
             </button>
-            <span aria-label="Số nhóm" className="w-10 text-center font-display text-[28px] font-extrabold">
+            <span aria-label={i18n.t('play.tools.teams.count')} className="w-10 text-center font-display text-[28px] font-extrabold">
               {count}
             </span>
             <button
               type="button"
-              aria-label="Thêm một nhóm"
+              aria-label={i18n.t('play.tools.teams.more')}
               disabled={count >= max}
               onClick={() => changeCount(count + 1)}
               className="size-12 cursor-pointer rounded-full border-0 bg-transparent font-[inherit] text-2xl font-extrabold disabled:opacity-30"
@@ -65,7 +66,7 @@ export function TeamMakerScreen() {
           </div>
           <button type="button" onClick={split} disabled={students.length < MIN_GROUPS} className={`${toolButtonClass} bg-primary text-white`}>
             <RefreshIcon size={22} />
-            {groups ? 'Chia lại' : 'Chia nhóm'}
+            {groups ? i18n.t('play.tools.teams.again') : i18n.t('play.tools.teams.make')}
           </button>
         </>
       }
@@ -77,7 +78,7 @@ export function TeamMakerScreen() {
             return (
               <motion.section
                 key={`${round}-${g}`}
-                aria-label={`Nhóm ${g + 1}`}
+                aria-label={i18n.t('play.tools.teams.group', { number: g + 1 })}
                 initial={{ opacity: 0, y: 30, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: g * 0.08, type: 'spring', bounce: 0.35 }}
@@ -85,8 +86,8 @@ export function TeamMakerScreen() {
                 style={{ borderColor: color }}
               >
                 <span className="flex items-center justify-between px-4 py-2 font-display text-[24px] font-extrabold text-white" style={{ background: color }}>
-                  Nhóm {g + 1}
-                  <span className="text-lg">{group.length} bạn</span>
+                  {i18n.t('play.tools.teams.group', { number: g + 1 })}
+                  <span className="text-lg">{i18n.t('play.tools.teams.students', { count: group.length })}</span>
                 </span>
                 <span className="flex flex-wrap content-start gap-1.5 p-3">
                   {group.map((s, i) => (
@@ -108,10 +109,11 @@ export function TeamMakerScreen() {
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-[32px] bg-white/70 text-center">
-          <span className="font-display text-[44px] font-extrabold">Chia {students.length} bạn thành {count} nhóm</span>
+          <span className="font-display text-[44px] font-extrabold">{i18n.t('play.tools.teams.intro', { students: students.length, groups: count })}</span>
           <span className="text-xl text-ink-soft">
-            Mỗi nhóm khoảng {Math.floor(students.length / count)}
-            {students.length % count ? `–${Math.ceil(students.length / count)}` : ''} bạn. Bấm “Chia nhóm” để bắt đầu.
+            {i18n.t('play.tools.teams.size', {
+              size: `${Math.floor(students.length / count)}${students.length % count ? `–${Math.ceil(students.length / count)}` : ''}`,
+            })}
           </span>
         </div>
       )}

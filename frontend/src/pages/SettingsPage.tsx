@@ -1,9 +1,11 @@
 import { App, Slider } from 'antd'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { BellIcon, GamepadIcon, GlobeIcon, LockIcon, SpeakerIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
+import { LANGUAGES, shownLanguage } from '@/i18n'
 import { SaveState, SettingItem, SettingSelect, SettingsSection, SettingSwitch } from '@/pages/settings/SettingsParts'
 import { playSound } from '@/sound/soundEngine'
 import { useAuthStore } from '@/store/authStore'
@@ -13,18 +15,20 @@ import { useTeacherStore } from '@/store/teacherStore'
 import { apiErrorMessage } from '@/utils/apiError'
 import { fromChoice, GAME_DEFAULT_OPTIONS, hasGameDefaults, toChoice, type GameDefaultKey } from '@/utils/settings'
 
-const GAME_DEFAULTS: { key: GameDefaultKey; label: string; hint: string }[] = [
-  { key: 'teams', label: 'Số đội', hint: 'Cho các trò chia lớp thành đội ngẫu nhiên.' },
-  { key: 'timeLimitSec', label: 'Thời gian mỗi câu', hint: 'Trắc nghiệm, Rung chuông vàng, Đua thuyền.' },
-  { key: 'allowSteal', label: 'Cho đội khác giành quyền', hint: 'Khi một đội trả lời sai.' },
-  { key: 'shuffleItems', label: 'Xáo trộn thứ tự câu hỏi', hint: 'Mỗi lần chơi một thứ tự khác.' },
-]
+/** The defaults for new games, with the keys of their name and hint (settings.games.*). */
+const GAME_DEFAULTS = [
+  { key: 'teams', label: 'teams', hint: 'teamsHint' },
+  { key: 'timeLimitSec', label: 'timeLimit', hint: 'timeLimitHint' },
+  { key: 'allowSteal', label: 'allowSteal', hint: 'allowStealHint' },
+  { key: 'shuffleItems', label: 'shuffle', hint: 'shuffleHint' },
+] as const satisfies readonly { key: GameDefaultKey; label: string; hint: string }[]
 
 /**
  * /settings — "Cài đặt": display, defaults of new games, notification mails. Every change saves by itself; a visitor's
  * in their browser (the mails need an account).
  */
 export function SettingsPage() {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const settings = useSettingsStore((s) => s.settings)
   const status = useSettingsStore((s) => s.status)
@@ -50,7 +54,7 @@ export function SettingsPage() {
   }, [ready, hash])
 
   const change = (patch: SettingsPatch) =>
-    update(patch).catch((e: unknown) => message.error(`Chưa lưu được cài đặt. ${apiErrorMessage(e)}`))
+    update(patch).catch((e: unknown) => message.error(t('settings.saveFailed', { reason: apiErrorMessage(e) })))
 
   const { display, games, notifications, sound } = settings
   const [volumeDraft, setVolumeDraft] = useState<number | null>(null)
@@ -59,12 +63,8 @@ export function SettingsPage() {
   return (
     <div className="flex flex-col gap-5">
       <PageHeader
-        title="Cài đặt"
-        text={
-          guest
-            ? 'Tùy chỉnh Lớp Vui theo cách bạn dạy. Chưa đăng nhập: cài đặt được lưu trên trình duyệt này.'
-            : 'Tùy chỉnh Lớp Vui theo cách cô dạy. Mọi thay đổi được lưu tự động.'
-        }
+        title={t('settings.title')}
+        text={guest ? t('settings.introGuest') : t('settings.intro')}
         badge={ready && <SaveState saving={saving} />}
       />
 
@@ -74,11 +74,11 @@ export function SettingsPage() {
         <PageLoading />
       ) : (
         <>
-          <SettingsSection id="display" icon={<GlobeIcon size={17} />} title="Hiển thị & trình chiếu" highlighted={highlighted('display')}>
+          <SettingsSection id="display" icon={<GlobeIcon size={17} />} title={t('settings.display.title')} highlighted={highlighted('display')}>
             <SettingItem
               id="set-reduce-motion"
-              label="Giảm hiệu ứng chuyển động"
-              hint="Tắt các hiệu ứng động trên mọi màn hình. Nên bật khi máy tính hoặc máy chiếu chạy chậm."
+              label={t('settings.display.reduceMotion')}
+              hint={t('settings.display.reduceMotionHint')}
               control={
                 <SettingSwitch
                   labelledBy="set-reduce-motion"
@@ -89,8 +89,8 @@ export function SettingsPage() {
             />
             <SettingItem
               id="set-fullscreen"
-              label="Toàn màn hình khi bắt đầu trò chơi"
-              hint="Bấm “Bắt đầu trò chơi” là màn chiếu mở toàn màn hình. Nhấn Esc để thoát."
+              label={t('settings.display.fullscreen')}
+              hint={t('settings.display.fullscreenHint')}
               control={
                 <SettingSwitch
                   labelledBy="set-fullscreen"
@@ -101,17 +101,32 @@ export function SettingsPage() {
             />
             <SettingItem
               id="set-language"
-              label="Ngôn ngữ"
-              hint="Lớp Vui hiện dùng tiếng Việt cho mọi màn hình."
-              control={<span className="text-[15px] font-bold text-ink-soft">Tiếng Việt</span>}
+              label={t('settings.language.label')}
+              hint={t('settings.language.hint')}
+              control={
+                LANGUAGES.length > 1 ? (
+                  <SettingSelect
+                    labelledBy="set-language"
+                    value={shownLanguage(display.language)}
+                    options={LANGUAGES.map((l) => ({
+                      value: l,
+                      // English is offered (in development) before it is finished.
+                      label: l === 'en' ? `${t('languages.en')} (${t('settings.language.beta')})` : t(`languages.${l}`),
+                    }))}
+                    onChange={(language) => void change({ display: { language } })}
+                  />
+                ) : (
+                  <span className="text-[15px] font-bold text-ink-soft">{t('languages.vi')}</span>
+                )
+              }
             />
           </SettingsSection>
 
           <SettingsSection
             id="games"
             icon={<GamepadIcon size={17} />}
-            title="Trò chơi mới"
-            text="Áp dụng khi cô tạo trò chơi mới. Trò chơi đã có giữ nguyên; cô vẫn đổi được cho từng trò ở trang Bắt đầu trò chơi."
+            title={t('settings.games.title')}
+            text={t('settings.games.text')}
             highlighted={highlighted('games')}
             action={
               hasGameDefaults(games) && (
@@ -120,7 +135,7 @@ export function SettingsPage() {
                   onClick={() => void change({ games: { teams: null, timeLimitSec: null, allowSteal: null, shuffleItems: null } })}
                   className="cursor-pointer rounded-full border border-line bg-white px-4 py-2 font-[inherit] text-[14px] font-bold text-ink-soft hover:border-primary hover:text-primary"
                 >
-                  Đặt lại theo từng trò
+                  {t('settings.games.reset')}
                 </button>
               )
             }
@@ -129,8 +144,8 @@ export function SettingsPage() {
               <SettingItem
                 key={key}
                 id={`set-${key}`}
-                label={label}
-                hint={hint}
+                label={t(`settings.games.${label}`)}
+                hint={t(`settings.games.${hint}`)}
                 control={
                   <SettingSelect
                     labelledBy={`set-${key}`}
@@ -146,20 +161,20 @@ export function SettingsPage() {
           <SettingsSection
             id="sound"
             icon={<SpeakerIcon size={17} />}
-            title="Âm thanh"
-            text="Âm thanh của các trò chơi trên màn chiếu. Trên màn chiếu, nút loa ở góc dưới (hoặc phím M) tắt và bật nhanh."
+            title={t('settings.sound.title')}
+            text={t('settings.sound.text')}
             highlighted={highlighted('sound')}
           >
             <SettingItem
               id="set-sound"
-              label="Âm thanh trong trò chơi"
-              hint="Tiếng trả lời đúng, sai, đếm giờ, chuông, vỗ tay khi thắng…"
+              label={t('settings.sound.effects')}
+              hint={t('settings.sound.effectsHint')}
               control={<SettingSwitch labelledBy="set-sound" checked={sound.enabled} onChange={(enabled) => void change({ sound: { enabled } })} />}
             />
             <SettingItem
               id="set-volume"
-              label="Âm lượng"
-              hint="Thả tay để nghe thử."
+              label={t('settings.sound.volume')}
+              hint={t('settings.sound.volumeHint')}
               control={
                 <div className="flex w-[220px] items-center gap-3">
                   <Slider
@@ -174,7 +189,7 @@ export function SettingsPage() {
                       setVolumeDraft(null)
                       void change({ sound: { volume } }).then(() => playSound('correct'))
                     }}
-                    ariaLabelForHandle="Âm lượng"
+                    ariaLabelForHandle={t('settings.sound.volume')}
                   />
                   <span className="w-10 text-right text-[14px] font-bold tabular-nums">{volumeDraft ?? sound.volume}%</span>
                 </div>
@@ -182,8 +197,8 @@ export function SettingsPage() {
             />
             <SettingItem
               id="set-music"
-              label="Nhạc nền"
-              hint="Nhạc vui nhẹ khi chơi, dồn dập hơn ở những giây cuối."
+              label={t('settings.sound.music')}
+              hint={t('settings.sound.musicHint')}
               control={
                 <SettingSwitch
                   labelledBy="set-music"
@@ -197,28 +212,28 @@ export function SettingsPage() {
           <SettingsSection
             id="notifications"
             icon={<BellIcon size={17} />}
-            title="Thông báo qua email"
+            title={t('settings.notifications.title')}
             text={
               guest
-                ? 'Thông báo được gửi tới email của tài khoản, nên cần đăng nhập.'
+                ? t('settings.notifications.textGuest')
                 : profile && !profile.email
-                  ? 'Tài khoản chưa có email nên Lớp Vui chưa gửi được thông báo.'
-                  : `Gửi tới ${profile?.email ?? 'email của tài khoản'} để cô biết ngay khi tài khoản có thay đổi.`
+                  ? t('settings.notifications.textNoEmail')
+                  : t('settings.notifications.text', { email: profile?.email ?? t('settings.notifications.accountEmail') })
             }
             highlighted={highlighted('notifications')}
           >
             {guest ? (
               <SettingItem
                 id="set-notifications-sign-in"
-                label="Đăng nhập để nhận thông báo"
-                hint="Khi tài khoản đăng nhập trên thiết bị mới, hoặc khi mật khẩu được đổi."
+                label={t('settings.notifications.signInTitle')}
+                hint={t('settings.notifications.signInHint')}
                 control={
                   <Link
                     to="/login?from=%2Fsettings%23notifications"
                     className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 font-extrabold text-white hover:bg-primary-ink hover:text-white"
                   >
                     <LockIcon size={16} strokeWidth={2.2} />
-                    Đăng nhập
+                    {t('settings.notifications.signIn')}
                   </Link>
                 }
               />
@@ -226,8 +241,8 @@ export function SettingsPage() {
               <>
                 <SettingItem
                   id="set-new-sign-in"
-                  label="Đăng nhập trên thiết bị mới"
-                  hint="Khi tài khoản đăng nhập trên trình duyệt hoặc máy chưa dùng bao giờ."
+                  label={t('settings.notifications.newSignIn')}
+                  hint={t('settings.notifications.newSignInHint')}
                   control={
                     <SettingSwitch
                       labelledBy="set-new-sign-in"
@@ -238,8 +253,8 @@ export function SettingsPage() {
                 />
                 <SettingItem
                   id="set-password-changed"
-                  label="Mật khẩu được thay đổi"
-                  hint="Khi mật khẩu được đổi trong Hồ sơ của tôi."
+                  label={t('settings.notifications.passwordChanged')}
+                  hint={t('settings.notifications.passwordChangedHint')}
                   control={
                     <SettingSwitch
                       labelledBy="set-password-changed"

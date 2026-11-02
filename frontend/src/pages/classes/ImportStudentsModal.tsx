@@ -1,5 +1,6 @@
 import { App, Button, Checkbox, Modal, Select, Spin, Upload } from 'antd'
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { DocumentIcon, FileTextIcon } from '@/components/ui/icons'
 import { apiErrorMessage } from '@/utils/apiError'
 import {
@@ -43,6 +44,7 @@ interface Loaded {
 }
 
 function ImportDialog({ classTitle, inClass, onClose, onAdd }: ImportStudentsModalProps) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [loaded, setLoaded] = useState<Loaded>()
   const [reading, setReading] = useState(false)
@@ -62,7 +64,7 @@ function ImportDialog({ classTitle, inClass, onClose, onAdd }: ImportStudentsMod
       setColumnKey(detection.choice?.key)
       setTicks(new Map())
     } catch (e) {
-      setError(e instanceof ClassListFileError ? e.message : 'Không đọc được file này. Cô chọn file Excel (.xlsx) hoặc CSV nhé.')
+      setError(e instanceof ClassListFileError ? e.message : t('classes.import.unreadable'))
     } finally {
       setReading(false)
     }
@@ -85,7 +87,7 @@ function ImportDialog({ classTitle, inClass, onClose, onAdd }: ImportStudentsMod
     setSaving(true)
     try {
       await onAdd(chosen.map((c) => c.name))
-      message.success(`Đã thêm ${chosen.length} học sinh vào ${classTitle}`)
+      message.success(t('classes.import.added', { count: chosen.length, name: classTitle }))
       onClose()
     } catch (e) {
       message.error(apiErrorMessage(e))
@@ -96,22 +98,22 @@ function ImportDialog({ classTitle, inClass, onClose, onAdd }: ImportStudentsMod
   return (
     <Modal
       open
-      title={`Nhập danh sách ${classTitle} từ file`}
+      title={t('classes.import.title', { name: classTitle })}
       onCancel={onClose}
       width={640}
       footer={
         loaded
           ? [
               <Button key="cancel" onClick={onClose}>
-                Hủy
+                {t('common.cancel')}
               </Button>,
               <Button key="add" type="primary" loading={saving} disabled={!chosen.length || tooMany} onClick={() => void add()}>
-                {chosen.length ? `Thêm ${chosen.length} học sinh` : 'Thêm học sinh'}
+                {chosen.length ? t('classes.add.submit', { count: chosen.length }) : t('classes.add.title')}
               </Button>,
             ]
           : [
               <Button key="cancel" onClick={onClose}>
-                Hủy
+                {t('common.cancel')}
               </Button>,
             ]
       }
@@ -135,8 +137,8 @@ function ImportDialog({ classTitle, inClass, onClose, onAdd }: ImportStudentsMod
                   <FileTextIcon size={28} />
                 </span>
               )}
-              <span className="text-[16px] font-extrabold text-ink">{reading ? 'Đang đọc file…' : 'Kéo thả file vào đây, hoặc bấm để chọn'}</span>
-              <span className="text-[13.5px] text-ink-muted">File Excel (.xlsx) hoặc CSV, tối đa 2 MB. Chỉ lấy họ tên học sinh.</span>
+              <span className="text-[16px] font-extrabold text-ink">{reading ? t('classes.import.reading') : t('classes.import.drop')}</span>
+              <span className="text-[13.5px] text-ink-muted">{t('classes.import.hint')}</span>
             </div>
           </Upload.Dragger>
           {error && (
@@ -145,9 +147,9 @@ function ImportDialog({ classTitle, inClass, onClose, onAdd }: ImportStudentsMod
             </p>
           )}
           <p className="m-0 flex flex-wrap items-center gap-x-2 text-[13.5px] text-ink-muted">
-            Dùng được file xuất từ vnEdu, SMAS hay danh sách lớp tự soạn.
+            {t('classes.import.sources')}
             <a href={TEMPLATE} download="mau-danh-sach-lop.xlsx" className="inline-flex items-center gap-1 font-bold">
-              <DocumentIcon size={15} /> Tải file mẫu
+              <DocumentIcon size={15} /> {t('classes.import.template')}
             </a>
           </p>
         </div>
@@ -159,16 +161,16 @@ function ImportDialog({ classTitle, inClass, onClose, onAdd }: ImportStudentsMod
               <span className="truncate">{loaded.fileName}</span>
             </span>
             <Button size="small" type="link" onClick={() => setLoaded(undefined)} className="px-0 font-bold">
-              Chọn file khác
+              {t('classes.import.otherFile')}
             </Button>
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-[14px] font-bold text-ink-soft">Cột họ tên học sinh</span>
+            <span className="text-[14px] font-bold text-ink-soft">{t('classes.import.column')}</span>
             <Select
-              aria-label="Cột họ tên học sinh"
+              aria-label={t('classes.import.column')}
               value={columnKey}
-              placeholder="Chọn cột chứa tên các em"
+              placeholder={t('classes.import.columnPlaceholder')}
               onChange={(key) => {
                 setColumnKey(key)
                 setTicks(new Map())
@@ -179,26 +181,26 @@ function ImportDialog({ classTitle, inClass, onClose, onAdd }: ImportStudentsMod
 
           {!column ? (
             <p role="status" className="m-0 rounded-[12px] bg-[#FFF6E5] px-3.5 py-2.5 text-[14px] text-sun-ink">
-              Không tìm thấy cột “Họ và tên” trong file. Cô chọn cột chứa tên các em ở trên nhé.
+              {t('classes.import.noColumn')}
             </p>
           ) : candidates.length === 0 ? (
             <p role="status" className="m-0 rounded-[12px] bg-[#FFF6E5] px-3.5 py-2.5 text-[14px] text-sun-ink">
-              Cột này không có tên học sinh nào. Cô thử chọn cột khác nhé.
+              {t('classes.import.emptyColumn')}
             </p>
           ) : (
             <>
               <div className="flex items-center justify-between gap-3 text-[13.5px]">
-                <span className="text-ink-muted">Tìm thấy {candidates.length} tên</span>
+                <span className="text-ink-muted">{t('classes.import.found', { count: candidates.length })}</span>
                 <span className="flex gap-3">
                   <button type="button" onClick={() => tickAll(true)} className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] font-bold text-primary">
-                    Chọn tất cả
+                    {t('classes.import.selectAll')}
                   </button>
                   <button type="button" onClick={() => tickAll(false)} className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] font-bold text-ink-muted">
-                    Bỏ chọn
+                    {t('classes.import.unselect')}
                   </button>
                 </span>
               </div>
-              <ul aria-label="Học sinh trong file" className="m-0 flex max-h-[300px] list-none flex-col overflow-y-auto rounded-[12px] border border-line-soft p-0">
+              <ul aria-label={t('classes.import.inFile')} className="m-0 flex max-h-[300px] list-none flex-col overflow-y-auto rounded-[12px] border border-line-soft p-0">
                 {candidates.map((c) => (
                   <li key={c.row} className="flex items-center gap-3 border-b border-line-soft px-3 py-2 last:border-b-0">
                     <Checkbox
@@ -207,7 +209,7 @@ function ImportDialog({ classTitle, inClass, onClose, onAdd }: ImportStudentsMod
                       onChange={(e) => tick(c.row, e.target.checked)}
                       aria-label={c.name}
                     />
-                    <span className="w-[58px] shrink-0 text-[12.5px] text-ink-muted tabular-nums">Dòng {c.row}</span>
+                    <span className="w-[58px] shrink-0 text-[12.5px] text-ink-muted tabular-nums">{t('classes.import.row', { row: c.row })}</span>
                     <span className="min-w-0 flex-1 truncate text-[14.5px] font-bold">{c.name}</span>
                     {c.status !== 'new' && (
                       <span className="shrink-0 rounded-full bg-[#FFF1C7] px-2 py-0.5 text-[12px] font-bold text-sun-ink">{STATUS_NOTES[c.status]}</span>
@@ -220,8 +222,8 @@ function ImportDialog({ classTitle, inClass, onClose, onAdd }: ImportStudentsMod
 
           <p role="status" className={`m-0 text-[14px] ${tooMany ? 'font-bold text-danger' : 'text-ink-muted'}`}>
             {tooMany
-              ? `Lớp còn chỗ cho ${room} học sinh (tối đa ${MAX_STUDENTS}), cô bỏ chọn ${chosen.length - room} em nhé.`
-              : `Đã chọn ${chosen.length} em, thêm vào cuối danh sách. Lớp còn chỗ cho ${room} em.`}
+              ? t('classes.import.tooMany', { room, max: MAX_STUDENTS, extra: chosen.length - room })
+              : t('classes.import.chosen', { count: chosen.length, room })}
           </p>
         </div>
       )}

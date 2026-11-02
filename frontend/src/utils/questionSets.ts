@@ -5,6 +5,8 @@ import type {
   QuestionType,
   SubjectCode,
 } from '@/types/api'
+import i18n from 'i18next'
+import { translatedLabels } from '@/i18n/labels'
 import { fold } from '@/utils/classrooms'
 
 /** Limits the backend enforces (QuestionSetRules). */
@@ -27,14 +29,23 @@ export interface SubjectInfo {
   ink: string
 }
 
+const subject = (code: SubjectCode, tint: string, ink: string): SubjectInfo => ({
+  code,
+  tint,
+  ink,
+  get label() {
+    return i18n.t(`questionSets.subjects.${code}`)
+  },
+})
+
 /** Subjects in the order of the tabs. */
 export const SUBJECTS: SubjectInfo[] = [
-  { code: 'TOAN', label: 'Toán', tint: '#E3F6EC', ink: '#17804F' },
-  { code: 'TIENG_VIET', label: 'Tiếng Việt', tint: '#FFF0D9', ink: '#B45F0A' },
-  { code: 'TIENG_ANH', label: 'Tiếng Anh', tint: '#EEE7FD', ink: '#6236C9' },
-  { code: 'TU_NHIEN_XA_HOI', label: 'Tự nhiên và Xã hội', tint: '#E2F6E8', ink: '#257A4B' },
-  { code: 'KHOA_HOC', label: 'Khoa học', tint: '#E1F1FB', ink: '#16699B' },
-  { code: 'KHAC', label: 'Khác', tint: '#FFF6D6', ink: '#8A6400' },
+  subject('TOAN', '#E3F6EC', '#17804F'),
+  subject('TIENG_VIET', '#FFF0D9', '#B45F0A'),
+  subject('TIENG_ANH', '#EEE7FD', '#6236C9'),
+  subject('TU_NHIEN_XA_HOI', '#E2F6E8', '#257A4B'),
+  subject('KHOA_HOC', '#E1F1FB', '#16699B'),
+  subject('KHAC', '#FFF6D6', '#8A6400'),
 ]
 
 export const subjectInfo = (code: SubjectCode): SubjectInfo => SUBJECTS.find((s) => s.code === code) ?? SUBJECTS[5]
@@ -42,17 +53,12 @@ export const subjectInfo = (code: SubjectCode): SubjectInfo => SUBJECTS.find((s)
 /** The set's picture: its subject's art (scripts/make_question_art.py). */
 export const subjectArt = (code: SubjectCode) => `/assets/question-sets/subject-${code.toLowerCase().replace(/_/g, '-')}.svg`
 
-export const gradeText = (grade?: number) => (grade ? `Lớp ${grade}` : 'Mọi khối')
+export const gradeText = (grade?: number) => (grade ? i18n.t('questionSets.grade', { grade }) : i18n.t('questionSets.allGrades'))
 
 /** What a set holds: only multiple choice, only short answers, both, or nothing yet. */
 export type QuestionKind = QuestionType | 'MIXED' | 'EMPTY'
 
-export const KIND_LABELS: Record<QuestionKind, string> = {
-  MULTIPLE_CHOICE: 'Trắc nghiệm',
-  SHORT_ANSWER: 'Tự luận',
-  MIXED: 'Trắc nghiệm + tự luận',
-  EMPTY: 'Chưa có câu hỏi',
-}
+export const KIND_LABELS = translatedLabels<QuestionKind>(['MULTIPLE_CHOICE', 'SHORT_ANSWER', 'MIXED', 'EMPTY'], (kind) => `questionSets.kinds.${kind}`)
 
 export function kindOf(set: Pick<QuestionSetSummaryResponse, 'multipleChoiceCount' | 'shortAnswerCount'>): QuestionKind {
   if (set.multipleChoiceCount && set.shortAnswerCount) return 'MIXED'
@@ -65,13 +71,7 @@ export function kindOf(set: Pick<QuestionSetSummaryResponse, 'multipleChoiceCoun
 
 export type SetSort = 'NEWEST' | 'OLDEST' | 'TITLE' | 'MOST_QUESTIONS' | 'MOST_USED'
 
-export const SORT_LABELS: Record<SetSort, string> = {
-  NEWEST: 'Mới cập nhật',
-  OLDEST: 'Cũ nhất',
-  TITLE: 'Tên A → Z',
-  MOST_QUESTIONS: 'Nhiều câu hỏi nhất',
-  MOST_USED: 'Dùng nhiều nhất',
-}
+export const SORT_LABELS = translatedLabels<SetSort>(['NEWEST', 'OLDEST', 'TITLE', 'MOST_QUESTIONS', 'MOST_USED'], (sort) => `questionSets.sorts.${sort}`)
 
 export interface SetFilters {
   search: string
@@ -153,37 +153,57 @@ export interface UseGame {
 /** How the class plays a game: the filter chips of the "Chơi" dialog. */
 export type UseGameGroup = 'TEAM' | 'CLASS' | 'WORD'
 
+const group = (code: UseGameGroup, icon: string) => ({
+  code,
+  icon,
+  get label() {
+    return i18n.t(`games.setGroups.${code}`)
+  },
+})
+
 export const USE_GAME_GROUPS: { code: UseGameGroup; label: string; icon: string }[] = [
-  { code: 'TEAM', label: 'Thi đua đội', icon: '🏁' },
-  { code: 'CLASS', label: 'Cả lớp', icon: '🙋' },
-  { code: 'WORD', label: 'Trò chữ', icon: '🔤' },
+  group('TEAM', '🏁'),
+  group('CLASS', '🙋'),
+  group('WORD', '🔤'),
 ]
 
 /** Navigation state that opens the "new set" form of /question-sets on arrival. */
 export const OPEN_CREATE_SET = { createSet: true }
 
+/** A game a set can be played with; its name and line are read in the current language. */
+const setGameOf = (code: QuestionGameCode, group: UseGameGroup): UseGame => ({
+  code,
+  group,
+  get name() {
+    return i18n.t(`games.names.${code}`)
+  },
+  get description() {
+    return i18n.t(`games.short.${code}`)
+  },
+})
+
 export const USE_GAMES: UseGame[] = [
-  { code: 'QUIZ', name: 'Trắc nghiệm', description: 'Các đội chọn đáp án đúng, cướp lượt khi đội trước sai.', group: 'TEAM' },
-  { code: 'GOLDEN_BELL', name: 'Rung chuông vàng', description: 'Cả lớp cùng trả lời, sai thì ra ngoài, ai trụ lại cuối cùng?', group: 'CLASS' },
-  { code: 'BOAT_RACE', name: 'Đua thuyền', description: 'Trả lời đúng để thuyền của đội tiến về đích.', group: 'TEAM' },
-  { code: 'GRID_BOARD', name: 'Lật ô thi đua', description: 'Các đội chọn ô số và trả lời để ghi điểm. Dùng được mọi câu.', group: 'TEAM' },
-  { code: 'MILLIONAIRE', name: 'Ai là triệu phú', description: 'Một bạn leo bậc thưởng, có 3 quyền trợ giúp.', group: 'CLASS' },
-  { code: 'TUG_OF_WAR', name: 'Kéo co', description: 'Hai đội thi trả lời, mỗi câu đúng kéo dây về phía mình.', group: 'TEAM' },
-  { code: 'FLOWER_PICK', name: 'Hái hoa dân chủ', description: 'Mỗi bông hoa trên cây là một câu hỏi.', group: 'CLASS' },
-  { code: 'WHACK_MOLE', name: 'Đập chuột', description: 'Đập đúng chú chuột mang đáp án đúng.', group: 'CLASS' },
-  { code: 'TRUE_FALSE', name: 'Đúng hay sai', description: 'Mọi đội cùng chọn Đúng hoặc Sai cho đáp án hiện ra.', group: 'CLASS' },
-  { code: 'LUCKY_STAR', name: 'Ngôi sao may mắn', description: 'Chọn ngôi sao: câu hỏi hoặc điểm thưởng may mắn.', group: 'TEAM' },
-  { code: 'SECRET_PICTURE', name: 'Ô cửa bí mật', description: 'Trả lời đúng để mở ô cửa và đoán bức tranh.', group: 'CLASS' },
-  { code: 'MOUNTAIN_CLIMB', name: 'Leo núi', description: 'Trả lời đúng để người leo núi của đội lên đỉnh.', group: 'TEAM' },
-  { code: 'POINT_WHEEL', name: 'Vòng quay điểm thưởng', description: 'Quay để biết câu hỏi đáng bao nhiêu điểm.', group: 'TEAM' },
-  { code: 'TIC_TAC_TOE', name: 'Cờ ca-rô hỏi đáp', description: 'Trả lời đúng để đánh dấu ô, ba ô thẳng hàng là thắng.', group: 'TEAM' },
-  { code: 'CONNECT_FOUR', name: 'Bốn ô liên tiếp', description: 'Trả lời đúng để thả quân, bốn quân liền nhau là thắng.', group: 'TEAM' },
-  { code: 'TREASURE_CHEST', name: 'Rương vàng', description: 'Trả lời đúng để mở rương báu đầy bất ngờ.', group: 'TEAM' },
-  { code: 'BUILD_TOWER', name: 'Xây tháp', description: 'Mỗi câu đúng thêm một khối, tháp nào cao nhất?', group: 'TEAM' },
-  { code: 'BEE_FLOWER', name: 'Ong tìm hoa', description: 'Chỉ đường cho chú ong đến bông hoa có đáp án đúng.', group: 'CLASS' },
-  { code: 'BINGO', name: 'Bingo', description: 'Đánh dấu đáp án trên thẻ, đủ một hàng là Bingo!', group: 'CLASS' },
-  { code: 'WORD_SCRAMBLE', name: 'Vua Tiếng Việt', description: 'Xếp lại các chữ cái bị xáo trộn thành đáp án. Dùng được mọi câu.', group: 'WORD' },
-  { code: 'HANGMAN', name: 'Đoán chữ', description: 'Đoán từng chữ cái để mở ô chữ. Dùng được mọi câu.', group: 'WORD' },
+  setGameOf('QUIZ', 'TEAM'),
+  setGameOf('GOLDEN_BELL', 'CLASS'),
+  setGameOf('BOAT_RACE', 'TEAM'),
+  setGameOf('GRID_BOARD', 'TEAM'),
+  setGameOf('MILLIONAIRE', 'CLASS'),
+  setGameOf('TUG_OF_WAR', 'TEAM'),
+  setGameOf('FLOWER_PICK', 'CLASS'),
+  setGameOf('WHACK_MOLE', 'CLASS'),
+  setGameOf('TRUE_FALSE', 'CLASS'),
+  setGameOf('LUCKY_STAR', 'TEAM'),
+  setGameOf('SECRET_PICTURE', 'CLASS'),
+  setGameOf('MOUNTAIN_CLIMB', 'TEAM'),
+  setGameOf('POINT_WHEEL', 'TEAM'),
+  setGameOf('TIC_TAC_TOE', 'TEAM'),
+  setGameOf('CONNECT_FOUR', 'TEAM'),
+  setGameOf('TREASURE_CHEST', 'TEAM'),
+  setGameOf('BUILD_TOWER', 'TEAM'),
+  setGameOf('BEE_FLOWER', 'CLASS'),
+  setGameOf('BINGO', 'CLASS'),
+  setGameOf('WORD_SCRAMBLE', 'WORD'),
+  setGameOf('HANGMAN', 'WORD'),
 ]
 
 /** Questions of the set the game can play: quiz games play multiple choice, Lật ô plays every question. */
@@ -213,20 +233,20 @@ export const emptyDraft = (type: QuestionType = 'MULTIPLE_CHOICE'): QuestionDraf
 
 /** Why the question cannot be saved yet, in Vietnamese; null when it can. Mirrors the backend's checks. */
 export function draftProblem(d: QuestionDraft): string | null {
-  if (!d.text.trim()) return 'Cô nhập nội dung câu hỏi nhé.'
-  if (d.text.trim().length > MAX_TEXT) return `Câu hỏi dài tối đa ${MAX_TEXT} ký tự.`
+  if (!d.text.trim()) return i18n.t('questionSets.question.noText')
+  if (d.text.trim().length > MAX_TEXT) return i18n.t('questionSets.question.textTooLong', { count: MAX_TEXT })
   if (d.type === 'SHORT_ANSWER') {
-    if (!d.answer.trim()) return 'Cô nhập câu trả lời đúng nhé.'
-    if (d.answer.trim().length > MAX_ANSWER) return `Câu trả lời dài tối đa ${MAX_ANSWER} ký tự.`
+    if (!d.answer.trim()) return i18n.t('questionSets.question.noAnswer')
+    if (d.answer.trim().length > MAX_ANSWER) return i18n.t('questionSets.question.answerTooLong', { count: MAX_ANSWER })
     return null
   }
   const options = d.options.map((o) => o.trim())
   const filled = options.filter(Boolean)
-  if (filled.length < MIN_OPTIONS) return `Cần ít nhất ${MIN_OPTIONS} đáp án.`
-  if (!options[d.correctOption]) return 'Cô chọn đáp án đúng (đáp án đó không được để trống).'
-  if (filled.some((o) => o.length > MAX_OPTION_TEXT)) return `Mỗi đáp án dài tối đa ${MAX_OPTION_TEXT} ký tự.`
+  if (filled.length < MIN_OPTIONS) return i18n.t('questionSets.question.fewOptions', { count: MIN_OPTIONS })
+  if (!options[d.correctOption]) return i18n.t('questionSets.question.noCorrect')
+  if (filled.some((o) => o.length > MAX_OPTION_TEXT)) return i18n.t('questionSets.question.optionTooLong', { count: MAX_OPTION_TEXT })
   const folded = filled.map((o) => fold(o).replace(/\s+/g, ' '))
-  if (new Set(folded).size !== folded.length) return 'Có hai đáp án giống nhau.'
+  if (new Set(folded).size !== folded.length) return i18n.t('questionSets.question.sameOptions')
   return null
 }
 
@@ -262,7 +282,11 @@ export interface PastedLine {
   problem?: string
 }
 
-const TRUE_FALSE: Record<string, number> = { đúng: 0, sai: 1 }
+/** "Đúng" / "Sai", or "True" / "False", as the right answer of a true / false question. */
+const TRUE_FALSE: Record<string, number> = { đúng: 0, sai: 1, true: 0, false: 1 }
+
+/** The options of a true / false question, in the teacher's language. */
+export const trueFalseOptions = () => [i18n.t('questionSets.true'), i18n.t('questionSets.false')]
 
 /**
  * Questions pasted one per line, as in the quiz editor:
@@ -285,18 +309,18 @@ export function parsePastedQuestions(text: string): PastedLine[] {
       .map((a) => a.trim())
       .filter(Boolean)
     if (!question || !answers.length || rest === '?') {
-      result.push({ line: i + 1, problem: 'Thiếu đáp án sau dấu “=”' })
+      result.push({ line: i + 1, problem: i18n.t('questionSets.paste.missingAnswer') })
       return
     }
     const single = answers.length === 1 ? TRUE_FALSE[answers[0].toLowerCase()] : undefined
     const draft: QuestionDraft =
       single !== undefined
-        ? { ...emptyDraft(), text: question, options: ['Đúng', 'Sai'], correctOption: single }
+        ? { ...emptyDraft(), text: question, options: trueFalseOptions(), correctOption: single }
         : answers.length === 1
           ? { ...emptyDraft('SHORT_ANSWER'), text: question, answer: answers[0] }
           : { ...emptyDraft(), text: question, options: answers, correctOption: 0 }
     if (answers.length > MAX_OPTIONS) {
-      result.push({ line: i + 1, problem: `Nhiều hơn ${MAX_OPTIONS} đáp án` })
+      result.push({ line: i + 1, problem: i18n.t('questionSets.add.tooManyOptions', { count: MAX_OPTIONS }) })
       return
     }
     const problem = draftProblem(draft)

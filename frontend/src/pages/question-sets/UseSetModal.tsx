@@ -1,5 +1,6 @@
 import { App, Button, Input, Modal, Select } from 'antd'
 import { useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import * as questionSetApi from '@/api/questionSetApi'
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon, SearchIcon } from '@/components/ui/icons'
@@ -56,6 +57,7 @@ export function UseSetModal(props: UseSetModalProps) {
 }
 
 function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { message } = App.useApp()
   const fullscreenOnStart = useSettingsStore((s) => s.settings.display.fullscreenOnStart)
@@ -101,8 +103,9 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
     try {
       const used = await questionSetApi.useQuestionSet(set.code, game)
       onUsed(set.code)
-      const skipped = used.skippedCount ? ` (bỏ qua ${used.skippedCount} câu tự luận)` : ''
-      if (skipped) message.info(`Trò chơi dùng ${used.questionCount} câu${skipped}.`)
+      if (used.skippedCount) {
+        message.info(t('questionSets.use.usedCount', { count: used.questionCount, skipped: t('questionSets.use.skipped', { count: used.skippedCount }) }))
+      }
       onClose()
       // Straight to the projector: its introduction shows the rules; the game can be edited later from the library.
       navigate(playPath({ id: used.gameCode, type: game }))
@@ -123,16 +126,14 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
           <div className="min-w-0 flex-1">
             <h2 className="m-0 truncate font-display text-[25px] leading-tight font-extrabold text-[#1A2440]">
               {set ? (
-                <>
-                  Chơi <span className="text-primary">{set.title}</span> với trò nào?
-                </>
+                <Trans i18nKey="questionSets.use.title" values={{ title: set.title }} components={{ title: <span className="text-primary" /> }} />
               ) : (
-                'Chơi với bộ câu hỏi này'
+                t('questionSets.use.titleNoSet')
               )}
             </h2>
             {set && (
               <p className="m-0 text-[14px] text-ink-muted">
-                {set.questionCount} câu hỏi · {subjectInfo(set.subject).label} · {gradeText(set.grade)}
+                {t('questionSets.questionCount', { count: set.questionCount })} · {subjectInfo(set.subject).label} · {gradeText(set.grade)}
               </p>
             )}
           </div>
@@ -143,13 +144,13 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
               aria-expanded={changingSet}
               className="h-10 shrink-0 cursor-pointer rounded-full border-2 border-[#DCE5F5] bg-white px-4 font-[inherit] text-[14px] font-extrabold text-primary hover:border-primary"
             >
-              ⇄ Đổi bộ
+              {t('questionSets.use.change')}
             </button>
           )}
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={t('common.close')}
             className="flex size-[38px] shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-[#F2F5FA] text-ink-muted hover:text-ink"
           >
             <CloseIcon size={18} />
@@ -173,24 +174,24 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
             optionFilterProp="label"
             value={code}
             onChange={pickSet}
-            notFoundContent="Không có bộ câu hỏi nào"
+            notFoundContent={t('questionSets.use.noSets')}
             options={playable.map((s) => ({
               value: s.code,
-              label: `${s.title} (${s.questionCount} câu)`,
+              label: t('questionSets.use.setOption', { title: s.title, count: s.questionCount }),
             }))}
-            aria-label="Bộ câu hỏi"
+            aria-label={t('questionSets.use.set')}
           />
         )}
 
         {!set ? (
           <p className="m-0 rounded-[18px] bg-surface-soft px-4 py-10 text-center text-[15px] text-ink-muted">
-            Chưa có bộ câu hỏi nào có câu hỏi. Thêm câu hỏi vào một bộ để chơi.
+            {t('questionSets.use.noUsable')}
           </p>
         ) : (
           <>
             <div className="flex flex-wrap items-center gap-2">
-              <div role="radiogroup" aria-label="Nhóm trò chơi" className="flex flex-wrap gap-2">
-                {[{ code: 'ALL' as const, label: 'Tất cả', icon: '' }, ...USE_GAME_GROUPS].map((g) => {
+              <div role="radiogroup" aria-label={t('questionSets.use.groups')} className="flex flex-wrap gap-2">
+                {[{ code: 'ALL' as const, label: t('questionSets.use.all'), icon: '' }, ...USE_GAME_GROUPS].map((g) => {
                   const on = filter === g.code
                   const count = listGames(set, g.code, '').length
                   return (
@@ -216,8 +217,8 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
                 value={search}
                 onChange={(e) => relist(filter, e.target.value)}
                 prefix={<SearchIcon size={17} className="text-ink-muted" />}
-                placeholder="Tìm trò chơi…"
-                aria-label="Tìm trò chơi"
+                placeholder={t('questionSets.use.search')}
+                aria-label={t('questionSets.use.search')}
                 className="ml-auto h-10 w-full rounded-full border-0 bg-[#F2F5FA] text-[14.5px] sm:w-[250px]"
               />
             </div>
@@ -227,10 +228,10 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
                 <span aria-hidden="true" className="text-[34px]">
                   🔍
                 </span>
-                Không có trò nào khớp “{search.trim()}”.
+                {t('questionSets.use.noMatch', { search: search.trim() })}
               </p>
             ) : (
-              <div role="radiogroup" aria-label="Trò chơi" className="grid min-h-[376px] grid-cols-2 content-start gap-3.5 lg:grid-cols-4">
+              <div role="radiogroup" aria-label={t('questionSets.use.games')} className="grid min-h-[376px] grid-cols-2 content-start gap-3.5 lg:grid-cols-4">
                 {games.slice((current - 1) * GAMES_PER_PAGE, current * GAMES_PER_PAGE).map((g) => (
                   <GameCard key={g.code} game={g} set={set} checked={g.code === game} onPick={() => setGame(g.code)} />
                 ))}
@@ -240,13 +241,11 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
             <footer className="flex flex-wrap items-center gap-3">
               <p className="m-0 min-w-0 flex-1 text-[13.5px] text-ink-muted">
                 {partial && (
-                  <>
-                    Nhãn{' '}
-                    <b className="text-[#B26B00]">
-                      {set.multipleChoiceCount}/{set.questionCount} câu
-                    </b>
-                    : trò chỉ dùng câu trắc nghiệm
-                  </>
+                  <Trans
+                    i18nKey="questionSets.use.onlyMultipleChoice"
+                    values={{ usable: set.multipleChoiceCount, count: set.questionCount }}
+                    components={{ b: <b className="text-[#B26B00]" /> }}
+                  />
                 )}
               </p>
               {pages > 1 && <Dots page={current} pages={pages} onChange={setPage} />}
@@ -259,7 +258,7 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
                   onClick={() => void make()}
                   className="h-[50px] max-w-full rounded-full px-7 text-[17px] font-black shadow-[0_8px_20px_rgba(53,99,233,0.35)]"
                 >
-                  <span className="truncate">▶ Chơi {picked?.name ?? ''}</span>
+                  <span className="truncate">{t('questionSets.use.playGame', { name: picked?.name ?? '' })}</span>
                 </Button>
               </div>
             </footer>
@@ -271,6 +270,7 @@ function UseSetDialog({ sets, presetCode, onClose, onUsed }: UseSetModalProps) {
 }
 
 function GameCard({ game, set, checked, onPick }: { game: UseGame; set: QuestionSetSummaryResponse; checked: boolean; onPick: () => void }) {
+  const { t } = useTranslation()
   const usable = usableCount(set, game.code)
   return (
     <button
@@ -295,12 +295,12 @@ function GameCard({ game, set, checked, onPick }: { game: UseGame; set: Question
         )}
         {usable === 0 ? (
           <span className="absolute bottom-2 left-2 rounded-full bg-white/95 px-2.5 py-0.5 text-[12px] font-extrabold text-danger">
-            Cần câu trắc nghiệm
+            {t('questionSets.use.needsMultipleChoice')}
           </span>
         ) : (
           usable < set.questionCount && (
             <span className="absolute bottom-2 left-2 rounded-full bg-white/95 px-2.5 py-0.5 text-[12px] font-extrabold text-[#B26B00]">
-              {usable}/{set.questionCount} câu
+              {t('questionSets.use.usableCount', { usable, count: set.questionCount })}
             </span>
           )
         )}
@@ -317,24 +317,25 @@ function GameCard({ game, set, checked, onPick }: { game: UseGame; set: Question
 
 /** ‹ ● ○ ○ › Trang 1/3: the current page a long dot. */
 function Dots({ page, pages, onChange }: { page: number; pages: number; onChange: (page: number) => void }) {
+  const { t } = useTranslation()
   const arrow =
     'flex size-8 cursor-pointer items-center justify-center rounded-full border-0 bg-[#F2F5FA] text-ink-muted transition enabled:hover:text-primary disabled:cursor-default disabled:opacity-40'
   return (
-    <nav aria-label="Trang trò chơi" className="flex items-center gap-2">
-      <button type="button" aria-label="Trang trước" disabled={page <= 1} onClick={() => onChange(page - 1)} className={arrow}>
+    <nav aria-label={t('questionSets.use.pages')} className="flex items-center gap-2">
+      <button type="button" aria-label={t('questionSets.use.previous')} disabled={page <= 1} onClick={() => onChange(page - 1)} className={arrow}>
         <ChevronLeftIcon size={16} />
       </button>
       {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
         <button
           key={n}
           type="button"
-          aria-label={`Trang ${n}`}
+          aria-label={t('questionSets.use.page', { page: n })}
           aria-current={n === page ? 'page' : undefined}
           onClick={() => onChange(n)}
           className={`h-2.5 cursor-pointer rounded-full border-0 p-0 transition-all ${n === page ? 'w-7 bg-primary' : 'w-2.5 bg-[#D5DDEB] hover:bg-[#AFC0DE]'}`}
         />
       ))}
-      <button type="button" aria-label="Trang sau" disabled={page >= pages} onClick={() => onChange(page + 1)} className={arrow}>
+      <button type="button" aria-label={t('questionSets.use.next')} disabled={page >= pages} onClick={() => onChange(page + 1)} className={arrow}>
         <ChevronRightIcon size={16} />
       </button>
       <span className="ml-1 text-[13px] text-[#8A93A8]">

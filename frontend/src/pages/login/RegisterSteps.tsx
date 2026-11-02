@@ -1,6 +1,7 @@
 import { App } from 'antd'
 import { useState, type MouseEvent } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { register as registerRequest, resendCode } from '@/api/authApi'
 import { ArrowRightIcon, LockIcon, MailIcon, UserIcon } from '@/components/ui/icons'
@@ -36,11 +37,12 @@ const fieldGap = 'mt-[clamp(10px,1.9vh,18px)]'
 
 /** "Bạn đã có tài khoản? Đăng nhập →", top right of the sign-up cards. */
 function SignInLink() {
+  const { t } = useTranslation()
   return (
     <span className="flex items-center gap-1.5 text-[14px] font-semibold text-ink-muted">
-      Bạn đã có tài khoản?
+      {t('auth.register.haveAccount')}
       <Link to="/login" className={`${linkClass} flex items-center gap-1 text-[14px]`}>
-        Đăng nhập
+        {t('auth.register.signIn')}
         <ArrowRightIcon size={16} strokeWidth={2.4} />
       </Link>
     </span>
@@ -52,6 +54,7 @@ export function SignUpForm({ initial, onCodeSent }: {
   initial: SignUpValues
   onCodeSent: (values: SignUpValues, sent: CodeSentResponse) => void
 }) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [passwordType, passwordToggle] = usePasswordToggle()
   const [confirmType, confirmToggle] = usePasswordToggle()
@@ -81,43 +84,43 @@ export function SignUpForm({ initial, onCodeSent }: {
 
   const openDocument = (name: string) => (e: MouseEvent) => {
     e.preventDefault()
-    message.info(`Trang “${name}” đang được hoàn thiện.`)
+    message.info(t('auth.documentSoon', { name }))
   }
 
   return (
-    <AuthCard compact title="Đăng ký tài khoản" subtitle="Bắt đầu hành trình đồng hành cùng Lớp Vui!" headerAction={<SignInLink />}>
+    <AuthCard compact title={t('auth.register.title')} subtitle={t('auth.register.subtitle')} headerAction={<SignInLink />}>
       <form noValidate onSubmit={onSubmit} className="@container mt-[clamp(14px,2.8vh,26px)] flex flex-col">
-        <Field label="Họ và tên" htmlFor="signup-name" icon={<UserIcon size={22} />} required error={errors.displayName?.message}>
+        <Field label={t('auth.register.name')} htmlFor="signup-name" icon={<UserIcon size={22} />} required error={errors.displayName?.message}>
           <input
             id="signup-name"
             type="text"
             autoComplete="name"
             autoFocus
-            placeholder="Nhập họ và tên của bạn"
+            placeholder={t('auth.register.namePlaceholder')}
             aria-invalid={errors.displayName ? true : undefined}
             {...register('displayName', {
-              validate: (v) => v.trim() !== '' || 'Vui lòng nhập họ và tên',
-              maxLength: { value: 100, message: 'Tối đa 100 ký tự' },
+              validate: (v) => v.trim() !== '' || t('auth.register.nameRequired'),
+              maxLength: { value: 100, message: t('auth.register.nameTooLong') },
             })}
             className={inputClass}
           />
         </Field>
 
-        <Field label="Email" htmlFor="signup-email" icon={<MailIcon size={22} />} required error={errors.email?.message} className={fieldGap}>
+        <Field label={t('auth.email')} htmlFor="signup-email" icon={<MailIcon size={22} />} required error={errors.email?.message} className={fieldGap}>
           <input
             id="signup-email"
             type="email"
             autoComplete="email"
-            placeholder="Nhập email của bạn"
+            placeholder={t('auth.emailPlaceholder')}
             aria-invalid={errors.email ? true : undefined}
-            {...register('email', { validate: (v) => EMAIL_PATTERN.test(v.trim()) || 'Email chưa đúng định dạng' })}
+            {...register('email', { validate: (v) => EMAIL_PATTERN.test(v.trim()) || t('auth.emailInvalid') })}
             className={inputClass}
           />
         </Field>
 
         <div className={`grid gap-x-4 gap-y-[clamp(10px,1.9vh,18px)] @md:grid-cols-2 ${fieldGap}`}>
           <Field
-            label="Mật khẩu"
+            label={t('auth.password')}
             htmlFor="signup-password"
             icon={<LockIcon size={22} />}
             required
@@ -128,18 +131,18 @@ export function SignUpForm({ initial, onCodeSent }: {
               id="signup-password"
               type={passwordType}
               autoComplete="new-password"
-              placeholder={`Ít nhất ${MIN_PASSWORD} ký tự`}
+              placeholder={t('auth.passwordMin', { count: MIN_PASSWORD })}
               aria-invalid={errors.password ? true : undefined}
               {...register('password', {
-                required: 'Vui lòng tạo mật khẩu',
-                minLength: { value: MIN_PASSWORD, message: `Cần ít nhất ${MIN_PASSWORD} ký tự` },
+                required: t('auth.register.passwordRequired'),
+                minLength: { value: MIN_PASSWORD, message: t('auth.passwordTooShort', { count: MIN_PASSWORD }) },
                 validate: (v) => passwordTooLong(v) || true,
               })}
               className={`${inputClass} pr-14`}
             />
           </Field>
           <Field
-            label="Xác nhận mật khẩu"
+            label={t('auth.confirmPassword')}
             htmlFor="signup-confirm"
             icon={<LockIcon size={22} />}
             required
@@ -150,10 +153,10 @@ export function SignUpForm({ initial, onCodeSent }: {
               id="signup-confirm"
               type={confirmType}
               autoComplete="new-password"
-              placeholder="Nhập lại mật khẩu"
+              placeholder={t('auth.confirmPlaceholder')}
               aria-invalid={errors.confirmPassword ? true : undefined}
               {...register('confirmPassword', {
-                validate: (v) => (v !== '' && v === getValues('password')) || 'Mật khẩu nhập lại chưa khớp',
+                validate: (v) => (v !== '' && v === getValues('password')) || t('auth.passwordMismatch'),
               })}
               className={`${inputClass} pr-14`}
             />
@@ -167,21 +170,19 @@ export function SignUpForm({ initial, onCodeSent }: {
               <input
                 type="checkbox"
                 aria-invalid={errors.acceptTerms ? true : undefined}
-                {...register('acceptTerms', { validate: (v) => v || 'Cô cần đồng ý với điều khoản để tiếp tục' })}
+                {...register('acceptTerms', { validate: (v) => v || t('auth.register.termsRequired') })}
                 className="peer sr-only"
               />
             }
           >
             <span className="text-[15px]">
-              Tôi đồng ý với{' '}
-              <a href="#" onClick={openDocument('Điều khoản sử dụng')} className="font-bold text-primary hover:text-primary-ink">
-                Điều khoản sử dụng
-              </a>{' '}
-              và{' '}
-              <a href="#" onClick={openDocument('Chính sách bảo mật')} className="font-bold text-primary hover:text-primary-ink">
-                Chính sách bảo mật
-              </a>{' '}
-              của Lớp Vui
+              <Trans
+                i18nKey="auth.register.terms"
+                components={{
+                  terms: <a href="#" onClick={openDocument(t('auth.register.termsName'))} className="font-bold text-primary hover:text-primary-ink" />,
+                  privacy: <a href="#" onClick={openDocument(t('auth.register.privacyName'))} className="font-bold text-primary hover:text-primary-ink" />,
+                }}
+              />
             </span>
           </Checkbox>
           {errors.acceptTerms && (
@@ -192,12 +193,12 @@ export function SignUpForm({ initial, onCodeSent }: {
         <FormError message={error} />
 
         <button type="submit" disabled={isSubmitting} className={`mt-[clamp(14px,2.6vh,24px)] ${primaryButtonClass}`}>
-          {isSubmitting ? 'Đang gửi mã...' : 'Đăng ký'}
+          {isSubmitting ? t('auth.register.submitting') : t('auth.register.submit')}
           {!isSubmitting && <ArrowRightIcon size={22} strokeWidth={2.4} />}
         </button>
       </form>
 
-      <SocialLogin label="Hoặc đăng ký bằng" action="Đăng ký" />
+      <SocialLogin action="register" />
     </AuthCard>
   )
 }
@@ -208,6 +209,7 @@ export function VerifyEmailStep({ sent, onBack, onSignedIn }: {
   onBack: () => void
   onSignedIn: () => void
 }) {
+  const { t } = useTranslation()
   const completeSignUp = useAuthStore((s) => s.completeSignUp)
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -231,10 +233,10 @@ export function VerifyEmailStep({ sent, onBack, onSignedIn }: {
   return (
     <AuthCard
       compact
-      title="Xác nhận email"
+      title={t('auth.register.verifyTitle')}
       subtitle={<CodeSentTo sent={sent} />}
       headerAction={<SignInLink />}
-      back={{ label: 'Đổi email', onClick: onBack }}
+      back={{ label: t('auth.code.changeEmail'), onClick: onBack }}
     >
       <form
         noValidate
@@ -255,7 +257,7 @@ export function VerifyEmailStep({ sent, onBack, onSignedIn }: {
           disabled={submitting || code.length !== 6}
           className={`mt-[clamp(16px,3vh,28px)] ${primaryButtonClass} disabled:cursor-not-allowed`}
         >
-          {submitting ? 'Đang xác nhận...' : 'Xác nhận'}
+          {submitting ? t('auth.register.verifying') : t('auth.register.verify')}
           {!submitting && <ArrowRightIcon size={22} strokeWidth={2.4} />}
         </button>
       </form>

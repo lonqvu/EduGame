@@ -1,0 +1,48 @@
+/** "Chọn trò chơi": every game on one page, grouped (ChooseGamePage, pages/choose-game). */
+export const chooser = {
+  title: 'Chọn trò chơi',
+  text: 'Bấm vào trò để chơi ngay với câu hỏi mẫu, đổi sang câu hỏi của cô ở màn bắt đầu.',
+  search: 'Tìm trò chơi…',
+  searchLabel: 'Tìm kiếm trò chơi',
+  goTo: 'Đi tới:',
+  groupsLabel: 'Nhóm trò chơi',
+  /** The groups, by what the teacher prepares. */
+  groups: {
+    QUESTION: 'Hỏi đáp',
+    PUZZLE: 'Giải đố',
+    RANDOM_TOOL: 'Gọi tên',
+    CLASS_TOOL: 'Công cụ lớp học',
+  },
+  /** The short name of the last group in the bar. */
+  toolsShort: 'Công cụ',
+  hints: {
+    QUESTION: 'Chơi với câu hỏi mẫu hoặc bộ câu hỏi của cô',
+    PUZZLE: 'Soạn cặp, thẻ, ô chữ trong trình soạn',
+    RANDOM_TOOL: 'Dùng danh sách lớp đang dạy',
+    CLASS_TOOL: 'Bấm là dùng ngay',
+  },
+  results: 'Kết quả tìm kiếm',
+  found_one: 'Tìm thấy {{count}} trò',
+  found_other: 'Tìm thấy {{count}} trò',
+  noMatch: 'Không tìm thấy trò chơi nào phù hợp.',
+  playNow: 'Chơi ngay {{name}}',
+  more_one: 'Xem thêm {{count}} trò ▾',
+  more_other: 'Xem thêm {{count}} trò ▾',
+  gameCount_one: '{{count}} trò',
+  gameCount_other: '{{count}} trò',
+  soon: 'Trò “{{name}}” đang được hoàn thiện.',
+  openFailed: 'Chưa mở được trò chơi. {{reason}}',
+  new: 'Mới',
+  popular: 'Phổ biến',
+  usesSets: '❓ Dùng bộ câu hỏi',
+  /** "Chơi lại": the teacher's recent games. */
+  recent: 'Chơi lại',
+  collapse: 'Thu gọn',
+  showAll: 'Xem tất cả',
+  pickTool: 'Chọn học sinh ngẫu nhiên',
+  replay: 'Chơi lại {{title}}',
+  optionsFor: 'Tùy chọn cho {{title}}',
+  editQuestions: 'Soạn câu hỏi',
+  rulesSettings: 'Luật chơi & cài đặt',
+  noGrade: 'Chưa chọn lớp',
+}

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { formatClock, MAX_TIMER_SECONDS, secondsLeft } from '@/game-engine/tools/classTools'
@@ -80,8 +81,8 @@ export function TimerScreen() {
 
   return (
     <ToolFrame
-      title="Đồng hồ đếm ngược"
-      subtitle={done ? 'Hết giờ!' : running ? 'Đang chạy' : 'Chọn thời gian rồi bấm “Bắt đầu”'}
+      title={i18n.t('play.tools.timer.title')}
+      subtitle={done ? i18n.t('play.tools.timer.done') : running ? i18n.t('play.tools.timer.running') : i18n.t('play.tools.timer.choose')}
       actions={PRESETS.map((m) => (
         <button
           key={m}
@@ -92,7 +93,7 @@ export function TimerScreen() {
             duration === m * 60 ? 'bg-primary text-white' : 'bg-white text-ink hover:text-primary-ink'
           }`}
         >
-          {m} phút
+          {i18n.t('play.tools.timer.minutes', { count: m })}
         </button>
       ))}
     >
@@ -117,33 +118,33 @@ export function TimerScreen() {
           </svg>
           <span
             role="timer"
-            aria-label="Thời gian còn lại"
+            aria-label={i18n.t('play.tools.timer.left')}
             className={`relative font-display leading-none font-extrabold tabular-nums ${done || urgent ? 'text-danger' : 'text-ink'}`}
             style={{ fontSize: formatClock(remaining).length > 5 ? 84 : 112 }}
           >
-            {done ? 'Hết giờ!' : formatClock(remaining)}
+            {done ? i18n.t('play.tools.timer.done') : formatClock(remaining)}
           </span>
         </motion.div>
 
         <div className="flex w-[300px] flex-col gap-3.5">
           {running ? (
             <button type="button" onClick={pause} className={`${toolButtonClass} h-16 bg-sun text-ink`}>
-              Tạm dừng
+              {i18n.t('play.tools.timer.pause')}
             </button>
           ) : (
             <button type="button" onClick={start} className={`${toolButtonClass} h-16 bg-success text-white`}>
-              {done ? 'Chạy lại' : started ? 'Chạy tiếp' : 'Bắt đầu'}
+              {done ? i18n.t('play.tools.timer.again') : started ? i18n.t('play.tools.timer.resume') : i18n.t('play.tools.timer.start')}
             </button>
           )}
           <button type="button" onClick={() => choose(duration)} className={`${toolButtonClass} bg-white text-ink`}>
-            Đặt lại
+            {i18n.t('play.tools.timer.reset')}
           </button>
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={() => adjust(-30)} className={`${toolButtonClass} bg-white text-ink`}>
-              − 30 giây
+              {i18n.t('play.tools.timer.less')}
             </button>
             <button type="button" onClick={() => adjust(60)} className={`${toolButtonClass} bg-white text-ink`}>
-              + 1 phút
+              {i18n.t('play.tools.timer.more')}
             </button>
           </div>
         </div>

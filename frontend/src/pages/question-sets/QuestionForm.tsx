@@ -1,5 +1,6 @@
 import { App, Button, Input, Segmented } from 'antd'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CloseIcon, PlusIcon } from '@/components/ui/icons'
 import type { QuestionRequest, QuestionResponse, QuestionType } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
@@ -34,6 +35,7 @@ interface QuestionFormProps {
  * answer. Ctrl+Enter saves (and starts the next new question). Mounted afresh for each question.
  */
 export function QuestionForm({ question, number, defaultType, onClose, onSave }: QuestionFormProps) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [draft, setDraft] = useState<QuestionDraft>(() => (question ? draftOf(question) : emptyDraft(defaultType)))
   const [count, setCount] = useState(number)
@@ -58,7 +60,7 @@ export function QuestionForm({ question, number, defaultType, onClose, onSave }:
     try {
       await onSave(draftToRequest(draft))
       if (next) {
-        message.success(`Đã thêm câu ${count}`)
+        message.success(t('questionSets.question.added', { count }))
         setDraft(emptyDraft(draft.type))
         setCount((c) => c + 1)
         setTried(false)
@@ -72,7 +74,7 @@ export function QuestionForm({ question, number, defaultType, onClose, onSave }:
     }
   }
 
-  const title = editing ? `Sửa câu ${number}` : `Câu hỏi mới (câu ${count})`
+  const title = editing ? t('questionSets.question.editTitle', { number }) : t('questionSets.question.newTitle', { count })
 
   return (
     <section
@@ -96,14 +98,14 @@ export function QuestionForm({ question, number, defaultType, onClose, onSave }:
           value={draft.type}
           onChange={(type) => change({ type })}
           options={[
-            { value: 'MULTIPLE_CHOICE', label: 'Trắc nghiệm' },
-            { value: 'SHORT_ANSWER', label: 'Tự luận (trả lời ngắn)' },
+            { value: 'MULTIPLE_CHOICE', label: t('questionSets.kinds.MULTIPLE_CHOICE') },
+            { value: 'SHORT_ANSWER', label: t('questionSets.question.shortAnswerType') },
           ]}
-          aria-label="Loại câu hỏi"
+          aria-label={t('questionSets.question.type')}
         />
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-[14px] font-bold text-ink-soft">Câu hỏi</span>
+          <span className="text-[14px] font-bold text-ink-soft">{t('questionSets.question.text')}</span>
           <Input.TextArea
             value={draft.text}
             onChange={(e) => change({ text: e.target.value })}
@@ -116,7 +118,7 @@ export function QuestionForm({ question, number, defaultType, onClose, onSave }:
 
         {draft.type === 'MULTIPLE_CHOICE' ? (
           <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
-            <legend className="mb-1.5 p-0 text-[14px] font-bold text-ink-soft">Đáp án (chọn ô tròn ở đáp án đúng)</legend>
+            <legend className="mb-1.5 p-0 text-[14px] font-bold text-ink-soft">{t('questionSets.question.options')}</legend>
             {draft.options.map((option, i) => (
               <div key={i} className="flex items-center gap-2.5">
                 <input
@@ -124,7 +126,7 @@ export function QuestionForm({ question, number, defaultType, onClose, onSave }:
                   name="correct-option"
                   checked={draft.correctOption === i}
                   onChange={() => change({ correctOption: i })}
-                  aria-label={`Đáp án ${OPTION_LETTERS[i]} đúng`}
+                  aria-label={t('questionSets.question.optionCorrect', { letter: OPTION_LETTERS[i] })}
                   className="size-5 shrink-0 cursor-pointer accent-[#1E9E62]"
                 />
                 <span
@@ -138,13 +140,13 @@ export function QuestionForm({ question, number, defaultType, onClose, onSave }:
                   value={option}
                   onChange={(e) => setOption(i, e.target.value)}
                   maxLength={MAX_OPTION_TEXT}
-                  placeholder={draft.correctOption === i ? 'Đáp án đúng' : 'Đáp án sai'}
-                  aria-label={`Đáp án ${OPTION_LETTERS[i]}`}
+                  placeholder={draft.correctOption === i ? t('questionSets.question.correctPlaceholder') : t('questionSets.question.wrongPlaceholder')}
+                  aria-label={t('questionSets.question.option', { letter: OPTION_LETTERS[i] })}
                   className={draft.correctOption === i ? 'border-[#1E9E62]' : ''}
                 />
                 <button
                   type="button"
-                  aria-label={`Bỏ đáp án ${OPTION_LETTERS[i]}`}
+                  aria-label={t('questionSets.question.removeOption', { letter: OPTION_LETTERS[i] })}
                   disabled={draft.options.length <= MIN_OPTIONS}
                   onClick={() => removeOption(i)}
                   className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-ink-muted hover:bg-[#FDECEC] hover:text-danger disabled:cursor-not-allowed disabled:opacity-30"
@@ -160,30 +162,30 @@ export function QuestionForm({ question, number, defaultType, onClose, onSave }:
                 onClick={() => change({ options: [...draft.options, ''] })}
                 className="mt-1 w-fit rounded-full"
               >
-                Thêm đáp án
+                {t('questionSets.question.addOption')}
               </Button>
             )}
           </fieldset>
         ) : (
           <label className="flex flex-col gap-1.5">
-            <span className="text-[14px] font-bold text-ink-soft">Câu trả lời đúng</span>
+            <span className="text-[14px] font-bold text-ink-soft">{t('questionSets.question.answer')}</span>
             <Input
               value={draft.answer}
               onChange={(e) => change({ answer: e.target.value })}
               maxLength={MAX_ANSWER}
-              placeholder="Cô dùng để chấm khi học sinh trả lời"
+              placeholder={t('questionSets.question.answerPlaceholder')}
             />
           </label>
         )}
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-[14px] font-bold text-ink-soft">Giải thích (không bắt buộc)</span>
+          <span className="text-[14px] font-bold text-ink-soft">{t('questionSets.question.explanation')}</span>
           <Input.TextArea
             value={draft.explanation}
             onChange={(e) => change({ explanation: e.target.value })}
             autoSize={{ minRows: 1, maxRows: 4 }}
             maxLength={500}
-            placeholder="Hiện sau khi trả lời, giúp các em hiểu vì sao"
+            placeholder={t('questionSets.question.explanationPlaceholder')}
           />
         </label>
 
@@ -193,17 +195,17 @@ export function QuestionForm({ question, number, defaultType, onClose, onSave }:
           </p>
         )}
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <span className="mr-auto hidden text-[12.5px] text-ink-muted sm:inline">Ctrl + Enter để lưu · Esc để hủy</span>
+          <span className="mr-auto hidden text-[12.5px] text-ink-muted sm:inline">{t('questionSets.question.keys')}</span>
           <Button onClick={onClose} className="rounded-full">
-            Hủy
+            {t('common.cancel')}
           </Button>
           {!editing && (
             <Button loading={saving} onClick={() => void save(true)} className="rounded-full font-bold">
-              Thêm và soạn câu tiếp
+              {t('questionSets.question.addNext')}
             </Button>
           )}
           <Button type="primary" loading={saving} onClick={() => void save(false)} className="rounded-full font-extrabold">
-            {editing ? 'Lưu câu hỏi' : 'Thêm câu hỏi'}
+            {editing ? t('questionSets.question.save') : t('questionSets.question.add')}
           </Button>
         </div>
       </div>

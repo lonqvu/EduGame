@@ -1,5 +1,6 @@
 import { App } from 'antd'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { playSample } from '@/api/gameApi'
 import { gameRegistry, playPath, toolPath } from '@/game-engine/registry'
@@ -14,6 +15,7 @@ import { enterFullscreen } from '@/utils/fullscreen'
  * being opened, so its button can say so and a second click does nothing.
  */
 export function usePlayNow() {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const navigate = useNavigate()
   const fullscreenOnStart = useSettingsStore((s) => s.settings.display.fullscreenOnStart)
@@ -32,7 +34,7 @@ export function usePlayNow() {
       const game = await playSample(type)
       navigate(playPath({ id: game.code, type }))
     } catch (error) {
-      message.error(`Chưa mở được trò chơi. ${apiErrorMessage(error)}`)
+      message.error(t('chooser.openFailed', { reason: apiErrorMessage(error) }))
     } finally {
       setBusy(null)
     }

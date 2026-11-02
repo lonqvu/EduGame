@@ -1,5 +1,6 @@
 import { Button, Dropdown, Input } from 'antd'
 import type { ReactNode } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
 import { CheckIcon, MoreVerticalIcon, PlayIcon, PlusIcon, SearchIcon } from '@/components/ui/icons'
 import { AnimalAvatar, CLASS_ASSETS } from '@/pages/classes/classUi'
@@ -7,11 +8,7 @@ import type { ClassroomResponse, LoadStatus } from '@/types/api'
 import { classAvatar, classTitle, type ClassTab } from '@/utils/classrooms'
 import { relativeTimeLabel } from '@/utils/dateLabels'
 
-const TABS: { key: ClassTab; label: string }[] = [
-  { key: 'ALL', label: 'Tất cả' },
-  { key: 'ACTIVE', label: 'Đang hoạt động' },
-  { key: 'PAUSED', label: 'Tạm ngưng' },
-]
+const TABS: ClassTab[] = ['ALL', 'ACTIVE', 'PAUSED']
 
 interface ClassListProps {
   status: LoadStatus
@@ -39,39 +36,40 @@ export interface ClassActions {
 
 /** The classes: search, tabs by status, one card per class with its main actions. */
 export function ClassList(props: ClassListProps) {
+  const { t } = useTranslation()
   const { counts, tab, onTabChange, search, onSearchChange } = props
   return (
-    <section aria-label="Danh sách lớp học" className="@container flex min-w-0 flex-col gap-3">
+    <section aria-label={t('classes.list.label')} className="@container flex min-w-0 flex-col gap-3">
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
         <Input
           allowClear
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           prefix={<SearchIcon size={18} className="text-ink-muted" />}
-          placeholder="Tìm lớp, trường..."
-          aria-label="Tìm kiếm lớp học"
+          placeholder={t('classes.list.search')}
+          aria-label={t('classes.list.searchLabel')}
           className="h-10 w-full rounded-full border-0 shadow-[0_1px_3px_rgba(31,42,68,0.06)] sm:w-[300px]"
         />
         {/* Narrow screens: the tabs scroll sideways rather than wrapping. */}
         <div
           role="tablist"
-          aria-label="Lọc theo trạng thái"
+          aria-label={t('classes.list.filter')}
           className="-mx-1 flex max-w-[calc(100%+8px)] gap-1.5 overflow-x-auto px-1 py-0.5 [scrollbar-width:none]"
         >
-          {TABS.map((t) => {
-            const selected = t.key === tab
+          {TABS.map((key) => {
+            const selected = key === tab
             return (
               <button
-                key={t.key}
+                key={key}
                 type="button"
                 role="tab"
                 aria-selected={selected}
-                onClick={() => onTabChange(t.key)}
+                onClick={() => onTabChange(key)}
                 className={`h-[36px] shrink-0 cursor-pointer rounded-full border-0 px-4 font-[inherit] text-[14px] font-extrabold transition ${
                   selected ? 'bg-primary text-white' : 'bg-white text-ink-soft hover:text-primary-ink'
                 }`}
               >
-                {t.label} ({counts[t.key]})
+                {t(`classes.list.tabs.${key}`)} ({counts[key]})
               </button>
             )
           })}
@@ -84,9 +82,10 @@ export function ClassList(props: ClassListProps) {
 }
 
 function ListBody({ status, classrooms, counts, tab, search, onSearchChange, onTabChange, currentCode, onCreate, onRetry, actions }: ClassListProps) {
+  const { t } = useTranslation()
   if (status === 'idle' || status === 'loading') {
     return (
-      <ul aria-busy="true" aria-label="Đang tải danh sách lớp" className="m-0 flex list-none flex-col gap-3 p-0">
+      <ul aria-busy="true" aria-label={t('classes.list.loading')} className="m-0 flex list-none flex-col gap-3 p-0">
         {[0, 1, 2].map((i) => (
           <li key={i} className="flex h-[96px] animate-pulse items-center gap-4 rounded-[20px] bg-white px-4">
             <span className="size-14 rounded-[16px] bg-chip" />
@@ -101,33 +100,33 @@ function ListBody({ status, classrooms, counts, tab, search, onSearchChange, onT
   }
   if (status === 'error') {
     return (
-      <Empty title="Chưa tải được danh sách lớp" text="Cô kiểm tra kết nối mạng rồi thử lại nhé.">
+      <Empty title={t('classes.list.errorTitle')} text={t('classes.list.errorText')}>
         <Button shape="round" onClick={onRetry}>
-          Thử lại
+          {t('common.retry')}
         </Button>
       </Empty>
     )
   }
   if (counts.ALL === 0) {
     return (
-      <Empty title="Cô chưa có lớp học nào" text="Tạo lớp đầu tiên, thêm học sinh rồi cùng các em chơi trò chơi nhé!" art>
+      <Empty title={t('classes.list.emptyTitle')} text={t('classes.list.emptyText')} art>
         <Button type="primary" shape="round" icon={<PlusIcon size={16} />} onClick={onCreate}>
-          Tạo lớp học
+          {t('classes.page.create')}
         </Button>
       </Empty>
     )
   }
   if (classrooms.length === 0) {
     return search.trim() ? (
-      <Empty title={`Không có lớp nào khớp “${search.trim()}”`} text="Cô thử tìm theo tên lớp hoặc tên trường nhé.">
+      <Empty title={t('classes.list.noMatch', { search: search.trim() })} text={t('classes.list.noMatchText')}>
         <Button shape="round" onClick={() => onSearchChange('')}>
-          Xóa tìm kiếm
+          {t('classes.list.clearSearch')}
         </Button>
       </Empty>
     ) : (
-      <Empty title={tab === 'PAUSED' ? 'Không có lớp nào tạm ngưng' : 'Chưa có lớp nào đang hoạt động'} text="Các lớp khác ở thẻ “Tất cả”.">
+      <Empty title={tab === 'PAUSED' ? t('classes.list.noPaused') : t('classes.list.noActive')} text={t('classes.list.othersInAll')}>
         <Button shape="round" onClick={() => onTabChange('ALL')}>
-          Xem tất cả lớp
+          {t('classes.list.showAll')}
         </Button>
       </Empty>
     )
@@ -146,51 +145,61 @@ function ListBody({ status, classrooms, counts, tab, search, onSearchChange, onT
  * the teacher does with it most: teach it ("Đang dạy" when it is), play with it, the rest in the menu.
  */
 function ClassRow({ classroom: c, current, actions }: { classroom: ClassroomResponse; current: boolean; actions: ClassActions }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const page = `/classes/${encodeURIComponent(c.code)}`
   const paused = c.status === 'PAUSED'
   // The class size first: the school name may be long and is cut on narrow screens.
-  const details = [`${c.studentCount} học sinh`, c.schoolName].filter(Boolean).join(' · ')
+  const details = [t('classes.studentCount', { count: c.studentCount }), c.schoolName].filter(Boolean).join(' · ')
   return (
+    // The whole card opens the class: the name's link covers it (after:inset-0); the buttons sit above that cover.
     <li
-      className={`flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[20px] border-2 border-transparent bg-white px-4 py-3.5 transition hover:border-[#C9D9F5] ${
+      className={`group relative flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-3 rounded-[20px] border-2 border-transparent bg-white px-4 py-3.5 transition hover:border-[#C9D9F5] hover:shadow-[0_4px_14px_rgba(31,42,68,0.07)] has-[a:focus-visible]:border-primary ${
         paused ? 'bg-white/70' : ''
       }`}
     >
-      <Link to={page} tabIndex={-1} aria-hidden="true" className={paused ? 'opacity-70' : ''}>
+      <span className={paused ? 'opacity-70' : ''}>
         <AnimalAvatar avatar={classAvatar(c)} size={60} className="size-[52px] rounded-[18px] sm:size-[60px]" />
-      </Link>
+      </span>
       <div className="flex min-w-0 flex-1 basis-[220px] flex-col gap-0.5">
         <span className="flex items-center gap-2">
-          <Link to={page} aria-label={`${classTitle(c.name)}, ${details}`} className="truncate text-[19px] font-black text-ink hover:text-primary-ink">
+          <Link
+            to={page}
+            aria-label={`${classTitle(c.name)}, ${details}`}
+            className="truncate text-[19px] font-black text-ink outline-none group-hover:text-primary-ink after:absolute after:inset-0 after:rounded-[18px] after:content-['']"
+          >
             {classTitle(c.name)}
           </Link>
-          {paused && <span className="shrink-0 rounded-full bg-chip px-2.5 py-0.5 text-[12px] font-extrabold text-ink-muted">Tạm ngưng</span>}
+          {paused && <span className="shrink-0 rounded-full bg-chip px-2.5 py-0.5 text-[12px] font-extrabold text-ink-muted">{t('classes.status.PAUSED')}</span>}
         </span>
         <span className="truncate text-[13.5px] text-ink-muted">{details}</span>
         <span className="mt-1 flex flex-wrap gap-1.5">
           <Fact>
-            🎮 Chơi gần nhất: <b className="font-extrabold">{relativeTimeLabel(c.lastPlayedAt) || 'chưa chơi'}</b>
+            <Trans
+              i18nKey="classes.list.lastPlayed"
+              values={{ when: relativeTimeLabel(c.lastPlayedAt) || t('classes.list.neverPlayed') }}
+              components={{ b: <b className="font-extrabold" /> }}
+            />
           </Fact>
           <Fact>
-            ⭐ <b className="font-extrabold">{c.weeklyStars}</b> sao tuần này
+            <Trans i18nKey="classes.list.weeklyStars" values={{ count: c.weeklyStars }} components={{ b: <b className="font-extrabold" /> }} />
           </Fact>
         </span>
       </div>
-      <div className="flex w-full items-center gap-2 sm:w-auto">
+      <div className="relative z-10 flex w-full cursor-default items-center gap-2 sm:w-auto">
         {paused ? (
           <Button shape="round" onClick={() => actions.setStatus(c, 'ACTIVE')} className="h-10 flex-1 font-extrabold sm:flex-none">
-            Kích hoạt lại
+            {t('classes.resume')}
           </Button>
         ) : (
           <>
             {current ? (
               <span className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#E2F6E8] px-4 text-[14px] font-extrabold whitespace-nowrap text-success sm:flex-none">
-                <CheckIcon size={15} /> Đang dạy
+                <CheckIcon size={15} /> {t('classes.teaching')}
               </span>
             ) : (
               <Button shape="round" onClick={() => actions.teach(c)} className="h-10 flex-1 border-2 font-extrabold text-primary-ink sm:flex-none">
-                Dạy lớp này
+                {t('classes.teach')}
               </Button>
             )}
             <Button
@@ -200,7 +209,7 @@ function ClassRow({ classroom: c, current, actions }: { classroom: ClassroomResp
               onClick={() => actions.play(c)}
               className="h-10 flex-1 font-extrabold sm:flex-none"
             >
-              Chơi cùng lớp
+              {t('classes.play')}
             </Button>
           </>
         )}
@@ -209,18 +218,18 @@ function ClassRow({ classroom: c, current, actions }: { classroom: ClassroomResp
           placement="bottomRight"
           menu={{
             items: [
-              { key: 'open', label: 'Mở lớp', onClick: () => navigate(page) },
+              { key: 'open', label: t('classes.open'), onClick: () => navigate(page) },
               paused
-                ? { key: 'resume', label: 'Kích hoạt lại lớp', onClick: () => actions.setStatus(c, 'ACTIVE') }
-                : { key: 'pause', label: 'Tạm ngưng lớp', onClick: () => actions.setStatus(c, 'PAUSED') },
+                ? { key: 'resume', label: t('classes.resumeClass'), onClick: () => actions.setStatus(c, 'ACTIVE') }
+                : { key: 'pause', label: t('classes.pause'), onClick: () => actions.setStatus(c, 'PAUSED') },
               { type: 'divider' },
-              { key: 'archive', label: 'Xóa lớp', danger: true, onClick: () => actions.archive(c) },
+              { key: 'archive', label: t('classes.delete'), danger: true, onClick: () => actions.archive(c) },
             ],
           }}
         >
           <button
             type="button"
-            aria-label={`Thao tác với ${classTitle(c.name)}`}
+            aria-label={t('classes.actionsFor', { name: classTitle(c.name) })}
             className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-ink-muted hover:bg-surface-soft"
           >
             <MoreVerticalIcon size={19} />

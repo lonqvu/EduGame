@@ -1,45 +1,33 @@
 import type { AdminAction, AdminAuditEntry, FeedbackStatus, UserRole, UserStatus } from '@/types/api'
+import i18n from 'i18next'
+import { translatedLabels } from '@/i18n/labels'
 import { apiErrorMessage } from '@/utils/apiError'
 import { FEEDBACK_KINDS } from '@/utils/feedback'
 
 /** Labels of "Quản trị". */
 
-export const USER_STATUS_LABELS: Record<UserStatus, string> = {
-  ACTIVE: 'Đang hoạt động',
-  LOCKED: 'Đã khoá',
-  DELETED: 'Đã xoá',
-}
+export const USER_STATUS_LABELS = translatedLabels<UserStatus>(['ACTIVE', 'LOCKED', 'DELETED'], (status) => `admin.status.${status}`)
 
-export const ROLE_LABELS: Record<UserRole, string> = {
-  ADMIN: 'Quản trị viên',
-  TEACHER: 'Giáo viên',
-}
+export const ROLE_LABELS = translatedLabels<UserRole>(['ADMIN', 'TEACHER'], (role) => `admin.roles.${role}`)
 
-export const FEEDBACK_STATUS_LABELS: Record<FeedbackStatus, string> = {
-  NEW: 'Mới',
-  SEEN: 'Đã xem',
-  DONE: 'Đã xử lý',
-}
+export const FEEDBACK_STATUS_LABELS = translatedLabels<FeedbackStatus>(['NEW', 'SEEN', 'DONE'], (status) => `admin.feedbackStatus.${status}`)
 
 export const feedbackKindLabel = (kind: string) => FEEDBACK_KINDS.find((k) => k.kind === kind)?.label ?? kind
 
-export const ACTION_LABELS: Record<AdminAction, string> = {
-  TEACHER_LOCKED: 'Khoá tài khoản',
-  TEACHER_UNLOCKED: 'Mở khoá tài khoản',
-  TEACHER_SIGNED_OUT: 'Đăng xuất mọi thiết bị',
-  ADMIN_GRANTED: 'Cấp quyền quản trị',
-  ADMIN_REVOKED: 'Bỏ quyền quản trị',
-  LOGIN_UNBLOCKED: 'Mở chặn đăng nhập',
-  FEEDBACK_STATUS_CHANGED: 'Đổi trạng thái góp ý',
-  FEEDBACK_EXPORTED: 'Tải file góp ý',
-}
+export const ACTION_LABELS = translatedLabels<AdminAction>(
+  ['TEACHER_LOCKED', 'TEACHER_UNLOCKED', 'TEACHER_SIGNED_OUT', 'ADMIN_GRANTED', 'ADMIN_REVOKED', 'LOGIN_UNBLOCKED', 'FEEDBACK_STATUS_CHANGED', 'FEEDBACK_EXPORTED'],
+  (action) => `admin.actions.${action}`,
+)
 
 /** Periods of the overview, in days. */
-export const DASHBOARD_PERIODS = [
-  { days: 7, label: '7 ngày' },
-  { days: 30, label: '30 ngày' },
-  { days: 90, label: '90 ngày' },
-] as const
+const period = <D extends number>(days: D) => ({
+  days,
+  get label() {
+    return i18n.t('admin.days', { count: days as number })
+  },
+})
+
+export const DASHBOARD_PERIODS = [period(7), period(30), period(90)] as const
 
 const number = (value: unknown) => (typeof value === 'number' ? value : null)
 const text = (value: unknown) => (typeof value === 'string' && value ? value : null)
@@ -51,19 +39,19 @@ export function auditDetail(entry: Pick<AdminAuditEntry, 'action' | 'details'>):
   const parts: string[] = []
   switch (entry.action) {
     case 'TEACHER_LOCKED':
-      if (text(d.reason)) parts.push(`Lý do: ${text(d.reason)}`)
+      if (text(d.reason)) parts.push(i18n.t('admin.detail.reason', { reason: text(d.reason) }))
       break
     case 'FEEDBACK_STATUS_CHANGED':
       parts.push(`${feedbackStatus(d.from)} → ${feedbackStatus(d.to)}`)
       break
     case 'FEEDBACK_EXPORTED':
-      if (number(d.rows) !== null) parts.push(`${number(d.rows)} góp ý`)
+      if (number(d.rows) !== null) parts.push(i18n.t('admin.detail.rows', { count: number(d.rows) ?? 0 }))
       break
     default:
       break
   }
   const ended = number(d.sessionsEnded)
-  if (ended) parts.push(`kết thúc ${ended} phiên đăng nhập`)
+  if (ended) parts.push(i18n.t('admin.detail.sessions', { count: ended }))
   return parts.join(' · ')
 }
 
@@ -77,7 +65,7 @@ export function dateTime(iso: string | undefined): string {
 }
 
 /** "1.234" */
-export const count = (n: number) => n.toLocaleString('vi-VN')
+export const count = (n: number) => n.toLocaleString(i18n.language === 'en' ? 'en-US' : 'vi-VN')
 
 /** A page number from the URL: 0 for anything that is not a whole number ≥ 0. */
 export function pageParam(value: string | null): number {
@@ -95,13 +83,10 @@ export function adminErrorMessage(error: unknown): string {
   const code = typeof error === 'object' && error !== null && 'code' in error ? (error as { code: unknown }).code : null
   switch (code) {
     case 'CANNOT_CHANGE_OWN_ACCOUNT':
-      return 'Cô không thao tác trên tài khoản của chính mình ở đây được.'
     case 'ADMIN_CANNOT_BE_LOCKED':
-      return 'Cần bỏ quyền quản trị trước khi khoá tài khoản này.'
     case 'TEACHER_LOCKED':
-      return 'Tài khoản đang bị khoá. Mở khoá trước khi cấp quyền quản trị.'
     case 'LAST_ADMIN':
-      return 'Lớp Vui cần ít nhất một quản trị viên.'
+      return i18n.t(`admin.errors.${code}`)
     default:
       return apiErrorMessage(error)
   }

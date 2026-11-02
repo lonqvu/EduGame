@@ -1,3 +1,5 @@
+import i18n from 'i18next'
+import { Trans } from 'react-i18next'
 import { motion } from 'motion/react'
 import { useReducer, useState, type ReactNode } from 'react'
 import { CheckIcon, ChevronRightIcon, CloseIcon } from '@/components/ui/icons'
@@ -44,7 +46,7 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
   const backTo = editPath(game.id)
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có hàng ngang nào đủ gợi ý, đáp án và chữ ở cột từ khóa." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.crossword')} backTo={backTo} />
   }
 
   if (state.finished) {
@@ -52,8 +54,8 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
       <TeamResults
         teams={state.teams}
         onPlayAgain={() => dispatch({ type: 'restart', teamCount: rules.teams })}
-        mostCorrectLabel="Giải được nhiều hàng nhất"
-        streakUnit="hàng"
+        mostCorrectLabel="rows"
+        streakUnit="row"
       />
     )
   }
@@ -71,11 +73,11 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
   const activeId = state.guessing ? state.guessTeamId : (state.answeringTeamId ?? (keywordTeam ? null : turnTeam.id))
 
   return (
-    <PlayFrame title={game.title} progress={`Còn ${hidden} / ${playable.length} hàng`} backTo={backTo}>
+    <PlayFrame title={game.title} progress={i18n.t('play.crossword.left', { hidden, total: playable.length })} backTo={backTo}>
       <TeamBar
         teams={state.teams}
         activeId={activeId}
-        activeLabel={state.guessing ? 'Đoán từ khóa' : state.answeringTeamId ? 'Đang trả lời' : 'Chọn hàng'}
+        activeLabel={state.guessing ? i18n.t('play.crossword.guessKeyword') : state.answeringTeamId ? i18n.t('play.common.answering') : i18n.t('play.crossword.chooseRow')}
         onPick={state.guessing ? (teamId) => dispatch({ type: 'pickGuessTeam', teamId }) : undefined}
         disabledIds={state.guessing ? state.keywordOut : []}
       />
@@ -97,10 +99,10 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
         {keywordTeam ? (
           <>
             <span className="flex-1 font-display text-[30px] leading-tight font-extrabold">
-              {keywordTeam.name} đoán đúng từ khóa <span className="text-primary">{keyword}</span>!
+              <Trans i18nKey="play.crossword.keywordFound" values={{ team: keywordTeam.name, keyword }} components={{ keyword: <span className="text-primary" /> }} />
             </span>
             <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} bg-primary text-white`}>
-              Xem kết quả
+              {i18n.t('play.common.seeResults')}
               <ChevronRightIcon size={20} />
             </button>
           </>
@@ -108,8 +110,8 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
           <>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="text-base font-extrabold" style={{ color: answering.color }}>
-                Hàng {state.current! + 1} · {current.letters.length} chữ cái · {answering.name} trả lời
-                {state.triedTeams.length > 0 && ' (giành quyền)'}
+                {i18n.t('play.crossword.row', { number: state.current! + 1, letters: current.letters.length, team: answering.name })}
+                {state.triedTeams.length > 0 && i18n.t('play.crossword.stolen')}
               </span>
               <span className="font-display text-[28px] leading-tight font-extrabold">{current.clue}</span>
             </div>
@@ -133,7 +135,7 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
                   }}
                   className={`${playButtonClass} bg-line-soft text-ink`}
                 >
-                  Bỏ qua
+                  {i18n.t('play.crossword.skip')}
                 </button>
               }
             />
@@ -141,7 +143,7 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
         ) : state.guessing ? (
           <>
             <span className="flex-1 font-display text-[28px] leading-tight font-extrabold">
-              {guesser ? `${guesser.name} đoán từ khóa có ${keyword.length} chữ cái` : 'Đội nào xin đoán từ khóa? Cô bấm vào tên đội.'}
+              {guesser ? i18n.t('play.crossword.guesser', { team: guesser.name, count: keyword.length }) : i18n.t('play.crossword.whoGuesses')}
             </span>
             {guesser ? (
               <MarkButtons
@@ -155,11 +157,11 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
                   setTimeout(() => sound.play('applause'), 400)
                   dispatch({ type: 'markGuess', correct: true, points: prize })
                 }}
-                rightLabel={`Đúng (+${prize})`}
+                rightLabel={i18n.t('play.crossword.rightPrize', { prize })}
               />
             ) : (
               <button type="button" onClick={() => dispatch({ type: 'cancelGuess' })} className={`${playButtonClass} bg-line-soft text-ink`}>
-                Thôi
+                {i18n.t('play.crossword.never')}
               </button>
             )}
           </>
@@ -167,8 +169,8 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
           <>
             <span className="flex-1 text-xl font-extrabold text-ink-soft">
               {allOpen
-                ? 'Đã mở hết các hàng. Đội nào đoán được từ khóa?'
-                : `${turnTeam.name} chọn một hàng ngang (bấm số hàng). Đoán đúng từ khóa bây giờ được ${prize} điểm.`}
+                ? i18n.t('play.crossword.allOpen')
+                : i18n.t('play.crossword.turn', { team: turnTeam.name, prize })}
             </span>
             <button
               type="button"
@@ -178,10 +180,10 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
               }}
               className={`${playButtonClass} bg-sun text-ink`}
             >
-              Đoán từ khóa
+              {i18n.t('play.crossword.guessKeyword')}
             </button>
             <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} bg-line-soft text-ink`}>
-              Kết thúc
+              {i18n.t('play.common.finish')}
             </button>
           </>
         )}
@@ -193,7 +195,7 @@ export function CrosswordScreen({ game, rows, settings }: CrosswordScreenProps) 
 function MarkButtons({
   onWrong,
   onRight,
-  rightLabel = 'Đúng',
+  rightLabel = i18n.t('play.common.right'),
   extra,
 }: {
   onWrong: () => void
@@ -252,7 +254,7 @@ function Board({ rows, results, teams, currentRow, showAll, canOpen, onOpen }: B
             <div key={row.id} className="absolute flex items-center" style={{ top: r * (cell + GAP), left: 0, height: cell }}>
               <button
                 type="button"
-                aria-label={`Hàng ${r + 1}`}
+                aria-label={i18n.t('play.crossword.rowLabel', { number: r + 1 })}
                 disabled={!canOpen || !!result}
                 onClick={() => onOpen(r)}
                 className="flex shrink-0 cursor-pointer items-center justify-center rounded-full border-[3px] font-[inherit] font-extrabold disabled:cursor-default"

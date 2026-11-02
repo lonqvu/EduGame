@@ -40,7 +40,7 @@ vi.stubGlobal('localStorage', {
 })
 
 const SERVER: UserSettings = {
-  display: { reduceMotion: false, fullscreenOnStart: true },
+  display: { reduceMotion: false, fullscreenOnStart: true, language: 'en' },
   games: { teams: 3 },
   notifications: { newSignInEmail: true, passwordChangedEmail: false },
   sound: { enabled: true, volume: 60, music: false },
@@ -83,7 +83,7 @@ describe('load', () => {
 
   it('starts from the defaults, then holds the server settings and caches the display ones', async () => {
     const store = await freshStore()
-    expect(store.getState().settings.display).toEqual({ reduceMotion: false, fullscreenOnStart: false })
+    expect(store.getState().settings.display).toEqual({ reduceMotion: false, fullscreenOnStart: false, language: 'vi' })
     expect(store.getState().status).toBe('idle')
 
     await store.getState().load()
@@ -105,7 +105,7 @@ describe('load', () => {
     const store = await freshStore()
     await store.getState().load()
     expect(store.getState().settings).toEqual({
-      display: { reduceMotion: true, fullscreenOnStart: false },
+      display: { reduceMotion: true, fullscreenOnStart: false, language: 'vi' },
       games: {},
       notifications: { newSignInEmail: true, passwordChangedEmail: true },
       sound: { enabled: true, volume: 80, music: true },
@@ -147,7 +147,7 @@ describe('update', () => {
     await saving
 
     expect(store.getState().saving).toBe(false)
-    expect(backend.state.saves).toEqual([{ ...SERVER, display: { reduceMotion: true, fullscreenOnStart: true } }])
+    expect(backend.state.saves).toEqual([{ ...SERVER, display: { reduceMotion: true, fullscreenOnStart: true, language: 'en' } }])
     expect(JSON.parse(storage.get('edugame.display')!).reduceMotion).toBe(true)
   })
 

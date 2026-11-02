@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { env } from '@/utils/env'
 
 /**
@@ -27,11 +28,11 @@ const isAccepted = (type: string) => (ACCEPTED_IMAGE_TYPES as readonly string[])
 export function imageFileProblem(file: { type: string; size: number }): string | null {
   if (!isAccepted(file.type)) {
     return file.type === 'image/heic' || file.type === 'image/heif'
-      ? 'Ảnh HEIC của iPhone chưa dùng được. Cô chọn ảnh JPG hoặc PNG nhé.'
-      : 'Cô chọn ảnh PNG, JPG, GIF hoặc WEBP nhé.'
+      ? i18n.t('editor.image.heic')
+      : i18n.t('editor.image.type')
   }
-  if (file.size === 0) return 'File ảnh này bị trống.'
-  if (file.type === 'image/gif' && file.size > MAX_IMAGE_BYTES) return 'Ảnh GIF quá lớn (tối đa 5 MB).'
+  if (file.size === 0) return i18n.t('editor.image.empty')
+  if (file.type === 'image/gif' && file.size > MAX_IMAGE_BYTES) return i18n.t('editor.image.gifTooLarge')
   return null
 }
 
@@ -61,7 +62,7 @@ export async function prepareImage(file: File): Promise<File> {
   try {
     bitmap = await createImageBitmap(file)
   } catch {
-    throw new ImageFileError('Không đọc được ảnh này. Cô thử chọn ảnh khác nhé.')
+    throw new ImageFileError(i18n.t('editor.image.unreadable'))
   }
   try {
     const target = resizeTarget(bitmap.width, bitmap.height, file.size)
@@ -73,7 +74,7 @@ export async function prepareImage(file: File): Promise<File> {
     const blob = (await toBlob(canvas, 'image/webp')) ?? (await toBlob(canvas, file.type === 'image/png' ? 'image/png' : 'image/jpeg'))
     // A browser without WebP output answers with PNG; keep whichever is smaller than the original.
     if (!blob || blob.size >= file.size) {
-      if (file.size > MAX_IMAGE_BYTES) throw new ImageFileError('Ảnh quá lớn (tối đa 5 MB).')
+      if (file.size > MAX_IMAGE_BYTES) throw new ImageFileError(i18n.t('editor.image.tooLarge'))
       return file
     }
     const extension = blob.type.split('/')[1] === 'jpeg' ? 'jpg' : blob.type.split('/')[1]

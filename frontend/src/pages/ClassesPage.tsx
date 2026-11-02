@@ -1,5 +1,6 @@
 import { App, Button } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { PlusIcon } from '@/components/ui/icons'
@@ -13,6 +14,7 @@ import { classTitle, countByTab, filterClassrooms, MAX_CLASSROOMS, type ClassTab
 
 /** /classes — the teacher's classes: pick the one being taught, play with one, open one, create one. */
 export function ClassesPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { message, modal } = App.useApp()
   const loadTeacher = useTeacherStore((s) => s.load)
@@ -40,7 +42,7 @@ export function ClassesPage() {
 
   const create = async (request: CreateClassroomRequest, importList: boolean) => {
     const created = await createClassroom(request)
-    message.success(`Đã tạo ${classTitle(created.name)}. Cô thêm học sinh cho lớp nhé!`)
+    message.success(t('classes.done.created', { name: classTitle(created.name) }))
     // The class page opens the file import right away when asked.
     navigate(`/classes/${encodeURIComponent(created.code)}`, { state: { importList } })
   }
@@ -55,7 +57,7 @@ export function ClassesPage() {
   }
 
   const actions = {
-    teach: (c: ClassroomResponse) => void run(() => select(c.code), `Từ giờ trò chơi và sao thưởng dùng danh sách ${classTitle(c.name)}`),
+    teach: (c: ClassroomResponse) => void run(() => select(c.code), t('classes.done.teaching', { name: classTitle(c.name) })),
     play: (c: ClassroomResponse) =>
       void run(async () => {
         if (c.code !== currentCode) await select(c.code)
@@ -64,34 +66,34 @@ export function ClassesPage() {
     setStatus: (c: ClassroomResponse, next: ClassroomResponse['status']) =>
       void run(
         () => updateClassroom(c.code, { status: next }),
-        next === 'PAUSED' ? `${classTitle(c.name)} đã tạm ngưng` : `${classTitle(c.name)} đã hoạt động trở lại`,
+        t(next === 'PAUSED' ? 'classes.done.paused' : 'classes.done.resumed', { name: classTitle(c.name) }),
       ),
     archive: (c: ClassroomResponse) =>
       modal.confirm({
-        title: `Xóa ${classTitle(c.name)}?`,
-        content: 'Lớp sẽ không còn trong danh sách của cô. Sao thưởng và kết quả cũ của các em vẫn được lưu lại.',
-        okText: 'Xóa lớp',
+        title: t('classes.deleteConfirm', { name: classTitle(c.name) }),
+        content: t('classes.deleteText'),
+        okText: t('classes.delete'),
         okButtonProps: { danger: true },
-        cancelText: 'Giữ lại',
-        onOk: () => run(() => archiveClassroom(c.code), `Đã xóa ${classTitle(c.name)}`),
+        cancelText: t('classes.keep'),
+        onOk: () => run(() => archiveClassroom(c.code), t('classes.done.deleted', { name: classTitle(c.name) })),
       }),
   }
 
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title="Lớp học của cô"
-        text="Chọn lớp đang dạy, xem học sinh và khen thưởng"
+        title={t('classes.page.title')}
+        text={t('classes.page.text')}
         actions={
             <Button
               type="primary"
               icon={<PlusIcon size={16} />}
               disabled={!canCreate}
-              title={status === 'ready' && !canCreate ? `Cô đã có ${MAX_CLASSROOMS} lớp` : undefined}
+              title={status === 'ready' && !canCreate ? t('classes.page.full', { count: MAX_CLASSROOMS }) : undefined}
               onClick={() => setCreating(true)}
               className="h-11 rounded-full px-5 font-extrabold shadow-[0_6px_16px_rgba(53,99,233,0.3)]"
             >
-              Tạo lớp học
+              {t('classes.page.create')}
             </Button>
         }
       />

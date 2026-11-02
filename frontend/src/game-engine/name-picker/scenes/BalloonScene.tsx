@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { BLEED, BLEED_W, BLEED_X, Cloud, Countdown, Crown, SceneSvg, Twinkle } from '@/game-engine/name-picker/effects'
@@ -95,7 +96,7 @@ export function BalloonScene({ slots, winnerSlot, phase, onFinish }: PickScenePr
           </motion.div>
         )
       })}
-      {running && <Countdown steps={['3', '2', '1', 'Thả!']} stepMs={COUNT_MS} left={540} top={180} accent="#FF8FB1" ink="#C2456F" />}
+      {running && <Countdown steps={['3', '2', '1', i18n.t('play.picker.release')]} stepMs={COUNT_MS} left={540} top={180} accent="#FF8FB1" ink="#C2456F" />}
     </>
   )
 }
@@ -127,7 +128,7 @@ function Pop({ color }: { color: string }) {
       >
         <path d="M0 -50 L10 -18 L42 -28 L20 0 L46 22 L10 15 L0 50 L-10 15 L-46 22 L-20 0 L-42 -28 L-10 -18Z" fill="#FFFFFF" />
         <text x="0" y="6" textAnchor="middle" dominantBaseline="middle" fontFamily="'Baloo 2', Nunito, sans-serif" fontWeight={800} fontSize="24" fill="#E5484D">
-          Bụp!
+          {i18n.t('play.picker.pop')}
         </text>
       </motion.svg>
       <motion.svg

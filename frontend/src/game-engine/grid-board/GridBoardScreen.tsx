@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { Link } from 'react-router'
 import { CheckIcon, UndoIcon } from '@/components/ui/icons'
@@ -26,7 +27,7 @@ export function GridBoardScreen({ gameId }: { gameId: string }) {
           <h1 className="m-0 truncate font-display text-[26px] font-extrabold">{game?.title}</h1>
         </div>
         <span className="shrink-0 rounded-full bg-white px-4 py-1.5 text-lg font-extrabold">
-          {remaining > 0 ? `Còn ${remaining} ô` : 'Đã lật hết ô'}
+          {remaining > 0 ? i18n.t('play.grid.left', { count: remaining }) : i18n.t('play.grid.allTurned')}
         </span>
       </div>
 
@@ -42,7 +43,7 @@ export function GridBoardScreen({ gameId }: { gameId: string }) {
               <span className="size-11 shrink-0 rounded-full" style={{ background: team.color }} />
               <div className="flex flex-1 flex-col">
                 <span className="text-xl font-extrabold">{team.name}</span>
-                {isTurn && <span className="text-[15px] font-extrabold text-[#9A4A00]">Đến lượt</span>}
+                {isTurn && <span className="text-[15px] font-extrabold text-[#9A4A00]">{i18n.t('play.common.yourTurn')}</span>}
               </div>
               <motion.span
                 key={team.score}
@@ -64,7 +65,7 @@ export function GridBoardScreen({ gameId }: { gameId: string }) {
             <div
               key={q.id}
               className="flex items-center justify-center gap-2 rounded-[20px] bg-tile-done text-ink-muted"
-              aria-label={`Ô ${tileNo} đã trả lời`}
+              aria-label={i18n.t('play.grid.tileAnswered', { number: tileNo })}
             >
               <CheckIcon size={26} strokeWidth={2.6} />
               <span className="font-display text-[26px] font-bold">{tileNo}</span>
@@ -93,20 +94,20 @@ export function GridBoardScreen({ gameId }: { gameId: string }) {
           className="flex h-12 cursor-pointer items-center gap-2 rounded-full border-0 bg-white px-5 font-[inherit] text-[17px] font-extrabold text-ink disabled:cursor-not-allowed disabled:opacity-50"
         >
           <UndoIcon size={20} />
-          Hoàn tác
+          {i18n.t('play.common.undo')}
         </button>
         <div className="flex gap-3">
           <Link
             to="/tools/wheel"
             className="flex h-12 items-center rounded-full bg-sun px-[22px] text-[17px] font-extrabold text-ink hover:text-ink hover:brightness-95"
           >
-            Gọi tên ngẫu nhiên
+            {i18n.t('play.grid.namePicker')}
           </Link>
           <Link
             to={`/play/${gameId}/results`}
             className="flex h-12 items-center rounded-full bg-ink px-[22px] text-[17px] font-extrabold text-white hover:text-white hover:brightness-125"
           >
-            Kết thúc
+            {i18n.t('play.common.finish')}
           </Link>
         </div>
       </div>

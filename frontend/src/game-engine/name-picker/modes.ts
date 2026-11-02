@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 export type PickMode = 'horse' | 'balloon' | 'claw' | 'fishing' | 'rocket'
 
 /** Where the start / result panel sits so it never covers the scene's action. */
@@ -18,38 +19,59 @@ export interface PickModeConfig {
   resultAt: PanelPlacement
 }
 
+/** A name picker; its texts are read in the current language (play.picker.modes.*). */
+function picker(mode: PickMode, slots: number, idleAt: PanelPlacement, resultAt: PanelPlacement): PickModeConfig {
+  const text = (key: 'title' | 'description' | 'prompt' | 'start' | 'again' | 'result') => i18n.t(`play.picker.modes.${mode}.${key}`)
+  return {
+    mode,
+    slots,
+    idleAt,
+    resultAt,
+    get title() {
+      return text('title')
+    },
+    get description() {
+      return text('description')
+    },
+    get prompt() {
+      return text('prompt')
+    },
+    get startLabel() {
+      return text('start')
+    },
+    get againLabel() {
+      return text('again')
+    },
+    get resultLabel() {
+      return text('result')
+    },
+  }
+}
+
 export const PICK_MODES: Record<PickMode, PickModeConfig> = {
-  horse: {
-    description: 'Mỗi chú ngựa mang tên một bạn. Chú ngựa về đích đầu tiên gọi tên bạn trả lời.',
-    mode: 'horse', title: 'Đua ngựa', slots: 5, prompt: 'Chú ngựa nào về nhất?',
-    startLabel: 'Bắt đầu đua', againLabel: 'Đua lại', resultLabel: 'Về nhất', idleAt: 'bottom', resultAt: 'bottom',
-  },
-  balloon: {
-    description: 'Thả cả chùm bóng bay mang tên các bạn, quả bay cao nhất được gọi.',
-    mode: 'balloon', title: 'Bóng bay', slots: 7, prompt: 'Quả bóng nào bay cao nhất?',
-    startLabel: 'Thả bóng bay', againLabel: 'Thả bóng lại', resultLabel: 'Bay cao nhất', idleAt: 'top', resultAt: 'bottom',
-  },
-  claw: {
-    description: 'Máy gắp thú gắp ngẫu nhiên một bạn trong lớp, hồi hộp như ở khu vui chơi.',
-    mode: 'claw', title: 'Máy gắp thú', slots: 11, prompt: 'Gắp trúng ai, bạn đó trả lời!',
-    startLabel: 'Gắp thú', againLabel: 'Gắp lại', resultLabel: 'Gắp trúng', idleAt: 'right', resultAt: 'right',
-  },
-  fishing: {
-    description: 'Thả câu xuống hồ, chú cá nào cắn câu thì bạn mang tên chú cá đó trả lời.',
-    mode: 'fishing', title: 'Câu cá', slots: 7, prompt: 'Chú cá nào sẽ cắn câu?',
-    startLabel: 'Thả câu', againLabel: 'Thả câu lại', resultLabel: 'Câu được bạn', idleAt: 'right', resultAt: 'right',
-  },
-  rocket: {
-    description: 'Các tên lửa cùng rời bệ phóng, tên lửa tới Mặt Trăng trước gọi tên bạn đó.',
-    mode: 'rocket', title: 'Tên lửa', slots: 4, prompt: 'Tên lửa nào bay tới Mặt Trăng?',
-    startLabel: 'Phóng tên lửa', againLabel: 'Phóng lại', resultLabel: 'Bay lên Mặt Trăng', idleAt: 'left', resultAt: 'left',
-  },
+  horse: picker('horse', 5, 'bottom', 'bottom'),
+  balloon: picker('balloon', 7, 'top', 'bottom'),
+  claw: picker('claw', 11, 'right', 'right'),
+  fishing: picker('fishing', 7, 'right', 'right'),
+  rocket: picker('rocket', 4, 'left', 'left'),
 }
 
 /** Every name-picking tool, for the "Đổi trò" menu (the wheel lives on its own route). */
 export const PICK_TOOL_LINKS: { key: string; label: string; path: string }[] = [
-  { key: 'wheel', label: 'Vòng quay', path: '/tools/wheel' },
-  ...Object.values(PICK_MODES).map((m) => ({ key: m.mode, label: m.title, path: `/tools/pick/${m.mode}` })),
+  {
+    key: 'wheel',
+    path: '/tools/wheel',
+    get label() {
+      return i18n.t('play.picker.wheel')
+    },
+  },
+  ...Object.values(PICK_MODES).map((m) => ({
+    key: m.mode,
+    path: `/tools/pick/${m.mode}`,
+    get label() {
+      return m.title
+    },
+  })),
 ]
 
 export const isPickMode = (value: string | undefined): value is PickMode =>

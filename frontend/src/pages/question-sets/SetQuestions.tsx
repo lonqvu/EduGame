@@ -2,7 +2,8 @@ import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Button, Dropdown } from 'antd'
 import { useState, type ReactNode } from 'react'
-import { BulbIcon, CheckIcon, DocumentIcon, MoreVerticalIcon, PencilIcon, PlusIcon } from '@/components/ui/icons'
+import { Trans, useTranslation } from 'react-i18next'
+import { BulbIcon, CheckIcon, DocumentIcon, FileTextIcon, MoreVerticalIcon, PencilIcon, PlusIcon } from '@/components/ui/icons'
 import { QuestionForm } from '@/pages/question-sets/QuestionForm'
 import { QS_ASSETS } from '@/pages/question-sets/qsUi'
 import type { QuestionRequest, QuestionResponse, QuestionType } from '@/types/api'
@@ -17,6 +18,8 @@ interface SetQuestionsProps {
   /** A change is being saved: moving is paused so clicks do not cross. */
   busy: boolean
   onPaste: () => void
+  /** "Nhập từ file": an Excel or CSV file of questions. */
+  onImport: () => void
   /** Saves a new question (at the end) or an edited one; rejects with the API error. */
   onSave: (request: QuestionRequest, question?: QuestionResponse) => Promise<unknown>
   onDelete: (question: QuestionResponse, number: number) => void
@@ -28,7 +31,8 @@ interface SetQuestionsProps {
  * The questions of a set in order, compact: text and answers on a line or two. Written and edited in place;
  * dragged to another place with a mouse, moved up or down from their menu on a touch screen.
  */
-export function SetQuestions({ questions, busy, onPaste, onSave, onDelete, onReorder }: SetQuestionsProps) {
+export function SetQuestions({ questions, busy, onPaste, onImport, onSave, onDelete, onReorder }: SetQuestionsProps) {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState<Filter>('ALL')
   /** The question open in the form: an existing one, or a new one of this type. */
   const [writing, setWriting] = useState<{ question?: QuestionResponse; type?: QuestionType } | null>(null)
@@ -79,15 +83,15 @@ export function SetQuestions({ questions, busy, onPaste, onSave, onDelete, onReo
     <section aria-labelledby="questions-title" className="@container min-w-0 rounded-[20px] bg-white p-4 sm:p-5">
       <header className="flex flex-wrap items-center gap-x-3 gap-y-3">
         <h2 id="questions-title" className="m-0 text-[19px] font-black">
-          Câu hỏi <span className="font-bold text-ink-muted">({questions.length})</span>
+          {t('questionSets.questions.title')} <span className="font-bold text-ink-muted">({questions.length})</span>
         </h2>
         {counts.MULTIPLE_CHOICE > 0 && counts.SHORT_ANSWER > 0 && (
-          <div role="radiogroup" aria-label="Lọc câu hỏi" className="flex rounded-full bg-chip p-1">
+          <div role="radiogroup" aria-label={t('questionSets.questions.filter')} className="flex rounded-full bg-chip p-1">
             {(
               [
-                ['ALL', 'Tất cả'],
-                ['MULTIPLE_CHOICE', `Trắc nghiệm ${counts.MULTIPLE_CHOICE}`],
-                ['SHORT_ANSWER', `Tự luận ${counts.SHORT_ANSWER}`],
+                ['ALL', t('questionSets.questions.all')],
+                ['MULTIPLE_CHOICE', t('questionSets.questions.multipleChoice', { count: counts.MULTIPLE_CHOICE })],
+                ['SHORT_ANSWER', t('questionSets.questions.shortAnswer', { count: counts.SHORT_ANSWER })],
               ] as const
             ).map(([key, label]) => (
               <button
@@ -105,24 +109,32 @@ export function SetQuestions({ questions, busy, onPaste, onSave, onDelete, onReo
             ))}
           </div>
         )}
-        <Button icon={<DocumentIcon size={17} />} onClick={onPaste} disabled={full} className="ml-auto h-10 rounded-full font-bold">
-          Dán nhiều câu
-        </Button>
+        <span className="ml-auto flex gap-2">
+          <Button icon={<FileTextIcon size={17} />} onClick={onImport} disabled={full} className="h-10 rounded-full font-bold">
+            {t('questionSets.questions.import')}
+          </Button>
+          <Button icon={<DocumentIcon size={17} />} onClick={onPaste} disabled={full} className="h-10 rounded-full font-bold">
+            {t('questionSets.questions.paste')}
+          </Button>
+        </span>
       </header>
 
       {questions.length === 0 && !writing ? (
         <div className="mt-4 flex flex-col items-center gap-2 rounded-[18px] border border-dashed border-line px-6 py-10 text-center">
           <img src={`${QS_ASSETS}/tip.svg`} alt="" className="h-[110px]" />
-          <p className="m-0 text-[17px] font-black">Bộ chưa có câu hỏi</p>
+          <p className="m-0 text-[17px] font-black">{t('questionSets.empty')}</p>
           <p className="m-0 max-w-[440px] text-[14.5px] text-ink-muted">
-            Soạn từng câu, hoặc dán cả danh sách câu hỏi cùng đáp án một lần (từ Word, Excel...).
+            {t('questionSets.questions.emptyText')}
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-2.5">
+            <Button shape="round" icon={<FileTextIcon size={16} />} onClick={onImport}>
+              {t('questionSets.questions.importLong')}
+            </Button>
             <Button shape="round" icon={<DocumentIcon size={16} />} onClick={onPaste}>
-              Dán nhiều câu
+              {t('questionSets.questions.paste')}
             </Button>
             <Button type="primary" shape="round" icon={<PlusIcon size={16} />} onClick={() => add(lastType)}>
-              Thêm câu hỏi
+              {t('questionSets.questions.add')}
             </Button>
           </div>
         </div>
@@ -143,10 +155,10 @@ export function SetQuestions({ questions, busy, onPaste, onSave, onDelete, onReo
                     sortable={sortable}
                     menu={{
                       items: [
-                        { key: 'up', label: 'Đưa lên', disabled: busy || number === 1, onClick: () => move(number - 1, -1) },
-                        { key: 'down', label: 'Đưa xuống', disabled: busy || number === questions.length, onClick: () => move(number - 1, 1) },
+                        { key: 'up', label: t('questionSets.questions.up'), disabled: busy || number === 1, onClick: () => move(number - 1, -1) },
+                        { key: 'down', label: t('questionSets.questions.down'), disabled: busy || number === questions.length, onClick: () => move(number - 1, 1) },
                         { type: 'divider' },
-                        { key: 'delete', label: 'Xóa câu hỏi', danger: true, onClick: () => onDelete(q, number) },
+                        { key: 'delete', label: t('questionSets.detail.deleteQuestion'), danger: true, onClick: () => onDelete(q, number) },
                       ],
                     }}
                     onEdit={() => setWriting({ question: q })}
@@ -163,10 +175,10 @@ export function SetQuestions({ questions, busy, onPaste, onSave, onDelete, onReo
       {!writing && questions.length > 0 && (
         <div className="mt-3 grid grid-cols-1 gap-2.5 @min-[520px]:grid-cols-2">
           <AddButton disabled={full} onClick={() => add('MULTIPLE_CHOICE')}>
-            + Thêm câu trắc nghiệm
+            {t('questionSets.questions.addMultipleChoice')}
           </AddButton>
           <AddButton disabled={full} onClick={() => add('SHORT_ANSWER')}>
-            + Thêm câu tự luận
+            {t('questionSets.questions.addShortAnswer')}
           </AddButton>
         </div>
       )}
@@ -185,6 +197,7 @@ interface QuestionRowProps {
 
 /** One question: number, text, its answers as chips (the right one green), the hint; edit and menu on hover. */
 function QuestionRow({ question: q, number, sortable, menu, onEdit }: QuestionRowProps) {
+  const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: q.id, disabled: !sortable })
   return (
     <li
@@ -197,7 +210,7 @@ function QuestionRow({ question: q, number, sortable, menu, onEdit }: QuestionRo
       {sortable && (
         <button
           type="button"
-          aria-label={`Kéo để đổi chỗ câu ${number}`}
+          aria-label={t('questionSets.questions.drag', { number })}
           {...attributes}
           {...listeners}
           className="mt-0.5 flex h-7 w-4 shrink-0 cursor-grab items-center justify-center border-0 bg-transparent p-0 text-[#C2C9D6] opacity-0 group-hover:opacity-100 focus-visible:opacity-100 active:cursor-grabbing"
@@ -213,7 +226,7 @@ function QuestionRow({ question: q, number, sortable, menu, onEdit }: QuestionRo
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <p className="m-0 text-[15px] leading-snug font-bold break-words whitespace-pre-line">{q.text}</p>
         {q.type === 'MULTIPLE_CHOICE' ? (
-          <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0" aria-label="Đáp án">
+          <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0" aria-label={t('questionSets.questions.answers')}>
             {(q.options ?? []).map((option, k) => {
               const right = k === q.correctOption
               return (
@@ -228,7 +241,7 @@ function QuestionRow({ question: q, number, sortable, menu, onEdit }: QuestionRo
                   {right && (
                     <>
                       <CheckIcon size={13} />
-                      <span className="sr-only">đáp án đúng</span>
+                      <span className="sr-only">{t('questionSets.questions.correct')}</span>
                     </>
                   )}
                 </li>
@@ -237,7 +250,7 @@ function QuestionRow({ question: q, number, sortable, menu, onEdit }: QuestionRo
           </ul>
         ) : (
           <p className="m-0 w-fit rounded-[8px] bg-[#E3F6EA] px-2.5 py-0.5 text-[13.5px] text-success">
-            Đáp án: <b>{q.answer}</b>
+            <Trans i18nKey="questionSets.questions.answer" values={{ answer: q.answer }} components={{ b: <b /> }} />
           </p>
         )}
         {q.explanation && (
@@ -251,17 +264,17 @@ function QuestionRow({ question: q, number, sortable, menu, onEdit }: QuestionRo
           q.type === 'MULTIPLE_CHOICE' ? 'bg-[#F3E8FF] text-[#7A3FC9]' : 'bg-[#FFF0D9] text-[#B45F0A]'
         }`}
       >
-        {q.type === 'MULTIPLE_CHOICE' ? 'Trắc nghiệm' : 'Tự luận'}
+        {t(`questionSets.kinds.${q.type}`)}
       </span>
       {/* With a mouse the actions show on hover; on a touch screen they are always there. */}
       <span className="flex shrink-0 flex-col gap-1 @min-[560px]:flex-row [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:opacity-100">
-        <RowButton label={`Sửa câu ${number}`} onClick={onEdit}>
+        <RowButton label={t('questionSets.questions.edit', { number })} onClick={onEdit}>
           <PencilIcon size={15} />
         </RowButton>
         <Dropdown trigger={['click']} placement="bottomRight" menu={menu}>
           <button
             type="button"
-            aria-label={`Thao tác với câu ${number}`}
+            aria-label={t('questionSets.questions.actions', { number })}
             className="flex size-8 cursor-pointer items-center justify-center rounded-full border border-line bg-white text-ink-muted hover:text-ink"
           >
             <MoreVerticalIcon size={16} />
@@ -287,11 +300,12 @@ function RowButton({ label, onClick, children }: { label: string; onClick: () =>
 }
 
 function AddButton({ disabled, onClick, children }: { disabled: boolean; onClick: () => void; children: ReactNode }) {
+  const { t } = useTranslation()
   return (
     <button
       type="button"
       disabled={disabled}
-      title={disabled ? `Bộ đã đủ ${MAX_QUESTIONS} câu hỏi` : undefined}
+      title={disabled ? t('questionSets.questions.full', { count: MAX_QUESTIONS }) : undefined}
       onClick={onClick}
       className="h-11 cursor-pointer rounded-[14px] border-2 border-dashed border-[#C9D6EA] bg-transparent font-[inherit] text-[14.5px] font-black text-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
     >

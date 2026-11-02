@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useEffect, useReducer, useState } from 'react'
 import { CheckIcon, ChevronRightIcon, EyeIcon } from '@/components/ui/icons'
@@ -39,7 +40,7 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
   }, [state.lastWrong])
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có bài sắp xếp nào có ít nhất 2 thẻ để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.ordering')} backTo={backTo} />
   }
 
   const restart = () => {
@@ -49,7 +50,7 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
   }
 
   if (state.finished) {
-    return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="Xếp đúng nhiều bài nhất" streakUnit="bài" />
+    return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="order" streakUnit="task" />
   }
 
   const set = playable[state.setIndex]
@@ -66,12 +67,12 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
   const fontSize = slotWidth < 150 ? 22 : 28
 
   return (
-    <PlayFrame title={game.title} progress={`Bài ${state.setIndex + 1} / ${playable.length}`} backTo={backTo}>
+    <PlayFrame title={game.title} progress={i18n.t('play.ordering.task', { number: state.setIndex + 1, total: playable.length })} backTo={backTo}>
       <TeamBar teams={state.teams} activeId={done ? null : team.id} />
 
       {set.text && <h2 className="m-0 text-center font-display text-[34px] leading-tight font-extrabold">{set.text}</h2>}
 
-      <div className="flex justify-center gap-3" aria-label="Thứ tự đã xếp">
+      <div className="flex justify-center gap-3" aria-label={i18n.t('play.ordering.placed')}>
         {state.slots.map((id, i) => {
           const entry = id ? byId.get(id) : undefined
           const wrong = state.lastWrong.includes(i)
@@ -86,7 +87,7 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
                   sound.play('pop')
                   dispatch({ type: 'unplace', slot: i })
                 }}
-                aria-label={entry ? `Ô ${i + 1}: ${entry.text}` : `Ô ${i + 1} trống`}
+                aria-label={entry ? i18n.t('play.ordering.slot', { number: i + 1, text: entry.text }) : i18n.t('play.ordering.slotEmpty', { number: i + 1 })}
                 animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : {}}
                 transition={{ duration: 0.45 }}
                 className={`flex h-[104px] w-full cursor-pointer items-center justify-center rounded-[22px] border-4 px-2 text-center font-[inherit] font-display leading-tight font-extrabold text-ink disabled:cursor-default ${
@@ -106,7 +107,7 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
         })}
       </div>
 
-      <div className="flex min-h-[96px] flex-1 flex-wrap content-center items-center justify-center gap-3 rounded-[28px] bg-white/60 px-5 py-3" aria-label="Các thẻ">
+      <div className="flex min-h-[96px] flex-1 flex-wrap content-center items-center justify-center gap-3 rounded-[28px] bg-white/60 px-5 py-3" aria-label={i18n.t('play.ordering.cards')}>
         {set.dealt.map((id) => {
           const entry = byId.get(id)!
           const placed = state.slots.includes(id)
@@ -136,16 +137,16 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
           {solver ? (
             <>
               <CheckIcon size={22} className="text-success" />
-              {solver.name} xếp đúng!
+              {i18n.t('play.ordering.solved', { team: solver.name })}
             </>
           ) : state.revealed ? (
-            'Đây là thứ tự đúng.'
+            i18n.t('play.ordering.rightOrder')
           ) : state.lastWrong.length > 0 ? (
-            `Còn ${state.lastWrong.length} thẻ chưa đúng chỗ, ${team.name} sửa tiếp.`
+            i18n.t('play.ordering.wrongLeft', { count: state.lastWrong.length, team: team.name })
           ) : (
             <>
               <span className="size-5 rounded-full" style={{ background: team.color }} />
-              {team.name}: nói thứ tự, cô bấm thẻ theo thứ tự đó.
+              {i18n.t('play.ordering.turn', { team: team.name })}
             </>
           )}
         </span>
@@ -160,11 +161,11 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
               className={`${playButtonClass} bg-sun-soft text-ink`}
             >
               <EyeIcon size={22} />
-              Hiện đáp án
+              {i18n.t('play.common.showAnswer')}
             </button>
           )}
           <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} bg-white text-ink`}>
-            Kết thúc
+            {i18n.t('play.common.finish')}
           </button>
           {done ? (
             <button
@@ -175,7 +176,7 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
               }}
               className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
             >
-              {isLast ? 'Xem kết quả' : 'Bài tiếp theo'}
+              {isLast ? i18n.t('play.common.seeResults') : i18n.t('play.ordering.nextTask')}
               <ChevronRightIcon size={20} />
             </button>
           ) : (
@@ -189,7 +190,7 @@ export function OrderingScreen({ game, sets, settings }: OrderingScreenProps) {
               className={`${playButtonClass} bg-success text-white hover:brightness-110`}
             >
               <CheckIcon size={22} />
-              Kiểm tra
+              {i18n.t('play.ordering.check')}
             </button>
           )}
         </div>

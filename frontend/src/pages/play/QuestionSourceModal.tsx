@@ -1,10 +1,11 @@
 import { App, Button, Input, Modal } from 'antd'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { playSample } from '@/api/gameApi'
 import * as questionSetApi from '@/api/questionSetApi'
 import { FileTextIcon, SearchIcon } from '@/components/ui/icons'
-import { alsoPlayableAs, editPath, gameRegistry } from '@/game-engine/registry'
+import { alsoPlayableAs, editPath, itemsLabel } from '@/game-engine/registry'
 import { useClassStore } from '@/store/classStore'
 import { useAuthStore } from '@/store/authStore'
 import { useGameLibraryStore } from '@/store/gameLibraryStore'
@@ -55,6 +56,7 @@ export function QuestionSourceModal(props: QuestionSourceModalProps) {
 }
 
 function Dialog({ mode, kindName, current, onClose }: QuestionSourceModalProps) {
+  const { t } = useTranslation()
   const setGame = isSetGame(mode) ? mode : undefined
   const navigate = useNavigate()
   const { message } = App.useApp()
@@ -81,25 +83,24 @@ function Dialog({ mode, kindName, current, onClose }: QuestionSourceModalProps) 
 
   /** The introduction of another game, in place of this one ("Quay lại" still leaves the game). */
   const open = (game: { id: string; type: GameType }, title: string) => {
-    message.success(`Đã đổi sang: ${title}`)
+    message.success(t('start.source.switched', { title }))
     onClose()
     navigate(`/play/${game.id}${game.type === mode ? '' : `?as=${mode}`}`, { replace: true })
   }
 
   const sources = (): Source[] => {
-    const unit = gameRegistry[mode].itemUnit
     const sample: Source = {
       key: 'sample',
-      title: 'Câu hỏi mẫu',
-      detail: 'Soạn sẵn để chơi thử',
+      title: t('start.source.sample'),
+      detail: t('start.source.sampleText'),
       art: '✨',
       current: !!current.sample,
-      pick: async () => open({ id: (await playSample(mode)).code, type: mode }, 'Câu hỏi mẫu'),
+      pick: async () => open({ id: (await playSample(mode)).code, type: mode }, t('start.source.sample')),
     }
-    const mine: Source[] = current.sample ? [] : [{ key: current.id, title: current.title, detail: `${current.itemCount} ${unit}`, art: '📝', current: true }]
+    const mine: Source[] = current.sample ? [] : [{ key: current.id, title: current.title, detail: itemsLabel(mode, current.itemCount), art: '📝', current: true }]
     // A visitor plays the sample or their own questions: question sets need an account.
     const lockedSets: Source[] = setGame && guest
-      ? [{ key: 'sets', title: 'Bộ câu hỏi của bạn', detail: 'Đăng nhập để chơi với các bộ câu hỏi đã soạn', art: '🔒', locked: true }]
+      ? [{ key: 'sets', title: t('start.source.lockedSets'), detail: t('start.source.lockedSetsText'), art: '🔒', locked: true }]
       : []
     const fromSets: Source[] = setGame
       ? setChoices(sets, setGame, '', 'ALL')
@@ -107,11 +108,11 @@ function Dialog({ mode, kindName, current, onClose }: QuestionSourceModalProps) 
           .map(({ set, usable }) => ({
             key: set.code,
             title: set.title,
-            detail: `Bộ câu hỏi · ${usable} câu`,
+            detail: t('start.source.fromSet', { count: usable }),
             art: subjectArt(set.subject),
             pick: async () => {
               const used = await questionSetApi.useQuestionSet(set.code, setGame, `${kindName} – ${set.title}`.slice(0, MAX_GAME_NAME))
-              if (used.skippedCount) message.info(`Trò chơi dùng ${used.questionCount} câu, bỏ qua ${used.skippedCount} câu tự luận.`)
+              if (used.skippedCount) message.info(t('start.source.skipped', { used: used.questionCount, skipped: used.skippedCount }))
               void loadSets() // the set's use count changed
               open({ id: used.gameCode, type: mode }, set.title)
             },
@@ -122,7 +123,7 @@ function Dialog({ mode, kindName, current, onClose }: QuestionSourceModalProps) 
       .map((g) => ({
         key: g.id,
         title: g.title,
-        detail: `${guest ? 'Bạn vừa soạn' : 'Trò cô đã soạn'} · ${g.itemCount} ${gameRegistry[g.type].itemUnit}`,
+        detail: `${guest ? t('start.source.guestWritten') : t('start.source.written')} · ${itemsLabel(g.type, g.itemCount)}`,
         art: '📝',
         pick: async () => open(g, g.title),
       }))
@@ -170,15 +171,15 @@ function Dialog({ mode, kindName, current, onClose }: QuestionSourceModalProps) 
             <FileTextIcon size={20} />
           </span>
           <span className="flex min-w-0 flex-col">
-            <span className="text-[18px] leading-tight font-black">Chơi với câu hỏi nào?</span>
+            <span className="text-[18px] leading-tight font-black">{t('start.source.title')}</span>
             <span className="truncate text-[13.5px] font-normal text-ink-muted">{kindName}</span>
           </span>
         </span>
       }
     >
       <div className="flex flex-col gap-5 pt-2">
-        <section aria-label="Chọn câu hỏi có sẵn" className="flex flex-col gap-3">
-          <h3 className="m-0 text-[13px] font-extrabold tracking-wide text-ink-muted uppercase">Chọn câu hỏi có sẵn</h3>
+        <section aria-label={t('start.source.existing')} className="flex flex-col gap-3">
+          <h3 className="m-0 text-[13px] font-extrabold tracking-wide text-ink-muted uppercase">{t('start.source.existing')}</h3>
           {all.length >= SEARCH_FROM && (
             <Input
               size="large"
@@ -186,25 +187,25 @@ function Dialog({ mode, kindName, current, onClose }: QuestionSourceModalProps) 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               prefix={<SearchIcon size={18} className="text-ink-muted" />}
-              placeholder="Tìm câu hỏi…"
-              aria-label="Tìm câu hỏi"
+              placeholder={t('start.source.search')}
+              aria-label={t('start.source.search')}
               className="rounded-[12px] text-[15px]"
             />
           )}
-          <ul aria-label="Câu hỏi có sẵn" className="m-0 flex max-h-[min(300px,40vh)] list-none flex-col gap-2 overflow-y-auto p-0 pr-1">
+          <ul aria-label={t('start.source.list')} className="m-0 flex max-h-[min(300px,40vh)] list-none flex-col gap-2 overflow-y-auto p-0 pr-1">
             {shown.map((source) => (
               <SourceRow key={source.key} source={source} busy={busy} onPick={(pick) => void run(source.key, pick)} onLocked={signIn} />
             ))}
-            {setGame && setsStatus === 'loading' && <li className="px-4 py-2 text-[14px] text-ink-muted">Đang tải bộ câu hỏi…</li>}
-            {!shown.length && <li className="rounded-[14px] bg-surface-soft px-4 py-4 text-center text-[14.5px] text-ink-muted">Không tìm thấy câu hỏi phù hợp.</li>}
+            {setGame && setsStatus === 'loading' && <li className="px-4 py-2 text-[14px] text-ink-muted">{t('start.source.loadingSets')}</li>}
+            {!shown.length && <li className="rounded-[14px] bg-surface-soft px-4 py-4 text-center text-[14.5px] text-ink-muted">{t('start.source.noMatch')}</li>}
           </ul>
         </section>
 
-        <section aria-label="Tạo câu hỏi mới" className="flex flex-col gap-3">
-          <h3 className="m-0 text-[13px] font-extrabold tracking-wide text-ink-muted uppercase">Tạo câu hỏi mới</h3>
+        <section aria-label={t('start.source.create')} className="flex flex-col gap-3">
+          <h3 className="m-0 text-[13px] font-extrabold tracking-wide text-ink-muted uppercase">{t('start.source.create')}</h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <CreateOption title="✎ Soạn câu hỏi" text="Gõ từng câu trong trình soạn" busy={busy === 'type'} disabled={!!busy} onClick={() => void write('type')} />
-            <CreateOption title="📋 Dán từ Word / Excel" text="Đã có sẵn câu hỏi ở chỗ khác" busy={busy === 'paste'} disabled={!!busy} onClick={() => void write('paste')} />
+            <CreateOption title={t('start.source.type')} text={t('start.source.typeText')} busy={busy === 'type'} disabled={!!busy} onClick={() => void write('type')} />
+            <CreateOption title={t('start.source.paste')} text={t('start.source.pasteText')} busy={busy === 'paste'} disabled={!!busy} onClick={() => void write('paste')} />
           </div>
         </section>
       </div>
@@ -229,6 +230,7 @@ function SourceRow({
   onPick: (pick: () => Promise<void>) => void
   onLocked: () => void
 }) {
+  const { t } = useTranslation()
   const { title, detail, art, current, pick } = source
   return (
     <li
@@ -248,21 +250,21 @@ function SourceRow({
         <span className="text-[13px] text-ink-muted">{detail}</span>
       </span>
       {source.locked ? (
-        <Button onClick={onLocked} aria-label={`Đăng nhập để dùng ${title}`} className="h-10 shrink-0 rounded-[12px] px-4 font-extrabold">
-          Đăng nhập
+        <Button onClick={onLocked} aria-label={t('start.source.signInFor', { title })} className="h-10 shrink-0 rounded-[12px] px-4 font-extrabold">
+          {t('start.source.signIn')}
         </Button>
       ) : current || !pick ? (
-        <span className="shrink-0 rounded-full bg-primary px-3 py-1.5 text-[13px] font-extrabold text-white">Đang dùng</span>
+        <span className="shrink-0 rounded-full bg-primary px-3 py-1.5 text-[13px] font-extrabold text-white">{t('start.source.inUse')}</span>
       ) : (
         <Button
           type="primary"
           loading={busy === source.key}
           disabled={!!busy && busy !== source.key}
           onClick={() => onPick(pick)}
-          aria-label={`Chọn ${title}`}
+          aria-label={t('start.source.pickLabel', { title })}
           className="h-10 shrink-0 rounded-[12px] px-5 font-extrabold"
         >
-          Chọn
+          {t('start.source.pick')}
         </Button>
       )}
     </li>
@@ -270,6 +272,7 @@ function SourceRow({
 }
 
 function CreateOption({ title, text, busy, disabled, onClick }: { title: string; text: string; busy: boolean; disabled: boolean; onClick: () => void }) {
+  const { t } = useTranslation()
   return (
     <button
       type="button"
@@ -278,7 +281,7 @@ function CreateOption({ title, text, busy, disabled, onClick }: { title: string;
       aria-busy={busy}
       className="flex cursor-pointer flex-col gap-1 rounded-[16px] border-2 border-line-soft bg-white px-4 py-4 text-left font-[inherit] text-ink transition enabled:hover:border-primary enabled:hover:bg-primary-soft/40 disabled:cursor-wait disabled:opacity-60"
     >
-      <span className="text-[16px] font-extrabold">{busy ? 'Đang tạo…' : title}</span>
+      <span className="text-[16px] font-extrabold">{busy ? t('start.source.creating') : title}</span>
       <span className="text-[13.5px] text-ink-muted">{text}</span>
     </button>
   )

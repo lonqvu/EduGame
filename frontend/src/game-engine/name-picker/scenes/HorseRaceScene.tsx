@@ -1,13 +1,16 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useState, useEffect } from 'react'
-import { BLEED, BLEED_W, BLEED_X, Cloud, Countdown, Crown, SceneSvg } from '@/game-engine/name-picker/effects'
+import { BLEED, BLEED_W, BLEED_X, Countdown, Crown, SceneSvg } from '@/game-engine/name-picker/effects'
 import { horseRacePlan, RACE_STRETCHES } from '@/game-engine/name-picker/horseRace'
 import { fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
 import { useSound } from '@/sound/useSound'
 
-const COAT_COLORS = ['#C98B5A', '#F2C27A', '#8C6A55', '#E8E1D6', '#B5643C']
-const LANE_TOP = 166
+const ART = '/assets/games/horse-race'
+/** One horse per lane, each its own coat and saddle so a class can tell them apart. */
+const COATS = ['golden', 'brown', 'white', 'chestnut', 'black']
+const LANE_TOP = 172
 const LANE_GAP = 82
 const START_LEFT = 56
 /** Horse nose crosses the finish line (x = 1118). */
@@ -18,10 +21,21 @@ const RACE_S = 7
 /** When each stretch of the race ends, 0 to 1. */
 const STRETCH_TIMES = Array.from({ length: RACE_STRETCHES + 1 }, (_, i) => i / RACE_STRETCHES)
 
-const BUNTING = ['#F28C28', '#3563E9', '#2E9E6A', '#8B5CF6', '#E5484D', '#FFD15C']
-/** Bunting flags are 58 wide, strung across the stage and its side bleed. */
-const BUNTING_X = -58 * Math.ceil(BLEED / 58)
-const BUNTING_FLAGS = Math.ceil((1280 + BLEED - BUNTING_X) / 58)
+/** The bunting picture is drawn 300 wide, strung across the stage and its side bleed. */
+const BUNTING_W = 300
+/** The bunting picture is 600 × 137. */
+const BUNTING_H = Math.round((BUNTING_W * 137) / 600)
+const BUNTING_X = -BUNTING_W * Math.ceil(BLEED / BUNTING_W)
+const BUNTINGS = Math.ceil((1280 + BLEED - BUNTING_X) / BUNTING_W)
+/** Hills behind the track and the grass along its lower edge repeat the same way, keeping their shape (700 × 196, 900 × 73). */
+const HILLS_W = 320
+const HILLS_H = Math.round((HILLS_W * 196) / 700)
+const GRASS_W = 560
+const GRASS_H = Math.round((GRASS_W * 73) / 900)
+const repeatAcross = (width: number) => {
+  const first = -width * Math.ceil(BLEED / width)
+  return Array.from({ length: Math.ceil((1280 + BLEED - first) / width) }, (_, i) => first + i * width)
+}
 
 export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickSceneProps) {
   const running = phase === 'run'
@@ -51,7 +65,7 @@ export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickScene
         return (
           <motion.div
             key={student.id}
-            className="absolute h-[91px] w-[136px]"
+            className="absolute h-[96px] w-[112px]"
             style={{ left: START_LEFT, top: LANE_TOP + i * LANE_GAP }}
             initial={{ x: 0 }}
             animate={{ x: moving ? plan[i] : 0 }}
@@ -71,13 +85,14 @@ export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickScene
               }
               transition={isWinner ? { duration: 0.45, ...LOOP } : gallop ? { duration: 0.28, ...LOOP } : { duration: 0.8, ...LOOP }}
             >
-              <Horse name={student.name} color={COAT_COLORS[i % COAT_COLORS.length]} galloping={gallop} />
+              <Horse name={student.name} coat={COATS[i % COATS.length]} />
             </motion.div>
-            {isWinner && <Crown width={54} left={84} top={-40} />}
+            {isWinner && <Crown width={46} left={64} top={-22} />}
+            {isWinner && <WinnerStars />}
           </motion.div>
         )
       })}
-      {running && <Countdown steps={['3', '2', '1', 'Chạy!']} stepMs={COUNT_MS} left={540} top={260} accent="#FFD15C" ink="#E5484D" />}
+      {running && <Countdown steps={['3', '2', '1', i18n.t('play.picker.run')]} stepMs={COUNT_MS} left={540} top={260} accent="#FFD15C" ink="#E5484D" />}
     </>
   )
 }
@@ -102,66 +117,56 @@ function Dust() {
   )
 }
 
-const LEG_ORIGIN = { transformBox: 'fill-box' as const, originX: 0.5, originY: 0.08 }
-
-function Horse({ name, color, galloping }: { name: string; color: string; galloping: boolean }) {
-  const swing = (reverse: boolean) =>
-    galloping
-      ? { animate: { rotate: reverse ? [-32, 32] : [32, -32] }, transition: { duration: 0.28, ...LOOP } }
-      : { animate: { rotate: 0 }, transition: { duration: 0.2 } }
-
+function Horse({ name, coat }: { name: string; coat: string }) {
   return (
-    <svg width="136" height="91" viewBox="-12 -14 162 108" className="overflow-visible" style={{ color }} aria-hidden="true">
-      <motion.path
-        d="M20 36 C2 30 -6 52 6 66 C10 54 14 48 24 46Z"
-        fill="#3B2A1E"
-        style={{ transformBox: 'fill-box', originX: 1, originY: 0.1 }}
-        animate={{ rotate: [-10, 16] }}
-        transition={{ duration: galloping ? 0.28 : 1.3, ...LOOP }}
-      />
-      {[24, 76].map((x) => (
-        <motion.g key={x} style={LEG_ORIGIN} {...swing(true)}>
-          <rect x={x} y="52" width="11" height="34" rx="5" fill="currentColor" opacity="0.8" />
-          <rect x={x} y="80" width="11" height="7" rx="3" fill="#3B2A1E" />
-        </motion.g>
-      ))}
-      {[36, 88].map((x) => (
-        <motion.g key={x} style={LEG_ORIGIN} {...swing(false)}>
-          <rect x={x} y="54" width="11" height="34" rx="5" fill="currentColor" />
-          <rect x={x} y="82" width="11" height="7" rx="3" fill="#3B2A1E" />
-        </motion.g>
-      ))}
-      <ellipse cx="62" cy="44" rx="46" ry="23" fill="currentColor" />
-      <path d="M90 42 L106 8 L126 16 L108 54Z" fill="currentColor" />
-      <ellipse cx="124" cy="22" rx="21" ry="13" transform="rotate(22 124 22)" fill="currentColor" />
-      <ellipse cx="138" cy="30" rx="9" ry="7.5" fill="#FFFFFF" opacity="0.35" />
-      <path d="M108 6 L111 -8 L118 6Z" fill="currentColor" />
-      <path d="M104 2 C94 12 90 26 88 40 L97 37 C99 24 103 14 110 7Z" fill="#3B2A1E" />
-      <circle cx="121" cy="16" r="3.4" fill="#1F2A44" />
-      <circle cx="122" cy="15" r="1.1" fill="#FFFFFF" />
-      <rect x="30" y="26" width="68" height="28" rx="8" fill="#FFFFFF" />
-      <text x="64" y="41" textAnchor="middle" dominantBaseline="middle" fontFamily="Nunito, sans-serif" fontWeight={800} fontSize={fontFor(name, 17, 14)} fill="#1F2A44">
+    <div className="absolute inset-0" aria-hidden="true">
+      <img src={`${ART}/horse-${coat}.webp`} alt="" draggable={false} className="block h-full w-full select-none" />
+      <span
+        className="absolute top-[47%] left-[6%] -translate-y-1/2 whitespace-nowrap rounded-lg bg-white px-2 py-0.5 font-extrabold leading-tight text-[#1F2A44] shadow-[0_2px_0_rgba(31,42,68,0.18)]"
+        style={{ fontSize: fontFor(name, 17, 14) }}
+      >
         {name}
-      </text>
-    </svg>
+      </span>
+    </div>
   )
 }
 
-function Flower({ x, y, petal, spin }: { x: number; y: number; petal: string; spin?: boolean }) {
+/** Gold stars popping around the winning horse. */
+function WinnerStars() {
   return (
-    <motion.g
-      style={{ transformBox: 'fill-box', originX: 0.5, originY: 0.5 }}
-      animate={spin ? { rotate: 360 } : undefined}
-      transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-    >
-      <g transform={`translate(${x} ${y})`}>
-        <circle cx="0" cy="-7" r="5" fill={petal} />
-        <circle cx="7" cy="0" r="5" fill={petal} />
-        <circle cx="0" cy="7" r="5" fill={petal} />
-        <circle cx="-7" cy="0" r="5" fill={petal} />
-        <circle cx="0" cy="0" r="4" fill="#F28C28" />
-      </g>
-    </motion.g>
+    <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+      {[
+        { x: -26, y: -10, size: 30, delay: 0 },
+        { x: 112, y: -18, size: 26, delay: 0.25 },
+        { x: 118, y: 52, size: 22, delay: 0.5 },
+        { x: -18, y: 60, size: 20, delay: 0.75 },
+      ].map((star, i) => (
+        <motion.img
+          key={i}
+          src={`${ART}/star.webp`}
+          alt=""
+          className="absolute"
+          style={{ left: star.x, top: star.y, width: star.size }}
+          animate={{ scale: [0.6, 1.15], rotate: [-12, 12], opacity: [0.7, 1] }}
+          transition={{ duration: 0.7, delay: star.delay, ...LOOP }}
+        />
+      ))}
+    </div>
+  )
+}
+
+function Flower({ x, y, size = 30, delay = 0 }: { x: number; y: number; size?: number; delay?: number }) {
+  return (
+    <motion.image
+      href={`${ART}/flower.webp`}
+      x={x - size / 2}
+      y={y - size / 2}
+      width={size}
+      height={size}
+      style={{ transformBox: 'fill-box', originX: 0.5, originY: 1 }}
+      animate={{ rotate: [-8, 8] }}
+      transition={{ duration: 1.6, delay, ...LOOP }}
+    />
   )
 }
 
@@ -184,10 +189,14 @@ function HorseBackground() {
         transition={{ duration: 1.5, ...LOOP }}
       />
       <circle cx="1150" cy="120" r="46" fill="#FFD15C" />
-      <Cloud x={170} y={96} scale={1.1} duration={18} />
-      <Cloud x={560} y={70} scale={0.8} duration={24} drift={-30} />
-      <Cloud x={880} y={104} scale={0.9} duration={20} />
-      <path d={`M${BLEED_X} 170 H0 Q 220 110 470 160 T 920 150 T 1280 140 H${1280 + BLEED} V 720 H${BLEED_X}Z`} fill="#B9E4A8" />
+      <rect x={BLEED_X} y="160" width={BLEED_W} height="560" fill="#B9E4A8" />
+      {repeatAcross(HILLS_W).map((x) => (
+        <image key={x} href={`${ART}/hills.webp`} x={x} y={178 - HILLS_H} width={HILLS_W + 1} height={HILLS_H} preserveAspectRatio="none" />
+      ))}
+      {/* In the open sky between the buttons, in front of the hills so none is cut off. */}
+      <SpriteCloud src="cloud-1" x={350} y={14} width={140} duration={18} drift={24} />
+      <SpriteCloud src="cloud-2" x={545} y={4} width={104} duration={24} drift={-20} />
+      <SpriteCloud src="cloud-3" x={690} y={26} width={104} duration={20} drift={16} />
       <rect x={BLEED_X} y="176" width={BLEED_W} height="410" fill="#E9CFA6" />
       <rect x={BLEED_X} y="170" width={BLEED_W} height="8" fill="#FFFFFF" />
       <rect x={BLEED_X} y="584" width={BLEED_W} height="8" fill="#FFFFFF" />
@@ -200,27 +209,46 @@ function HorseBackground() {
       <motion.g style={wave} animate={{ rotate: [-6, 6] }} transition={{ duration: 1.4, ...LOOP }}>
         <rect x="1084" y="104" width="92" height="34" rx="10" fill="#E5484D" />
         <text x="1130" y="122" textAnchor="middle" dominantBaseline="middle" fontFamily="'Baloo 2', Nunito, sans-serif" fontWeight={800} fontSize="20" fill="#FFFFFF">
-          Đích
+          {i18n.t('play.picker.finishLine')}
         </text>
       </motion.g>
-      <line x1={BLEED_X} y1="144" x2={1280 + BLEED} y2="144" stroke="#FFFFFF" strokeWidth="3" />
-      {Array.from({ length: BUNTING_FLAGS }, (_, i) => (
-        <motion.path
+      {Array.from({ length: BUNTINGS }, (_, i) => (
+        <motion.image
           key={i}
-          d={`M${BUNTING_X + i * 58} 144 l58 0 l-29 24Z`}
-          fill={BUNTING[i % BUNTING.length]}
+          href={`${ART}/bunting.webp`}
+          x={BUNTING_X + i * BUNTING_W}
+          y="112"
+          width={BUNTING_W + 4}
+          height={BUNTING_H}
+          preserveAspectRatio="none"
           style={wave}
-          animate={{ rotate: [-8, 8] }}
-          transition={{ duration: 1.2, delay: (i % 4) * 0.15, ...LOOP }}
+          animate={{ rotate: [-2, 2] }}
+          transition={{ duration: 1.4, delay: (i % 3) * 0.2, ...LOOP }}
         />
       ))}
       <rect x="40" y="176" width="28" height="410" fill="#FFFFFF" opacity="0.6" />
-      <Flower x={90} y={640} petal="#FF8FB1" spin />
-      <Flower x={260} y={700} petal="#FFD15C" />
-      <Flower x={160} y={612} petal="#FFFFFF" spin />
-      <Flower x={1030} y={650} petal="#FFFFFF" spin />
-      <Flower x={1210} y={690} petal="#FF8FB1" />
-      <Flower x={1150} y={620} petal="#FFD15C" spin />
+      {repeatAcross(GRASS_W).map((x) => (
+        <image key={x} href={`${ART}/grass.webp`} x={x} y="580" width={GRASS_W + 1} height={GRASS_H} preserveAspectRatio="none" />
+      ))}
+      <Flower x={90} y={650} />
+      <Flower x={260} y={696} size={26} delay={0.4} />
+      <Flower x={170} y={672} size={22} delay={0.8} />
+      <Flower x={1040} y={660} delay={0.2} />
+      <Flower x={1210} y={694} size={26} delay={0.6} />
+      <Flower x={1140} y={676} size={22} delay={1} />
     </SceneSvg>
+  )
+}
+
+function SpriteCloud({ src, x, y, width, drift = 40, duration = 20 }: { src: string; x: number; y: number; width: number; drift?: number; duration?: number }) {
+  return (
+    <motion.image
+      href={`${ART}/${src}.webp`}
+      x={x}
+      y={y}
+      width={width}
+      animate={{ x: [-drift, drift] }}
+      transition={{ duration, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+    />
   )
 }

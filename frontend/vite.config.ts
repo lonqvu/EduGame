@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { execSync } from 'node:child_process'
 import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
@@ -32,5 +33,12 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+  },
+  // Only the game screens import it: found late, it made Vite re-bundle mid-session and fail with "Outdated Optimize Dep".
+  optimizeDeps: {
+    include: ['zustand/middleware'],
+  },
+  test: {
+    setupFiles: ['src/test/setup.ts'],
   },
 })

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { shuffle } from '@/game-engine/shared/shuffle'
 import type { TeamScore } from '@/game-engine/shared/teamScore'
 
@@ -28,15 +29,15 @@ export const dealChests = (random: () => number = Math.random): Treasure[] => sh
 export function treasureLabel(t: Treasure): string {
   switch (t.kind) {
     case 'points':
-      return `+${t.points} điểm`
+      return i18n.t('play.chests.points', { points: t.points })
     case 'double':
-      return 'Nhân đôi điểm'
+      return i18n.t('play.chests.double')
     case 'steal':
-      return `Lấy ${t.points} điểm`
+      return i18n.t('play.chests.steal', { points: t.points })
     case 'swap':
-      return 'Đổi điểm'
+      return i18n.t('play.chests.swap')
     case 'empty':
-      return 'Rương trống'
+      return i18n.t('play.chests.empty')
   }
 }
 

@@ -1,4 +1,5 @@
 import { Dropdown } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { ClockIcon, MoreVerticalIcon, PlayIcon } from '@/components/ui/icons'
 import { editPath, gameRegistry, playPath, startPath } from '@/game-engine/registry'
@@ -29,34 +30,35 @@ export function RecentActivity({
   onRetry,
   onArchive,
 }: RecentActivityProps) {
+  const { t } = useTranslation()
   return (
     <Panel className="@container flex flex-col gap-3 px-4 pt-[18px] pb-4">
       <PanelHeader
         icon={<ClockIcon size={23} className="text-primary" />}
-        title="Chơi gần đây"
+        title={t('home.recent.title')}
         action={
-          games.length > 0 && <TextAction label={expanded ? 'Thu gọn' : 'Xem tất cả'} onClick={onToggleExpanded} />
+          games.length > 0 && <TextAction label={expanded ? t('home.recent.collapse') : t('home.recent.showAll')} onClick={onToggleExpanded} />
         }
       />
 
-      {status === 'loading' && games.length === 0 && <p className="m-0 px-2 text-ink-soft">Đang tải trò chơi…</p>}
+      {status === 'loading' && games.length === 0 && <p className="m-0 px-2 text-ink-soft">{t('home.recent.loading')}</p>}
       {status === 'error' && (
         <p className="m-0 px-2 text-ink-soft">
-          Chưa tải được danh sách trò chơi.{' '}
+          {t('home.recent.error')}{' '}
           <button
             type="button"
             onClick={onRetry}
             className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] font-extrabold text-primary-ink underline"
           >
-            Thử lại
+            {t('common.retry')}
           </button>
         </p>
       )}
       {status === 'ready' && games.length === 0 && (
         <p className="m-0 px-2 text-ink-soft">
-          Cô chưa có trò chơi nào.{' '}
+          {t('home.recent.empty')}{' '}
           <Link to="/games/new" className="font-extrabold text-primary-ink underline">
-            Tạo trò chơi đầu tiên
+            {t('home.recent.createFirst')}
           </Link>
         </p>
       )}
@@ -89,16 +91,16 @@ export function RecentActivity({
                   to={editPath(game.id)}
                   className="flex h-[38px] shrink-0 items-center justify-center rounded-full border-2 border-[#DCE5F5] bg-white px-3.5 text-[14.5px] font-extrabold text-primary-ink hover:border-primary hover:text-primary-ink"
                 >
-                  Tiếp tục
+                  {t('home.recent.resume')}
                 </Link>
               ) : (
                 <Link
                   to={playPath(game)}
-                  aria-label={`Chơi lại ${game.title}`}
+                  aria-label={t('home.recent.replayLabel', { title: game.title })}
                   className="flex h-[38px] shrink-0 items-center justify-center gap-1.5 rounded-full border-2 border-[#DCE5F5] bg-white px-3.5 text-[14.5px] font-extrabold text-primary-ink hover:border-primary hover:text-primary-ink"
                 >
                   <PlayIcon size={14} className="fill-current" />
-                  <span className="hidden @min-[380px]:inline">Chơi lại</span>
+                  <span className="hidden @min-[380px]:inline">{t('home.recent.replay')}</span>
                 </Link>
               )}
               <Dropdown
@@ -106,16 +108,16 @@ export function RecentActivity({
                 placement="bottomRight"
                 menu={{
                   items: [
-                    ...(usesQuestions ? [{ key: 'edit', label: <Link to={editPath(game.id)}>Soạn câu hỏi</Link> }] : []),
-                    { key: 'play', label: <Link to={startPath(game)}>Luật chơi & cài đặt</Link> },
+                    ...(usesQuestions ? [{ key: 'edit', label: <Link to={editPath(game.id)}>{t('home.recent.editQuestions')}</Link> }] : []),
+                    { key: 'play', label: <Link to={startPath(game)}>{t('home.recent.rulesSettings')}</Link> },
                     { type: 'divider' as const },
-                    { key: 'archive', danger: true, label: 'Xóa khỏi thư viện', onClick: () => onArchive(game) },
+                    { key: 'archive', danger: true, label: t('home.recent.remove'), onClick: () => onArchive(game) },
                   ],
                 }}
               >
                 <button
                   type="button"
-                  aria-label={`Tùy chọn cho ${game.title}`}
+                  aria-label={t('home.recent.optionsFor', { title: game.title })}
                   className="flex h-10 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-[#3F4B68] hover:bg-surface-soft"
                 >
                   <MoreVerticalIcon size={20} />

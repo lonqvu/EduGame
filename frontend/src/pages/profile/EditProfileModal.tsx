@@ -1,12 +1,13 @@
 import { App, Form, Input, Modal } from 'antd'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CheckIcon, PlusIcon } from '@/components/ui/icons'
 import { squarePicture } from '@/pages/profile/squarePicture'
 import { useProfileStore } from '@/store/profileStore'
 import type { ProfileResponse } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
 import {
-  AVATAR_LABELS,
+  avatarLabel,
   AVATARS,
   avatarSrc,
   formatPhone,
@@ -35,6 +36,7 @@ interface Picked {
  * in and is not changed here.
  */
 export function EditProfileModal({ open, profile, onClose }: { open: boolean; profile: ProfileResponse; onClose: () => void }) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const save = useProfileStore((s) => s.save)
   const [form] = Form.useForm<FormValues>()
@@ -73,7 +75,7 @@ export function EditProfileModal({ open, profile, onClose }: { open: boolean; pr
       setPicked({ blob, url: URL.createObjectURL(blob) })
       form.setFieldValue('avatar', UPLOADED)
     } catch {
-      message.error('Không đọc được ảnh này, cô chọn ảnh khác nhé.')
+      message.error(t('profile.edit.imageUnreadable'))
     } finally {
       setReading(false)
     }
@@ -85,7 +87,7 @@ export function EditProfileModal({ open, profile, onClose }: { open: boolean; pr
       const keepsOwn = values.avatar === UPLOADED
       // The teacher drawing is the default: no avatar is stored for it.
       await save({ ...values, avatar: values.avatar === 'teacher' ? '' : values.avatar }, keepsOwn ? picked?.blob : undefined)
-      message.success('Đã lưu hồ sơ.')
+      message.success(t('profile.edit.saved'))
       close()
     } catch (error) {
       message.error(apiErrorMessage(error))
@@ -101,9 +103,9 @@ export function EditProfileModal({ open, profile, onClose }: { open: boolean; pr
   return (
     <Modal
       open={open}
-      title="Thông tin cá nhân"
-      okText="Lưu thay đổi"
-      cancelText="Hủy"
+      title={t('profile.edit.title')}
+      okText={t('common.saveChanges')}
+      cancelText={t('common.cancel')}
       onOk={() => form.submit()}
       onCancel={close}
       confirmLoading={saving}
@@ -116,26 +118,26 @@ export function EditProfileModal({ open, profile, onClose }: { open: boolean; pr
           <Input />
         </Form.Item>
         <div className="mb-4 flex flex-col gap-2">
-          <span className="text-[14px]">Ảnh đại diện</span>
-          <div role="radiogroup" aria-label="Ảnh đại diện" className="flex flex-wrap gap-2.5">
+          <span className="text-[14px]">{t('profile.edit.picture')}</span>
+          <div role="radiogroup" aria-label={t('profile.edit.picture')} className="flex flex-wrap gap-2.5">
             <button
               type="button"
               onClick={() => fileInput.current?.click()}
               disabled={reading}
-              aria-label="Tải ảnh của cô lên"
-              title="Tải ảnh lên"
+              aria-label={t('profile.edit.upload')}
+              title={t('profile.edit.uploadTitle')}
               className="flex size-[52px] cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full border-2 border-dashed border-[#B7C7E6] bg-[#F4F8FF] p-0 text-primary transition outline-none hover:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60"
             >
               <PlusIcon size={18} strokeWidth={2.6} />
-              <span className="text-[9.5px] leading-none font-bold">{reading ? '…' : 'Tải ảnh'}</span>
+              <span className="text-[9.5px] leading-none font-bold">{reading ? '…' : t('profile.edit.uploadShort')}</span>
             </button>
             {ownPicture && (
-              <AvatarChoice checked={current === UPLOADED} label="Ảnh của cô" onSelect={() => form.setFieldValue('avatar', UPLOADED)}>
+              <AvatarChoice checked={current === UPLOADED} label={t('profile.edit.uploaded')} onSelect={() => form.setFieldValue('avatar', UPLOADED)}>
                 <img src={ownPicture} alt="" className="size-full object-cover" />
               </AvatarChoice>
             )}
             {AVATARS.map((key) => (
-              <AvatarChoice key={key} checked={current === key} label={AVATAR_LABELS[key]} onSelect={() => form.setFieldValue('avatar', key)}>
+              <AvatarChoice key={key} checked={current === key} label={avatarLabel(key)} onSelect={() => form.setFieldValue('avatar', key)}>
                 <img src={avatarSrc(key)} alt="" className="size-full object-cover" />
               </AvatarChoice>
             ))}
@@ -153,28 +155,28 @@ export function EditProfileModal({ open, profile, onClose }: { open: boolean; pr
               e.target.value = ''
             }}
           />
-          <span className="text-[12.5px] text-ink-muted">Ảnh JPG, PNG… tối đa 15 MB; ảnh được cắt vuông ở giữa.</span>
+          <span className="text-[12.5px] text-ink-muted">{t('profile.edit.pictureHint')}</span>
         </div>
         <Form.Item
           name="displayName"
-          label="Họ và tên"
+          label={t('profile.edit.name')}
           rules={[
-            { required: true, whitespace: true, message: 'Cô nhập họ và tên nhé' },
-            { max: MAX_DISPLAY_NAME, message: `Tối đa ${MAX_DISPLAY_NAME} ký tự` },
+            { required: true, whitespace: true, message: t('profile.edit.nameRequired') },
+            { max: MAX_DISPLAY_NAME, message: t('profile.edit.nameTooLong', { count: MAX_DISPLAY_NAME }) },
           ]}
         >
-          <Input size="large" maxLength={MAX_DISPLAY_NAME} placeholder="VD: Cô Lan" autoComplete="name" />
+          <Input size="large" maxLength={MAX_DISPLAY_NAME} placeholder={t('profile.edit.namePlaceholder')} autoComplete="name" />
         </Form.Item>
-        <Form.Item label="Email" extra="Email dùng để đăng nhập nên chưa đổi được ở đây.">
+        <Form.Item label={t('profile.edit.email')} extra={t('profile.edit.emailHint')}>
           <Input size="large" value={profile.email ?? ''} disabled />
         </Form.Item>
         <Form.Item
           name="phone"
-          label="Số điện thoại (không bắt buộc)"
+          label={t('profile.edit.phone')}
           className="mb-1"
           rules={[{ validator: (_, value: string) => (phoneError(value ?? '') ? Promise.reject(new Error(phoneError(value ?? '') as string)) : Promise.resolve()) }]}
         >
-          <Input size="large" placeholder="VD: 0987 654 321" inputMode="tel" autoComplete="tel" maxLength={20} />
+          <Input size="large" placeholder={t('profile.edit.phonePlaceholder')} inputMode="tel" autoComplete="tel" maxLength={20} />
         </Form.Item>
       </Form>
     </Modal>

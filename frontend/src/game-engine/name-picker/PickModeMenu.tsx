@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { Dropdown } from 'antd'
 import { useNavigate } from 'react-router'
 import { ChevronRightIcon } from '@/components/ui/icons'
@@ -22,7 +23,7 @@ export function PickModeMenu({ current }: { current: string }) {
         type="button"
         className="flex h-11 cursor-pointer items-center gap-1.5 rounded-full border-0 bg-white/90 pr-3 pl-4 font-[inherit] text-[17px] font-extrabold text-ink hover:bg-white"
       >
-        Đổi trò
+        {i18n.t('play.picker.switch')}
         <ChevronRightIcon size={18} className="rotate-90" />
       </button>
     </Dropdown>

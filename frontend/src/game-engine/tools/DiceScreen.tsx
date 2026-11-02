@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { MAX_DICE, rollDice } from '@/game-engine/tools/classTools'
@@ -21,7 +22,7 @@ const PIPS: Record<number, [number, number][]> = {
 
 function Die({ value, color, size }: { value: number; color: string; size: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={`Mặt ${value}`}>
+    <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={i18n.t('play.tools.dice.face', { value })}>
       <rect x="4" y="4" width="92" height="92" rx="20" fill="#FFFFFF" stroke={color} strokeWidth="5" />
       {PIPS[value].map(([x, y], i) => (
         <circle key={i} cx={x} cy={y} r="9" fill={color} />
@@ -66,8 +67,8 @@ export function DiceScreen() {
 
   return (
     <ToolFrame
-      title="Xúc xắc"
-      subtitle="Gieo để chọn số câu, số bước đi hay đội đi trước"
+      title={i18n.t('play.tools.dice.title')}
+      subtitle={i18n.t('play.tools.dice.subtitle')}
       actions={Array.from({ length: MAX_DICE }, (_, i) => i + 1).map((n) => (
         <button
           key={n}
@@ -79,12 +80,12 @@ export function DiceScreen() {
             count === n ? 'bg-primary text-white' : 'bg-white text-ink hover:text-primary-ink'
           }`}
         >
-          {n} xúc xắc
+          {i18n.t('play.tools.dice.count', { count: n })}
         </button>
       ))}
     >
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-7">
-        <div className="flex items-center gap-10" aria-live="polite" aria-label="Kết quả">
+        <div className="flex items-center gap-10" aria-live="polite" aria-label={i18n.t('play.tools.dice.result')}>
           {faces.map((value, i) => (
             <motion.div
               key={i}
@@ -96,14 +97,14 @@ export function DiceScreen() {
           ))}
         </div>
         <span className="h-12 font-display text-[40px] leading-none font-extrabold">
-          {!rolling && count > 1 && history.length > 0 ? `Tổng: ${total}` : ''}
+          {!rolling && count > 1 && history.length > 0 ? i18n.t('play.tools.dice.total', { total }) : ''}
         </span>
         <button type="button" disabled={rolling} onClick={() => setRolling(true)} className={`${toolButtonClass} h-16 bg-primary px-10 text-xl text-white`}>
-          {rolling ? 'Đang gieo…' : 'Gieo xúc xắc'}
+          {rolling ? i18n.t('play.tools.dice.rolling') : i18n.t('play.tools.dice.roll')}
         </button>
         {history.length > 0 && (
-          <div className="flex flex-wrap items-center justify-center gap-2" aria-label="Các lần gieo trước">
-            <span className="text-lg font-bold text-ink-soft">Các lần trước:</span>
+          <div className="flex flex-wrap items-center justify-center gap-2" aria-label={i18n.t('play.tools.dice.history')}>
+            <span className="text-lg font-bold text-ink-soft">{i18n.t('play.tools.dice.before')}</span>
             {history.map((roll, i) => (
               <span key={i} className={`rounded-full px-3.5 py-1 text-lg font-extrabold ${i === 0 ? 'bg-sun' : 'bg-white'}`}>
                 {roll.join(' + ')}

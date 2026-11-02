@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { BLEED, BLEED_W, BLEED_X, Countdown, SceneSvg, Twinkle } from '@/game-engine/name-picker/effects'
@@ -6,7 +7,9 @@ import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
 import { useSound } from '@/sound/useSound'
 
 const PADS = [560, 760, 960, 1160]
-const COLORS = ['#7FB2FF', '#FFD15C', '#8BD3A8', '#C5A8FF']
+const ART = '/assets/games/rocket'
+/** One rocket per pad, each its own colour. */
+const COLORS = ['blue', 'yellow', 'green', 'purple']
 const PAD_Y = 560
 /** Where the winning rocket parks, beside the moon. */
 const MOON_SPOT = { x: 1010, y: 215 }
@@ -48,22 +51,16 @@ export function RocketScene({ slots, winnerSlot, phase, onFinish }: PickScenePro
       {reached && (
         <>
           {PADS.slice(0, slots.length).map((x) => (
-            <motion.svg
+            <motion.img
               key={x}
-              width="200" height="90" viewBox="-100 -45 200 90"
-              className="pointer-events-none absolute"
-              style={{ left: x - 100, top: 584 }}
-              initial={{ scale: 0.3, opacity: 0.9 }}
-              animate={{ scale: 1.6, opacity: 0, y: -10 }}
+              src={`${ART}/smoke.webp`}
+              alt=""
+              className="pointer-events-none absolute w-[180px]"
+              style={{ left: x - 90, top: 590 }}
+              initial={{ scale: 0.3, opacity: 0.95 }}
+              animate={{ scale: 1.5, opacity: 0, y: -10 }}
               transition={{ duration: 1.4, ease: 'easeOut' }}
-              aria-hidden="true"
-            >
-              <g fill="#FFFFFF" opacity="0.7">
-                <circle cx="-50" cy="10" r="28" />
-                <circle cx="0" cy="0" r="36" />
-                <circle cx="52" cy="10" r="28" />
-              </g>
-            </motion.svg>
+            />
           ))}
         </>
       )}
@@ -102,7 +99,7 @@ export function RocketScene({ slots, winnerSlot, phase, onFinish }: PickScenePro
               <motion.div className="absolute inset-0" animate={{ rotate: isWinner && reached ? (dx >= 0 ? 25 : -25) : 0 }} transition={{ duration: 0.9, ease: 'easeOut' }}>
                 <motion.div className="absolute inset-0" style={{ originX: 0.5, originY: 0 }} {...body}>
                   {chute && <Parachute />}
-                  {flame && <Flame />}
+                  {flame && <Flame small={step === 'ignite'} />}
                   <Rocket color={COLORS[i % COLORS.length]} />
                 </motion.div>
               </motion.div>
@@ -121,56 +118,28 @@ export function RocketScene({ slots, winnerSlot, phase, onFinish }: PickScenePro
         )
       })}
 
-      {arrived && (
-        <motion.svg
-          width="200" height="200" viewBox="-100 -100 200 200"
-          className="pointer-events-none absolute"
-          style={{ left: 1010, top: 40 }}
-          initial={{ scale: 0, rotate: -30 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', bounce: 0.5 }}
-          aria-hidden="true"
-        >
-          <g fill="#FFD15C">
-            {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
-              <path key={a} d="M0 -96 L8 -70 L0 -60 L-8 -70Z" transform={`rotate(${a})`} />
-            ))}
-          </g>
-        </motion.svg>
-      )}
-
-      {running && <Countdown steps={['3', '2', '1', 'Phóng!']} stepMs={COUNT_MS} left={660} top={220} accent="#FFD15C" ink="#2449B8" />}
+      {running && <Countdown steps={['3', '2', '1', i18n.t('play.picker.launch')]} stepMs={COUNT_MS} left={660} top={220} accent="#FFD15C" ink="#2449B8" />}
     </>
   )
 }
 
 function Rocket({ color }: { color: string }) {
-  return (
-    <svg width="120" height="220" viewBox="-60 -80 120 220" className="absolute inset-0 overflow-visible" aria-hidden="true">
-      <path d="M-24 40 L-44 70 L-20 62Z" fill={color} />
-      <path d="M24 40 L44 70 L20 62Z" fill={color} />
-      <path d="M0 -70 C30 -40 28 20 22 62 H-22 C-28 20 -30 -40 0 -70Z" fill="#FFFFFF" />
-      <path d="M0 -70 C14 -56 20 -44 23 -32 H-23 C-20 -44 -14 -56 0 -70Z" fill={color} />
-      <circle cx="0" cy="-4" r="13" fill="#7FB2FF" stroke={color} strokeWidth="5" />
-      <circle cx="-4" cy="-8" r="4" fill="#FFFFFF" opacity="0.7" />
-      <rect x="-14" y="62" width="28" height="8" rx="3" fill="#8A94AD" />
-    </svg>
-  )
+  return <img src={`${ART}/rocket-${color}.webp`} alt="" draggable={false} className="absolute top-[6px] left-[12px] h-[150px] w-[96px] select-none" aria-hidden="true" />
 }
 
-function Flame() {
+/** The engine fire: a small flicker while the rocket sits on its pad, full flames once it lifts off. */
+function Flame({ small }: { small: boolean }) {
   return (
-    <svg width="120" height="220" viewBox="-60 -80 120 220" className="absolute inset-0 overflow-visible" aria-hidden="true">
-      <motion.g
-        style={{ transformBox: 'fill-box', originX: 0.5, originY: 0 }}
-        initial={{ scaleY: 0 }}
-        animate={{ scaleY: [0.8, 1.25], scaleX: [1.05, 0.9] }}
-        transition={{ duration: 0.12, ...LOOP }}
-      >
-        <path d="M-16 66 Q0 150 16 66Z" fill="#FF9C3B" />
-        <path d="M-9 66 Q0 120 9 66Z" fill="#FFE07A" />
-      </motion.g>
-    </svg>
+    <motion.img
+      src={`${ART}/flame.webp`}
+      alt=""
+      className="absolute top-[146px] left-[33px] h-[96px] w-[54px]"
+      style={{ originX: 0.5, originY: 0 }}
+      initial={{ scaleY: 0 }}
+      animate={small ? { scaleY: [0.3, 0.42], scaleX: [0.7, 0.6] } : { scaleY: [0.85, 1.2], scaleX: [1.05, 0.9] }}
+      transition={{ duration: 0.12, ...LOOP }}
+      aria-hidden="true"
+    />
   )
 }
 
@@ -225,32 +194,26 @@ function SpaceBackground({ happy, names }: { happy: boolean; names: string[] }) 
         animate={happy ? { scale: [1, 1.08], rotate: [-4, 4] } : { y: [0, -6] }}
         transition={{ duration: happy ? 0.5 : 2, ...LOOP }}
       >
-        <circle cx="1110" cy="140" r="110" fill="#FFF3C4" opacity="0.15" />
-        <circle cx="1110" cy="140" r="84" fill="#FFF3C4" />
-        <circle cx="1080" cy="116" r="16" fill="#F2E3A6" />
-        <circle cx="1140" cy="170" r="22" fill="#F2E3A6" />
-        <circle cx="1130" cy="100" r="9" fill="#F2E3A6" />
-        <circle cx="1072" cy="164" r="9" fill="#FF8FB1" opacity={happy ? 0.9 : 0} />
-        <circle cx="1128" cy="164" r="9" fill="#FF8FB1" opacity={happy ? 0.9 : 0} />
-        <circle cx="1084" cy="148" r="5" fill="#1F2A44" />
-        <circle cx="1116" cy="148" r="5" fill="#1F2A44" />
-        <path d={happy ? 'M1086 164 Q1100 180 1114 164' : 'M1088 166 Q1100 176 1112 166'} fill="none" stroke="#1F2A44" strokeWidth="3.5" strokeLinecap="round" />
+        <circle cx="1110" cy="140" r="118" fill="#FFF3C4" opacity={happy ? 0.3 : 0.15} />
+        <image href={`${ART}/moon.webp`} x="1012" y="42" width="196" height="196" />
+        <circle cx="1060" cy="158" r="10" fill="#FF8FB1" opacity={happy ? 0.8 : 0} />
+        <circle cx="1146" cy="158" r="10" fill="#FF8FB1" opacity={happy ? 0.8 : 0} />
       </motion.g>
       <motion.g style={center} animate={{ y: [-8, 8], rotate: [-6, 6] }} transition={{ duration: 6, ...LOOP }}>
-        <g transform="translate(520 200)">
-          <circle r="34" fill="#FF8FB1" />
-          <ellipse rx="58" ry="14" fill="none" stroke="#FFD15C" strokeWidth="6" transform="rotate(-18)" />
-        </g>
+        <image href={`${ART}/planet-pink.webp`} x="448" y="155" width="146" height="90" />
       </motion.g>
+      <motion.g style={center} animate={{ y: [6, -6], rotate: [4, -4] }} transition={{ duration: 7, ...LOOP }}>
+        <image href={`${ART}/planet-blue.webp`} x="190" y="430" width="110" height="71" />
+      </motion.g>
+      <motion.image href={`${ART}/sparkles.webp`} x="330" y="400" width="170" height="59" animate={{ opacity: [0.7, 0.3] }} transition={{ duration: 1.6, ...LOOP }} />
       <path d={`M${BLEED_X} 600 H0 Q 320 560 640 590 T 1280 580 H${1280 + BLEED} V 720 H${BLEED_X}Z`} fill="#2B3566" />
       <path d={`M${BLEED_X} 640 H0 Q 320 610 640 636 T 1280 628 H${1280 + BLEED} V 720 H${BLEED_X}Z`} fill="#232C57" />
+      <image href={`${ART}/ground.webp`} x="400" y="600" width="920" height="133" preserveAspectRatio="none" />
       {PADS.slice(0, names.length).map((x, i) => (
         <g key={x}>
-          <rect x={x - 56} y="634" width="112" height="22" rx="8" fill="#8A94AD" />
-          <rect x={x - 46} y="656" width="10" height="40" fill="#5C6688" />
-          <rect x={x + 36} y="656" width="10" height="40" fill="#5C6688" />
-          <rect x={x - 58} y="664" width="116" height="34" rx="12" fill="#FFFFFF" />
-          <text x={x} y="682" textAnchor="middle" dominantBaseline="middle" fontFamily="Nunito, sans-serif" fontWeight={800} fontSize={fontFor(names[i], 17, 15)} fill="#1F2A44">
+          <image href={`${ART}/pad.webp`} x={x - 58} y="630" width="116" height="59" />
+          <rect x={x - 58} y="680" width="116" height="34" rx="12" fill="#FFFFFF" />
+          <text x={x} y="698" textAnchor="middle" dominantBaseline="middle" fontFamily="Nunito, sans-serif" fontWeight={800} fontSize={fontFor(names[i], 17, 15)} fill="#1F2A44">
             {names[i]}
           </text>
         </g>

@@ -1,59 +1,36 @@
 import { Collapse, Modal } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useFeedbackStore } from '@/store/feedbackStore'
 
+/** The questions (profile.help.*: the question, its answer `…Text` and link `…Link`), with the page each one is about. */
 const QUESTIONS = [
-  {
-    key: 'game',
-    label: 'Làm sao để tổ chức một trò chơi?',
-    text: 'Vào “Trò chơi”, bấm “Chọn trò chơi” ở trò cô muốn, đặt tên rồi chọn dùng bộ câu hỏi có sẵn hoặc soạn nội dung mới. Ở trang chuẩn bị, cô xem luật chơi, trình chiếu luật cho cả lớp rồi bấm “Bắt đầu trò chơi”.',
-    to: '/games/new',
-    link: 'Đi tới Chọn trò chơi',
-  },
-  {
-    key: 'sets',
-    label: 'Bộ câu hỏi dùng để làm gì?',
-    text: 'Bộ câu hỏi là nơi cô soạn câu hỏi một lần rồi dùng cho nhiều trò chơi: Trắc nghiệm, Rung chuông vàng, Đua thuyền và Lật ô. Câu tự luận chỉ dùng được cho Lật ô.',
-    to: '/question-sets',
-    link: 'Đi tới Bộ câu hỏi',
-  },
-  {
-    key: 'class',
-    label: 'Làm sao để thêm học sinh vào lớp?',
-    text: 'Vào “Lớp học”, mở lớp rồi thêm học sinh từng bạn, dán cả danh sách, hoặc nhập từ file Excel / CSV theo file mẫu.',
-    to: '/classes',
-    link: 'Đi tới Lớp học',
-  },
-  {
-    key: 'projector',
-    label: 'Trình chiếu lên máy chiếu thế nào?',
-    text: 'Nối máy tính với máy chiếu, mở trò chơi rồi bấm “Bắt đầu trò chơi”. Màn chơi tự co giãn vừa mọi màn hình; bấm F11 để toàn màn hình.',
-  },
-  {
-    key: 'password',
-    label: 'Quên mật khẩu thì làm sao?',
-    text: 'Ở màn đăng nhập, bấm “Quên mật khẩu?” và nhập email: Lớp Vui gửi mã để cô đặt mật khẩu mới. Khi đang đăng nhập, cô đổi mật khẩu trong “Bảo mật tài khoản”.',
-  },
-]
+  { key: 'games', to: '/games/new' },
+  { key: 'sets', to: '/question-sets' },
+  { key: 'students', to: '/classes' },
+  { key: 'projector' },
+  { key: 'password' },
+] as const
 
 /** "Trợ giúp": answers to what teachers ask most, with a link to the page each one is about. */
 export function HelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useTranslation()
   const openFeedback = useFeedbackStore((s) => s.openFeedback)
   return (
-    <Modal open={open} title="Trợ giúp" footer={null} onCancel={onClose} width={620}>
-      <p className="mt-1 mb-3 text-[14px] text-ink-soft">Những câu hỏi thường gặp khi dùng Lớp Vui.</p>
+    <Modal open={open} title={t('profile.help.title')} footer={null} onCancel={onClose} width={620}>
+      <p className="mt-1 mb-3 text-[14px] text-ink-soft">{t('profile.help.intro')}</p>
       <Collapse
         accordion
-        defaultActiveKey={['game']}
+        defaultActiveKey={['games']}
         items={QUESTIONS.map((q) => ({
           key: q.key,
-          label: <span className="font-bold">{q.label}</span>,
+          label: <span className="font-bold">{t(`profile.help.${q.key}`)}</span>,
           children: (
             <div className="flex flex-col gap-2 text-[14px] leading-[1.55] text-ink-soft">
-              <p className="m-0">{q.text}</p>
-              {q.to && (
+              <p className="m-0">{t(`profile.help.${q.key}Text`)}</p>
+              {'to' in q && (
                 <Link to={q.to} onClick={onClose} className="font-bold">
-                  {q.link} →
+                  {t(`profile.help.${q.key}Link`)} →
                 </Link>
               )}
             </div>
@@ -61,7 +38,7 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
         }))}
       />
       <p className="m-0 mt-4 text-[14px] text-ink-soft">
-        Chưa thấy câu trả lời?{' '}
+        {t('profile.help.notFound')}{' '}
         <button
           type="button"
           onClick={() => {
@@ -70,7 +47,7 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
           }}
           className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] font-bold text-primary hover:underline"
         >
-          Gửi góp ý cho đội Lớp Vui
+          {t('profile.help.feedback')}
         </button>
       </p>
     </Modal>

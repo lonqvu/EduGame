@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useRef, useState } from 'react'
 import { Countdown } from '@/game-engine/quiz/QuizParts'
@@ -41,7 +42,7 @@ export function PointWheelScreen({ game, questions, settings }: PointWheelScreen
   const backTo = editPath(game.id)
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   }
   if (state.finished) {
     return (
@@ -63,7 +64,7 @@ export function PointWheelScreen({ game, questions, settings }: PointWheelScreen
     return (
       <PlayFrame
         title={game.title}
-        progress={`Câu ${asked + 1} / ${state.done.length}`}
+        progress={i18n.t('play.common.question', { number: asked + 1, total: state.done.length })}
         extra={rules.timeLimitSec > 0 && !state.revealed && <Countdown key={`${round}-${state.current}`} seconds={rules.timeLimitSec} paused={state.revealed} />}
         backTo={backTo}
       >
@@ -72,8 +73,8 @@ export function PointWheelScreen({ game, questions, settings }: PointWheelScreen
           question={playable[state.current]}
           rules={rules}
           dispatch={dispatch}
-          heading={`${team.name} · câu hỏi đáng ${state.stake} điểm`}
-          closeLabel={asked + 1 >= state.done.length ? 'Xem kết quả' : 'Lượt tiếp theo'}
+          heading={i18n.t('play.wheel.worth', { team: team.name, points: state.stake })}
+          closeLabel={asked + 1 >= state.done.length ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextTurn')}
         />
       </PlayFrame>
     )
@@ -92,7 +93,7 @@ export function PointWheelScreen({ game, questions, settings }: PointWheelScreen
   }
 
   return (
-    <PlayFrame title={game.title} progress={`Câu ${Math.min(asked + 1, state.done.length)} / ${state.done.length}`} backTo={backTo}>
+    <PlayFrame title={game.title} progress={i18n.t('play.common.question', { number: Math.min(asked + 1, state.done.length), total: state.done.length })} backTo={backTo}>
       <div className="flex min-h-0 flex-1 items-center gap-6">
         <div className="relative shrink-0" style={{ width: 560 * WHEEL_SCALE, height: 600 * WHEEL_SCALE }}>
           <div className="absolute top-0 left-0 origin-top-left" style={{ transform: `scale(${WHEEL_SCALE})` }}>
@@ -114,21 +115,21 @@ export function PointWheelScreen({ game, questions, settings }: PointWheelScreen
           <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-[28px] bg-white px-6 py-5 text-center">
             {segment ? (
               <>
-                <span className="text-xl font-extrabold text-ink-soft">{team.name} quay được</span>
+                <span className="text-xl font-extrabold text-ink-soft">{i18n.t('play.wheel.landed', { team: team.name })}</span>
                 <motion.span
                   initial={{ scale: 0.4, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', bounce: 0.55 }}
                   className={`font-display text-[64px] leading-none font-extrabold ${segment.kind === 'lose' ? 'text-danger' : 'text-primary-ink'}`}
                 >
-                  {segment.kind === 'points' ? `${segment.points} điểm` : segment.label}
+                  {segment.kind === 'points' ? i18n.t('play.common.points', { count: segment.points }) : segment.label}
                 </motion.span>
                 <span className="text-xl font-bold text-ink-soft">
                   {segment.kind === 'lose'
-                    ? 'Tiếc quá! Lượt chuyển sang đội tiếp theo.'
+                    ? i18n.t('play.wheel.loseText')
                     : segment.kind === 'double'
-                      ? `Trả lời đúng thì điểm của đội được nhân đôi (+${stake} điểm).`
-                      : 'Trả lời đúng câu hỏi để nhận số điểm này.'}
+                      ? i18n.t('play.wheel.doubleText', { points: stake })
+                      : i18n.t('play.wheel.pointsText')}
                 </span>
                 <button
                   type="button"
@@ -143,12 +144,12 @@ export function PointWheelScreen({ game, questions, settings }: PointWheelScreen
                   }}
                   className={`${playButtonClass} mt-2 bg-primary text-white hover:brightness-110`}
                 >
-                  {segment.kind === 'lose' ? 'Lượt tiếp theo' : 'Xem câu hỏi'}
+                  {segment.kind === 'lose' ? i18n.t('play.common.nextTurn') : i18n.t('play.wheel.seeQuestion')}
                 </button>
               </>
             ) : (
               <>
-                <span className="text-xl font-extrabold text-ink-soft">Đến lượt</span>
+                <span className="text-xl font-extrabold text-ink-soft">{i18n.t('play.common.yourTurn')}</span>
                 <span className="flex items-center gap-3 font-display text-[46px] leading-none font-extrabold">
                   <span className="size-9 rounded-full" style={{ background: team.color }} />
                   {team.name}
@@ -159,14 +160,14 @@ export function PointWheelScreen({ game, questions, settings }: PointWheelScreen
                   onClick={spin}
                   className={`${playButtonClass} mt-3 h-16 bg-sun px-10 text-[24px] text-ink`}
                 >
-                  {spinning ? 'Đang quay…' : '🎡 Quay'}
+                  {spinning ? i18n.t('play.wheel.spinning') : i18n.t('play.wheel.spin')}
                 </button>
               </>
             )}
           </div>
-          <TeamBar teams={state.teams} activeId={team.id} activeLabel="Đến lượt" columns={2} />
+          <TeamBar teams={state.teams} activeId={team.id} activeLabel={i18n.t('play.common.yourTurn')} columns={2} />
           <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} justify-center bg-white text-ink`}>
-            Kết thúc
+            {i18n.t('play.common.finish')}
           </button>
         </div>
       </div>

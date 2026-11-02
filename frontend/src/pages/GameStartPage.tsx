@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
 import { ArrowLeftIcon, ArrowRightIcon, ChevronLeftIcon, GamepadFilledIcon, PencilIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { countPlayable, gameGuide, isGuideGame } from '@/game-engine/gameGuide'
-import { editPath, gameRegistry, playMode, playPath } from '@/game-engine/registry'
+import { editPath, itemsLabel as countItems, itemWord, playMode, playPath } from '@/game-engine/registry'
 import { PLAY_DEFAULTS, readPlaySettings, writePlaySettings, type PlaySettings } from '@/game-engine/shared/gameSettings'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { QUICK_SETTINGS } from '@/pages/game-start/quickSettings'
@@ -27,6 +28,7 @@ const NO_SETTINGS: Record<string, unknown> = {}
  * questions the way of another quiz game, as on /play.
  */
 export function GameStartPage() {
+  const { t } = useTranslation()
   const { gameId = '' } = useParams()
   const [params] = useSearchParams()
   const navigate = useNavigate()
@@ -63,7 +65,6 @@ export function GameStartPage() {
   const guide = gameGuide(mode, settings)
   const current: PlaySettings = readPlaySettings(settings, mode === 'GRID_BOARD' ? {} : PLAY_DEFAULTS[mode])
   const playable = countPlayable(mode, items)
-  const unit = gameRegistry[mode].itemUnit
   const template = templates.find((t) => t.type === mode)
   const playUrl = mode === game.type ? playPath(game) : `${playPath(game)}?as=${mode}`
   const changeSettings = (patch: Partial<PlaySettings>) => updateSettings(gameId, writePlaySettings(settings, patch))
@@ -71,7 +72,7 @@ export function GameStartPage() {
   const goBack = () => (location.key === 'default' ? navigate('/games/new') : navigate(-1))
 
   const itemsLabel =
-    playable === items.length ? `${playable} ${unit}` : `${playable}/${items.length} ${unit} dùng được`
+    playable === items.length ? countItems(mode, playable) : t('start.usable', { items: countItems(mode, playable), total: items.length })
 
   return (
     <div className="flex flex-col gap-5">
@@ -80,7 +81,7 @@ export function GameStartPage() {
           <button
             type="button"
             onClick={goBack}
-            aria-label="Quay lại"
+            aria-label={t('start.back')}
             className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-ink hover:text-primary-ink"
           >
             <ChevronLeftIcon size={22} />
@@ -89,9 +90,9 @@ export function GameStartPage() {
             <GamepadFilledIcon size={30} />
           </span>
           <div className="flex min-w-0 flex-col gap-1">
-            <h1 className="m-0 text-[28px] leading-tight font-black text-[#1A2440] sm:text-[32px]">Bắt đầu trò chơi</h1>
+            <h1 className="m-0 text-[28px] leading-tight font-black text-[#1A2440] sm:text-[32px]">{t('start.title')}</h1>
             <p className="m-0 text-[14.5px] text-ink-soft">
-              Xem lại luật chơi, cách chơi và thông tin để truyền đạt cho học sinh trước khi bắt đầu.
+              {t('start.text')}
             </p>
           </div>
         </div>
@@ -123,25 +124,25 @@ export function GameStartPage() {
             className="flex h-[46px] cursor-pointer items-center gap-2 rounded-[12px] border border-primary bg-white px-5 font-[inherit] text-[15px] font-bold text-primary hover:bg-primary-soft"
           >
             <ArrowLeftIcon size={18} />
-            Quay lại
+            {t('start.back')}
           </button>
           <Link
             to={editPath(game.id)}
             className="hidden h-[46px] items-center gap-2 rounded-[12px] px-4 text-[15px] font-bold text-ink-soft hover:text-primary sm:flex"
           >
             <PencilIcon size={18} />
-            Sửa nội dung
+            {t('start.editContent')}
           </Link>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {playable === 0 && <span className="text-[14px] font-semibold text-danger">Chưa có {unit} nào đủ nội dung để chơi.</span>}
+          {playable === 0 && <span className="text-[14px] font-semibold text-danger">{t('start.noneReady', { item: itemWord(mode) })}</span>}
           {/* Phones have the one in the rules card. */}
           <button
             type="button"
             onClick={() => setShowing(true)}
             className="hidden h-[46px] cursor-pointer items-center rounded-[12px] border-0 bg-primary-soft px-5 font-[inherit] text-[15px] font-bold text-primary-ink hover:brightness-95 sm:flex"
           >
-            Trình chiếu luật chơi
+            {t('start.presentRules')}
           </button>
           {playable > 0 ? (
             <Link
@@ -153,12 +154,12 @@ export function GameStartPage() {
               }}
               className="flex h-[46px] items-center gap-2 rounded-[12px] bg-primary px-6 text-[15px] font-bold text-white hover:text-white hover:brightness-110"
             >
-              Bắt đầu trò chơi
+              {t('start.start')}
               <ArrowRightIcon size={18} />
             </Link>
           ) : (
             <span aria-disabled="true" className="flex h-[46px] cursor-not-allowed items-center gap-2 rounded-[12px] bg-line px-6 text-[15px] font-bold text-ink-soft">
-              Bắt đầu trò chơi
+              {t('start.start')}
               <ArrowRightIcon size={18} />
             </span>
           )}

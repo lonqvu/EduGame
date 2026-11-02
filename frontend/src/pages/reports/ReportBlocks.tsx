@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { ArrowRightIcon } from '@/components/ui/icons'
+import { gameName } from '@/i18n/gameNames'
 import { cardArt } from '@/pages/choose-game/chooserEntries'
 import { ReportCard } from '@/pages/reports/ReportParts'
 import type { ClassReport, ReportSession } from '@/types/api'
@@ -104,26 +106,27 @@ const HISTORY_PAGE = 10
 
 /** The games played, newest first, under the day they were played; ten more at a time. */
 export function HistoryCard({ report, action }: { report: ClassReport; action?: ReactNode }) {
+  const { t } = useTranslation()
   const [onlyEnded, setOnlyEnded] = useState(false)
   const [count, setCount] = useState(HISTORY_PAGE)
   const shown = onlyEnded ? report.sessions.filter((s) => s.status === 'ENDED') : report.sessions
   const { summary } = report
   return (
     <ReportCard
-      title="Lịch sử hoạt động"
+      title={t('reports.blocks.history')}
       text={
         summary.correctAnswers > 0
-          ? `${summary.activities} lượt chơi · ${summary.correctAnswers} câu trả lời đúng của các đội`
-          : `${summary.activities} lượt chơi`
+          ? t('reports.blocks.historyCorrect', { plays: summary.activities, correct: summary.correctAnswers })
+          : t('reports.blocks.historyPlays', { plays: summary.activities })
       }
       action={
         <div className="flex items-center gap-2">
           <Switch
-            label="Lượt chơi hiện"
+            label={t('reports.blocks.show')}
             value={onlyEnded ? 'ended' : 'all'}
             options={[
-              { value: 'all', label: 'Tất cả' },
-              { value: 'ended', label: 'Chơi đến cuối' },
+              { value: 'all', label: t('reports.blocks.all') },
+              { value: 'ended', label: t('reports.ended') },
             ]}
             onChange={(v) => {
               setOnlyEnded(v === 'ended')
@@ -135,7 +138,7 @@ export function HistoryCard({ report, action }: { report: ClassReport; action?: 
       }
     >
       {shown.length === 0 ? (
-        <p className="m-0 text-[14px] text-ink-muted">Chưa trò nào được chơi đến cuối trong kỳ này.</p>
+        <p className="m-0 text-[14px] text-ink-muted">{t('reports.blocks.noneEnded')}</p>
       ) : (
         <div className="flex flex-col">
           {sessionsByDay(shown.slice(0, count)).map((d) => (
@@ -156,13 +159,13 @@ export function HistoryCard({ report, action }: { report: ClassReport; action?: 
           onClick={() => setCount((n) => n + HISTORY_PAGE * 2)}
           className="flex cursor-pointer items-center gap-1.5 self-center rounded-full border border-line bg-white px-4 py-2 font-[inherit] text-[14px] font-bold text-primary hover:border-primary"
         >
-          Xem thêm ({shown.length - count})
+          {t('reports.blocks.more', { count: shown.length - count })}
           <ArrowRightIcon size={16} className="rotate-90" />
         </button>
       )}
       {summary.activities > report.sessions.length && (
         <p className="m-0 text-[13px] text-ink-muted">
-          Hiện {report.sessions.length} lượt chơi gần nhất. Cô chọn khoảng thời gian ngắn hơn để xem các lượt cũ.
+          {t('reports.blocks.limited', { count: report.sessions.length })}
         </p>
       )}
     </ReportCard>
@@ -170,6 +173,7 @@ export function HistoryCard({ report, action }: { report: ClassReport; action?: 
 }
 
 function SessionRow({ session: s }: { session: ReportSession }) {
+  const { t } = useTranslation()
   const ended = s.status === 'ENDED'
   return (
     <li className="flex items-center gap-3 border-b border-line-soft py-2.5 last:border-b-0">
@@ -177,7 +181,7 @@ function SessionRow({ session: s }: { session: ReportSession }) {
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[14.5px] font-bold">{s.gameTitle}</span>
         <span className="truncate text-[12.5px] text-ink-muted">
-          {s.templateName} · {clockTime(s.startedAt)}
+          {gameName(s.templateCode, s.templateName)} · {clockTime(s.startedAt)}
           {s.minutes !== undefined && ` · ${sessionDuration(s.minutes)}`}
           {ended && <span className="md:hidden"> · {resultLabel(s)}</span>}
         </span>
@@ -186,7 +190,7 @@ function SessionRow({ session: s }: { session: ReportSession }) {
       <span
         className={`shrink-0 rounded-full px-2.5 py-1 text-[12px] font-black whitespace-nowrap ${ended ? 'bg-[#E2F6E8] text-success' : 'bg-[#F2F5FA] text-ink-muted'}`}
       >
-        {ended ? '✓ Đến cuối' : 'Dừng giữa chừng'}
+        {ended ? t('reports.blocks.toEnd') : t('reports.stopped')}
       </span>
     </li>
   )
@@ -194,12 +198,13 @@ function SessionRow({ session: s }: { session: ReportSession }) {
 
 /** "Gợi ý cho cô": what to do next, each with its link. */
 export function TipsCard({ tips }: { tips: ReportTip[] }) {
+  const { t } = useTranslation()
   return (
     <section
-      aria-label="Gợi ý cho cô"
+      aria-label={t('reports.tips.label')}
       className="flex flex-col gap-1 rounded-[20px] border-2 border-[#FFE7A3] bg-[linear-gradient(135deg,#FFF6DA,#FFFFFF)] px-[18px] py-4"
     >
-      <h2 className="m-0 mb-1 text-[18px] font-black">💡 Gợi ý cho cô</h2>
+      <h2 className="m-0 mb-1 text-[18px] font-black">{t('reports.tips.title')}</h2>
       <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
         {tips.map((tip) => (
           <li key={tip.key} className="flex items-start gap-2.5 text-[14px] leading-snug">
@@ -230,22 +235,23 @@ const PODIUM = [
 
 /** "Ngôi sao của lớp": the three with the most stars on a podium, the next ones, and who still waits for a star. */
 export function StarsCard({ report, action }: { report: ClassReport; action?: ReactNode }) {
+  const { t } = useTranslation()
   const [all, setAll] = useState(false)
   const starred = report.students.filter((s) => s.stars > 0)
   const waiting = report.students.filter((s) => s.stars <= 0)
   const top = starred.slice(0, 3)
   const rest = starred.slice(3, all ? undefined : 5)
   return (
-    <ReportCard title="Ngôi sao của lớp" action={action}>
+    <ReportCard title={t('reports.blocks.classStars')} action={action}>
       {report.students.length === 0 ? (
         <p className="m-0 text-[14px] text-ink-muted">
-          Lớp chưa có học sinh. <Link to={`/classes/${report.classroom.code}`}>Thêm học sinh</Link>
+          <Trans i18nKey="reports.blocks.noStudents" components={{ link: <Link to={`/classes/${report.classroom.code}`} /> }} />
         </p>
       ) : starred.length === 0 ? (
-        <p className="m-0 text-[14px] text-ink-muted">Chưa em nào được thưởng sao trong kỳ này.</p>
+        <p className="m-0 text-[14px] text-ink-muted">{t('reports.blocks.noStars')}</p>
       ) : (
         <>
-          <ol aria-label="Ba bạn nhiều sao nhất" className="m-0 flex list-none items-end justify-center gap-2.5 p-0">
+          <ol aria-label={t('reports.blocks.podium')} className="m-0 flex list-none items-end justify-center gap-2.5 p-0">
             {PODIUM.filter((p) => top[p.place - 1]).map((p) => {
               const s = top[p.place - 1]
               return (
@@ -269,7 +275,7 @@ export function StarsCard({ report, action }: { report: ClassReport; action?: Re
             })}
           </ol>
           {rest.length > 0 && (
-            <ol start={4} aria-label="Các bạn tiếp theo" className="m-0 flex list-none flex-col p-0">
+            <ol start={4} aria-label={t('reports.blocks.next')} className="m-0 flex list-none flex-col p-0">
               {rest.map((s, i) => (
                 <li key={s.id} className="flex items-center gap-2.5 py-1.5 text-[14px]">
                   <span className="w-5 text-right font-extrabold text-ink-muted tabular-nums">{i + 4}</span>
@@ -286,15 +292,15 @@ export function StarsCard({ report, action }: { report: ClassReport; action?: Re
               onClick={() => setAll((v) => !v)}
               className="cursor-pointer self-start border-0 bg-transparent p-0 font-[inherit] text-[14px] font-bold text-primary hover:underline"
             >
-              {all ? 'Thu gọn' : `Xem cả ${starred.length} em`}
+              {all ? t('reports.blocks.collapse') : t('reports.blocks.showAllStudents', { count: starred.length })}
             </button>
           )}
         </>
       )}
       {waiting.length > 0 && starred.length > 0 && (
         <div className="flex flex-col gap-1.5">
-          <span className="text-[13px] font-extrabold text-ink-muted">Chưa được khen ({waiting.length})</span>
-          <ul aria-label="Học sinh chưa được khen" className="m-0 flex list-none flex-wrap gap-1.5 p-0">
+          <span className="text-[13px] font-extrabold text-ink-muted">{t('reports.blocks.waiting', { count: waiting.length })}</span>
+          <ul aria-label={t('reports.blocks.waitingList')} className="m-0 flex list-none flex-wrap gap-1.5 p-0">
             {waiting.map((s) => (
               <li key={s.id} className="rounded-full bg-[#F2F5FA] px-2.5 py-1 text-[13px] font-bold">
                 {s.displayName}
@@ -311,24 +317,25 @@ const TOP_ROWS = 5
 
 /** "Trò lớp hay chơi": the kinds of game, or the teacher's games, most played first; five, the others on demand. */
 export function PlaysCard({ report }: { report: ClassReport }) {
+  const { t } = useTranslation()
   const [by, setBy] = useState<'kind' | 'game'>('kind')
   const [all, setAll] = useState(false)
   const rows =
     by === 'kind'
-      ? report.byTemplate.map((t) => ({ key: t.templateCode, name: t.templateName, to: null as string | null, value: t.activities }))
+      ? report.byTemplate.map((tpl) => ({ key: tpl.templateCode, name: gameName(tpl.templateCode, tpl.templateName), to: null as string | null, value: tpl.activities }))
       : report.topGames.map((g) => ({ key: g.gameCode, name: g.title, to: `/games/${g.gameCode}/start`, value: g.activities }))
   const top = Math.max(1, ...rows.map((r) => r.value))
   const shown = all ? rows : rows.slice(0, TOP_ROWS)
   return (
     <ReportCard
-      title="Trò lớp hay chơi"
+      title={t('reports.blocks.favorites')}
       action={
         <Switch
-          label="Xếp theo"
+          label={t('reports.blocks.sortBy')}
           value={by}
           options={[
-            { value: 'kind', label: 'Loại trò' },
-            { value: 'game', label: 'Trò của cô' },
+            { value: 'kind', label: t('reports.blocks.byKind') },
+            { value: 'game', label: t('reports.blocks.byGame') },
           ]}
           onChange={(v) => {
             setBy(v)
@@ -337,9 +344,9 @@ export function PlaysCard({ report }: { report: ClassReport }) {
         />
       }
     >
-      <ul aria-label={by === 'kind' ? 'Loại trò chơi' : 'Trò chơi được chơi nhiều'} className="m-0 flex list-none flex-col gap-2 p-0">
+      <ul aria-label={by === 'kind' ? t('reports.blocks.kindsList') : t('reports.blocks.gamesList')} className="m-0 flex list-none flex-col gap-2 p-0">
         {shown.map((r) => (
-          <li key={r.key} title={`${r.name}: ${r.value} lần`} className="flex items-center gap-2.5 text-[14px]">
+          <li key={r.key} title={t('reports.blocks.timesTitle', { name: r.name, count: r.value })} className="flex items-center gap-2.5 text-[14px]">
             <span className="w-[130px] shrink-0 truncate font-extrabold">
               {r.to ? (
                 <Link to={r.to} className="text-ink hover:text-primary">
@@ -353,7 +360,7 @@ export function PlaysCard({ report }: { report: ClassReport }) {
               <span className="block h-full rounded-full bg-primary" style={{ width: `${Math.max(3, (r.value / top) * 100)}%` }} />
             </span>
             <span className="w-12 shrink-0 text-right font-black tabular-nums">
-              {r.value} <span className="text-[12px] font-semibold text-ink-muted">lần</span>
+              {r.value} <span className="text-[12px] font-semibold text-ink-muted">{t('reports.blocks.timesWord', { count: r.value })}</span>
             </span>
           </li>
         ))}
@@ -364,7 +371,7 @@ export function PlaysCard({ report }: { report: ClassReport }) {
           onClick={() => setAll((v) => !v)}
           className="cursor-pointer self-center border-0 bg-transparent p-0 font-[inherit] text-[14px] font-black text-primary hover:underline"
         >
-          {all ? 'Thu gọn' : by === 'kind' ? `Xem cả ${rows.length} loại` : `Xem cả ${rows.length} trò`}
+          {all ? t('reports.blocks.collapse') : by === 'kind' ? t('reports.blocks.allKinds', { count: rows.length }) : t('reports.blocks.allGames', { count: rows.length })}
         </button>
       )}
     </ReportCard>

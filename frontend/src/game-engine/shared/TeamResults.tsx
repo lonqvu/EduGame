@@ -1,3 +1,5 @@
+import i18n from 'i18next'
+import type { Translation } from '@/i18n/locales/vi'
 import { App } from 'antd'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
@@ -13,18 +15,18 @@ const WINNER_STARS = 3
 interface TeamResultsProps {
   teams: TeamScore[]
   onPlayAgain: () => void
-  /** "Đúng nhiều câu nhất", "Ghép đúng nhiều cặp nhất"... */
-  mostCorrectLabel?: string
-  /** "câu", "cặp" in "Đúng 3 câu liên tiếp". */
-  streakUnit?: string
+  /** What the team with most right answers did (play.results.best.*: "Đúng nhiều câu nhất"). */
+  mostCorrectLabel?: keyof Results['best']
+  /** What a streak counts (play.results.units.*: "câu" in "Đúng 3 câu liên tiếp"). */
+  streakUnit?: keyof Results['units']
 }
 
 /** Projector: podium, awards and what to do next. Shared by every team game. */
 export function TeamResults({
   teams,
   onPlayAgain,
-  mostCorrectLabel = 'Đúng nhiều câu nhất',
-  streakUnit = 'câu',
+  mostCorrectLabel = 'correct',
+  streakUnit = 'question',
 }: TeamResultsProps) {
   const { message } = App.useApp()
   const [starsGiven, setStarsGiven] = useState(false)
@@ -37,9 +39,11 @@ export function TeamResults({
 
   const ranked = rankTeams(teams)
   const winners = ranked.filter((t) => t.rank === 1 && t.score > 0)
-  const winnerNames = winners.map((t) => t.name).join(' và ')
+  const winnerNames = winners.map((t) => t.name).join(i18n.t('play.results.and'))
   const headline =
-    winners.length === 0 ? 'Cả lớp đã cố gắng!' : winners.length === 1 ? `${winnerNames} chiến thắng!` : `${winnerNames} cùng thắng!`
+    winners.length === 0
+      ? i18n.t('play.results.triedHard')
+      : i18n.t(winners.length === 1 ? 'play.results.won' : 'play.results.wonTogether', { names: winnerNames })
 
   // The music gives way to a fanfare for the winners (applause only when nobody scored), then the class claps.
   const someoneWon = winners.length > 0
@@ -57,12 +61,12 @@ export function TeamResults({
   const giveStars = () => {
     setStarsGiven(true)
     sound.play('star')
-    message.success(`Đã thưởng ${WINNER_STARS} sao cho ${winnerNames}`)
+    message.success(i18n.t('play.results.starsGiven', { count: WINNER_STARS, names: winnerNames }))
   }
 
   return (
     <div className="relative flex h-full flex-col items-center gap-[18px] px-12 py-7">
-      <span className="text-[22px] font-extrabold text-sun-ink">Kết thúc trò chơi</span>
+      <span className="text-[22px] font-extrabold text-sun-ink">{i18n.t('play.common.gameOver')}</span>
       <motion.h1
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -87,7 +91,7 @@ export function TeamResults({
               className="flex w-full flex-col items-center justify-center overflow-hidden rounded-t-[22px] rounded-b-lg bg-white"
             >
               <span className="font-display text-[40px] leading-none font-extrabold">{team.score}</span>
-              <span className="text-base font-bold text-ink-soft">Hạng {team.rank}</span>
+              <span className="text-base font-bold text-ink-soft">{i18n.t('play.results.rank', { rank: team.rank })}</span>
             </motion.div>
           </div>
         ))}
@@ -99,7 +103,7 @@ export function TeamResults({
             <div className="flex items-center gap-3 rounded-[20px] bg-white px-5 py-3">
               <BoltIcon size={28} className="text-[#9A4A00]" />
               <span className="text-lg font-extrabold">
-                {mostCorrectLabel} · {mostCorrect.name}
+                {i18n.t(`play.results.best.${mostCorrectLabel}`)} · {mostCorrect.name}
               </span>
             </div>
           )}
@@ -107,7 +111,7 @@ export function TeamResults({
             <div className="flex items-center gap-3 rounded-[20px] bg-white px-5 py-3">
               <MedalIcon size={28} className="text-success" />
               <span className="text-lg font-extrabold">
-                Đúng {longestStreak.bestStreak} {streakUnit} liên tiếp · {longestStreak.name}
+                {i18n.t('play.results.streak', { count: longestStreak.bestStreak, unit: i18n.t(`play.results.units.${streakUnit}`), name: longestStreak.name })}
               </span>
             </div>
           )}
@@ -123,7 +127,7 @@ export function TeamResults({
             className="flex h-[60px] cursor-pointer items-center gap-2.5 rounded-full border-0 bg-primary px-7 font-[inherit] text-[19px] font-extrabold text-white hover:brightness-110 disabled:cursor-default disabled:opacity-60"
           >
             <FilledStarIcon size={22} stroke="#FFFFFF" />
-            {starsGiven ? 'Đã thưởng sao' : `Thưởng ${WINNER_STARS} sao cho ${winnerNames}`}
+            {starsGiven ? i18n.t('play.common.starsGiven') : i18n.t('play.results.giveStars', { count: WINNER_STARS, names: winnerNames })}
           </button>
         )}
         <button
@@ -131,15 +135,17 @@ export function TeamResults({
           onClick={playAgain}
           className="h-[60px] cursor-pointer rounded-full border-0 bg-white px-[26px] font-[inherit] text-[19px] font-extrabold text-ink hover:text-primary-ink"
         >
-          Chơi lại
+          {i18n.t('play.common.playAgain')}
         </button>
         <Link
           to="/"
           className="flex h-[60px] items-center rounded-full bg-white px-[26px] text-[19px] font-extrabold text-ink hover:text-primary-ink"
         >
-          Về trang chủ
+          {i18n.t('play.common.goHome')}
         </Link>
       </div>
     </div>
   )
 }
+
+type Results = Translation['play']['results']

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { Countdown } from '@/game-engine/quiz/QuizParts'
@@ -37,7 +38,7 @@ export function TicTacToeScreen({ game, questions, settings }: TicTacToeScreenPr
   const sound = useSound()
   const backTo = editPath(game.id)
 
-  if (!question) return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+  if (!question) return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   const newBoard = () => {
     setCells(Array(9).fill(null))
     setMovedAt(-1)
@@ -50,7 +51,7 @@ export function TicTacToeScreen({ game, questions, settings }: TicTacToeScreenPr
           newBoard()
           restart()
         }}
-        mostCorrectLabel="Đánh dấu nhiều ô nhất"
+        mostCorrectLabel="marked"
       />
     )
   }
@@ -67,13 +68,13 @@ export function TicTacToeScreen({ game, questions, settings }: TicTacToeScreenPr
   return (
     <PlayFrame
       title={game.title}
-      progress={`Câu ${state.asked + 1}`}
+      progress={i18n.t('play.common.questionOnly', { number: state.asked + 1 })}
       extra={rules.timeLimitSec > 0 && !state.revealed && <Countdown key={`${round}-${state.asked}`} seconds={rules.timeLimitSec} paused={state.revealed} />}
       backTo={backTo}
     >
       <TeamBar teams={state.teams.map((t, i) => ({ ...t, name: `${t.name} (${MARKS[i]})` }))} activeId={over ? null : team.id} />
       <div className="flex min-h-0 flex-1 gap-6">
-        <div className="grid shrink-0 grid-cols-3 gap-3 rounded-[28px] bg-white p-4" style={{ width: 480, height: 480 }} role="grid" aria-label="Bàn cờ">
+        <div className="grid shrink-0 grid-cols-3 gap-3 rounded-[28px] bg-white p-4" style={{ width: 480, height: 480 }} role="grid" aria-label={i18n.t('play.common.board')}>
           {cells.map((owner, i) => {
             const inLine = line?.cells.includes(i)
             const color = owner ? state.teams.find((t) => t.id === owner)?.color : undefined
@@ -82,7 +83,7 @@ export function TicTacToeScreen({ game, questions, settings }: TicTacToeScreenPr
                 key={`${round}-${i}`}
                 type="button"
                 disabled={!canMark || !!owner}
-                aria-label={owner ? `Ô ${i + 1}: ${markOf(owner)}` : `Ô ${i + 1}, trống`}
+                aria-label={owner ? i18n.t('play.ticTacToe.filled', { number: i + 1, mark: markOf(owner) }) : i18n.t('play.ticTacToe.empty', { number: i + 1 })}
                 onClick={() => {
                   sound.play('pop')
                   const next = cells.map((c, k) => (k === i ? team.id : c))
@@ -112,12 +113,12 @@ export function TicTacToeScreen({ game, questions, settings }: TicTacToeScreenPr
           question={question}
           points={rules.points}
           dispatch={dispatch}
-          move="chọn một ô trống để đánh dấu"
+          move={i18n.t('play.ticTacToe.move')}
           moveDone={moved}
           footer={
             over && (!state.earned || moved) ? (
               <BoardEnd
-                title={winner ? `${winner.name} thắng ván này! +${LINE_BONUS}` : 'Hòa! Bàn cờ đã kín.'}
+                title={winner ? i18n.t('play.ticTacToe.win', { team: winner.name, bonus: LINE_BONUS }) : i18n.t('play.common.draw')}
                 onNewBoard={() => {
                   newBoard()
                   if (state.revealed) dispatch({ type: 'next' })

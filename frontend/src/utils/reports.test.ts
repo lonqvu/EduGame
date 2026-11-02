@@ -230,7 +230,7 @@ describe('CSV', () => {
   })
 
   it('names the file after the class and the period, without accents', () => {
-    expect(csvFileName(report, 'sao')).toBe('bao-cao-lop-3a-dac-biet-2026-10-12-2026-10-18-sao.csv')
+    expect(csvFileName(report, 'stars')).toBe('bao-cao-lop-3a-dac-biet-2026-10-12-2026-10-18-sao.csv')
   })
 })
 

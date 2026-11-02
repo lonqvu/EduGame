@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { PROJECTOR_BOARD_BG, ProjectorStage } from '@/components/projector/ProjectorStage'
@@ -64,7 +65,7 @@ export function PlayGamePage() {
   if (!game || (loadState !== 'play' && loadState !== 'edit')) return <PageLoading />
 
   const mode = playMode(game.type, params.get('as'))
-  if (!isGuideGame(mode)) return <NotFoundPage message="Trò này không có màn chiếu câu hỏi." />
+  if (!isGuideGame(mode)) return <NotFoundPage message={i18n.t('start.intro.noQuestions')} />
 
   if (!started) {
     return (

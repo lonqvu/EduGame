@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { Countdown } from '@/game-engine/quiz/QuizParts'
@@ -37,7 +38,7 @@ export function ConnectFourScreen({ game, questions, settings }: ConnectFourScre
   const sound = useSound()
   const backTo = editPath(game.id)
 
-  if (!question) return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+  if (!question) return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   const newBoard = () => {
     setCells(Array(ROWS * COLS).fill(null))
     setMovedAt(-1)
@@ -50,7 +51,7 @@ export function ConnectFourScreen({ game, questions, settings }: ConnectFourScre
           newBoard()
           restart()
         }}
-        mostCorrectLabel="Thả nhiều quân nhất"
+        mostCorrectLabel="pieces"
       />
     )
   }
@@ -80,21 +81,21 @@ export function ConnectFourScreen({ game, questions, settings }: ConnectFourScre
   return (
     <PlayFrame
       title={game.title}
-      progress={`Câu ${state.asked + 1}`}
+      progress={i18n.t('play.common.questionOnly', { number: state.asked + 1 })}
       extra={rules.timeLimitSec > 0 && !state.revealed && <Countdown key={`${round}-${state.asked}`} seconds={rules.timeLimitSec} paused={state.revealed} />}
       backTo={backTo}
     >
       <TeamBar teams={state.teams} activeId={over ? null : team.id} />
       <div className="flex min-h-0 flex-1 gap-6">
         <div className="flex shrink-0 flex-col gap-2">
-          <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, ${CELL}px)` }} role="group" aria-label="Chọn cột">
+          <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, ${CELL}px)` }} role="group" aria-label={i18n.t('play.connect.columns')}>
             {Array.from({ length: COLS }, (_, col) => (
               <button
                 key={col}
                 type="button"
                 disabled={!canDrop || dropRow(cells, ROWS, COLS, col) < 0}
                 onClick={() => drop(col)}
-                aria-label={`Thả vào cột ${col + 1}`}
+                aria-label={i18n.t('play.connect.drop', { number: col + 1 })}
                 className="flex h-9 cursor-pointer items-center justify-center rounded-xl border-0 font-[inherit] text-lg font-extrabold text-white disabled:cursor-default disabled:opacity-25"
                 style={{ background: team.color }}
               >
@@ -106,7 +107,7 @@ export function ConnectFourScreen({ game, questions, settings }: ConnectFourScre
             className="grid gap-1.5 rounded-[22px] bg-[#3563E9] p-2.5"
             style={{ gridTemplateColumns: `repeat(${COLS}, ${CELL - 5}px)` }}
             role="grid"
-            aria-label="Bàn cờ"
+            aria-label={i18n.t('play.common.board')}
           >
             {cells.map((owner, i) => {
               const color = owner ? state.teams.find((t) => t.id === owner)?.color : undefined
@@ -133,12 +134,12 @@ export function ConnectFourScreen({ game, questions, settings }: ConnectFourScre
           question={question}
           points={rules.points}
           dispatch={dispatch}
-          move="chọn cột để thả quân"
+          move={i18n.t('play.connect.move')}
           moveDone={moved}
           footer={
             over && (!state.earned || moved) ? (
               <BoardEnd
-                title={winner ? `${winner.name} có 4 quân liền nhau! +${LINE_BONUS}` : 'Hòa! Bàn cờ đã kín.'}
+                title={winner ? i18n.t('play.connect.win', { team: winner.name, bonus: LINE_BONUS }) : i18n.t('play.common.draw')}
                 onNewBoard={() => {
                   newBoard()
                   if (state.revealed) dispatch({ type: 'next' })

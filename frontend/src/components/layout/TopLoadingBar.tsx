@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigation } from 'react-router'
 import { useLoadingStore } from '@/store/loadingStore'
 
@@ -10,6 +11,7 @@ const SHOW_AFTER_MS = 150
  * it creeps toward the end, then fills and fades when the work is done.
  */
 export function TopLoadingBar() {
+  const { t } = useTranslation()
   const navigating = useNavigation().state !== 'idle'
   const requests = useLoadingStore((s) => s.pending > 0)
   const busy = navigating || requests
@@ -44,7 +46,7 @@ export function TopLoadingBar() {
   return (
     <div
       role="progressbar"
-      aria-label="Đang tải"
+      aria-label={t('common.loading')}
       aria-hidden={!visible}
       aria-valuemin={0}
       aria-valuemax={100}

@@ -37,6 +37,6 @@ export function AuthGate() {
 export function RequireAuth() {
   const status = useAuthStore((s) => s.status)
   const { pathname } = useLocation()
-  if (status !== 'signedIn') return <LoginRequiredPage feature={loginOnlyFeature(pathname) ?? 'trang này'} />
+  if (status !== 'signedIn') return <LoginRequiredPage feature={loginOnlyFeature(pathname) ?? 'page'} />
   return <Outlet />
 }

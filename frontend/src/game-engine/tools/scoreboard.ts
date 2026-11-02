@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { MAX_SCOREBOARD_TEAMS, MIN_SCOREBOARD_TEAMS } from '@/game-engine/tools/classTools'
 
 /** A team of "Bảng điểm": its name (the teacher can rename it) and its points. */
@@ -9,12 +10,13 @@ export interface BoardTeam {
 }
 
 const COLORS = ['#F28C28', '#3563E9', '#2E9E6A', '#8B5CF6', '#E5484D', '#0E9AA7']
-const NAMES = ['Đội Cam', 'Đội Biển', 'Đội Lá', 'Đội Tím', 'Đội Đỏ', 'Đội Ngọc']
+/** The teams' colors, by which they are named (play.teams.*). */
+const NAMES = ['orange', 'blue', 'green', 'purple', 'red', 'jade'] as const
 
 /** `count` teams (2-6) with no points, named and colored as in the games. */
 export function scoreboardTeams(count: number): BoardTeam[] {
   const n = Math.min(Math.max(Math.round(count) || MIN_SCOREBOARD_TEAMS, MIN_SCOREBOARD_TEAMS), MAX_SCOREBOARD_TEAMS)
-  return Array.from({ length: n }, (_, i) => ({ id: `t${i + 1}`, name: NAMES[i], color: COLORS[i], score: 0 }))
+  return Array.from({ length: n }, (_, i) => ({ id: `t${i + 1}`, name: i18n.t(`play.teams.${NAMES[i]}`), color: COLORS[i], score: 0 }))
 }
 
 /** The teams with `delta` points for `id`; a score never goes under 0. */

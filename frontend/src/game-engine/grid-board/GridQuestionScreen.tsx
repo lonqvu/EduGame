@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router'
@@ -49,20 +50,20 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
             className="flex h-12 items-center gap-2 rounded-full bg-white pr-5 pl-3.5 text-[17px] font-extrabold text-ink hover:text-primary-ink"
           >
             <ChevronLeftIcon size={20} strokeWidth={2.4} />
-            Bảng ô
+            {i18n.t('play.grid.board')}
           </Link>
           <SoundToggle />
         </div>
         <div className="flex items-center gap-3">
           <span className="rounded-full bg-white px-[18px] py-2 text-lg font-extrabold">
-            Ô số {tileNo} · {question.points} điểm
+            {i18n.t('play.grid.tile', { number: tileNo, points: question.points })}
           </span>
           <span
             className="flex items-center gap-2.5 rounded-full border-[3px] bg-white py-1.5 pr-[18px] pl-2 text-lg font-extrabold"
             style={{ borderColor: team.color }}
           >
             <span className="size-7 rounded-full" style={{ background: team.color }} />
-            {team.name} trả lời
+            {i18n.t('play.grid.teamAnswers', { team: team.name })}
           </span>
         </div>
       </div>
@@ -81,9 +82,9 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col self-start rounded-[22px] bg-sun-soft px-[26px] py-3.5"
               >
-                <span className="text-[17px] font-bold text-sun-ink">Đáp án</span>
+                <span className="text-[17px] font-bold text-sun-ink">{i18n.t('play.words.answerLabel')}</span>
                 <span className="font-display text-[40px] leading-[1.1] font-extrabold">
-                  {question.answer || '(chưa nhập đáp án)'}
+                  {question.answer || i18n.t('play.grid.noAnswer')}
                 </span>
               </motion.div>
             ) : (
@@ -98,7 +99,7 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
                 className="flex h-[76px] cursor-pointer items-center gap-3 self-start rounded-[22px] border-0 bg-sun-soft px-[26px] font-[inherit] text-2xl font-extrabold text-ink hover:brightness-95"
               >
                 <EyeIcon size={28} />
-                Hiện đáp án
+                {i18n.t('play.common.showAnswer')}
               </motion.button>
             )}
           </AnimatePresence>
@@ -114,7 +115,7 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
           }}
           className="h-14 cursor-pointer rounded-full border-0 bg-white px-[22px] font-[inherit] text-lg font-extrabold text-ink hover:text-primary-ink"
         >
-          Đội khác giành quyền
+          {i18n.t('play.grid.steal')}
         </button>
         <div className="flex gap-4">
           <button
@@ -131,7 +132,7 @@ export function GridQuestionScreen({ gameId, tileNo }: GridQuestionScreenProps) 
             className="flex h-[76px] w-[260px] cursor-pointer items-center justify-center gap-2.5 rounded-3xl border-0 bg-success font-display text-[30px] font-extrabold text-white hover:brightness-110"
           >
             <CheckIcon size={32} />
-            Đúng
+            {i18n.t('play.common.right')}
           </button>
         </div>
       </div>

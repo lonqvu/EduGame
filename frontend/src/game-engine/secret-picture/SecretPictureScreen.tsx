@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { EyeIcon } from '@/components/ui/icons'
@@ -40,7 +41,7 @@ export function SecretPictureScreen({ game, questions, settings }: SecretPicture
   const backTo = editPath(game.id)
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   }
   if (state.finished) {
     return (
@@ -65,7 +66,7 @@ export function SecretPictureScreen({ game, questions, settings }: SecretPicture
     return (
       <PlayFrame
         title={game.title}
-        progress={`Đã mở ${opened} / ${doors} ô cửa`}
+        progress={i18n.t('play.picture.opened', { opened, total: doors })}
         extra={rules.timeLimitSec > 0 && !state.revealed && <Countdown key={`${round}-${state.current}`} seconds={rules.timeLimitSec} paused={state.revealed} />}
         backTo={backTo}
       >
@@ -74,18 +75,18 @@ export function SecretPictureScreen({ game, questions, settings }: SecretPicture
           question={playable[state.current]}
           rules={rules}
           dispatch={dispatch}
-          heading={`Ô cửa số ${state.current + 1} · ${rules.points} điểm`}
-          closeLabel="Mở ô cửa"
+          heading={i18n.t('play.picture.door', { number: state.current + 1, points: rules.points })}
+          closeLabel={i18n.t('play.picture.openDoor')}
         />
       </PlayFrame>
     )
   }
 
   return (
-    <PlayFrame title={game.title} progress={`Đã mở ${opened} / ${doors} ô cửa`} backTo={backTo}>
+    <PlayFrame title={game.title} progress={i18n.t('play.picture.opened', { opened, total: doors })} backTo={backTo}>
       <div className="flex min-h-0 flex-1 gap-6">
         <div className="relative shrink-0 overflow-hidden rounded-[28px] bg-white" style={{ width: PICTURE_WIDTH, height: PICTURE_HEIGHT }}>
-          <img src={picture.src} alt={shown ? picture.answer : 'Bức tranh bí mật'} className="absolute inset-0 size-full object-contain p-4" />
+          <img src={picture.src} alt={shown ? picture.answer : i18n.t('play.picture.secret')} className="absolute inset-0 size-full object-contain p-4" />
           <div
             className="absolute inset-0 grid"
             style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}
@@ -101,7 +102,7 @@ export function SecretPictureScreen({ game, questions, settings }: SecretPicture
                       sound.play('flip')
                       dispatch({ type: 'open', cell: i, points: rules.points })
                     }}
-                    aria-label={`Ô cửa số ${i + 1}`}
+                    aria-label={i18n.t('play.picture.doorLabel', { number: i + 1 })}
                     className="flex cursor-pointer items-center justify-center rounded-2xl border-[3px] border-white font-display text-[44px] font-extrabold text-white shadow-[inset_0_-6px_0_rgba(0,0,0,0.15)] hover:brightness-110"
                     style={{ background: DOOR_COLORS[i % DOOR_COLORS.length], transformOrigin: 'left center' }}
                   >
@@ -116,21 +117,21 @@ export function SecretPictureScreen({ game, questions, settings }: SecretPicture
 
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex flex-col gap-2 rounded-[24px] bg-white px-6 py-5">
-            <span className="text-[17px] font-bold text-ink-soft">Bức tranh bí mật là gì?</span>
+            <span className="text-[17px] font-bold text-ink-soft">{i18n.t('play.picture.what')}</span>
             {shown ? (
               <motion.span initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-[38px] leading-tight font-extrabold text-primary-ink">
                 {picture.answer}
               </motion.span>
             ) : (
               <span className="font-display text-[30px] leading-tight font-extrabold">
-                {allOpen ? 'Mọi ô cửa đã mở! Đội nào đoán được?' : `${team.name} chọn một ô cửa, hoặc đoán bức tranh!`}
+                {allOpen ? i18n.t('play.picture.allOpen') : i18n.t('play.picture.turn', { team: team.name })}
               </span>
             )}
           </div>
 
           {shown ? (
             <div className="flex flex-col gap-3 rounded-[24px] bg-white px-6 py-5">
-              <span className="text-xl font-extrabold">Đội nào đoán đúng? (+{rules.keywordPoints} điểm)</span>
+              <span className="text-xl font-extrabold">{i18n.t('play.picture.whoGuessed', { points: rules.keywordPoints })}</span>
               <div className="grid grid-cols-2 gap-2.5">
                 {state.teams.map((t) => (
                   <button
@@ -152,7 +153,7 @@ export function SecretPictureScreen({ game, questions, settings }: SecretPicture
                   onClick={() => dispatch({ type: 'finish' })}
                   className="flex h-14 cursor-pointer items-center justify-center rounded-2xl border-[3px] border-line bg-surface-soft px-3 font-[inherit] text-lg font-extrabold text-ink-soft"
                 >
-                  Chưa đội nào đoán đúng
+                  {i18n.t('play.picture.noOne')}
                 </button>
               </div>
             </div>
@@ -166,13 +167,13 @@ export function SecretPictureScreen({ game, questions, settings }: SecretPicture
               className={`${playButtonClass} justify-center bg-sun text-ink`}
             >
               <EyeIcon size={22} />
-              {allOpen ? 'Công bố bức tranh' : 'Có đội đoán! Mở bức tranh'}
+              {allOpen ? i18n.t('play.picture.reveal') : i18n.t('play.picture.guessed')}
             </button>
           )}
 
-          <TeamBar teams={state.teams} activeId={shown || opened === doors ? null : team.id} activeLabel="Đến lượt" columns={2} />
+          <TeamBar teams={state.teams} activeId={shown || opened === doors ? null : team.id} activeLabel={i18n.t('play.common.yourTurn')} columns={2} />
           <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} mt-auto justify-center bg-white text-ink`}>
-            Kết thúc
+            {i18n.t('play.common.finish')}
           </button>
         </div>
       </div>

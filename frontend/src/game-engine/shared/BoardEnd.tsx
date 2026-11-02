@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { playButtonClass } from '@/game-engine/shared/PlayFrame'
 
@@ -16,10 +17,10 @@ export function BoardEnd({ title, onNewBoard, onResults }: { title: string; onNe
       </motion.span>
       <div className="flex gap-3">
         <button type="button" onClick={onNewBoard} className={`${playButtonClass} bg-white text-ink`}>
-          Ván mới
+          {i18n.t('play.common.newRound')}
         </button>
         <button type="button" onClick={onResults} className={`${playButtonClass} bg-primary text-white hover:brightness-110`}>
-          Xem kết quả
+          {i18n.t('play.common.seeResults')}
         </button>
       </div>
     </div>

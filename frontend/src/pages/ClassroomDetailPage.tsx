@@ -1,5 +1,6 @@
 import { App, Button, Dropdown } from 'antd'
 import { useEffect, useState, type ReactNode } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { BackLink } from '@/components/ui/BackLink'
 import { CheckIcon, GamepadIcon, MoreVerticalIcon, PencilIcon, PlayIcon } from '@/components/ui/icons'
@@ -19,6 +20,7 @@ import { relativeTimeLabel } from '@/utils/dateLabels'
 
 /** /classes/:code — a class: its details and numbers, pause or delete it, and its class list. */
 export function ClassroomDetailPage() {
+  const { t } = useTranslation()
   const { code = '' } = useParams()
   const navigate = useNavigate()
   const { message, modal } = App.useApp()
@@ -43,7 +45,7 @@ export function ClassroomDetailPage() {
     if (useClassStore.getState().status === 'idle') void loadClasses()
   }, [loadClasses])
 
-  if (detail.status === 'missing') return <NotFoundPage message="Không tìm thấy lớp học này (có thể đã bị xóa)." />
+  if (detail.status === 'missing') return <NotFoundPage message={t('classes.detail.missing')} />
   if (detail.status === 'error') return <LoadError onRetry={detail.reload} />
   if (detail.status === 'loading' || !classroom) return <PageLoading />
 
@@ -60,7 +62,7 @@ export function ClassroomDetailPage() {
   const setStatus = async (status: ClassroomResponse['status']) => {
     try {
       await update({ status })
-      message.success(status === 'PAUSED' ? `${title} đã tạm ngưng` : `${title} đã hoạt động trở lại`)
+      message.success(t(status === 'PAUSED' ? 'classes.done.paused' : 'classes.done.resumed', { name: title }))
     } catch (error) {
       message.error(apiErrorMessage(error))
     }
@@ -78,7 +80,7 @@ export function ClassroomDetailPage() {
   const teachThisClass = async () => {
     try {
       await select(classroom.code)
-      message.success(`Từ giờ trò chơi và sao thưởng dùng danh sách ${title}`)
+      message.success(t('classes.done.teaching', { name: title }))
     } catch (error) {
       message.error(apiErrorMessage(error))
     }
@@ -86,15 +88,15 @@ export function ClassroomDetailPage() {
 
   const confirmArchive = () =>
     modal.confirm({
-      title: `Xóa ${title}?`,
-      content: 'Lớp sẽ không còn trong danh sách của cô. Sao thưởng và kết quả cũ của các em vẫn được lưu lại.',
-      okText: 'Xóa lớp',
+      title: t('classes.deleteConfirm', { name: title }),
+      content: t('classes.deleteText'),
+      okText: t('classes.delete'),
       okButtonProps: { danger: true },
-      cancelText: 'Giữ lại',
+      cancelText: t('classes.keep'),
       onOk: async () => {
         try {
           await archiveClassroom(classroom.code)
-          message.success(`Đã xóa ${title}`)
+          message.success(t('classes.done.deleted', { name: title }))
           navigate('/classes')
         } catch (error) {
           message.error(apiErrorMessage(error))
@@ -104,15 +106,15 @@ export function ClassroomDetailPage() {
 
   const confirmRemove = (student: StudentResponse) =>
     modal.confirm({
-      title: `Xóa ${student.displayName} khỏi lớp?`,
-      content: 'Sao thưởng của em vẫn được giữ trong lịch sử.',
-      okText: 'Xóa khỏi lớp',
+      title: t('classes.detail.removeConfirm', { name: student.displayName }),
+      content: t('classes.detail.removeText'),
+      okText: t('classes.detail.remove'),
       okButtonProps: { danger: true },
-      cancelText: 'Giữ lại',
+      cancelText: t('classes.keep'),
       onOk: async () => {
         try {
           await detail.removeStudent(student.id)
-          message.success(`Đã xóa ${student.displayName} khỏi lớp`)
+          message.success(t('classes.detail.removed', { name: student.displayName }))
         } catch (error) {
           message.error(apiErrorMessage(error))
         }
@@ -121,14 +123,14 @@ export function ClassroomDetailPage() {
 
   const confirmSort = () =>
     modal.confirm({
-      title: 'Xếp lại danh sách theo tên?',
-      content: 'Số thứ tự của các em được đánh lại theo tên (A → Z), như sổ điểm danh.',
-      okText: 'Xếp theo tên',
-      cancelText: 'Hủy',
+      title: t('classes.detail.sortConfirm'),
+      content: t('classes.detail.sortText'),
+      okText: t('classes.detail.sort'),
+      cancelText: t('common.cancel'),
       onOk: async () => {
         try {
           await detail.sortStudentsByName()
-          message.success('Đã xếp danh sách theo tên')
+          message.success(t('classes.detail.sorted'))
         } catch (error) {
           message.error(apiErrorMessage(error))
         }
@@ -136,14 +138,14 @@ export function ClassroomDetailPage() {
     })
 
   const details = [
-    `Khối ${classroom.grade}`,
+    t('classes.grade', { grade: classroom.grade }),
     classroom.schoolName,
-    classroom.schoolYear && `Năm học ${classroom.schoolYear}`,
+    classroom.schoolYear && t('classes.schoolYear', { year: classroom.schoolYear }),
   ].filter(Boolean)
 
   return (
     <div className="flex flex-col gap-5">
-      <BackLink to="/classes" label="Danh sách lớp học" />
+      <BackLink to="/classes" label={t('classes.detail.back')} />
 
       <section className="@container flex flex-wrap items-center gap-x-5 gap-y-4 rounded-[22px] bg-white p-5 sm:p-6">
         <AnimalAvatar avatar={classAvatar(classroom)} size={76} className="rounded-[22px]" />
@@ -153,11 +155,11 @@ export function ClassroomDetailPage() {
             {paused && <StatusChip status={classroom.status} />}
             {current && (
               <span className="flex items-center gap-1 rounded-full bg-[#E2F6E8] px-2.5 py-0.5 text-[12.5px] font-extrabold text-success">
-                <CheckIcon size={13} /> Đang dạy
+                <CheckIcon size={13} /> {t('classes.teaching')}
               </span>
             )}
           </div>
-          <p className="m-0 text-[15px] text-ink-muted">{[`${classroom.studentCount} học sinh`, ...details].join(' · ')}</p>
+          <p className="m-0 text-[15px] text-ink-muted">{[t('classes.studentCount', { count: classroom.studentCount }), ...details].join(' · ')}</p>
         </div>
         <div className="flex w-full items-center gap-2.5 @min-[760px]:w-auto">
           <Button
@@ -167,10 +169,10 @@ export function ClassroomDetailPage() {
             onClick={() => void playWithClass()}
             className="h-11 flex-1 rounded-[12px] px-5 font-extrabold @min-[760px]:flex-none"
           >
-            Chơi cùng lớp
+            {t('classes.play')}
           </Button>
           <Button icon={<PencilIcon size={17} />} onClick={() => setEditing(true)} className="h-11 rounded-[12px] font-bold">
-            Sửa lớp
+            {t('classes.edit')}
           </Button>
           <Dropdown
             trigger={['click']}
@@ -178,17 +180,17 @@ export function ClassroomDetailPage() {
             menu={{
               items: [
                 ...(!paused && !current
-                  ? [{ key: 'teach', icon: <CheckIcon size={16} />, label: 'Dạy lớp này (dùng ở trang chủ)', onClick: () => void teachThisClass() }]
+                  ? [{ key: 'teach', icon: <CheckIcon size={16} />, label: t('classes.teachLong'), onClick: () => void teachThisClass() }]
                   : []),
                 paused
-                  ? { key: 'resume', label: 'Kích hoạt lại lớp', onClick: () => void setStatus('ACTIVE') }
-                  : { key: 'pause', label: 'Tạm ngưng lớp', onClick: () => void setStatus('PAUSED') },
+                  ? { key: 'resume', label: t('classes.resumeClass'), onClick: () => void setStatus('ACTIVE') }
+                  : { key: 'pause', label: t('classes.pause'), onClick: () => void setStatus('PAUSED') },
                 { type: 'divider' },
-                { key: 'archive', label: 'Xóa lớp', danger: true, onClick: confirmArchive },
+                { key: 'archive', label: t('classes.delete'), danger: true, onClick: confirmArchive },
               ],
             }}
           >
-            <Button aria-label="Thêm thao tác" icon={<MoreVerticalIcon size={19} />} className="size-11 rounded-[12px]" />
+            <Button aria-label={t('common.more')} icon={<MoreVerticalIcon size={19} />} className="size-11 rounded-[12px]" />
           </Dropdown>
         </div>
       </section>
@@ -196,10 +198,10 @@ export function ClassroomDetailPage() {
       {paused && (
         <div role="status" className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[18px] border border-sun-soft bg-sun-pale px-5 py-3.5">
           <p className="m-0 flex-1 text-[15px] text-sun-ink">
-            <strong>Lớp đang tạm ngưng.</strong> Cô chưa chơi trò chơi với lớp này được; danh sách và sao của các em vẫn được giữ.
+            <Trans i18nKey="classes.detail.pausedNotice" components={{ b: <strong /> }} />
           </p>
           <Button icon={<PlayIcon size={16} />} onClick={() => void setStatus('ACTIVE')} className="rounded-full font-bold">
-            Kích hoạt lại
+            {t('classes.resume')}
           </Button>
         </div>
       )}
@@ -223,7 +225,7 @@ export function ClassroomDetailPage() {
         onClose={() => setEditing(false)}
         onSubmit={async (values: CreateClassroomRequest) => {
           await update(values)
-          message.success('Đã lưu thông tin lớp')
+          message.success(t('classes.done.saved'))
         }}
       />
       <AddStudentsModal
@@ -250,28 +252,29 @@ export function ClassroomDetailPage() {
 
 /** What the teacher wants to know about the class this week: its stars, who shines, who is waiting, the last game. */
 function ClassNumbers({ classroom, students }: { classroom: ClassroomResponse; students: StudentResponse[] }) {
+  const { t } = useTranslation()
   const top = students.reduce<StudentResponse | undefined>((best, s) => (s.weeklyStars > (best?.weeklyStars ?? 0) ? s : best), undefined)
   const waiting = students.filter((s) => s.weeklyStars <= 0).length
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-      <Tile icon="⭐" tint="#FFF4D6" value={String(classroom.weeklyStars)} hint="sao tuần này của lớp" />
+      <Tile icon="⭐" tint="#FFF4D6" value={String(classroom.weeklyStars)} hint={t('classes.detail.starsHint')} />
       <Tile
         icon="🏆"
         tint="#E2F6E8"
-        value={top ? top.displayName : 'Chưa có'}
-        hint={top ? `được khen nhiều nhất (${top.weeklyStars} ⭐)` : 'bạn được khen nhiều nhất'}
+        value={top ? top.displayName : t('classes.detail.noneYet')}
+        hint={top ? t('classes.detail.topHint', { count: top.weeklyStars }) : t('classes.detail.topHintNone')}
       />
       <Tile
         icon="🙋"
         tint="#FDE7EC"
-        value={students.length ? `${waiting} bạn` : '–'}
-        hint={waiting ? 'chưa được khen tuần này' : students.length ? 'cả lớp đã được khen!' : 'chưa có học sinh nào'}
+        value={students.length ? t('classes.detail.waiting', { count: waiting }) : '–'}
+        hint={waiting ? t('classes.detail.waitingHint') : students.length ? t('classes.detail.allPraised') : t('classes.detail.noStudents')}
       />
       <Tile
         icon="🎮"
         tint="#E8EFFD"
-        value={relativeTimeLabel(classroom.lastPlayedAt) || 'Chưa chơi'}
-        hint={classroom.lastPlayedAt ? 'lần chơi gần nhất' : 'mở một trò chơi để bắt đầu'}
+        value={relativeTimeLabel(classroom.lastPlayedAt) || t('classes.detail.neverPlayed')}
+        hint={classroom.lastPlayedAt ? t('classes.detail.lastPlayedHint') : t('classes.detail.startHint')}
       />
     </div>
   )

@@ -1,5 +1,7 @@
 import { App, Button, Form, Input, Modal } from 'antd'
+import i18n from 'i18next'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { changePassword, signOutOthers } from '@/api/userApi'
 import { LockIcon, LogoutIcon } from '@/components/ui/icons'
 import { apiErrorMessage } from '@/utils/apiError'
@@ -11,13 +13,15 @@ interface PasswordValues {
   confirmPassword: string
 }
 
-const othersLabel = (n: number) => (n > 0 ? `Đã đăng xuất ${n} thiết bị khác.` : 'Không có thiết bị nào khác đang đăng nhập.')
+const othersLabel = (count: number) =>
+  count > 0 ? i18n.t('profile.security.othersSignedOut', { count }) : i18n.t('profile.security.noOthers')
 
 /**
  * "Bảo mật tài khoản": a new password (every other device is signed out, this one stays) and signing out of the
  * other devices on its own, e.g. after using a shared school computer.
  */
 export function SecurityModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useTranslation()
   const { message, modal } = App.useApp()
   const [form] = Form.useForm<PasswordValues>()
   const [saving, setSaving] = useState(false)
@@ -31,7 +35,7 @@ export function SecurityModal({ open, onClose }: { open: boolean; onClose: () =>
     setSaving(true)
     try {
       const { otherSessions } = await changePassword(currentPassword, newPassword)
-      message.success(`Đã đổi mật khẩu. ${othersLabel(otherSessions)}`)
+      message.success(t('profile.security.changed', { others: othersLabel(otherSessions) }))
       onClose()
     } catch (error) {
       message.error(apiErrorMessage(error))
@@ -42,10 +46,10 @@ export function SecurityModal({ open, onClose }: { open: boolean; onClose: () =>
 
   const confirmSignOut = () =>
     modal.confirm({
-      title: 'Đăng xuất khỏi các thiết bị khác?',
-      content: 'Mọi máy tính, điện thoại khác đang đăng nhập tài khoản này sẽ phải đăng nhập lại. Máy này vẫn giữ đăng nhập.',
-      okText: 'Đăng xuất thiết bị khác',
-      cancelText: 'Hủy',
+      title: t('profile.security.signOutOthersConfirm'),
+      content: t('profile.security.signOutOthersText'),
+      okText: t('profile.security.signOutOthersOk'),
+      cancelText: t('common.cancel'),
       onOk: async () => {
         setSigningOut(true)
         try {
@@ -59,29 +63,29 @@ export function SecurityModal({ open, onClose }: { open: boolean; onClose: () =>
     })
 
   return (
-    <Modal open={open} title="Bảo mật tài khoản" footer={null} onCancel={onClose} forceRender width={560}>
+    <Modal open={open} title={t('profile.security.title')} footer={null} onCancel={onClose} forceRender width={560}>
       <div className="flex flex-col gap-5 pt-2">
         <section className="flex flex-col gap-3">
           <h3 className="m-0 flex items-center gap-2 text-[16px] font-black">
             <LockIcon size={19} className="text-primary" />
-            Đổi mật khẩu
+            {t('profile.security.changePassword')}
           </h3>
           <Form<PasswordValues> form={form} layout="vertical" requiredMark={false} onFinish={(v) => void submit(v)}>
-            <Form.Item name="currentPassword" label="Mật khẩu hiện tại" rules={[{ required: true, message: 'Cô nhập mật khẩu hiện tại nhé' }]}>
+            <Form.Item name="currentPassword" label={t('profile.security.currentPassword')} rules={[{ required: true, message: t('profile.security.currentRequired') }]}>
               <Input.Password size="large" autoComplete="current-password" />
             </Form.Item>
             <Form.Item
               name="newPassword"
-              label="Mật khẩu mới"
+              label={t('profile.security.newPassword')}
               dependencies={['currentPassword']}
               rules={[
-                { required: true, message: 'Cô nhập mật khẩu mới nhé' },
-                { min: MIN_PASSWORD, message: `Mật khẩu cần ít nhất ${MIN_PASSWORD} ký tự` },
+                { required: true, message: t('profile.security.newRequired') },
+                { min: MIN_PASSWORD, message: t('profile.security.tooShort', { count: MIN_PASSWORD }) },
                 { validator: (_, v: string) => (v && passwordTooLong(v) ? Promise.reject(new Error(passwordTooLong(v) as string)) : Promise.resolve()) },
                 ({ getFieldValue }) => ({
                   validator: (_, v: string) =>
                     v && v === getFieldValue('currentPassword')
-                      ? Promise.reject(new Error('Mật khẩu mới cần khác mật khẩu hiện tại'))
+                      ? Promise.reject(new Error(t('profile.security.samePassword')))
                       : Promise.resolve(),
                 }),
               ]}
@@ -90,21 +94,21 @@ export function SecurityModal({ open, onClose }: { open: boolean; onClose: () =>
             </Form.Item>
             <Form.Item
               name="confirmPassword"
-              label="Nhập lại mật khẩu mới"
+              label={t('profile.security.confirm')}
               dependencies={['newPassword']}
               rules={[
-                { required: true, message: 'Cô nhập lại mật khẩu mới nhé' },
+                { required: true, message: t('profile.security.confirmRequired') },
                 ({ getFieldValue }) => ({
                   validator: (_, v: string) =>
-                    !v || v === getFieldValue('newPassword') ? Promise.resolve() : Promise.reject(new Error('Mật khẩu nhập lại chưa khớp')),
+                    !v || v === getFieldValue('newPassword') ? Promise.resolve() : Promise.reject(new Error(t('profile.security.mismatch'))),
                 }),
               ]}
             >
               <Input.Password size="large" autoComplete="new-password" />
             </Form.Item>
-            <p className="m-0 mb-3 text-[13px] text-ink-muted">Sau khi đổi, các thiết bị khác sẽ phải đăng nhập lại bằng mật khẩu mới.</p>
+            <p className="m-0 mb-3 text-[13px] text-ink-muted">{t('profile.security.afterChange')}</p>
             <Button type="primary" size="large" htmlType="submit" loading={saving} className="rounded-[12px] font-bold">
-              Đổi mật khẩu
+              {t('profile.security.changePassword')}
             </Button>
           </Form>
         </section>
@@ -112,13 +116,13 @@ export function SecurityModal({ open, onClose }: { open: boolean; onClose: () =>
         <section className="flex flex-col gap-2.5 border-t border-line-soft pt-5">
           <h3 className="m-0 flex items-center gap-2 text-[16px] font-black">
             <LogoutIcon size={19} className="text-primary" />
-            Thiết bị đăng nhập
+            {t('profile.security.devices')}
           </h3>
           <p className="m-0 text-[14px] text-ink-soft">
-            Đã đăng nhập trên máy tính ở trường hay máy của người khác? Cô đăng xuất các thiết bị đó, máy này vẫn giữ đăng nhập.
+            {t('profile.security.devicesText')}
           </p>
           <Button size="large" onClick={confirmSignOut} loading={signingOut} className="self-start rounded-[12px] font-bold">
-            Đăng xuất khỏi các thiết bị khác
+            {t('profile.security.signOutOthers')}
           </Button>
         </section>
       </div>

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { App } from 'antd'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
@@ -64,10 +65,10 @@ export function SpinWheelScreen() {
     const { name } = picked
     setStarred(true)
     sound.play('star')
-    message.success(`Đã thưởng 1 sao cho ${name}`)
+    message.success(i18n.t('play.common.starGiven', { name }))
     awardStars(picked.id, 1).catch(() => {
       setStarred(false)
-      message.error(`Chưa lưu được sao cho ${name}, cô thử lại nhé.`)
+      message.error(i18n.t('play.common.starFailed', { name }))
     })
   }
 
@@ -86,9 +87,10 @@ export function SpinWheelScreen() {
       <div className="flex flex-1 flex-col gap-[22px]">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <h1 className="m-0 font-display text-[30px] font-extrabold">Vòng quay gọi tên</h1>
+            <h1 className="m-0 font-display text-[30px] font-extrabold">{i18n.t('play.spin.title')}</h1>
             <span className="text-lg text-ink-soft">
-              {className && `${className} · `}Đã gọi {calledIds.length} / {students.length} bạn
+              {className && `${className} · `}
+              {i18n.t('play.spin.called', { called: calledIds.length, total: students.length })}
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -100,7 +102,7 @@ export function SpinWheelScreen() {
               className="flex h-12 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border-0 bg-white pr-5 pl-3.5 font-[inherit] text-[17px] font-extrabold text-ink hover:text-primary-ink"
             >
               <ChevronLeftIcon size={20} />
-              Quay lại
+              {i18n.t('play.common.back')}
             </button>
           </div>
         </div>
@@ -115,7 +117,7 @@ export function SpinWheelScreen() {
                 transition={{ type: 'spring', bounce: 0.5 }}
                 className="flex flex-col items-center gap-3.5"
               >
-                <span className="text-xl font-bold text-ink-soft">Bạn được gọi là</span>
+                <span className="text-xl font-bold text-ink-soft">{i18n.t('play.spin.picked')}</span>
                 <Avatar name={picked.name} size={96} className="font-display" />
                 <span className="font-display text-[64px] leading-none font-extrabold">{picked.name}</span>
               </motion.div>
@@ -127,7 +129,7 @@ export function SpinWheelScreen() {
                 exit={{ opacity: 0 }}
                 className="text-center font-display text-[32px] font-extrabold text-ink-soft"
               >
-                {spinning ? 'Đang quay…' : allCalled ? 'Đã gọi hết cả lớp!' : 'Bấm “Quay” để chọn một bạn'}
+                {spinning ? i18n.t('play.spin.spinning') : allCalled ? i18n.t('play.spin.allCalled') : i18n.t('play.spin.press')}
               </motion.span>
             )}
           </AnimatePresence>
@@ -141,7 +143,7 @@ export function SpinWheelScreen() {
               className="flex h-[68px] flex-1 cursor-pointer items-center justify-center gap-2.5 rounded-[22px] border-0 bg-primary font-[inherit] text-xl font-extrabold text-white hover:brightness-110"
             >
               <RefreshIcon size={24} />
-              Gọi lại từ đầu
+              {i18n.t('play.picker.restart')}
             </button>
           ) : (
             <button
@@ -151,7 +153,7 @@ export function SpinWheelScreen() {
               className="flex h-[68px] flex-1 cursor-pointer items-center justify-center gap-2.5 rounded-[22px] border-0 bg-primary font-[inherit] text-xl font-extrabold text-white hover:brightness-110 disabled:cursor-wait disabled:opacity-70"
             >
               <RefreshIcon size={24} />
-              {picked ? 'Quay tiếp' : 'Quay'}
+              {picked ? i18n.t('play.spin.spinAgain') : i18n.t('play.spin.spin')}
             </button>
           )}
           <button
@@ -161,7 +163,7 @@ export function SpinWheelScreen() {
             className="flex h-[68px] flex-1 cursor-pointer items-center justify-center gap-2.5 rounded-[22px] border-0 bg-sun font-[inherit] text-xl font-extrabold text-ink hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <FilledStarIcon size={24} fill="#FFFFFF" stroke="#1F2A44" />
-            {starred ? 'Đã thưởng sao' : 'Thưởng 1 sao'}
+            {starred ? i18n.t('play.common.starsGiven') : i18n.t('play.common.giveStar')}
           </button>
         </div>
 
@@ -172,7 +174,7 @@ export function SpinWheelScreen() {
             onChange={(e) => setNoRepeat(e.target.checked)}
             className="size-[26px] accent-primary"
           />
-          Không gọi lại bạn đã được gọi
+          {i18n.t('play.spin.noRepeat')}
         </label>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { ToolFrame } from '@/game-engine/tools/ToolFrame'
@@ -5,11 +6,29 @@ import { useSound } from '@/sound/useSound'
 
 type Light = 'RED' | 'YELLOW' | 'GREEN'
 
+/** A light; its title and text are read in the current language (play.tools.light.*). */
+function light(id: Light, key: string, color: string, ink: string, dim: string, name: 'red' | 'yellow' | 'green', icon: string) {
+  return {
+    id,
+    key,
+    color,
+    ink,
+    dim,
+    icon,
+    get title() {
+      return i18n.t(`play.tools.light.${name}Title`)
+    },
+    get text() {
+      return i18n.t(`play.tools.light.${name}Text`)
+    },
+  }
+}
+
 /** `ink`: the light's color dark enough to read on the light board. */
 const LIGHTS: { id: Light; key: string; color: string; ink: string; dim: string; title: string; text: string; icon: string }[] = [
-  { id: 'RED', key: '1', color: '#E5484D', ink: '#C93035', dim: '#5A2224', title: 'Im lặng', text: 'Cả lớp giữ trật tự, lắng nghe cô.', icon: '🤫' },
-  { id: 'YELLOW', key: '2', color: '#FFC93C', ink: '#A86B00', dim: '#5A4A1C', title: 'Nói nhỏ', text: 'Trao đổi thì thầm với bạn bên cạnh.', icon: '🗣️' },
-  { id: 'GREEN', key: '3', color: '#2E9E6A', ink: '#1B7A50', dim: '#1D3B2D', title: 'Thảo luận', text: 'Các nhóm được thảo luận, làm việc cùng nhau.', icon: '💬' },
+  light('RED', '1', '#E5484D', '#C93035', '#5A2224', 'red', '🤫'),
+  light('YELLOW', '2', '#FFC93C', '#A86B00', '#5A4A1C', 'yellow', '🗣️'),
+  light('GREEN', '3', '#2E9E6A', '#1B7A50', '#1D3B2D', 'green', '💬'),
 ]
 
 /** Projector: a traffic light telling the class how to work now. Click a light or press 1, 2, 3. */
@@ -30,9 +49,9 @@ export function TrafficLightScreen() {
 
   const active = LIGHTS.find((l) => l.id === light)
   return (
-    <ToolFrame title="Đèn tín hiệu" subtitle="Bấm vào đèn, hoặc nhấn phím 1, 2, 3">
+    <ToolFrame title={i18n.t('play.tools.light.title')} subtitle={i18n.t('play.tools.light.subtitle')}>
       <div className="flex flex-1 items-center justify-center gap-16">
-        <div className="flex flex-col gap-5 rounded-[48px] bg-[#1F2A44] p-6 shadow-[0_18px_40px_rgba(31,42,68,0.35)]" role="radiogroup" aria-label="Đèn tín hiệu">
+        <div className="flex flex-col gap-5 rounded-[48px] bg-[#1F2A44] p-6 shadow-[0_18px_40px_rgba(31,42,68,0.35)]" role="radiogroup" aria-label={i18n.t('play.tools.light.title')}>
           {LIGHTS.map((l) => {
             const on = l.id === light
             return (
@@ -41,7 +60,7 @@ export function TrafficLightScreen() {
                 type="button"
                 role="radio"
                 aria-checked={on}
-                aria-label={`${l.title} (phím ${l.key})`}
+                aria-label={i18n.t('play.tools.light.key', { title: l.title, key: l.key })}
                 onClick={() => {
                   sound.play('pop')
                   setLight(l.id)
@@ -65,7 +84,7 @@ export function TrafficLightScreen() {
             </motion.div>
           ) : (
             <span role="status" className="font-display text-[48px] leading-tight font-extrabold text-ink-soft">
-              Cô chọn một đèn cho lớp nhé!
+              {i18n.t('play.tools.light.choose')}
             </span>
           )}
         </div>

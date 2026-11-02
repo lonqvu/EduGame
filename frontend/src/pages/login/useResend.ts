@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { useEffect, useState } from 'react'
 import type { CodeSentResponse } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
@@ -23,7 +24,7 @@ export function useResend(sent: CodeSentResponse, request: () => Promise<CodeSen
     try {
       const again = await request()
       setResendAt(Date.now() + again.resendAfter * 1000)
-      setNotice('Đã gửi mã mới. Mã cũ không dùng được nữa.')
+      setNotice(i18n.t('auth.code.resent'))
     } catch (e) {
       setError(apiErrorMessage(e))
     }

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import type { ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { ChevronLeftIcon } from '@/components/ui/icons'
@@ -23,7 +24,7 @@ export function ToolFrame({ title, subtitle, actions, children }: ToolFrameProps
           <button
             type="button"
             onClick={goBack}
-            aria-label="Quay lại"
+            aria-label={i18n.t('play.common.back')}
             className="flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-ink hover:text-primary-ink"
           >
             <ChevronLeftIcon size={22} />

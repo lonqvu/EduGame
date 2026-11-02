@@ -13,6 +13,7 @@ import java.util.Map;
 
 import com.edugame.auth.mail.AuthMail;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -91,7 +92,7 @@ class UserSettingsApiTest {
         JsonNode settings = body(send(get(SETTINGS), hoa, null).andExpect(status().isOk()));
 
         assertThat(settings).isEqualTo(objectMapper.readTree("""
-                {"display": {"reduceMotion": false, "fullscreenOnStart": false},
+                {"display": {"reduceMotion": false, "fullscreenOnStart": false, "language": "vi"},
                  "games": {},
                  "notifications": {"newSignInEmail": true, "passwordChangedEmail": true},
                  "sound": {"enabled": true, "volume": 80, "music": true}}
@@ -109,7 +110,10 @@ class UserSettingsApiTest {
                 .andExpect(jsonPath("$.games.shuffleItems").value(true))
                 .andExpect(jsonPath("$.notifications.newSignInEmail").value(false));
 
-        assertThat(body(send(get(SETTINGS), hoa, null))).isEqualTo(objectMapper.valueToTree(mine));
+        // Left out, the language stays Vietnamese.
+        ObjectNode expected = objectMapper.valueToTree(mine);
+        ((ObjectNode) expected.get("display")).put("language", "vi");
+        assertThat(body(send(get(SETTINGS), hoa, null))).isEqualTo(expected);
         // Cô Lan's are her own.
         send(get(SETTINGS), login("colan", CHROME_WINDOWS), null)
                 .andExpect(jsonPath("$.display.reduceMotion").value(false));
@@ -146,6 +150,24 @@ class UserSettingsApiTest {
                 .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
 
         send(get(SETTINGS), hoa, null).andExpect(jsonPath("$.display.reduceMotion").value(false));
+    }
+
+    @Test
+    void theLanguageIsSavedAndAnOlderAppThatLeavesItOutKeepsIt() throws Exception {
+        send(get(SETTINGS), hoa, null).andExpect(jsonPath("$.display.language").value("vi"));
+
+        Map<String, Object> english = new HashMap<>(settings(false, false, null, null, null, null, true, true));
+        english.put("display", Map.of("reduceMotion", false, "fullscreenOnStart", false, "language", "en"));
+        send(put(SETTINGS), hoa, english).andExpect(status().isOk()).andExpect(jsonPath("$.display.language").value("en"));
+
+        // Saved by an app opened before languages existed: no language, the saved one stays.
+        send(put(SETTINGS), hoa, settings(true, false, null, null, null, null, true, true)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.display.reduceMotion").value(true))
+                .andExpect(jsonPath("$.display.language").value("en"));
+
+        Map<String, Object> french = new HashMap<>(english);
+        french.put("display", Map.of("reduceMotion", false, "fullscreenOnStart", false, "language", "fr"));
+        send(put(SETTINGS), hoa, french).andExpect(status().isBadRequest());
     }
 
     @Test

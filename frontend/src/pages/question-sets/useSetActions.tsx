@@ -1,5 +1,6 @@
 import { App } from 'antd'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import * as questionSetApi from '@/api/questionSetApi'
 import { QuestionSetFormModal } from '@/pages/question-sets/QuestionSetFormModal'
@@ -20,6 +21,7 @@ interface Options {
  * delete it. Returns the handlers and the dialogs to render.
  */
 export function useSetActions({ onEdited, afterArchive }: Options = {}) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { message, modal } = App.useApp()
   const sets = useQuestionSetStore((s) => s.sets)
@@ -34,7 +36,7 @@ export function useSetActions({ onEdited, afterArchive }: Options = {}) {
   const copy = async (set: QuestionSetSummaryResponse) => {
     try {
       const copied = await copySet(set.code)
-      message.success(`Đã nhân bản thành “${copied.summary.title}”`)
+      message.success(t('questionSets.actions.copied', { title: copied.summary.title }))
       navigate(`/question-sets/${encodeURIComponent(copied.summary.code)}`)
     } catch (error) {
       message.error(apiErrorMessage(error))
@@ -43,18 +45,15 @@ export function useSetActions({ onEdited, afterArchive }: Options = {}) {
 
   const archive = (set: QuestionSetSummaryResponse) =>
     modal.confirm({
-      title: `Xóa “${set.title}”?`,
-      content:
-        set.useCount > 0
-          ? 'Bộ câu hỏi sẽ không còn trong danh sách. Các trò chơi đã tạo từ bộ này vẫn giữ nguyên câu hỏi và chơi bình thường.'
-          : 'Bộ câu hỏi sẽ không còn trong danh sách của cô.',
-      okText: 'Xóa bộ câu hỏi',
+      title: t('questionSets.actions.deleteConfirm', { title: set.title }),
+      content: set.useCount > 0 ? t('questionSets.actions.deleteUsed') : t('questionSets.actions.deleteText'),
+      okText: t('questionSets.delete'),
       okButtonProps: { danger: true },
-      cancelText: 'Giữ lại',
+      cancelText: t('questionSets.keep'),
       onOk: async () => {
         try {
           await archiveSet(set.code)
-          message.success(`Đã xóa “${set.title}”`)
+          message.success(t('questionSets.actions.deleted', { title: set.title }))
           if (afterArchive) navigate(afterArchive)
         } catch (error) {
           message.error(apiErrorMessage(error))
@@ -87,7 +86,7 @@ export function useSetActions({ onEdited, afterArchive }: Options = {}) {
         onSubmit={async (request) => {
           const saved = await update(editing!.code, request)
           onEdited?.(saved)
-          message.success('Đã lưu thông tin bộ câu hỏi')
+          message.success(t('questionSets.actions.saved'))
         }}
       />
     </>

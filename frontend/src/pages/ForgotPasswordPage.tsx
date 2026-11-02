@@ -1,5 +1,6 @@
 import { App } from 'antd'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { AuthLayout } from '@/pages/login/authUi'
 import { ForgotPasswordForm, ResetPasswordStep } from '@/pages/login/ForgotPasswordSteps'
@@ -8,6 +9,7 @@ import type { CodeSentResponse } from '@/types/api'
 
 /** "Quên mật khẩu": the address, then the mailed code with the new password. */
 export function ForgotPasswordPage() {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -21,7 +23,7 @@ export function ForgotPasswordPage() {
           sent={sent}
           onBack={() => setSent(null)}
           onDone={() => {
-            message.success('Đã đặt lại mật khẩu. Các thiết bị khác đã được đăng xuất.')
+            message.success(t('auth.forgot.done'))
             navigate('/', { replace: true })
           }}
         />

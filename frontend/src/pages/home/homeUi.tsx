@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import type { ReactNode } from 'react'
 import { ArrowRightIcon } from '@/components/ui/icons'
 import { HOME_ASSETS } from '@/pages/home/homeAssets'
@@ -54,7 +55,7 @@ const SUBJECT_STYLES: { match: RegExp; className: string }[] = [
 
 /** Colored chip of a subject ("Toán", "Tiếng Việt"...); "Tổng hợp" when the game has none. */
 export function SubjectTag({ subject }: { subject?: string }) {
-  const label = subject?.trim() || 'Tổng hợp'
+  const label = subject?.trim() || i18n.t('home.mixed')
   const style = SUBJECT_STYLES.find((s) => s.match.test(label))?.className ?? 'bg-[#EDE4FF] text-[#7448D6]'
   return <span className={`shrink-0 rounded-[7px] px-2.5 py-[3px] text-[12.5px] leading-[1.35] font-bold ${style}`}>{label}</span>
 }

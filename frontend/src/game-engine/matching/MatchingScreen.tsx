@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useEffect, useReducer, useState } from 'react'
 import { CheckIcon, ChevronRightIcon } from '@/components/ui/icons'
@@ -47,7 +48,7 @@ export function MatchingScreen({ game, sets, settings }: MatchingScreenProps) {
   }, [state.lastWrong])
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có bộ nào có ít nhất 2 cặp điền đủ hai bên để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.matching')} backTo={backTo} />
   }
 
   const restart = () => {
@@ -57,7 +58,7 @@ export function MatchingScreen({ game, sets, settings }: MatchingScreenProps) {
   }
 
   if (state.finished) {
-    return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="Nối đúng nhiều cặp nhất" streakUnit="cặp" />
+    return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="pairs" streakUnit="pair" />
   }
 
   const set = playable[state.setIndex]
@@ -121,7 +122,7 @@ export function MatchingScreen({ game, sets, settings }: MatchingScreenProps) {
     <div
       className="grid flex-1 content-start"
       style={{ gridTemplateColumns: `repeat(${perSide}, minmax(0, 1fr))`, gap: ROW_GAP }}
-      aria-label={side === 'left' ? 'Cột trái' : 'Cột phải'}
+      aria-label={side === 'left' ? i18n.t('play.matching.left') : i18n.t('play.matching.right')}
     >
       {ids.map((id) => {
         const pair = byId.get(id)
@@ -162,7 +163,7 @@ export function MatchingScreen({ game, sets, settings }: MatchingScreenProps) {
   )
 
   return (
-    <PlayFrame title={game.title} progress={`Bộ ${state.setIndex + 1} / ${playable.length}`} backTo={backTo}>
+    <PlayFrame title={game.title} progress={i18n.t('play.common.set', { number: state.setIndex + 1, total: playable.length })} backTo={backTo}>
       <TeamBar teams={state.teams} activeId={complete ? null : team.id} />
 
       <div className="flex min-h-0 flex-1 gap-8" style={{ height: COLUMNS_HEIGHT }}>
@@ -179,18 +180,18 @@ export function MatchingScreen({ game, sets, settings }: MatchingScreenProps) {
           {complete ? (
             <>
               <CheckIcon size={22} className="text-success" />
-              Đã nối xong bộ này!
+              {i18n.t('play.matching.done')}
             </>
           ) : (
             <>
               <span className="size-5 rounded-full" style={{ background: team.color }} />
-              {team.name}: chọn một ô bên trái và một ô bên phải đi cùng nhau.
+              {i18n.t('play.matching.turn', { team: team.name })}
             </>
           )}
         </span>
         <div className="flex shrink-0 gap-3">
           <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} bg-white text-ink`}>
-            Kết thúc
+            {i18n.t('play.common.finish')}
           </button>
           <button
             type="button"
@@ -198,7 +199,7 @@ export function MatchingScreen({ game, sets, settings }: MatchingScreenProps) {
             onClick={goNext}
             className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
           >
-            {isLast ? 'Xem kết quả' : 'Bộ tiếp theo'}
+            {isLast ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextSet')}
             <ChevronRightIcon size={20} />
           </button>
         </div>

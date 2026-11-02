@@ -1,7 +1,8 @@
 import { Popover } from 'antd'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { gameGuide, isGuideGame } from '@/game-engine/gameGuide'
-import { gameRegistry } from '@/game-engine/registry'
+import { durationLabel, gameRegistry, playersLabel } from '@/game-engine/registry'
 import type { ChooserEntry } from '@/pages/choose-game/chooserEntries'
 import { useHoverPointer } from '@/utils/pointer'
 import { isSetGame } from '@/utils/questionSets'
@@ -23,6 +24,7 @@ interface GameTileProps {
  * would pop up under the finger while scrolling. There a tap opens the game at once, its introduction has the rules.
  */
 export function GameTile({ entry, popular, opening, onPlay }: GameTileProps) {
+  const { t } = useTranslation()
   const def = gameRegistry[entry.template.type]
   const hover = useHoverPointer()
   const card = (
@@ -31,15 +33,15 @@ export function GameTile({ entry, popular, opening, onPlay }: GameTileProps) {
       onClick={onPlay}
       disabled={opening}
       aria-busy={opening}
-      aria-label={`Chơi ngay ${entry.name}`}
+      aria-label={t('chooser.playNow', { name: entry.name })}
       className="group flex w-full min-w-0 cursor-pointer flex-col border-0 bg-transparent p-0 text-left font-[inherit] text-ink outline-none disabled:cursor-wait"
     >
       <span className="relative block overflow-hidden rounded-[14px] border-2 border-transparent transition group-hover:border-primary group-hover:shadow-[0_6px_16px_rgba(53,99,233,0.22)] group-focus-visible:border-primary">
         <img src={entry.art} alt="" loading="lazy" className="block aspect-[2/1] w-full object-cover" />
         {def.isNew ? (
-          <Ribbon className="bg-[#2E9E6A] text-white">Mới</Ribbon>
+          <Ribbon className="bg-[#2E9E6A] text-white">{t('chooser.new')}</Ribbon>
         ) : (
-          popular && <Ribbon className="bg-[#FFE7A3] text-[#8A5A00]">Phổ biến</Ribbon>
+          popular && <Ribbon className="bg-[#FFE7A3] text-[#8A5A00]">{t('chooser.popular')}</Ribbon>
         )}
         <span
           aria-hidden="true"
@@ -52,8 +54,8 @@ export function GameTile({ entry, popular, opening, onPlay }: GameTileProps) {
       </span>
       <span className="mt-[7px] px-0.5 text-[13px] leading-tight font-black max-sm:line-clamp-2 sm:truncate sm:text-[14.5px]">{entry.name}</span>
       <span className="truncate px-0.5 text-[12px] text-ink-muted">
-        👥 {def.players}
-        <span className="max-sm:hidden"> · ⏱ {def.duration}</span>
+        👥 {playersLabel(entry.template.type)}
+        <span className="max-sm:hidden"> · ⏱ {durationLabel(entry.template.type)}</span>
       </span>
     </button>
   )
@@ -75,8 +77,8 @@ export function GameTile({ entry, popular, opening, onPlay }: GameTileProps) {
 
 /** What the hover shows: the goal, the first three steps of a round (games with a guide), who plays, how long. */
 function GamePreview({ entry }: { entry: ChooserEntry }) {
+  const { t } = useTranslation()
   const type = entry.template.type
-  const def = gameRegistry[type]
   const guide = !entry.pickMode && isGuideGame(type) ? gameGuide(type, undefined) : null
   return (
     <div className="flex w-[300px] flex-col gap-1.5 px-[14px] py-3">
@@ -98,9 +100,9 @@ function GamePreview({ entry }: { entry: ChooserEntry }) {
         </ol>
       )}
       <span className="mt-1 flex flex-wrap gap-1.5">
-        <Chip>👥 {def.players}</Chip>
-        <Chip>⏱ {def.duration}</Chip>
-        {isSetGame(type) && <Chip>❓ Dùng bộ câu hỏi</Chip>}
+        <Chip>👥 {playersLabel(type)}</Chip>
+        <Chip>⏱ {durationLabel(type)}</Chip>
+        {isSetGame(type) && <Chip>{t('chooser.usesSets')}</Chip>}
       </span>
     </div>
   )

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useClassStore } from '@/store/classStore'
 import { apiErrorMessage } from '@/utils/apiError'
 import { MAX_STUDENTS } from '@/utils/classrooms'
@@ -12,6 +13,7 @@ const GRADES = [1, 2, 3, 4, 5]
  * Making a class of it is offered, never required. Drawn on the projector stage, so everything is big.
  */
 export function QuickNames() {
+  const { t } = useTranslation()
   const startQuickList = useClassStore((s) => s.startQuickList)
   const saveQuickList = useClassStore((s) => s.saveQuickList)
   const [text, setText] = useState(rememberedNames)
@@ -35,7 +37,7 @@ export function QuickNames() {
       await saveQuickList(className.trim(), grade)
     } catch (e) {
       // The names are already on screen; only the class was not made.
-      setError(`Chưa lưu được lớp. ${apiErrorMessage(e)}`)
+      setError(t('classes.quick.saveFailed', { reason: apiErrorMessage(e) }))
     } finally {
       setSaving(false)
     }
@@ -47,48 +49,48 @@ export function QuickNames() {
     'h-[52px] cursor-pointer rounded-full border-0 px-7 font-[inherit] text-[20px] font-extrabold disabled:cursor-not-allowed disabled:opacity-50'
 
   return (
-    <section aria-label="Nhập tên học sinh" className="flex h-full items-center justify-center p-8">
+    <section aria-label={t('classes.quick.label')} className="flex h-full items-center justify-center p-8">
       <div className="flex w-[900px] flex-col gap-4 rounded-[32px] bg-white px-10 py-8 shadow-[0_20px_50px_rgba(31,42,68,0.18)]">
         <div className="flex flex-col gap-1">
-          <h1 className="m-0 font-display text-[36px] leading-tight font-extrabold text-[#1A2440]">Ai sẽ được gọi tên hôm nay?</h1>
-          <p className="m-0 text-[18px] text-ink-soft">Dán danh sách lớp, mỗi dòng một bạn. Cô chưa cần tạo lớp.</p>
+          <h1 className="m-0 font-display text-[36px] leading-tight font-extrabold text-[#1A2440]">{t('classes.quick.title')}</h1>
+          <p className="m-0 text-[18px] text-ink-soft">{t('classes.quick.text')}</p>
         </div>
         <textarea
-          aria-label="Danh sách tên"
+          aria-label={t('classes.quick.names')}
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={6}
           autoFocus
-          placeholder={'Nguyễn Minh Anh\nTrần Bảo Ngọc\nLê Hoàng Nam\n…'}
+          placeholder={t('classes.quick.placeholder')}
           className={`${field} resize-none py-3 leading-snug`}
         />
         <div className="flex flex-wrap items-center justify-between gap-4">
           <label className="flex cursor-pointer items-center gap-3 text-[17px] font-bold">
             <input type="checkbox" checked={save} onChange={(e) => setSave(e.target.checked)} className="size-5 accent-primary" />
-            Lưu thành lớp để lần sau khỏi nhập
+            {t('classes.quick.save')}
           </label>
           <button type="button" onClick={() => void start()} disabled={!enough || saving} className={`${button} bg-primary text-white`}>
-            {saving ? 'Đang lưu lớp…' : enough ? `▶ Bắt đầu với ${names.length} bạn` : 'Nhập ít nhất 2 tên'}
+            {saving ? t('classes.quick.saving') : enough ? t('classes.quick.start', { count: names.length }) : t('classes.quick.needTwo')}
           </button>
         </div>
         {save && (
           <div className="flex flex-wrap items-center gap-3 text-[17px]">
             <input
-              aria-label="Tên lớp"
+              aria-label={t('classes.quick.className')}
               value={className}
               onChange={(e) => setClassName(e.target.value)}
               maxLength={50}
-              placeholder="Tên lớp, VD: 3A"
+              placeholder={t('classes.quick.classNamePlaceholder')}
               className={`${field} h-[48px] w-[240px]`}
             />
-            <select aria-label="Khối" value={grade} onChange={(e) => setGrade(Number(e.target.value))} className={`${field} h-[48px]`}>
+            <select aria-label={t('classes.quick.grade')} value={grade} onChange={(e) => setGrade(Number(e.target.value))} className={`${field} h-[48px]`}>
               {GRADES.map((g) => (
                 <option key={g} value={g}>
-                  Khối {g}
+                  {t('classes.grade', { grade: g })}
                 </option>
               ))}
             </select>
-            {!className.trim() && <span className="text-ink-muted">Nhập tên lớp để lưu.</span>}
+            {!className.trim() && <span className="text-ink-muted">{t('classes.quick.nameToSave')}</span>}
           </div>
         )}
         {error && (
@@ -97,10 +99,10 @@ export function QuickNames() {
           </p>
         )}
         <div className="flex items-center gap-4 border-t border-line-soft pt-4 text-[18px]">
-          <span className="font-bold text-ink-soft">Hoặc gọi theo số thứ tự từ 1 đến</span>
+          <span className="font-bold text-ink-soft">{t('classes.quick.numbers')}</span>
           <input
             type="number"
-            aria-label="Số học sinh"
+            aria-label={t('classes.quick.count')}
             min={MIN_NAMES}
             max={MAX_STUDENTS}
             value={count}
@@ -113,7 +115,7 @@ export function QuickNames() {
             disabled={!(count >= MIN_NAMES)}
             className={`${button} bg-primary-soft text-primary-ink`}
           >
-            Dùng số thứ tự
+            {t('classes.quick.useNumbers')}
           </button>
         </div>
       </div>

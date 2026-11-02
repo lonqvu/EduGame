@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { PICK_MODES, type PickMode } from '@/game-engine/name-picker/modes'
 import { gameRegistry } from '@/game-engine/registry'
 import type { GameCategory, GameTemplate } from '@/types/game'
@@ -22,18 +23,39 @@ export interface ChooserEntry {
   popularity: number
 }
 
+/** Name pickers whose card art is a painted picture (card-pick-*.webp) rather than the generated vector. */
+const PAINTED_PICK_CARDS: ReadonlySet<PickMode> = new Set(['horse', 'rocket'])
+
 /** The cards of a template: NAME_RACE is shown as its name pickers, every other template as itself. */
 export function entriesOf(template: GameTemplate): ChooserEntry[] {
   const popularity = gameRegistry[template.type].popularity
   if (template.type !== 'NAME_RACE') {
-    return [{ key: template.type, template, name: template.name, description: template.description, art: cardArt(template.type), popularity }]
+    return [
+      {
+        key: template.type,
+        template,
+        // Read in the current language when shown.
+        get name() {
+          return template.name
+        },
+        get description() {
+          return template.description
+        },
+        art: cardArt(template.type),
+        popularity,
+      },
+    ]
   }
   return Object.values(PICK_MODES).map((m, i) => ({
     key: `pick-${m.mode}`,
     template,
-    name: m.title,
-    description: m.description,
-    art: `${ASSETS}/card-pick-${m.mode}.svg`,
+    get name() {
+      return m.title
+    },
+    get description() {
+      return m.description
+    },
+    art: `${ASSETS}/card-pick-${m.mode}.${PAINTED_PICK_CARDS.has(m.mode) ? 'webp' : 'svg'}`,
     pickMode: m.mode,
     popularity: popularity + i / 10,
   }))
@@ -51,12 +73,18 @@ export interface ChooserGroup {
  * The groups of the chooser, by what the teacher has to prepare: every game a question set plays is "Hỏi đáp" (the
  * word games too), whatever its catalog category.
  */
-export const GROUPS: ChooserGroup[] = [
-  { key: 'QUESTION', title: 'Hỏi đáp', icon: '❓', hint: 'Chơi với câu hỏi mẫu hoặc bộ câu hỏi của cô' },
-  { key: 'PUZZLE', title: 'Giải đố', icon: '🧩', hint: 'Soạn cặp, thẻ, ô chữ trong trình soạn' },
-  { key: 'RANDOM_TOOL', title: 'Gọi tên', icon: '🎯', hint: 'Dùng danh sách lớp đang dạy' },
-  { key: 'CLASS_TOOL', title: 'Công cụ lớp học', icon: '🧰', hint: 'Bấm là dùng ngay' },
-]
+const group = (key: GameCategory, icon: string): ChooserGroup => ({
+  key,
+  icon,
+  get title() {
+    return i18n.t(`chooser.groups.${key}`)
+  },
+  get hint() {
+    return i18n.t(`chooser.hints.${key}`)
+  },
+})
+
+export const GROUPS: ChooserGroup[] = [group('QUESTION', '❓'), group('PUZZLE', '🧩'), group('RANDOM_TOOL', '🎯'), group('CLASS_TOOL', '🧰')]
 
 export const groupOf = (entry: ChooserEntry): GameCategory => (isSetGame(entry.template.type) ? 'QUESTION' : entry.template.category)
 

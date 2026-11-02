@@ -1,5 +1,6 @@
 import { App, Input, Modal } from 'antd'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiErrorMessage } from '@/utils/apiError'
 import { MAX_NAME_LENGTH, MAX_STUDENTS, parseStudentNames } from '@/utils/classrooms'
 
@@ -13,6 +14,7 @@ interface AddStudentsModalProps {
 
 /** One name per line, typed or pasted from a class list; numbering is dropped. */
 export function AddStudentsModal({ open, studentCount, onClose, onAdd }: AddStudentsModalProps) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [text, setText] = useState('')
   const [saving, setSaving] = useState(false)
@@ -28,16 +30,16 @@ export function AddStudentsModal({ open, studentCount, onClose, onAdd }: AddStud
   const tooLong = names.find((n) => n.length > MAX_NAME_LENGTH)
   const problem =
     names.length > room
-      ? `Lớp còn chỗ cho ${room} học sinh (tối đa ${MAX_STUDENTS}), cô bớt ${names.length - room} tên nhé.`
+      ? t('classes.add.tooMany', { room, max: MAX_STUDENTS, extra: names.length - room })
       : tooLong
-        ? `Tên “${tooLong.slice(0, 24)}…” dài quá ${MAX_NAME_LENGTH} ký tự.`
+        ? t('classes.add.tooLong', { name: tooLong.slice(0, 24), max: MAX_NAME_LENGTH })
         : ''
 
   const add = async () => {
     setSaving(true)
     try {
       await onAdd(names)
-      message.success(`Đã thêm ${names.length} học sinh`)
+      message.success(t('classes.add.added', { count: names.length }))
       onClose()
     } catch (error) {
       message.error(apiErrorMessage(error))
@@ -49,9 +51,9 @@ export function AddStudentsModal({ open, studentCount, onClose, onAdd }: AddStud
   return (
     <Modal
       open={open}
-      title="Thêm học sinh"
-      okText={names.length ? `Thêm ${names.length} học sinh` : 'Thêm học sinh'}
-      cancelText="Hủy"
+      title={t('classes.add.title')}
+      okText={names.length ? t('classes.add.submit', { count: names.length }) : t('classes.add.title')}
+      cancelText={t('common.cancel')}
       okButtonProps={{ disabled: !names.length || !!problem }}
       confirmLoading={saving}
       onOk={() => void add()}
@@ -59,19 +61,19 @@ export function AddStudentsModal({ open, studentCount, onClose, onAdd }: AddStud
       width={520}
     >
       <label htmlFor="student-names" className="mb-2 block pt-1 text-[14.5px] text-ink-soft">
-        Mỗi dòng một tên. Cô có thể dán cả danh sách lớp từ Excel hay Word.
+        {t('classes.add.hint')}
       </label>
       <Input.TextArea
         id="student-names"
         value={text}
         onChange={(e) => setText(e.target.value)}
         autoSize={{ minRows: 7, maxRows: 14 }}
-        placeholder={'Nguyễn Minh Anh\nTrần Gia Huy\nLê Bảo Ngọc'}
+        placeholder={t('classes.add.placeholder')}
         autoFocus
         status={problem ? 'error' : undefined}
       />
       <p role="status" className={`mt-2 mb-0 text-[14px] ${problem ? 'text-danger' : 'text-ink-muted'}`}>
-        {problem || (names.length ? `Sẽ thêm ${names.length} học sinh vào cuối danh sách.` : `Lớp còn chỗ cho ${room} học sinh.`)}
+        {problem || (names.length ? t('classes.add.willAdd', { count: names.length }) : t('classes.add.room', { count: room }))}
       </p>
     </Modal>
   )
@@ -85,6 +87,7 @@ interface RenameStudentModalProps {
 }
 
 export function RenameStudentModal({ student, onClose, onRename }: RenameStudentModalProps) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
@@ -112,9 +115,9 @@ export function RenameStudentModal({ student, onClose, onRename }: RenameStudent
   return (
     <Modal
       open={!!student}
-      title="Đổi tên học sinh"
-      okText="Lưu"
-      cancelText="Hủy"
+      title={t('classes.add.renameTitle')}
+      okText={t('common.save')}
+      cancelText={t('common.cancel')}
       okButtonProps={{ disabled: !trimmed || trimmed === student?.displayName }}
       confirmLoading={saving}
       onOk={() => void save()}
@@ -122,7 +125,7 @@ export function RenameStudentModal({ student, onClose, onRename }: RenameStudent
       width={420}
     >
       <Input
-        aria-label="Tên học sinh"
+        aria-label={t('classes.add.name')}
         size="large"
         value={name}
         maxLength={MAX_NAME_LENGTH}

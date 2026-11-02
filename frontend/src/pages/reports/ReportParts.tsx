@@ -1,4 +1,6 @@
+import i18n from 'i18next'
 import { useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { axisLabelIndexes, niceMax, shortDate, weekdayDate, type ChartBucket } from '@/utils/reports'
 
 /** White block of the reports page. */
@@ -76,7 +78,20 @@ export interface ChartLabels {
   secondTitle: string
 }
 
-const ACTIVITY_LABELS: ChartLabels = { title: 'Hoạt động', main: 'hoạt động', second: 'hoàn thành', secondTitle: 'Hoàn thành' }
+const ACTIVITY_LABELS: ChartLabels = {
+  get title() {
+    return i18n.t('reports.chart.title')
+  },
+  get main() {
+    return i18n.t('reports.chart.main')
+  },
+  get second() {
+    return i18n.t('reports.chart.second')
+  },
+  get secondTitle() {
+    return i18n.t('reports.chart.secondTitle')
+  },
+}
 
 /**
  * Games per day (or week): one column each, the completed share in the tooltip. Every column is focusable and
@@ -94,10 +109,12 @@ export function ActivityChart({
   /** The second figure is a part of the first: shown dark at the foot of each column, the rest light. */
   stacked?: boolean
 }) {
+  const { t } = useTranslation()
   const [hovered, setHovered] = useState<number | null>(null)
   const top = niceMax(Math.max(0, ...buckets.map((b) => b.activities)))
   const labelled = new Set(axisLabelIndexes(buckets.length))
-  const name = (b: ChartBucket) => (unit === 'day' ? weekdayDate(b.start) : `Tuần ${shortDate(b.start)} – ${shortDate(b.end)}`)
+  const name = (b: ChartBucket) => (unit === 'day' ? weekdayDate(b.start) : t('reports.week', { start: shortDate(b.start), end: shortDate(b.end) }))
+  const byUnit = t(unit === 'day' ? 'reports.chart.byDay' : 'reports.chart.byWeek', { title: labels.title })
   const describe = (b: ChartBucket) => `${name(b)}: ${b.activities} ${labels.main}, ${b.completed} ${labels.second}`
   const shown = hovered === null ? null : buckets[hovered]
 
@@ -117,7 +134,7 @@ export function ActivityChart({
             <span className="border-t border-line" />
           </div>
           <ul
-            aria-label={`${labels.title} theo ${unit === 'day' ? 'ngày' : 'tuần'}`}
+            aria-label={byUnit}
             className="relative m-0 flex h-full list-none items-end gap-[2px] p-0"
             onPointerLeave={() => setHovered(null)}
           >
@@ -177,11 +194,11 @@ export function ActivityChart({
       </div>
       <table className="sr-only">
         <caption>
-          {labels.title} theo {unit === 'day' ? 'ngày' : 'tuần'}
+          {byUnit}
         </caption>
         <thead>
           <tr>
-            <th>{unit === 'day' ? 'Ngày' : 'Tuần'}</th>
+            <th>{unit === 'day' ? t('reports.chart.day') : t('reports.chart.week')}</th>
             <th>{labels.title}</th>
             <th>{labels.secondTitle}</th>
           </tr>

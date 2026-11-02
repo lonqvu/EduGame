@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { Countdown } from '@/game-engine/quiz/QuizParts'
 import { useBuzzerQuiz } from '@/game-engine/quiz/useBuzzerQuiz'
@@ -36,9 +37,9 @@ export function TugOfWarScreen({ game, questions, settings }: TugOfWarScreenProp
   const steps = rules.raceSteps
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   }
-  if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="Kéo khỏe nhất" />
+  if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="pull" />
 
   const question = playable[state.index]
   const answering = state.teams.find((t) => t.id === state.answeringTeamId)
@@ -48,7 +49,7 @@ export function TugOfWarScreen({ game, questions, settings }: TugOfWarScreenProp
   return (
     <PlayFrame
       title={game.title}
-      progress={`Câu ${state.index + 1} / ${playable.length}`}
+      progress={i18n.t('play.common.question', { number: state.index + 1, total: playable.length })}
       extra={rules.timeLimitSec > 0 && !state.revealed && <Countdown key={`${round}-${state.index}`} seconds={rules.timeLimitSec} paused={state.revealed} />}
       backTo={backTo}
     >
@@ -82,12 +83,12 @@ export function TugOfWarScreen({ game, questions, settings }: TugOfWarScreenProp
       <PlayFooter
         message={
           winner
-            ? `${winner.name} kéo dây qua vạch!`
+            ? i18n.t('play.tug.won', { team: winner.name })
             : state.revealed
-              ? 'Đáp án đúng đã hiện.'
+              ? i18n.t('play.common.answerShown')
               : answering
-                ? `${answering.name} chọn đáp án nào?`
-                : 'Đội nào giành quyền? Cô bấm tên đội ở hai đầu dây.'
+                ? i18n.t('play.common.whichAnswerShort', { team: answering.name })
+                : i18n.t('play.tug.whoBuzzed')
         }
         revealed={state.revealed}
         onReveal={() => dispatch({ type: 'reveal' })}
@@ -96,7 +97,7 @@ export function TugOfWarScreen({ game, questions, settings }: TugOfWarScreenProp
           if (winner) sound.play('applause')
           dispatch(winner ? { type: 'finish' } : { type: 'next', total: playable.length })
         }}
-        nextLabel={ends ? 'Xem kết quả' : 'Câu tiếp theo'}
+        nextLabel={ends ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextQuestion')}
       />
     </PlayFrame>
   )
@@ -158,7 +159,7 @@ function Field({ teams, position, steps, answeringId, triedIds, onPick }: FieldP
             onClick={() => onPick(team.id)}
             disabled={done}
             aria-pressed={active}
-            aria-label={`${team.name}, ${team.correct} câu đúng`}
+            aria-label={i18n.t('play.tug.correct', { team: team.name, count: team.correct })}
             className={`absolute top-3 flex cursor-pointer items-center gap-2 rounded-2xl border-[3px] bg-white px-4 py-2 font-[inherit] text-ink disabled:cursor-default ${
               i === 0 ? 'left-3' : 'right-3'
             }`}
@@ -167,7 +168,7 @@ function Field({ teams, position, steps, answeringId, triedIds, onPick }: FieldP
             <span className="size-6 rounded-full" style={{ background: team.color }} />
             <span className="flex flex-col text-left leading-tight">
               <span className="text-xl font-extrabold">{team.name}</span>
-              <span className="text-[13px] font-bold text-ink-soft">{active ? 'Đang trả lời' : `${team.correct} câu đúng`}</span>
+              <span className="text-[13px] font-bold text-ink-soft">{active ? i18n.t('play.common.answering') : i18n.t('play.tug.correctShort', { count: team.correct })}</span>
             </span>
           </button>
         )

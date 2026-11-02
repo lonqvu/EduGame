@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { PauseIcon } from '@/components/ui/icons'
 import type { ClassroomStatus } from '@/types/api'
 import { AVATAR_NAMES, avatarSrc, STATUS_LABELS, type ClassAvatar } from '@/utils/classrooms'
@@ -45,7 +46,7 @@ export function AvatarPicker({
   options: readonly ClassAvatar[]
 }) {
   return (
-    <div role="radiogroup" aria-label="Biểu tượng lớp" className="flex flex-wrap gap-2.5">
+    <div role="radiogroup" aria-label={i18n.t('classes.icon')} className="flex flex-wrap gap-2.5">
       {options.map((avatar) => {
         const checked = avatar === value
         return (

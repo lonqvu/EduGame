@@ -1,4 +1,5 @@
 import { Pagination, Select } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { listAdminAuditLog } from '@/api/adminApi'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
@@ -6,13 +7,14 @@ import { AdminCard, AdminHeader } from '@/pages/admin/AdminParts'
 import { AuditList } from '@/pages/admin/AuditList'
 import { useRemote } from '@/pages/admin/useRemote'
 import type { AdminAction } from '@/types/api'
-import { ACTION_LABELS, count, oneOf, pageParam } from '@/utils/admin'
+import { ACTION_LABELS, oneOf, pageParam } from '@/utils/admin'
 
 const PAGE_SIZE = 50
 const ACTIONS = Object.keys(ACTION_LABELS) as AdminAction[]
 
 /** /admin/audit-log — "Nhật ký": every change an admin made, who made it and when. Nothing here can be changed. */
 export function AdminAuditLogPage() {
+  const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
   const action = oneOf<AdminAction | ''>(params.get('action'), ['', ...ACTIONS], '')
   const page = pageParam(params.get('page'))
@@ -22,17 +24,17 @@ export function AdminAuditLogPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminHeader title="Nhật ký" text="Mọi thay đổi của quản trị viên: ai làm, làm gì, lúc nào. Nhật ký không sửa hay xoá được." />
+      <AdminHeader title={t('admin.audit.title')} text={t('admin.audit.text')} />
 
       <div className="flex flex-wrap items-center gap-3">
         <Select<AdminAction | ''>
-          aria-label="Loại thao tác"
+          aria-label={t('admin.audit.action')}
           value={action}
           onChange={(value) => setParams(value ? { action: value } : {}, { replace: true })}
-          options={[{ value: '', label: 'Mọi thao tác' }, ...ACTIONS.map((a) => ({ value: a, label: ACTION_LABELS[a] }))]}
+          options={[{ value: '', label: t('admin.audit.allActions') }, ...ACTIONS.map((a) => ({ value: a, label: ACTION_LABELS[a] }))]}
           className="w-[240px]"
         />
-        {data && <span className="text-[14px] text-ink-muted">{count(data.total)} dòng</span>}
+        {data && <span className="text-[14px] text-ink-muted">{t('admin.audit.rows', { count: data.total })}</span>}
       </div>
 
       {!data ? (

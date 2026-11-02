@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useReducer, useState } from 'react'
 import { bingoQuestions, bingoReducer, cardSize, cellOf, initialBingo, makeCards } from '@/game-engine/bingo/bingo'
@@ -37,7 +38,7 @@ export function BingoScreen({ game, questions, settings }: BingoScreenProps) {
   const backTo = editPath(game.id)
 
   if (!round.size || round.asked.length === 0) {
-    return <NothingToPlay message="Bingo cần ít nhất 4 câu trắc nghiệm có đáp án đúng khác nhau." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.bingo')} backTo={backTo} />
   }
   if (state.finished) {
     return (
@@ -48,7 +49,7 @@ export function BingoScreen({ game, questions, settings }: BingoScreenProps) {
           setRound(next)
           dispatch({ type: 'restart', cards: next.cards })
         }}
-        mostCorrectLabel="Đánh dấu nhiều ô nhất"
+        mostCorrectLabel="marked"
       />
     )
   }
@@ -61,7 +62,7 @@ export function BingoScreen({ game, questions, settings }: BingoScreenProps) {
   return (
     <PlayFrame
       title={game.title}
-      progress={`Câu ${state.index + 1} / ${round.asked.length}`}
+      progress={i18n.t('play.common.question', { number: state.index + 1, total: round.asked.length })}
       extra={rules.timeLimitSec > 0 && !state.revealed && <Countdown key={`${round.number}-${state.index}`} seconds={rules.timeLimitSec} paused={state.revealed} />}
       backTo={backTo}
     >
@@ -84,7 +85,7 @@ export function BingoScreen({ game, questions, settings }: BingoScreenProps) {
           return (
             <section
               key={team.id}
-              aria-label={`Thẻ của ${team.name}`}
+              aria-label={i18n.t('play.bingo.card', { team: team.name })}
               className="flex flex-col gap-2.5 rounded-[24px] border-4 bg-white p-3"
               style={{ borderColor: bingo ? '#F2B705' : team.color }}
             >
@@ -110,7 +111,7 @@ export function BingoScreen({ game, questions, settings }: BingoScreenProps) {
                       }}
                       animate={wrongClaim ? { x: [0, -6, 6, -4, 4, 0] } : marked && state.revealed && claimed ? { scale: [1, 1.1, 1] } : {}}
                       aria-pressed={claimed}
-                      aria-label={`${team.name}: ${answer}${marked ? ', đã đánh dấu' : ''}`}
+                      aria-label={i18n.t(marked ? 'play.bingo.squareMarked' : 'play.bingo.square', { team: team.name, answer })}
                       className={`relative flex min-h-[64px] cursor-pointer items-center justify-center rounded-2xl border-[3px] px-1.5 text-center font-display font-extrabold disabled:cursor-default ${
                         answer.length > 14 ? 'text-[16px]' : 'text-[22px]'
                       } ${
@@ -134,7 +135,7 @@ export function BingoScreen({ game, questions, settings }: BingoScreenProps) {
               </div>
               {bingo && (
                 <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', bounce: 0.6 }} className="text-center font-display text-[32px] font-extrabold text-[#C98A00]">
-                  BINGO! 🎉
+                  {i18n.t('play.bingo.bingo')}
                 </motion.span>
               )}
             </section>
@@ -146,9 +147,9 @@ export function BingoScreen({ game, questions, settings }: BingoScreenProps) {
         message={
           state.revealed
             ? winners.length
-              ? `${winners.map((w) => w.name).join(' và ')} Bingo!`
-              : 'Các đội tìm đúng đã được đánh dấu.'
-            : 'Đội nào thấy đáp án trên thẻ thì giơ tay, cô bấm ô đội chỉ.'
+              ? i18n.t('play.bingo.winners', { names: winners.map((w) => w.name).join(i18n.t('play.results.and')) })
+              : i18n.t('play.bingo.marked')
+            : i18n.t('play.bingo.hint')
         }
         revealed={state.revealed}
         onFinish={() => dispatch({ type: 'finish' })}
@@ -162,7 +163,7 @@ export function BingoScreen({ game, questions, settings }: BingoScreenProps) {
           dispatch({ type: 'next', total: round.asked.length })
         }}
         nextDisabled={false}
-        nextLabel={!state.revealed ? 'Công bố đáp án' : winners.length || isLast ? 'Xem kết quả' : 'Câu tiếp theo'}
+        nextLabel={!state.revealed ? i18n.t('play.bingo.reveal') : winners.length || isLast ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextQuestion')}
       />
     </PlayFrame>
   )

@@ -1,11 +1,12 @@
 import { App, Button, Form, Input, Modal, Select } from 'antd'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AvatarPicker } from '@/pages/classes/classUi'
 import type { ApiError, ClassroomResponse, CreateClassroomRequest } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
 import { CLASS_AVATARS, classAvatar, type ClassAvatar, MAX_NAME_LENGTH, schoolYearOptions, schoolYearOf } from '@/utils/classrooms'
 
-const GRADES = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `Khối ${i + 1}` }))
+const GRADES = Array.from({ length: 12 }, (_, i) => i + 1)
 const NO_YEAR = ''
 
 interface FormValues {
@@ -30,6 +31,7 @@ interface ClassFormModalProps {
 
 /** Create a class, or edit one: name, grade, school year, school and its animal. */
 export function ClassFormModal({ open, classroom, classrooms, onClose, onSubmit }: ClassFormModalProps) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [form] = Form.useForm<FormValues>()
   const [saving, setSaving] = useState(false)
@@ -91,11 +93,11 @@ export function ClassFormModal({ open, classroom, classrooms, onClose, onSubmit 
   return (
     <Modal
       open={open}
-      title={editing ? 'Sửa thông tin lớp' : 'Tạo lớp học mới'}
+      title={editing ? t('classes.form.editTitle') : t('classes.form.createTitle')}
       onCancel={onClose}
       footer={[
         <Button key="cancel" onClick={onClose}>
-          Hủy
+          {t('common.cancel')}
         </Button>,
         !editing && (
           <Button
@@ -108,7 +110,7 @@ export function ClassFormModal({ open, classroom, classrooms, onClose, onSubmit 
               form.submit()
             }}
           >
-            Tạo và nhập từ file
+            {t('classes.form.createAndImport')}
           </Button>
         ),
         <Button
@@ -122,7 +124,7 @@ export function ClassFormModal({ open, classroom, classrooms, onClose, onSubmit 
             form.submit()
           }}
         >
-          {editing ? 'Lưu thay đổi' : 'Tạo lớp học'}
+          {editing ? t('common.saveChanges') : t('classes.form.create')}
         </Button>,
       ]}
       forceRender
@@ -131,29 +133,29 @@ export function ClassFormModal({ open, classroom, classrooms, onClose, onSubmit 
       <Form<FormValues> form={form} layout="vertical" requiredMark={false} onFinish={(v) => void submit(v)} className="pt-2">
         <Form.Item
           name="name"
-          label="Tên lớp"
+          label={t('classes.form.name')}
           rules={[
-            { required: true, whitespace: true, message: 'Cô nhập tên lớp nhé' },
-            { max: MAX_NAME_LENGTH, message: `Tên lớp dài tối đa ${MAX_NAME_LENGTH} ký tự` },
+            { required: true, whitespace: true, message: t('classes.form.nameRequired') },
+            { max: MAX_NAME_LENGTH, message: t('classes.form.nameTooLong', { count: MAX_NAME_LENGTH }) },
           ]}
         >
-          <Input size="large" placeholder="VD: 1A, 2B, Lớp Sao Mai" maxLength={MAX_NAME_LENGTH} autoFocus />
+          <Input size="large" placeholder={t('classes.form.namePlaceholder')} maxLength={MAX_NAME_LENGTH} autoFocus />
         </Form.Item>
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-          <Form.Item name="grade" label="Khối lớp">
-            <Select size="large" options={GRADES} />
+          <Form.Item name="grade" label={t('classes.form.grade')}>
+            <Select size="large" options={GRADES.map((grade) => ({ value: grade, label: t('classes.grade', { grade }) }))} />
           </Form.Item>
-          <Form.Item name="schoolYear" label="Năm học">
+          <Form.Item name="schoolYear" label={t('classes.form.schoolYear')}>
             <Select
               size="large"
-              options={[...years.map((y) => ({ value: y, label: `Năm học ${y}` })), { value: NO_YEAR, label: 'Không ghi năm học' }]}
+              options={[...years.map((year) => ({ value: year, label: t('classes.schoolYear', { year }) })), { value: NO_YEAR, label: t('classes.form.noYear') }]}
             />
           </Form.Item>
         </div>
-        <Form.Item name="schoolName" label="Trường" rules={[{ max: 100, message: 'Tên trường dài tối đa 100 ký tự' }]}>
-          <Input size="large" placeholder="VD: Tiểu học Kim Đồng" maxLength={100} />
+        <Form.Item name="schoolName" label={t('classes.form.school')} rules={[{ max: 100, message: t('classes.form.schoolTooLong') }]}>
+          <Input size="large" placeholder={t('classes.form.schoolPlaceholder')} maxLength={100} />
         </Form.Item>
-        <Form.Item name="avatar" label="Biểu tượng lớp" className="mb-1">
+        <Form.Item name="avatar" label={t('classes.icon')} className="mb-1">
           <AvatarPicker options={CLASS_AVATARS} />
         </Form.Item>
       </Form>

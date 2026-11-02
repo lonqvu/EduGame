@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import type { ReactNode } from 'react'
 import { ChevronRightIcon, EyeIcon } from '@/components/ui/icons'
 import { playButtonClass } from '@/game-engine/shared/PlayFrame'
@@ -48,11 +49,11 @@ export function PlayFooter({
             className={`${playButtonClass} bg-sun-soft text-ink`}
           >
             <EyeIcon size={22} />
-            Hiện đáp án
+            {i18n.t('play.common.showAnswer')}
           </button>
         )}
         <button type="button" onClick={onFinish} className={`${playButtonClass} bg-white text-ink`}>
-          Kết thúc
+          {i18n.t('play.common.finish')}
         </button>
         <button type="button" disabled={nextDisabled} onClick={onNext} className={`${playButtonClass} bg-primary text-white hover:brightness-110`}>
           {nextLabel}

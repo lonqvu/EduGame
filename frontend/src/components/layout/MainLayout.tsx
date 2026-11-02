@@ -1,5 +1,6 @@
 import { App, Drawer } from 'antd'
 import { useEffect, useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, Outlet, useLocation } from 'react-router'
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
 import {
@@ -16,13 +17,17 @@ import {
   UsersIcon,
 } from '@/components/ui/icons'
 import { BrandLogo } from '@/components/ui/BrandLogo'
+import type { Translation } from '@/i18n/locales/vi'
 import { useAuthStore } from '@/store/authStore'
 import { useFeedbackStore } from '@/store/feedbackStore'
 import { loginOnlyFeature } from '@/store/loginPromptStore'
 import { useTeacherStore } from '@/store/teacherStore'
 
+type NavKey = `nav.${keyof Translation['nav']}`
+
 interface NavItem {
-  label: string
+  /** Key of its name in the translations. */
+  label: NavKey
   icon: ReactNode
   /** Route; items without one are pages still being built. */
   to?: string
@@ -30,35 +35,36 @@ interface NavItem {
   match?: (path: string) => boolean
   /** A button instead of a page ("Góp ý" opens its dialog). */
   action?: () => void
-  /** Accessible name, when the label is not enough. */
-  ariaLabel?: string
+  /** Key of its accessible name, when the label is not enough. */
+  ariaLabel?: NavKey
 }
 
 const MAIN_NAV: NavItem[] = [
-  { label: 'Trang chủ', icon: <HomeIcon size={22} />, to: '/', match: (p) => p === '/' },
-  { label: 'Trò chơi', icon: <GamepadIcon size={22} />, to: '/games/new', match: (p) => p.startsWith('/games') },
-  { label: 'Bộ câu hỏi', icon: <FileTextIcon size={22} />, to: '/question-sets', match: (p) => p.startsWith('/question-sets') },
-  { label: 'Lớp học', icon: <UsersIcon size={22} strokeWidth={1.8} />, to: '/classes', match: (p) => p.startsWith('/classes') },
-  { label: 'Báo cáo', icon: <ChartIcon size={22} />, to: '/reports', match: (p) => p.startsWith('/reports') },
+  { label: 'nav.home', icon: <HomeIcon size={22} />, to: '/', match: (p) => p === '/' },
+  { label: 'nav.games', icon: <GamepadIcon size={22} />, to: '/games/new', match: (p) => p.startsWith('/games') },
+  { label: 'nav.questionSets', icon: <FileTextIcon size={22} />, to: '/question-sets', match: (p) => p.startsWith('/question-sets') },
+  { label: 'nav.classes', icon: <UsersIcon size={22} strokeWidth={1.8} />, to: '/classes', match: (p) => p.startsWith('/classes') },
+  { label: 'nav.reports', icon: <ChartIcon size={22} />, to: '/reports', match: (p) => p.startsWith('/reports') },
 ]
 
 /** Only for accounts with the role ADMIN (the API refuses everyone else too). */
-const ADMIN_NAV: NavItem = { label: 'Quản trị', icon: <ShieldIcon size={22} />, to: '/admin', match: (p) => p.startsWith('/admin') }
+const ADMIN_NAV: NavItem = { label: 'nav.admin', icon: <ShieldIcon size={22} />, to: '/admin', match: (p) => p.startsWith('/admin') }
 
 const FOOTER_NAV: NavItem[] = [
   {
-    label: 'Góp ý',
+    label: 'nav.feedback',
     icon: <MessageIcon size={22} />,
-    ariaLabel: 'Góp ý cho Lớp Vui',
+    ariaLabel: 'nav.feedbackLabel',
     // Visitors too: a teacher's goes with their account, a visitor's without one.
     action: () => useFeedbackStore.getState().openFeedback(),
   },
-  { label: 'Cài đặt', icon: <SettingsIcon size={22} />, to: '/settings', match: (p) => p.startsWith('/settings') },
-  { label: 'Trợ giúp', icon: <HelpIcon size={22} /> },
+  { label: 'nav.settings', icon: <SettingsIcon size={22} />, to: '/settings', match: (p) => p.startsWith('/settings') },
+  { label: 'nav.help', icon: <HelpIcon size={22} /> },
 ]
 
 /** Teacher screens: sidebar navigation (a drawer on small screens), with "Góp ý" always at hand, and the page. */
 export function MainLayout() {
+  const { t } = useTranslation()
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname } = useLocation()
   // Pages laid out edge to edge, as in their designs; the others keep a centered column. Both start at the same place, so the
@@ -80,7 +86,7 @@ export function MainLayout() {
           <Logo />
           <button
             type="button"
-            aria-label="Mở menu"
+            aria-label={t('nav.openMenu')}
             onClick={() => setMenuOpen(true)}
             className="flex size-11 cursor-pointer items-center justify-center rounded-xl border-0 bg-surface-soft text-ink"
           >
@@ -127,6 +133,7 @@ function Logo() {
 }
 
 function Sidebar({ onNavigate }: { onNavigate: () => void }) {
+  const { t } = useTranslation()
   const { pathname } = useLocation()
   const { message } = App.useApp()
   const isAdmin = useTeacherStore((s) => s.teacher?.isAdmin ?? false)
@@ -148,22 +155,22 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
         {nav.to ? (
           <Link to={nav.to} onClick={onNavigate} aria-current={active ? 'page' : undefined} className={className}>
             <span className={active ? 'text-primary' : 'text-ink-soft'}>{nav.icon}</span>
-            {nav.label}
+            {t(nav.label)}
             {guest && loginOnlyFeature(nav.to) && <LockIcon size={15} className="ml-auto text-ink-muted" />}
           </Link>
         ) : (
           <button
             type="button"
-            aria-label={nav.ariaLabel}
+            aria-label={nav.ariaLabel && t(nav.ariaLabel)}
             onClick={() => {
               onNavigate()
               if (nav.action) nav.action()
-              else message.info(`Trang "${nav.label}" đang được hoàn thiện.`)
+              else message.info(t('nav.comingSoon', { page: t(nav.label) }))
             }}
             className={`cursor-pointer border-0 bg-transparent font-[inherit] ${className}`}
           >
             <span className="text-ink-soft">{nav.icon}</span>
-            {nav.label}
+            {t(nav.label)}
           </button>
         )}
       </li>
@@ -171,7 +178,7 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
   }
 
   return (
-    <nav aria-label="Điều hướng chính" className="flex h-full flex-col">
+    <nav aria-label={t('nav.main')} className="flex h-full flex-col">
       <div className="px-2 pb-[22px]">
         <Logo />
       </div>

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useReducer, useState } from 'react'
 import { CheckIcon, CloseIcon } from '@/components/ui/icons'
@@ -34,14 +35,14 @@ export function TrueFalseScreen({ game, questions, settings }: TrueFalseScreenPr
   const backTo = editPath(game.id)
 
   if (statements.length === 0) {
-    return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   }
   const restart = () => {
     dispatch({ type: 'restart', teamCount: rules.teams })
     setStatements(deal())
     setRound((r) => r + 1)
   }
-  if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="Đoán đúng nhiều nhất" />
+  if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="trueFalse" />
 
   const statement = statements[state.index]
   const isLast = state.index === statements.length - 1
@@ -50,7 +51,7 @@ export function TrueFalseScreen({ game, questions, settings }: TrueFalseScreenPr
   return (
     <PlayFrame
       title={game.title}
-      progress={`Câu ${state.index + 1} / ${statements.length}`}
+      progress={i18n.t('play.common.question', { number: state.index + 1, total: statements.length })}
       extra={rules.timeLimitSec > 0 && !state.revealed && <Countdown key={`${round}-${state.index}`} seconds={rules.timeLimitSec} paused={state.revealed} />}
       backTo={backTo}
     >
@@ -73,11 +74,11 @@ export function TrueFalseScreen({ game, questions, settings }: TrueFalseScreenPr
               statement.truth ? 'border-success text-success' : 'border-danger text-danger'
             }`}
           >
-            {statement.truth ? 'ĐÚNG' : 'SAI'}
+            {statement.truth ? i18n.t('play.trueFalse.true') : i18n.t('play.trueFalse.false')}
           </motion.div>
         )}
         {state.revealed && !statement.truth && statement.answer !== null && (
-          <span className="text-[24px] font-extrabold text-success">Đáp án đúng: {statement.rightAnswer}</span>
+          <span className="text-[24px] font-extrabold text-success">{i18n.t('play.common.rightAnswer', { answer: statement.rightAnswer })}</span>
         )}
       </div>
 
@@ -105,7 +106,7 @@ export function TrueFalseScreen({ game, questions, settings }: TrueFalseScreenPr
                     type="button"
                     disabled={state.revealed}
                     aria-pressed={vote === value}
-                    aria-label={`${team.name}: ${value ? 'Đúng' : 'Sai'}`}
+                    aria-label={`${team.name}: ${value ? i18n.t('play.common.right') : i18n.t('play.common.wrong')}`}
                     onClick={() => {
                       sound.play('pop')
                       dispatch({ type: 'vote', teamId: team.id, value })
@@ -119,7 +120,7 @@ export function TrueFalseScreen({ game, questions, settings }: TrueFalseScreenPr
                     } ${state.revealed && vote !== value ? 'opacity-40' : ''}`}
                   >
                     {value ? <CheckIcon size={20} /> : <CloseIcon size={18} />}
-                    {value ? 'Đúng' : 'Sai'}
+                    {value ? i18n.t('play.common.right') : i18n.t('play.common.wrong')}
                   </button>
                 ))}
               </div>
@@ -132,9 +133,9 @@ export function TrueFalseScreen({ game, questions, settings }: TrueFalseScreenPr
         message={
           state.revealed
             ? statement.truth
-              ? 'Đáp án này ĐÚNG!'
-              : 'Đáp án này SAI!'
-            : `Các đội chọn Đúng hoặc Sai (${votes}/${state.teams.length} đội đã chọn).`
+              ? i18n.t('play.trueFalse.isTrue')
+              : i18n.t('play.trueFalse.isFalse')
+            : i18n.t('play.trueFalse.votes', { votes, teams: state.teams.length })
         }
         revealed={state.revealed}
         onFinish={() => dispatch({ type: 'finish' })}
@@ -149,7 +150,7 @@ export function TrueFalseScreen({ game, questions, settings }: TrueFalseScreenPr
           dispatch({ type: 'next', total: statements.length })
         }}
         nextDisabled={false}
-        nextLabel={!state.revealed ? 'Công bố' : isLast ? 'Xem kết quả' : 'Câu tiếp theo'}
+        nextLabel={!state.revealed ? i18n.t('play.trueFalse.reveal') : isLast ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextQuestion')}
       />
     </PlayFrame>
   )

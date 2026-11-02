@@ -1,9 +1,10 @@
 import { Modal, Select, Switch } from 'antd'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { PROJECTOR_BOARD_BG } from '@/components/projector/ProjectorStage'
 import { BookOpenFilledIcon, BulbIcon, ClockIcon, EyeIcon, FileTextIcon, PlayIcon, SettingsIcon, UsersIcon } from '@/components/ui/icons'
 import type { GameGuide, GuideGameType } from '@/game-engine/gameGuide'
-import { gameRegistry } from '@/game-engine/registry'
+import { durationLabel } from '@/game-engine/registry'
 import type { PlaySettings } from '@/game-engine/shared/gameSettings'
 import { gameThumb } from '@/pages/home/homeAssets'
 import { SubjectTag } from '@/pages/home/homeUi'
@@ -43,14 +44,15 @@ export function GameInfoCard({ mode, game, kind, description, items }: {
   /** "8 câu" */
   items: ReactNode
 }) {
+  const { t } = useTranslation()
   const facts = [
-    { icon: <BookOpenFilledIcon size={20} />, label: 'Môn học', value: <SubjectTag subject={game.subject} /> },
-    { icon: <UsersIcon size={20} />, label: 'Khối lớp', value: gradeLabel(game.grade) },
-    { icon: <FileTextIcon size={20} />, label: 'Nội dung', value: items },
-    { icon: <ClockIcon size={20} />, label: 'Thời lượng', value: gameRegistry[mode].duration },
+    { icon: <BookOpenFilledIcon size={20} />, label: t('start.subject'), value: <SubjectTag subject={game.subject} /> },
+    { icon: <UsersIcon size={20} />, label: t('start.grade'), value: gradeLabel(game.grade) },
+    { icon: <FileTextIcon size={20} />, label: t('start.content'), value: items },
+    { icon: <ClockIcon size={20} />, label: t('start.duration'), value: durationLabel(mode) },
   ]
   return (
-    <StartCard icon={<FileTextIcon size={18} />} title="Thông tin trò chơi">
+    <StartCard icon={<FileTextIcon size={18} />} title={t('start.info')}>
       <div className="flex flex-col gap-4 sm:flex-row">
         <img src={gameThumb(mode)} alt="" className="aspect-[2/1] w-full shrink-0 rounded-[14px] sm:w-[220px]" />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -58,7 +60,7 @@ export function GameInfoCard({ mode, game, kind, description, items }: {
             {/* A sample is named by its game alone, with "Câu hỏi mẫu" beside it. */}
             <h3 className="m-0 text-[21px] leading-tight font-black break-words">{game.sample && kind ? kind : game.title}</h3>
             {game.sample ? (
-              <span className="rounded-full bg-[#FFF1C2] px-2.5 py-[3px] text-[12.5px] font-bold text-[#7A5600]">Câu hỏi mẫu</span>
+              <span className="rounded-full bg-[#FFF1C2] px-2.5 py-[3px] text-[12.5px] font-bold text-[#7A5600]">{t('start.sample')}</span>
             ) : kind && <span className="rounded-full bg-[#EDE4FF] px-2.5 py-[3px] text-[12.5px] font-bold text-[#7448D6]">{kind}</span>}
           </div>
           {description && <p className="m-0 text-[14.5px] leading-[1.5] text-ink-soft">{description}</p>}
@@ -81,10 +83,11 @@ export function GameInfoCard({ mode, game, kind, description, items }: {
 
 /** Numbered rules, as they are said to the class. */
 export function RulesCard({ guide, onProject }: { guide: GameGuide; onProject: () => void }) {
+  const { t } = useTranslation()
   return (
     <StartCard
       icon={<BookOpenFilledIcon size={18} />}
-      title="Luật chơi"
+      title={t('start.rules')}
       action={
         <button
           type="button"
@@ -92,12 +95,12 @@ export function RulesCard({ guide, onProject }: { guide: GameGuide; onProject: (
           className="flex h-[38px] cursor-pointer items-center gap-2 rounded-full border border-primary bg-white px-4 font-[inherit] text-[14px] font-bold text-primary hover:bg-primary-soft"
         >
           <PlayIcon size={16} />
-          Trình chiếu luật chơi
+          {t('start.presentRules')}
         </button>
       }
     >
       <p className="m-0 rounded-[12px] bg-sun-pale px-4 py-3 text-[15px] leading-[1.5]">
-        <strong>Mục tiêu:</strong> {guide.goal}
+        <Trans i18nKey="start.goal" values={{ goal: guide.goal }} components={{ b: <strong /> }} />
       </p>
       <ol className="m-0 flex list-none flex-col gap-2.5 p-0">
         {guide.rules.map((rule, i) => (
@@ -118,8 +121,9 @@ const STEP_TINTS = ['bg-primary-soft text-primary', 'bg-sun-soft text-sun-ink', 
 
 /** The flow of a round, step by step. */
 export function StepsCard({ guide }: { guide: GameGuide }) {
+  const { t } = useTranslation()
   return (
-    <StartCard icon={<PlayIcon size={18} />} title="Cách chơi">
+    <StartCard icon={<PlayIcon size={18} />} title={t('start.steps')}>
       <ol className="m-0 grid list-none gap-3 p-0 sm:grid-cols-2 xl:grid-cols-4">
         {guide.steps.map((step, i) => (
           <li key={step.title} className="flex flex-col gap-2 rounded-[14px] border border-line-soft p-3.5">
@@ -173,18 +177,19 @@ function ScreenPreview({ mode, game, items, settings }: { mode: GuideGameType; g
 
 /** What the class will see, with a larger view on demand. */
 export function PreviewCard(props: { mode: GuideGameType; game: GameSummary; items: GameItem[]; settings: Record<string, unknown> }) {
+  const { t } = useTranslation()
   const [large, setLarge] = useState(false)
   return (
     <StartCard
       icon={<EyeIcon size={18} />}
-      title="Xem trước màn chiếu"
+      title={t('start.preview')}
       action={
         <button
           type="button"
           onClick={() => setLarge(true)}
           className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-[14px] font-bold text-primary hover:text-primary-ink"
         >
-          Xem lớn
+          {t('start.previewLarge')}
         </button>
       }
     >
@@ -194,11 +199,11 @@ export function PreviewCard(props: { mode: GuideGameType; game: GameSummary; ite
         <button
           type="button"
           onClick={() => setLarge(true)}
-          aria-label="Xem lớn màn chiếu"
+          aria-label={t('start.previewLargeLabel')}
           className="absolute inset-0 cursor-zoom-in rounded-[14px] border-0 bg-transparent p-0 hover:bg-white/10"
         />
       </div>
-      <Modal open={large} onCancel={() => setLarge(false)} footer={null} width="min(1100px, 94vw)" centered destroyOnHidden title="Xem trước màn chiếu">
+      <Modal open={large} onCancel={() => setLarge(false)} footer={null} width="min(1100px, 94vw)" centered destroyOnHidden title={t('start.preview')}>
         <ScreenPreview {...props} />
       </Modal>
     </StartCard>
@@ -212,15 +217,16 @@ export function QuickSettingsCard({ settings, current, saving, onChange }: {
   saving: boolean
   onChange: (patch: Partial<PlaySettings>) => void
 }) {
+  const { t } = useTranslation()
   return (
     <StartCard
       icon={<SettingsIcon size={18} />}
-      title="Cài đặt nhanh"
-      action={settings.length > 0 && <span className="text-[13px] text-ink-muted">{saving ? 'Đang lưu…' : 'Đã lưu'}</span>}
+      title={t('start.quickSettings')}
+      action={settings.length > 0 && <span className="text-[13px] text-ink-muted">{saving ? t('common.saving') : t('common.saved')}</span>}
     >
       {settings.length === 0 ? (
         <p className="m-0 text-[14px] leading-[1.5] text-ink-soft">
-          Trò này chơi với 4 đội cố định; điểm của từng ô được đặt cho mỗi câu hỏi trong trình soạn.
+          {t('start.gridBoardSettings')}
         </p>
       ) : (
         <ul className="m-0 flex list-none flex-col p-0">
@@ -251,14 +257,15 @@ export function QuickSettingsCard({ settings, current, saving, onChange }: {
 
 /** How to drive the projector, and a reminder to show the rules first: for the teacher only. */
 export function TeacherTipsCard({ notes }: { notes: string[] }) {
+  const { t } = useTranslation()
   return (
     <section className="flex flex-col gap-2.5 rounded-[20px] bg-[#E9F7EF] p-[18px] sm:p-[22px]">
       <h2 className="m-0 flex items-center gap-2 text-[16px] font-black text-success">
         <BulbIcon size={20} />
-        Gợi ý cho cô
+        {t('start.tips')}
       </h2>
       <ul className="m-0 flex list-disc flex-col gap-1.5 pl-5 text-[14px] leading-[1.5] text-ink-soft">
-        <li>Trình chiếu luật chơi trước khi bắt đầu để cả lớp nắm rõ cách tham gia.</li>
+        <li>{t('start.tipPresent')}</li>
         {notes.map((note) => (
           <li key={note}>{note}</li>
         ))}

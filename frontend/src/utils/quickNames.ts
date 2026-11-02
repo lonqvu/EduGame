@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { MAX_NAME_LENGTH, MAX_STUDENTS } from '@/utils/classrooms'
 
 /**
@@ -15,7 +16,7 @@ export function parseNames(text: string): string[] {
 
 /** "Số 1" … "Số n": spin by roll number when the names are not at hand. */
 export const numberNames = (count: number) =>
-  Array.from({ length: Math.max(1, Math.min(MAX_STUDENTS, Math.round(count))) }, (_, i) => `Số ${i + 1}`)
+  Array.from({ length: Math.max(1, Math.min(MAX_STUDENTS, Math.round(count))) }, (_, i) => i18n.t('classes.quick.number', { number: i + 1 }))
 
 const STORAGE_KEY = 'edugame.quickNames'
 

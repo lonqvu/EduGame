@@ -1,13 +1,27 @@
+import i18n from 'i18next'
+import { gameName } from '@/i18n/gameNames'
 import type { ClassReport, ReportSession } from '@/types/api'
+
+const english = () => i18n.language === 'en'
+/** "Oct 12", "Oct 12, 2025" (English dates: day and month as numbers would be ambiguous). */
+const englishDate = (date: Date, year: boolean) =>
+  date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', ...(year ? { year: 'numeric' } : {}) })
 
 // --- Periods ------------------------------------------------------------------------------------------------------
 
 /** The periods a teacher thinks in; each runs to today. */
-export const PERIOD_PRESETS = [
-  { key: 'week', label: 'Tuần này', name: 'tuần này' },
-  { key: 'month', label: 'Tháng này', name: 'tháng này' },
-  { key: 'term', label: 'Học kỳ này', name: 'học kỳ này' },
-] as const
+const preset = <K extends 'week' | 'month' | 'term'>(key: K) => ({
+  key,
+  get label() {
+    return i18n.t(`reports.presets.${key}`)
+  },
+  /** "trong tháng này": ends a sentence of the tips. */
+  get during() {
+    return i18n.t(`reports.during.${key}`)
+  },
+})
+
+export const PERIOD_PRESETS = [preset('week'), preset('month'), preset('term')] as const
 
 export type PresetKey = (typeof PERIOD_PRESETS)[number]['key']
 export type PeriodKey = PresetKey | 'custom'
@@ -55,15 +69,16 @@ export function presetRange(key: PresetKey, today: Date = new Date()): { from: s
 
 /** Why a custom period cannot be shown, or null. */
 export function rangeProblem(from: string, to: string): string | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) return 'Cô chọn ngày bắt đầu và ngày kết thúc nhé.'
-  if (from > to) return 'Ngày bắt đầu phải trước ngày kết thúc.'
-  if (daysBetween(from, to) > MAX_REPORT_DAYS) return 'Mỗi báo cáo xem tối đa 1 năm.'
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) return i18n.t('reports.rangeMissing')
+  if (from > to) return i18n.t('reports.rangeOrder')
+  if (daysBetween(from, to) > MAX_REPORT_DAYS) return i18n.t('reports.rangeTooLong')
   return null
 }
 
 /** "12/10" or "12/10/2025" when not this year. */
 export function shortDate(iso: string, today: Date = new Date()): string {
   const date = parseIsoDate(iso)
+  if (english()) return englishDate(date, date.getFullYear() !== today.getFullYear())
   const dm = `${pad(date.getDate())}/${pad(date.getMonth() + 1)}`
   return date.getFullYear() === today.getFullYear() ? dm : `${dm}/${date.getFullYear()}`
 }
@@ -72,16 +87,19 @@ export function shortDate(iso: string, today: Date = new Date()): string {
 export function periodLabel(from: string, to: string): string {
   const a = parseIsoDate(from)
   const b = parseIsoDate(to)
+  if (english()) return from === to ? englishDate(b, true) : `${englishDate(a, a.getFullYear() !== b.getFullYear())} – ${englishDate(b, true)}`
   const head = a.getFullYear() === b.getFullYear() ? `${pad(a.getDate())}/${pad(a.getMonth() + 1)}` : `${pad(a.getDate())}/${pad(a.getMonth() + 1)}/${a.getFullYear()}`
   return from === to ? `${pad(b.getDate())}/${pad(b.getMonth() + 1)}/${b.getFullYear()}` : `${head} – ${pad(b.getDate())}/${pad(b.getMonth() + 1)}/${b.getFullYear()}`
 }
 
-const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+/** The name of a day of the week, Sunday first: "T2" / "Mon", or long, "Thứ Hai" / "Monday". */
+const weekday = (day: number, long = false) => i18n.t(long ? 'reports.weekdays' : 'reports.weekdaysShort').split(',')[day]
 
-/** "T2, 12/10" */
+/** "T2, 12/10"; "Mon, Oct 12" */
 export function weekdayDate(iso: string): string {
   const date = parseIsoDate(iso)
-  return `${WEEKDAYS[date.getDay()]}, ${pad(date.getDate())}/${pad(date.getMonth() + 1)}`
+  if (english()) return `${weekday(date.getDay())}, ${englishDate(date, false)}`
+  return `${weekday(date.getDay())}, ${pad(date.getDate())}/${pad(date.getMonth() + 1)}`
 }
 
 /** "08:05 · T2, 12/10" of a moment, in this browser's time zone. */
@@ -97,14 +115,14 @@ export function durationLabel(minutes: number): string {
   const m = Math.max(0, Math.round(minutes))
   const hours = Math.floor(m / 60)
   const rest = m % 60
-  if (hours === 0) return `${rest} phút`
-  return rest === 0 ? `${hours} giờ` : `${hours} giờ ${rest} phút`
+  if (hours === 0) return i18n.t('reports.minutes', { minutes: rest })
+  return rest === 0 ? i18n.t('reports.hours', { hours }) : i18n.t('reports.hoursMinutes', { hours, minutes: rest })
 }
 
 /** "45 phút", "2 giờ", "1 giờ 48": a duration short enough for a tile. */
 export function shortDuration(minutes: number): string {
   const m = Math.max(0, Math.round(minutes))
-  return m >= 60 && m % 60 !== 0 ? `${Math.floor(m / 60)} giờ ${m % 60}` : durationLabel(m)
+  return m >= 60 && m % 60 !== 0 ? i18n.t('reports.hoursShort', { hours: Math.floor(m / 60), minutes: m % 60 }) : durationLabel(m)
 }
 
 /** Completed share, 0–100 (0 when nothing was played). */
@@ -114,15 +132,16 @@ export const completionRate = (completed: number, activities: number) => (activi
 export function trend(now: number, before: number): { direction: 'up' | 'down' | 'same'; text: string } | null {
   if (now === 0 && before === 0) return null
   const diff = now - before
-  if (diff === 0) return { direction: 'same', text: 'Bằng kỳ trước' }
-  return { direction: diff > 0 ? 'up' : 'down', text: `${diff > 0 ? '+' : '−'}${Math.abs(diff).toLocaleString('vi-VN')} so với kỳ trước` }
+  if (diff === 0) return { direction: 'same', text: i18n.t('reports.trendSame') }
+  const change = `${diff > 0 ? '+' : '−'}${Math.abs(diff).toLocaleString(english() ? 'en-US' : 'vi-VN')}`
+  return { direction: diff > 0 ? 'up' : 'down', text: i18n.t('reports.trendChange', { change }) }
 }
 
 /** The same move as a share: "▲ 12%"; none when the period before had nothing to compare with. */
 export function trendPercent(now: number, before: number): { direction: 'up' | 'down' | 'same'; text: string } | null {
   if (before <= 0) return null
   const change = Math.round(((now - before) / before) * 100)
-  if (change === 0) return { direction: 'same', text: 'bằng kỳ trước' }
+  if (change === 0) return { direction: 'same', text: i18n.t('reports.trendSameLower') }
   return { direction: change > 0 ? 'up' : 'down', text: `${change > 0 ? '▲' : '▼'} ${Math.abs(change)}%` }
 }
 
@@ -168,36 +187,38 @@ export function chartBuckets(daily: ClassReport['daily'], unit?: 'day' | 'week')
 
 /** What a game ended with, in a few words. */
 export function resultLabel(session: ReportSession): string {
-  if (session.status !== 'ENDED') return 'Chưa chơi đến cuối'
+  if (session.status !== 'ENDED') return i18n.t('reports.result.unfinished')
   const results = session.results
-  if (!results) return 'Đã hoàn thành'
+  if (!results) return i18n.t('reports.result.done')
   if (results.teams?.length) {
     const best = Math.max(...results.teams.map((t) => t.score))
     const winners = results.teams.filter((t) => t.score === best)
     const scores = [...results.teams].sort((a, b) => b.score - a.score).map((t) => t.score).join(' – ')
-    if (best <= 0) return `Hòa · ${scores}`
-    return `${winners.map((t) => t.name).join(' và ')} ${winners.length > 1 ? 'cùng thắng' : 'thắng'} · ${scores}`
+    if (best <= 0) return i18n.t('reports.result.draw', { scores })
+    const names = winners.map((t) => t.name).join(i18n.t('reports.result.and'))
+    return i18n.t(winners.length > 1 ? 'reports.result.wonTogether' : 'reports.result.won', { names, scores })
   }
   if (results.winners) {
-    if (results.winners.length === 0) return 'Không bạn nào trụ đến cuối'
-    const names = results.winners.length <= 3 ? results.winners.join(', ') : `${results.winners.slice(0, 3).join(', ')} và ${results.winners.length - 3} bạn`
-    return `${names} rung chuông vàng`
+    if (results.winners.length === 0) return i18n.t('reports.result.noneLeft')
+    const names =
+      results.winners.length <= 3
+        ? results.winners.join(', ')
+        : i18n.t('reports.result.andMore', { names: results.winners.slice(0, 3).join(', '), count: results.winners.length - 3 })
+    return i18n.t('reports.result.goldenBell', { names })
   }
-  return 'Đã hoàn thành'
+  return i18n.t('reports.result.done')
 }
 
 /** "12 phút", "dưới 1 phút" for a game ended within the minute. */
-export const sessionDuration = (minutes: number) => (Math.round(minutes) <= 0 ? 'dưới 1 phút' : durationLabel(minutes))
-
-const WEEKDAY_NAMES = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
+export const sessionDuration = (minutes: number) => (Math.round(minutes) <= 0 ? i18n.t('reports.underAMinute') : durationLabel(minutes))
 
 /** "Hôm nay · Thứ Tư 28/10", "Hôm qua · …", "Thứ Hai 26/10" of a day. */
 export function dayHeading(iso: string, today: Date = new Date()): string {
   const date = parseIsoDate(iso)
-  const name = `${WEEKDAY_NAMES[date.getDay()]} ${shortDate(iso, today)}`
+  const name = english() ? `${weekday(date.getDay(), true)}, ${shortDate(iso, today)}` : `${weekday(date.getDay(), true)} ${shortDate(iso, today)}`
   const todayIso = isoDate(today)
-  if (iso === todayIso) return `Hôm nay · ${name}`
-  if (iso === addDays(todayIso, -1)) return `Hôm qua · ${name}`
+  if (iso === todayIso) return i18n.t('reports.today', { day: name })
+  if (iso === addDays(todayIso, -1)) return i18n.t('reports.yesterday', { day: name })
   return name
 }
 
@@ -221,8 +242,8 @@ export function clockTime(isoInstant: string): string {
 
 /** "Yến", "Yến và An", "Yến, An và 3 bạn khác". */
 export function namesLabel(names: string[], max = 2): string {
-  if (names.length <= max) return names.join(' và ')
-  return `${names.slice(0, max).join(', ')} và ${names.length - max} bạn khác`
+  if (names.length <= max) return names.join(i18n.t('reports.result.and'))
+  return i18n.t('reports.result.andOthers', { names: names.slice(0, max).join(', '), count: names.length - max })
 }
 
 // --- CSV ----------------------------------------------------------------------------------------------------------
@@ -241,12 +262,12 @@ export function toCsv(rows: (string | number)[][]): string {
 
 export function sessionsCsv(report: ClassReport): string {
   return toCsv([
-    ['Bắt đầu', 'Trò chơi', 'Loại trò chơi', 'Trạng thái', 'Thời lượng (phút)', 'Kết quả'],
+    ['start', 'game', 'kind', 'status', 'minutes', 'result'].map((column) => i18n.t(`reports.csv.${column as 'start'}`)),
     ...report.sessions.map((s) => [
       sessionTime(s.startedAt),
       s.gameTitle,
-      s.templateName,
-      s.status === 'ENDED' ? 'Hoàn thành' : 'Chưa chơi đến cuối',
+      gameName(s.templateCode, s.templateName),
+      s.status === 'ENDED' ? i18n.t('reports.csv.done') : i18n.t('reports.result.unfinished'),
       s.minutes ?? '',
       resultLabel(s),
     ]),
@@ -254,11 +275,11 @@ export function sessionsCsv(report: ClassReport): string {
 }
 
 export function starsCsv(report: ClassReport): string {
-  return toCsv([['STT', 'Học sinh', `Sao (${periodLabel(report.from, report.to)})`], ...report.students.map((s) => [s.rollNumber ?? '', s.displayName, s.stars])])
+  return toCsv([[i18n.t('reports.csv.number'), i18n.t('reports.csv.student'), i18n.t('reports.csv.stars', { period: periodLabel(report.from, report.to) })], ...report.students.map((s) => [s.rollNumber ?? '', s.displayName, s.stars])])
 }
 
-/** "bao-cao-3a-2026-10-12-2026-10-18-lich-su.csv" */
-export function csvFileName(report: ClassReport, what: string): string {
+/** "bao-cao-3a-2026-10-12-2026-10-18-lich-su.csv" ("report-…-history.csv" in English). */
+export function csvFileName(report: ClassReport, what: 'stars' | 'history'): string {
   const name = report.classroom.name
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
@@ -267,7 +288,8 @@ export function csvFileName(report: ClassReport, what: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
-  return `bao-cao-${name || 'lop'}-${report.from}-${report.to}-${what}.csv`
+  const file = (key: 'reportFile' | 'starsFile' | 'historyFile') => i18n.t(`reports.csv.${key}`)
+  return `${file('reportFile')}-${name || 'class'}-${report.from}-${report.to}-${file(what === 'stars' ? 'starsFile' : 'historyFile')}.csv`
 }
 
 /**
@@ -310,8 +332,8 @@ export function reportTips(
     tips.push({
       key: 'praise',
       icon: '🌱',
-      text: [{ strong: all ? 'Cả lớp' : namesLabel(unpraised.map((s) => s.displayName)) }, ` chưa được khen sao nào ${during}.`],
-      link: { to: `/classes/${report.classroom.code}`, label: 'Khen ngay' },
+      text: [{ strong: all ? i18n.t('reports.tips.wholeClass') : namesLabel(unpraised.map((s) => s.displayName)) }, i18n.t('reports.tips.unpraised', { during })],
+      link: { to: `/classes/${report.classroom.code}`, label: i18n.t('reports.tips.praiseNow') },
     })
   }
   const unfinished = report.sessions.filter((s) => s.status !== 'ENDED')
@@ -320,8 +342,8 @@ export function reportTips(
     tips.push({
       key: 'unfinished',
       icon: '⏸',
-      text: [{ strong: `${unfinished.length} lượt chơi` }, ` dừng giữa chừng, gần nhất là "${again.s.gameTitle}".`],
-      link: { to: again.to, label: 'Chơi lại' },
+      text: [{ strong: i18n.t('reports.tips.unfinished', { count: unfinished.length }) }, i18n.t('reports.tips.unfinishedText', { title: again.s.gameTitle })],
+      link: { to: again.to, label: i18n.t('reports.tips.replay') },
     })
   }
   const [top] = report.byTemplate
@@ -330,8 +352,8 @@ export function reportTips(
     tips.push({
       key: 'variety',
       icon: '🎲',
-      text: [`Lớp chơi ${top.templateName} nhiều nhất. Đổi gió với `, { strong: untried }, '?'],
-      link: { to: '/games/new', label: 'Xem trò' },
+      text: [i18n.t('reports.tips.varietyBefore', { name: gameName(top.templateCode, top.templateName) }), { strong: untried }, i18n.t('reports.tips.varietyAfter')],
+      link: { to: '/games/new', label: i18n.t('reports.tips.seeGames') },
     })
   }
   return tips

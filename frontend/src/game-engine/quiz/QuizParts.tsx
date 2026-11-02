@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { CheckIcon, CloseIcon } from '@/components/ui/icons'
@@ -91,7 +92,7 @@ export function Countdown({ seconds, paused }: { seconds: number; paused: boolea
         left === 0 ? 'bg-danger text-white' : urgent ? 'bg-sun text-ink' : 'bg-white text-ink'
       }`}
     >
-      {left === 0 ? 'Hết giờ!' : `⏱ ${left}s`}
+      {left === 0 ? i18n.t('play.common.timeUp') : i18n.t('play.common.seconds', { seconds: left })}
     </span>
   )
 }

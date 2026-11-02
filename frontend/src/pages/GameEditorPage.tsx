@@ -1,5 +1,6 @@
 import { App, Dropdown, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { BulbIcon, ChevronDownIcon, ChevronLeftIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
@@ -20,13 +21,11 @@ import { itemCodec } from '@/utils/gameItems'
 
 const EMPTY: never[] = []
 
-const SAVE_LABELS: Record<SaveState, string> = {
-  saved: 'Đã tự động lưu',
-  saving: 'Đang lưu…',
-  error: 'Chưa lưu được',
-}
+/** Keys of the save state in the header (editor.page.*). */
+const SAVE_LABELS = { saved: 'saved', saving: 'saving', error: 'saveError' } as const satisfies Record<SaveState, string>
 
 export function GameEditorPage() {
+  const { t } = useTranslation()
   const { gameId = '' } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -59,8 +58,8 @@ export function GameEditorPage() {
 
   // The store reloads the game right after a failed save, so the header label alone is easy to miss.
   useEffect(() => {
-    if (saveState === 'error') message.error('Chưa lưu được thay đổi vừa rồi, đã tải lại bản trên máy chủ.')
-  }, [saveState, message])
+    if (saveState === 'error') message.error(t('editor.page.saveFailed'))
+  }, [saveState, message, t])
 
   // Edit only once the draft is open: before that, item ids may still change.
   if (loadState === 'missing') return <NotFoundPage />
@@ -69,10 +68,10 @@ export function GameEditorPage() {
   const definition = EDITOR_DEFINITIONS[game.type]
   const codec = itemCodec(game.type)
   if (!gameRegistry[game.type].hasEditor || !definition || !codec) {
-    return <NotFoundPage message="Trình soạn câu hỏi cho trò này đang được hoàn thiện." />
+    return <NotFoundPage message={t('editor.page.notReady')} />
   }
 
-  const noun = definition.noun.toLowerCase()
+  const noun = definition.nounLower
   const selectedIndex = Math.max(
     0,
     items.findIndex((q) => q.id === selectedId),
@@ -93,10 +92,10 @@ export function GameEditorPage() {
       return
     }
     modal.confirm({
-      title: `${unfinished} ${noun} chưa đủ nội dung`,
-      content: `${unfinished === 1 ? 'Mục' : 'Các mục'} đó sẽ được bỏ qua khi chơi. Chơi ${ready} ${noun} đã xong, hay sửa tiếp?`,
-      okText: `Chơi ${ready} ${noun}`,
-      cancelText: 'Sửa tiếp',
+      title: t('editor.page.unfinished', { items: definition.count(unfinished) }),
+      content: t('editor.page.unfinishedText', { count: unfinished, ready: definition.count(ready) }),
+      okText: t('editor.page.playReady', { ready: definition.count(ready) }),
+      cancelText: t('editor.page.keepEditing'),
       onOk: go,
     })
   }
@@ -127,11 +126,11 @@ export function GameEditorPage() {
   const confirmDelete = () => {
     if (!selected) return
     modal.confirm({
-      title: `Xóa ${noun} ${selectedIndex + 1}?`,
+      title: t('editor.page.deleteConfirm', { noun, number: selectedIndex + 1 }),
       content: codec.summary(selected) || definition.blankLabel,
-      okText: 'Xóa',
+      okText: t('common.delete'),
       okButtonProps: { danger: true },
-      cancelText: 'Giữ lại',
+      cancelText: t('classes.keep'),
       onOk: () => {
         const neighbour = items[selectedIndex + 1] ?? items[selectedIndex - 1]
         removeItem(gameId, selected.id)
@@ -150,20 +149,20 @@ export function GameEditorPage() {
           <button
             type="button"
             onClick={goBack}
-            aria-label="Quay lại"
+            aria-label={t('editor.page.back')}
             className="flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-ink hover:text-primary-ink"
           >
             <ChevronLeftIcon size={22} />
           </button>
           <div className="flex min-w-0 flex-1 flex-col">
             <input
-              aria-label="Tên trò chơi"
+              aria-label={t('editor.page.name')}
               value={game.title}
               onChange={(e) => renameGame(gameId, e.target.value)}
               className="w-full min-w-0 rounded-lg border-0 bg-transparent font-display text-[28px] leading-[1.15] font-extrabold text-ink outline-none focus:bg-white"
             />
             <span className={`text-base ${saveState === 'error' ? 'text-danger' : 'text-ink-soft'}`}>
-              {[templateName, guest ? 'Chưa lưu (chưa đăng nhập)' : SAVE_LABELS[saveState]].filter(Boolean).join(' · ')}
+              {[templateName, guest ? t('editor.page.guestUnsaved') : t(`editor.page.${SAVE_LABELS[saveState]}`)].filter(Boolean).join(' · ')}
             </span>
           </div>
         </div>
@@ -186,17 +185,17 @@ export function GameEditorPage() {
                 type="button"
                 className="flex min-h-[52px] cursor-pointer items-center gap-2 rounded-full border-0 bg-white px-6 font-[inherit] font-extrabold text-ink hover:text-primary-ink"
               >
-                Chơi kiểu khác
+                {t('editor.page.playAs')}
                 <ChevronDownIcon size={18} />
               </button>
             </Dropdown>
           )}
           <Link to={startPath(game)} className="px-2 text-[15px] font-bold text-ink-soft hover:text-primary-ink">
-            Luật chơi & cài đặt
+            {t('editor.page.rulesSettings')}
           </Link>
           <Tooltip
             title={
-              !playable ? 'Màn chiếu cho trò này đang được hoàn thiện' : ready === 0 ? `Chưa có ${noun} nào đủ nội dung để chơi` : undefined
+              !playable ? t('editor.page.projectorSoon') : ready === 0 ? t('editor.page.noneReady', { noun }) : undefined
             }
           >
             <button
@@ -208,7 +207,7 @@ export function GameEditorPage() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" />
               </svg>
-              Chơi · {ready} {noun}
+              {t('editor.page.play', { items: definition.count(ready) })}
             </button>
           </Tooltip>
         </div>
@@ -217,11 +216,10 @@ export function GameEditorPage() {
         // Not signed in: what is typed here plays at once, but is not kept.
         <p role="note" className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-[16px] bg-[#FFF4D6] px-5 py-3.5 text-[15px] text-[#6B4A00]">
           <span>
-            <strong>Bạn đang chơi thử, chưa đăng nhập.</strong> Câu hỏi soạn ở đây chỉ dùng được trong tab này và kết quả chơi không
-            được lưu lại.
+            <Trans i18nKey="editor.page.guestNotice" components={{ b: <strong /> }} />
           </span>
           <Link to="/login" className="font-extrabold text-primary-ink underline">
-            Đăng nhập để soạn câu hỏi được lưu lại
+            {t('editor.page.guestSignIn')}
           </Link>
         </p>
       )}
@@ -260,7 +258,7 @@ export function GameEditorPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center gap-4 rounded-[28px] bg-white p-10 text-center">
-              <span className="font-display text-[26px] font-extrabold">Chưa có {noun} nào</span>
+              <span className="font-display text-[26px] font-extrabold">{t('editor.page.empty', { noun })}</span>
               <button
                 type="button"
                 onClick={addItem}
@@ -274,14 +272,18 @@ export function GameEditorPage() {
           <div className="flex items-start gap-3.5 rounded-[22px] bg-sun-pale px-[22px] py-[18px]">
             <BulbIcon size={26} className="mt-0.5 shrink-0 text-[#8A6400]" />
             <span className="text-[17px]">
-              Mẹo: cô có thể{' '}
-              <button
-                type="button"
-                onClick={() => setPasteOpen(true)}
-                className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] font-extrabold text-primary-ink underline"
-              >
-                dán nhiều dòng cùng lúc
-              </button>
+              <Trans
+                i18nKey="editor.page.tip"
+                components={{
+                  paste: (
+                    <button
+                      type="button"
+                      onClick={() => setPasteOpen(true)}
+                      className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] font-extrabold text-primary-ink underline"
+                    />
+                  ),
+                }}
+              />
               . {definition.paste.hint}
             </span>
           </div>
@@ -291,10 +293,11 @@ export function GameEditorPage() {
       <BulkPasteModal
         open={pasteOpen}
         paste={definition.paste}
+        count={definition.count}
         onClose={() => setPasteOpen(false)}
         onAdd={async (drafts) => {
           const created = await add(drafts)
-          if (created.length) message.success(`Đã thêm ${created.length} ${definition.paste.unit}`)
+          if (created.length) message.success(t('editor.page.added', { items: definition.count(created.length) }))
         }}
       />
     </div>

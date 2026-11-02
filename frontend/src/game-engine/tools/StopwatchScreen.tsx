@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { useEffect, useState } from 'react'
 import { formatStopwatch } from '@/game-engine/tools/moreTools2'
 import { ToolFrame, toolButtonClass } from '@/game-engine/tools/ToolFrame'
@@ -50,15 +51,15 @@ export function StopwatchScreen() {
 
   const time = elapsed(clock, now)
   return (
-    <ToolFrame title="Bấm giờ" subtitle="Nhấn phím cách để bắt đầu hoặc tạm dừng">
+    <ToolFrame title={i18n.t('play.tools.stopwatch.title')} subtitle={i18n.t('play.tools.stopwatch.subtitle')}>
       <div className="flex flex-1 items-center gap-10">
         <div className="flex flex-1 flex-col items-center gap-8">
-          <span role="timer" aria-label={`Đã trôi qua ${formatStopwatch(time)}`} className="font-display text-[150px] leading-none font-extrabold tabular-nums">
+          <span role="timer" aria-label={i18n.t('play.tools.stopwatch.elapsed', { time: formatStopwatch(time) })} className="font-display text-[150px] leading-none font-extrabold tabular-nums">
             {formatStopwatch(time)}
           </span>
           <div className="flex gap-4">
             <button type="button" onClick={toggle} className={`${toolButtonClass} h-16 w-[220px] text-[22px] text-white ${running ? 'bg-[#F28C28]' : 'bg-primary'}`}>
-              {running ? '⏸ Tạm dừng' : time > 0 ? '▶ Tiếp tục' : '▶ Bắt đầu'}
+              {running ? i18n.t('play.tools.stopwatch.pause') : time > 0 ? i18n.t('play.tools.stopwatch.resume') : i18n.t('play.tools.stopwatch.start')}
             </button>
             <button
               type="button"
@@ -69,7 +70,7 @@ export function StopwatchScreen() {
               }}
               className={`${toolButtonClass} h-16 bg-sun text-[20px] text-ink`}
             >
-              🏁 Ghi thời gian
+              {i18n.t('play.tools.stopwatch.lap')}
             </button>
             <button
               type="button"
@@ -80,15 +81,15 @@ export function StopwatchScreen() {
               }}
               className={`${toolButtonClass} h-16 bg-white text-[20px] text-ink`}
             >
-              Về 0
+              {i18n.t('play.tools.stopwatch.reset')}
             </button>
           </div>
         </div>
         {laps.length > 0 && (
-          <ol aria-label="Thời gian đã ghi" className="m-0 flex w-[320px] list-none flex-col gap-2 self-stretch overflow-y-auto rounded-[28px] bg-white p-5">
+          <ol aria-label={i18n.t('play.tools.stopwatch.laps')} className="m-0 flex w-[320px] list-none flex-col gap-2 self-stretch overflow-y-auto rounded-[28px] bg-white p-5">
             {laps.map((lap, i) => (
               <li key={i} className="flex items-center justify-between rounded-2xl bg-surface-soft px-4 py-2.5 text-xl font-extrabold">
-                <span>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`} Lần {i + 1}</span>
+                <span>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`} {i18n.t('play.tools.stopwatch.lapLabel', { number: i + 1 })}</span>
                 <span className="tabular-nums">{formatStopwatch(lap)}</span>
               </li>
             ))}

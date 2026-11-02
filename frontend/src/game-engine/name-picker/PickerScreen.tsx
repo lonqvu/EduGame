@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { App } from 'antd'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
@@ -59,10 +60,10 @@ export function PickerScreen({ mode }: { mode: PickMode }) {
     const { name } = round.winner
     setStarred(true)
     sound.play('star')
-    message.success(`Đã thưởng 1 sao cho ${name}`)
+    message.success(i18n.t('play.common.starGiven', { name }))
     awardStars(round.winner.id, 1).catch(() => {
       setStarred(false)
-      message.error(`Chưa lưu được sao cho ${name}, cô thử lại nhé.`)
+      message.error(i18n.t('play.common.starFailed', { name }))
     })
   }
 
@@ -70,7 +71,7 @@ export function PickerScreen({ mode }: { mode: PickMode }) {
 
   const startButton = round.allCalled ? (
     <BigButton onClick={resetCalled} icon={<RefreshIcon size={28} />}>
-      Gọi lại từ đầu
+      {i18n.t('play.picker.restart')}
     </BigButton>
   ) : (
     <BigButton onClick={start}>{config.startLabel}</BigButton>
@@ -100,18 +101,18 @@ export function PickerScreen({ mode }: { mode: PickMode }) {
           <button
             type="button"
             onClick={goBack}
-            aria-label="Quay lại"
+            aria-label={i18n.t('play.common.back')}
             className="flex size-11 cursor-pointer items-center justify-center rounded-full border-0 bg-white text-ink hover:text-primary-ink"
           >
             <ChevronLeftIcon size={22} />
           </button>
           <SoundToggle />
           <span className="rounded-full bg-white px-[18px] py-2 font-display text-[22px] font-extrabold">{config.title}</span>
-          <span className="rounded-full bg-white/85 px-4 py-2 text-[17px] font-extrabold">{className}</span>
+          {className && <span className="rounded-full bg-white/85 px-4 py-2 text-[17px] font-extrabold">{className}</span>}
         </div>
         <div className="flex items-center gap-2.5">
           <span className="rounded-full bg-white/85 px-4 py-2 text-[17px] font-extrabold">
-            Đã gọi {round.calledCount} / {round.total} bạn
+            {i18n.t('play.picker.called', { called: round.calledCount, total: round.total })}
           </span>
           <label className="flex h-11 cursor-pointer items-center gap-2 rounded-full bg-white/85 px-4 text-[15px] font-bold">
             <input
@@ -120,7 +121,7 @@ export function PickerScreen({ mode }: { mode: PickMode }) {
               onChange={(e) => setNoRepeat(e.target.checked)}
               className="size-5 accent-primary"
             />
-            Không gọi lại
+            {i18n.t('play.picker.noRepeat')}
           </label>
           <PickModeMenu current={mode} />
         </div>
@@ -207,7 +208,7 @@ function IdleContent({ placement, prompt, button }: { placement: PanelPlacement;
 function WaitingDots() {
   return (
     <span className="flex items-end font-display text-5xl leading-none font-extrabold">
-      Chờ chút
+      {i18n.t('play.picker.wait')}
       {[0, 1, 2].map((i) => (
         <motion.span key={i} animate={{ y: [0, -8, 0] }} transition={{ duration: 1, delay: i * 0.15, repeat: Infinity }}>
           .
@@ -291,7 +292,7 @@ function ResultCard({ layout, label, name, starred, againLabel, canAgain, onAgai
           className="flex h-14 cursor-pointer items-center gap-2 rounded-[18px] whitespace-nowrap border-0 bg-sun px-[22px] font-[inherit] text-lg font-extrabold text-ink hover:brightness-95 disabled:cursor-default disabled:opacity-60"
         >
           <FilledStarIcon size={22} fill="#FFFFFF" stroke="#1F2A44" />
-          {starred ? 'Đã thưởng sao' : 'Thưởng 1 sao'}
+          {starred ? i18n.t('play.common.starsGiven') : i18n.t('play.common.giveStar')}
         </button>
       </div>
     </div>

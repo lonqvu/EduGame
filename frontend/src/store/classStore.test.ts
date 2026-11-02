@@ -80,14 +80,14 @@ beforeEach(async () => {
 })
 
 describe('class store', () => {
-  it('a visitor has no class: nothing is asked of the server', async () => {
+  it('a visitor has no class: nothing is asked of the server, and the name pickers ask for names', async () => {
     vi.resetModules()
     vi.clearAllMocks()
     auth.guest = true
     const guestStore = (await import('@/store/classStore')).useClassStore
     await guestStore.getState().load()
     expect(backend.api.listClassrooms).not.toHaveBeenCalled()
-    expect(guestStore.getState()).toMatchObject({ status: 'idle', classrooms: [], students: [] })
+    expect(guestStore.getState()).toMatchObject({ status: 'ready', classrooms: [], students: [] })
   })
 
   it('loads the first class and its students', () => {

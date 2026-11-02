@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useReducer, useState } from 'react'
 import { ChevronRightIcon, EyeIcon } from '@/components/ui/icons'
@@ -41,7 +42,7 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
   const steps = rules.raceSteps
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   }
 
   const restart = () => {
@@ -51,7 +52,7 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
   }
 
   if (state.finished) {
-    return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="Về đích nhanh nhất" />
+    return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="finish" />
   }
 
   const question = playable[state.index]
@@ -62,7 +63,7 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
   return (
     <PlayFrame
       title={game.title}
-      progress={`Câu ${state.index + 1} / ${playable.length}`}
+      progress={i18n.t('play.common.question', { number: state.index + 1, total: playable.length })}
       extra={
         rules.timeLimitSec > 0 &&
         !state.revealed && <Countdown key={`${round}-${state.index}`} seconds={rules.timeLimitSec} paused={state.revealed} />
@@ -127,12 +128,12 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
       <div className="flex items-center justify-between gap-4">
         <span className="text-lg font-extrabold text-ink-soft">
           {arrived
-            ? `${arrived.name} đã cập bến!`
+            ? i18n.t('play.boat.docked', { team: arrived.name })
             : state.revealed
-              ? 'Đáp án đúng đã hiện.'
+              ? i18n.t('play.common.answerShown')
               : answering
-                ? `${answering.name} chọn đáp án nào? Cô bấm vào đáp án đội nói.`
-                : 'Đội nào giành quyền trả lời? Cô bấm vào tên đội trên dòng sông.'}
+                ? i18n.t('play.common.whichAnswer', { team: answering.name })
+                : i18n.t('play.boat.whoBuzzed')}
         </span>
         <div className="flex shrink-0 gap-3">
           {!state.revealed && (
@@ -145,11 +146,11 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
               className={`${playButtonClass} bg-sun-soft text-ink`}
             >
               <EyeIcon size={22} />
-              Hiện đáp án
+              {i18n.t('play.common.showAnswer')}
             </button>
           )}
           <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} bg-white text-ink`}>
-            Kết thúc
+            {i18n.t('play.common.finish')}
           </button>
           <button
             type="button"
@@ -160,7 +161,7 @@ export function BoatRaceScreen({ game, questions, settings }: BoatRaceScreenProp
             }}
             className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
           >
-            {ends ? 'Xem kết quả' : 'Câu tiếp theo'}
+            {ends ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextQuestion')}
             <ChevronRightIcon size={20} />
           </button>
         </div>
@@ -225,7 +226,7 @@ function River({ teams, steps, answeringId, triedIds, onPick }: RiverProps) {
           ),
         )}
         <text x={FINISH_X + 52} y={RIVER_HEIGHT - 16} textAnchor="middle" fontSize={20} fontWeight={800} fill="#5A3A1C">
-          Bến
+          {i18n.t('play.boat.dock')}
         </text>
       </svg>
 
@@ -241,7 +242,7 @@ function River({ teams, steps, answeringId, triedIds, onPick }: RiverProps) {
               onClick={() => onPick(team.id)}
               disabled={done}
               aria-pressed={active}
-              aria-label={`${team.name}, chặng ${step} / ${steps}`}
+              aria-label={i18n.t('play.boat.stage', { team: team.name, step, steps })}
               className="absolute left-2 flex cursor-pointer items-center gap-2 rounded-2xl border-[3px] bg-white px-3 font-[inherit] text-ink disabled:cursor-default"
               style={{
                 top: top + 5,
@@ -254,7 +255,7 @@ function River({ teams, steps, answeringId, triedIds, onPick }: RiverProps) {
               <span className="size-6 shrink-0 rounded-full" style={{ background: team.color }} />
               <span className="flex min-w-0 flex-col text-left leading-tight">
                 <span className="truncate text-lg font-extrabold">{team.name}</span>
-                <span className="text-[13px] font-bold text-ink-soft">{active ? 'Đang trả lời' : `Chặng ${step} / ${steps}`}</span>
+                <span className="text-[13px] font-bold text-ink-soft">{active ? i18n.t('play.common.answering') : i18n.t('play.boat.stageShort', { step, steps })}</span>
               </span>
             </button>
             <motion.div

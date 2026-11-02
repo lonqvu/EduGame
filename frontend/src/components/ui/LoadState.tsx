@@ -1,4 +1,5 @@
 import { Button, Result, Spin } from 'antd'
+import { useTranslation } from 'react-i18next'
 
 /** Centered spinner while a page's data loads. */
 export function PageLoading() {
@@ -11,14 +12,15 @@ export function PageLoading() {
 
 /** The page's data could not be loaded (backend down, network...). */
 export function LoadError({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation()
   return (
     <Result
       status="warning"
-      title="Chưa tải được dữ liệu"
-      subTitle="Cô kiểm tra kết nối mạng rồi thử lại nhé."
+      title={t('load.errorTitle')}
+      subTitle={t('load.errorText')}
       extra={
         <Button type="primary" size="large" shape="round" onClick={onRetry}>
-          Thử lại
+          {t('common.retry')}
         </Button>
       }
     />

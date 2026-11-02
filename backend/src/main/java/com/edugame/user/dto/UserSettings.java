@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * "Cài đặt" of a teacher: the whole document, read and written in one piece ({@code GET/PUT /me/settings}).
@@ -18,7 +19,7 @@ public record UserSettings(@NotNull @Valid Display display, @NotNull @Valid Game
                            @NotNull @Valid Notifications notifications, @Valid Sound sound) {
 
     public static final UserSettings DEFAULTS = new UserSettings(
-            new Display(false, false),
+            new Display(false, false, "vi"),
             new GameDefaults(null, null, null, null),
             new Notifications(true, true),
             new Sound(true, 80, true));
@@ -28,11 +29,23 @@ public record UserSettings(@NotNull @Valid Display display, @NotNull @Valid Game
         return new UserSettings(display, games, notifications, newSound);
     }
 
+    /** The same settings with another display section. */
+    public UserSettings withDisplay(Display newDisplay) {
+        return new UserSettings(newDisplay, games, notifications, sound);
+    }
+
     /**
      * @param reduceMotion      animations off (slow projector computers, children sensitive to motion)
      * @param fullscreenOnStart "Bắt đầu trò chơi" also puts the browser in full screen
+     * @param language          of the app's screens (and later its mails), "vi" or "en"; may be left out of a PUT (an
+     *                          app opened before languages existed), the saved one is then kept
      */
-    public record Display(@NotNull Boolean reduceMotion, @NotNull Boolean fullscreenOnStart) {
+    public record Display(@NotNull Boolean reduceMotion, @NotNull Boolean fullscreenOnStart,
+                          @Pattern(regexp = "vi|en") String language) {
+
+        public Display withLanguage(String newLanguage) {
+            return new Display(reduceMotion, fullscreenOnStart, newLanguage);
+        }
     }
 
     /**

@@ -1,11 +1,12 @@
 import { Input, Select, Table } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 import { listAdminTeachers, type TeacherSort } from '@/api/adminApi'
 import { LoadError } from '@/components/ui/LoadState'
 import { AdminCard, AdminHeader, RoleTag, StatusTag } from '@/pages/admin/AdminParts'
 import { useRemote } from '@/pages/admin/useRemote'
 import type { AdminTeacherSummary, UserRole, UserStatus } from '@/types/api'
-import { count, dateTime, oneOf, pageParam } from '@/utils/admin'
+import { dateTime, oneOf, pageParam } from '@/utils/admin'
 import { relativeTimeLabel } from '@/utils/dateLabels'
 
 const PAGE_SIZE = 20
@@ -18,6 +19,7 @@ const SORTS = ['NEWEST', 'LAST_ACTIVE', 'NAME'] as const
  * be reloaded or shared with another admin.
  */
 export function AdminTeachersPage() {
+  const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
   const q = params.get('q')?.trim() ?? ''
   const status = oneOf(params.get('status'), STATUS_FILTERS, '')
@@ -56,54 +58,54 @@ export function AdminTeachersPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminHeader title="Giáo viên" text="Tìm tài khoản, xem giáo viên đã dùng Lớp Vui thế nào, khoá hoặc mở khoá khi cần." />
+      <AdminHeader title={t('admin.teachers.title')} text={t('admin.teachers.text')} />
 
       <AdminCard>
-        <div role="group" aria-label="Lọc giáo viên" className="flex flex-wrap items-center gap-3">
+        <div role="group" aria-label={t('admin.teachers.filters')} className="flex flex-wrap items-center gap-3">
           <Input.Search
             key={q}
             defaultValue={q}
             allowClear
-            placeholder="Tìm theo tên, tên đăng nhập hoặc email"
-            aria-label="Tìm giáo viên"
+            placeholder={t('admin.teachers.search')}
+            aria-label={t('admin.teachers.searchLabel')}
             onSearch={(value) => update({ q: value.trim() })}
             className="max-w-[360px] min-w-[220px] flex-1"
           />
           <Select
-            aria-label="Trạng thái"
+            aria-label={t('admin.teachers.status')}
             value={status}
             onChange={(value: string) => update({ status: value })}
             options={[
-              { value: '', label: 'Mọi trạng thái' },
-              { value: 'ACTIVE', label: 'Đang hoạt động' },
-              { value: 'LOCKED', label: 'Đã khoá' },
-              { value: 'DELETED', label: 'Đã xoá' },
+              { value: '', label: t('admin.teachers.allStatuses') },
+              { value: 'ACTIVE', label: t('admin.status.ACTIVE') },
+              { value: 'LOCKED', label: t('admin.status.LOCKED') },
+              { value: 'DELETED', label: t('admin.status.DELETED') },
             ]}
             className="w-[180px]"
           />
           <Select
-            aria-label="Vai trò"
+            aria-label={t('admin.teachers.role')}
             value={role}
             onChange={(value: string) => update({ role: value })}
             options={[
-              { value: '', label: 'Mọi vai trò' },
-              { value: 'TEACHER', label: 'Giáo viên' },
-              { value: 'ADMIN', label: 'Quản trị viên' },
+              { value: '', label: t('admin.teachers.allRoles') },
+              { value: 'TEACHER', label: t('admin.roles.TEACHER') },
+              { value: 'ADMIN', label: t('admin.roles.ADMIN') },
             ]}
             className="w-[160px]"
           />
           <Select
-            aria-label="Sắp xếp"
+            aria-label={t('admin.teachers.sort')}
             value={sort}
             onChange={(value: TeacherSort) => update({ sort: value === 'NEWEST' ? '' : value })}
             options={[
-              { value: 'NEWEST', label: 'Mới tham gia trước' },
-              { value: 'LAST_ACTIVE', label: 'Hoạt động gần đây' },
-              { value: 'NAME', label: 'Tên A → Z' },
+              { value: 'NEWEST', label: t('admin.teachers.newest') },
+              { value: 'LAST_ACTIVE', label: t('admin.teachers.lastActive') },
+              { value: 'NAME', label: t('admin.teachers.name') },
             ]}
             className="w-[190px]"
           />
-          {data && <span className="text-[14px] text-ink-muted">{count(data.total)} tài khoản</span>}
+          {data && <span className="text-[14px] text-ink-muted">{t('admin.teachers.accounts', { count: data.total })}</span>}
         </div>
 
         {error && !data ? (
@@ -114,7 +116,7 @@ export function AdminTeachersPage() {
             loading={loading}
             dataSource={data?.items ?? []}
             scroll={{ x: 820 }}
-            locale={{ emptyText: q || status || role ? 'Không có tài khoản nào phù hợp.' : 'Chưa có tài khoản nào.' }}
+            locale={{ emptyText: q || status || role ? t('admin.teachers.noMatch') : t('admin.teachers.none') }}
             pagination={{
               current: page + 1,
               pageSize: PAGE_SIZE,
@@ -125,36 +127,36 @@ export function AdminTeachersPage() {
             }}
             columns={[
               {
-                title: 'Giáo viên',
+                title: t('admin.teachers.teacher'),
                 key: 'teacher',
-                render: (_, t) => (
+                render: (_, row) => (
                   <div className="flex min-w-0 flex-col gap-0.5">
                     <span className="flex flex-wrap items-center gap-2">
-                      <Link to={`/admin/teachers/${encodeURIComponent(t.code)}`} className="font-bold">
-                        {t.displayName}
+                      <Link to={`/admin/teachers/${encodeURIComponent(row.code)}`} className="font-bold">
+                        {row.displayName}
                       </Link>
-                      <RoleTag role={t.role} />
+                      <RoleTag role={row.role} />
                     </span>
-                    <span className="text-[13px] text-ink-muted">{t.email ?? t.username}</span>
+                    <span className="text-[13px] text-ink-muted">{row.email ?? row.username}</span>
                   </div>
                 ),
               },
-              { title: 'Trạng thái', key: 'status', width: 150, render: (_, t) => <StatusTag status={t.status} /> },
-              { title: 'Lớp', dataIndex: 'classrooms', width: 70, align: 'right' },
-              { title: 'Trò chơi', dataIndex: 'games', width: 90, align: 'right' },
+              { title: t('admin.teachers.status'), key: 'status', width: 150, render: (_, row) => <StatusTag status={row.status} /> },
+              { title: t('admin.teachers.classes'), dataIndex: 'classrooms', width: 70, align: 'right' },
+              { title: t('admin.teachers.games'), dataIndex: 'games', width: 90, align: 'right' },
               {
-                title: 'Tham gia',
+                title: t('admin.teachers.joinedColumn'),
                 key: 'createdAt',
                 width: 150,
-                render: (_, t) => <span className="text-[13.5px]">{dateTime(t.createdAt).slice(0, 10)}</span>,
+                render: (_, row) => <span className="text-[13.5px]">{dateTime(row.createdAt).slice(0, 10)}</span>,
               },
               {
-                title: 'Hoạt động gần nhất',
+                title: t('admin.teachers.lastActiveColumn'),
                 key: 'lastActiveAt',
                 width: 170,
-                render: (_, t) => (
-                  <span className="text-[13.5px]" title={dateTime(t.lastActiveAt)}>
-                    {t.lastActiveAt ? relativeTimeLabel(t.lastActiveAt) : 'Chưa dùng'}
+                render: (_, row) => (
+                  <span className="text-[13.5px]" title={dateTime(row.lastActiveAt)}>
+                    {row.lastActiveAt ? relativeTimeLabel(row.lastActiveAt) : t('admin.noneYet')}
                   </span>
                 ),
               },

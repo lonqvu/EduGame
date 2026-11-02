@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ChevronRightIcon } from '@/components/ui/icons'
 import { Art } from '@/pages/home/homeUi'
 
@@ -8,10 +9,11 @@ interface QuickTilesProps {
 
 /** The two other things a teacher comes for, beside "Tổ chức trò chơi": writing questions and the class. */
 export function QuickTiles({ onCreate, onOpenClass }: QuickTilesProps) {
+  const { t } = useTranslation()
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4">
-      <Tile icon="card-question-icon" title="Tạo bộ câu hỏi" text="Soạn một lần, dùng cho mọi trò" tint="bg-[#FFF4D6]" onClick={onCreate} />
-      <Tile icon="card-class-icon" title="Quản lý lớp học" text="Học sinh, nhóm và điểm sao" tint="bg-[#DDF5E8]" onClick={onOpenClass} />
+      <Tile icon="card-question-icon" title={t('home.tiles.createSet')} text={t('home.tiles.createSetText')} tint="bg-[#FFF4D6]" onClick={onCreate} />
+      <Tile icon="card-class-icon" title={t('home.tiles.classes')} text={t('home.tiles.classesText')} tint="bg-[#DDF5E8]" onClick={onOpenClass} />
     </div>
   )
 }

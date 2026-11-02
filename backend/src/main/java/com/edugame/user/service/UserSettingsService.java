@@ -38,7 +38,11 @@ public class UserSettingsService {
     @Transactional
     public UserSettings update(UserSettings settings) {
         User user = currentUserService.getCurrentUser();
-        UserSettings complete = settings.sound() != null ? settings : settings.withSound(settingsOf(user).sound());
+        UserSettings current = settingsOf(user);
+        UserSettings complete = settings.sound() != null ? settings : settings.withSound(current.sound());
+        if (complete.display().language() == null) {
+            complete = complete.withDisplay(complete.display().withLanguage(current.display().language()));
+        }
         user.setSettings(objectMapper.valueToTree(complete));
         return settingsOf(user);
     }

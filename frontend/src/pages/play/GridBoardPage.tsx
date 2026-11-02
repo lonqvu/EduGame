@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { useEffect } from 'react'
 import { useParams } from 'react-router'
 import { PROJECTOR_BOARD_BG, PROJECTOR_RESULTS_BG, ProjectorStage } from '@/components/projector/ProjectorStage'
@@ -28,7 +29,7 @@ export function GridBoardPage({ screen }: { screen: Screen }) {
   if (loadState === 'error') return <LoadError onRetry={() => void loadGame(gameId, 'play')} />
   if (!game || (loadState !== 'play' && loadState !== 'edit')) return <PageLoading />
   if (game.type !== 'GRID_BOARD') {
-    return <NotFoundPage message="Màn chiếu cho trò chơi này đang được hoàn thiện." />
+    return <NotFoundPage message={i18n.t('start.intro.notReady')} />
   }
 
   return (

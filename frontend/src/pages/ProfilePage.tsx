@@ -1,5 +1,6 @@
 import { App } from 'antd'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { BellIcon, GlobeIcon, HelpIcon, SettingsIcon, ShieldIcon, UserIcon } from '@/components/ui/icons'
@@ -16,6 +17,7 @@ type Dialog = 'edit' | 'security' | 'help' | null
 
 /** /profile — "Hồ sơ của tôi": the teacher's account, what they have done, and its settings. */
 export function ProfilePage() {
+  const { t } = useTranslation()
   const { modal } = App.useApp()
   const navigate = useNavigate()
   const profile = useProfileStore((s) => s.profile)
@@ -32,9 +34,9 @@ export function ProfilePage() {
 
   const confirmLogout = () =>
     modal.confirm({
-      title: 'Đăng xuất khỏi Lớp Vui?',
-      okText: 'Đăng xuất',
-      cancelText: 'Ở lại',
+      title: t('profile.signOutConfirm'),
+      okText: t('profile.signOut'),
+      cancelText: t('profile.stay'),
       onOk: () => logout(),
     })
 
@@ -43,47 +45,47 @@ export function ProfilePage() {
       key: 'info',
       icon: <UserIcon size={22} />,
       tint: 'bg-[#E3ECFF] text-primary',
-      title: 'Thông tin cá nhân',
-      text: 'Họ tên, email, số điện thoại, ảnh đại diện',
+      title: t('profile.rows.personal'),
+      text: t('profile.rows.personalText'),
       onClick: () => setDialog('edit'),
     },
     {
       key: 'security',
       icon: <ShieldIcon size={22} />,
       tint: 'bg-[#DDF5E8] text-success',
-      title: 'Bảo mật tài khoản',
-      text: 'Đổi mật khẩu, quản lý phiên đăng nhập',
+      title: t('profile.rows.security'),
+      text: t('profile.rows.securityText'),
       onClick: () => setDialog('security'),
     },
     {
       key: 'notifications',
       icon: <BellIcon size={22} />,
       tint: 'bg-[#EDE4FF] text-[#7448D6]',
-      title: 'Thông báo',
-      text: 'Email khi đăng nhập trên thiết bị mới, khi đổi mật khẩu',
+      title: t('profile.rows.notifications'),
+      text: t('profile.rows.notificationsText'),
       onClick: () => navigate('/settings#notifications'),
     },
     {
       key: 'language',
       icon: <GlobeIcon size={22} />,
       tint: 'bg-[#DDF2F7] text-[#1B7A8C]',
-      title: 'Ngôn ngữ & hiển thị',
-      text: 'Hiệu ứng chuyển động, toàn màn hình khi trình chiếu',
+      title: t('profile.rows.display'),
+      text: t('profile.rows.displayText'),
       onClick: () => navigate('/settings#display'),
     },
     {
       key: 'help',
       icon: <HelpIcon size={22} />,
       tint: 'bg-[#FFE4EA] text-[#D23C6E]',
-      title: 'Trợ giúp',
-      text: 'Hướng dẫn sử dụng, câu hỏi thường gặp',
+      title: t('profile.rows.help'),
+      text: t('profile.rows.helpText'),
       onClick: () => setDialog('help'),
     },
   ]
 
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="Hồ sơ của tôi" text="Quản lý thông tin cá nhân và tài khoản Lớp Vui của bạn." />
+      <PageHeader title={t('profile.title')} text={t('profile.intro')} />
 
       {status === 'error' && !profile ? (
         <LoadError onRetry={() => void load()} />
@@ -93,7 +95,7 @@ export function ProfilePage() {
         <>
           <ProfileCard profile={profile} onEdit={() => setDialog('edit')} />
           <ActivityOverview stats={profile.stats} />
-          <ProfileSection icon={<SettingsIcon size={17} />} title="Cài đặt tài khoản">
+          <ProfileSection icon={<SettingsIcon size={17} />} title={t('profile.accountSettings')}>
             <SettingsList rows={rows} />
           </ProfileSection>
           <LogoutButton onClick={confirmLogout} />

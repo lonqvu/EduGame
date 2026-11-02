@@ -1,8 +1,9 @@
 import { App } from 'antd'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
-import { gameRegistry } from '@/game-engine/registry'
+import { gameRegistry, itemsLabel } from '@/game-engine/registry'
 import { HomeHero } from '@/pages/home/HomeHero'
 import { PraiseCorner, type StarPeriod } from '@/pages/home/PraiseCorner'
 import { QuickTiles } from '@/pages/home/QuickTiles'
@@ -17,7 +18,7 @@ import { needsLogin } from '@/store/loginPromptStore'
 import { useQuestionSetStore } from '@/store/questionSetStore'
 import { useTeacherStore } from '@/store/teacherStore'
 import type { QuestionSetSummaryResponse } from '@/types/api'
-import type { GameSummary, GameType } from '@/types/game'
+import type { GameSummary } from '@/types/game'
 import { apiErrorMessage } from '@/utils/apiError'
 import { classTitle } from '@/utils/classrooms'
 import { relativeTimeLabel } from '@/utils/dateLabels'
@@ -27,20 +28,9 @@ import { OPEN_CREATE_SET } from '@/utils/questionSets'
 const RECENT_LIMIT = 4
 const SETS_LIMIT = 3
 
-/** Unit of a game's items in sentences like "10 câu hỏi". */
-const ITEM_UNITS: Partial<Record<GameType, string>> = {
-  GRID_BOARD: 'câu hỏi',
-  QUIZ: 'câu hỏi',
-  GOLDEN_BELL: 'câu hỏi',
-  BOAT_RACE: 'câu hỏi',
-  MATCHING: 'bộ nối cặp',
-  MEMORY: 'bộ thẻ',
-  CROSSWORD: 'hàng ngang',
-  ORDERING: 'bài sắp xếp',
-  SORTING: 'bộ phân loại',
-}
 
 export function HomePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { message, modal } = App.useApp()
   const teacher = useTeacherStore((s) => s.teacher)
@@ -81,7 +71,7 @@ export function HomePage() {
   /** "Lớp 3A" when the game is for the class being taught, else "Lớp 3". */
   const classLabel = (game: GameSummary) => (className && game.grade === classGrade ? className : gradeLabel(game.grade))
   const countLabel = (game: GameSummary) =>
-    gameRegistry[game.type].usesQuestions ? `${game.itemCount} ${ITEM_UNITS[game.type] ?? 'mục'}` : `${students.length} học sinh`
+    gameRegistry[game.type].usesQuestions ? itemsLabel(game.type, game.itemCount) : t('classes.studentCount', { count: students.length })
   const meta = (game: GameSummary) =>
     [classLabel(game), countLabel(game), relativeTimeLabel(game.updatedAt)].filter(Boolean).join(' · ')
 
@@ -96,15 +86,15 @@ export function HomePage() {
 
   const confirmArchive = (game: GameSummary) =>
     modal.confirm({
-      title: `Xóa "${game.title}" khỏi thư viện?`,
-      content: 'Trò chơi được lưu trữ, không mất kết quả cũ.',
-      okText: 'Xóa',
+      title: t('home.deleteConfirm', { title: game.title }),
+      content: t('home.deleteText'),
+      okText: t('common.delete'),
       okButtonProps: { danger: true },
-      cancelText: 'Giữ lại',
+      cancelText: t('classes.keep'),
       onOk: async () => {
         try {
           await archiveGame(game.id)
-          message.success('Đã xóa khỏi thư viện')
+          message.success(t('home.deleted'))
         } catch (error) {
           message.error(apiErrorMessage(error))
         }
@@ -124,7 +114,7 @@ export function HomePage() {
       <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
         <div className="flex min-w-0 flex-col gap-5">
           <HomeHero
-            greetingName={teacher?.greetingName ?? (guest ? 'bạn' : 'cô')}
+            greeting={teacher?.greetingName ? t('home.greeting', { name: teacher.greetingName }) : guest ? t('home.greetingGuest') : t('home.greetingTeacher')}
             className={className}
             studentCount={students.length}
             classes={classrooms

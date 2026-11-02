@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import type { FeedbackKind, FeedbackRequest } from '@/types/api'
 import { prepareImage } from '@/utils/images'
 
@@ -5,19 +6,39 @@ import { prepareImage } from '@/utils/images'
 export const MAX_FEEDBACK_MESSAGE = 2000
 export const MAX_SCREENSHOT_BYTES = 3 * 1024 * 1024
 
+/** A kind of feedback; its label and placeholder are read in the current language. */
+const kind = (key: FeedbackKind, emoji: string) => ({
+  kind: key,
+  emoji,
+  get label() {
+    return i18n.t(`feedback.kinds.${key}`)
+  },
+  get placeholder() {
+    return i18n.t(`feedback.placeholders.${key}`)
+  },
+})
+
 export const FEEDBACK_KINDS: { kind: FeedbackKind; label: string; emoji: string; placeholder: string }[] = [
-  { kind: 'BUG', label: 'Báo lỗi', emoji: '🐞', placeholder: 'Cô đang làm gì thì gặp lỗi? Màn hình hiện ra như thế nào?' },
-  { kind: 'IDEA', label: 'Đề xuất', emoji: '💡', placeholder: 'Cô muốn Lớp Vui có thêm trò chơi hay tính năng gì?' },
-  { kind: 'PRAISE', label: 'Khen', emoji: '❤️', placeholder: 'Cô thích điều gì ở Lớp Vui?' },
-  { kind: 'OTHER', label: 'Khác', emoji: '💬', placeholder: 'Cô muốn nhắn gì tới đội Lớp Vui?' },
+  kind('BUG', '🐞'),
+  kind('IDEA', '💡'),
+  kind('PRAISE', '❤️'),
+  kind('OTHER', '💬'),
 ]
 
+const rating = (value: 1 | 2 | 3 | 4 | 5, emoji: string) => ({
+  value,
+  emoji,
+  get label() {
+    return i18n.t(`feedback.ratings.${value}`)
+  },
+})
+
 export const RATINGS: { value: number; emoji: string; label: string }[] = [
-  { value: 1, emoji: '😞', label: 'Rất không hài lòng' },
-  { value: 2, emoji: '🙁', label: 'Chưa hài lòng' },
-  { value: 3, emoji: '😐', label: 'Bình thường' },
-  { value: 4, emoji: '🙂', label: 'Hài lòng' },
-  { value: 5, emoji: '😍', label: 'Rất hài lòng' },
+  rating(1, '😞'),
+  rating(2, '🙁'),
+  rating(3, '😐'),
+  rating(4, '🙂'),
+  rating(5, '😍'),
 ]
 
 /** What the teacher is writing, kept while the dialog is closed so nothing typed is lost. */
@@ -56,8 +77,8 @@ const SCREENSHOT_TYPES = ['image/png', 'image/jpeg', 'image/webp']
 
 /** Why this file cannot go with the feedback, or null. */
 export function screenshotProblem(file: { type: string; size: number }): string | null {
-  if (!SCREENSHOT_TYPES.includes(file.type)) return 'Cô chọn ảnh PNG, JPG hoặc WEBP nhé.'
-  if (file.size === 0) return 'File ảnh này bị trống.'
+  if (!SCREENSHOT_TYPES.includes(file.type)) return i18n.t('feedback.imageType')
+  if (file.size === 0) return i18n.t('feedback.imageEmpty')
   return null
 }
 
@@ -66,7 +87,7 @@ export async function prepareScreenshot(file: File): Promise<File> {
   const problem = screenshotProblem(file)
   if (problem) throw new Error(problem)
   const prepared = await prepareImage(file)
-  if (prepared.size > MAX_SCREENSHOT_BYTES) throw new Error('Ảnh lớn quá (tối đa 3 MB), cô chọn ảnh khác nhé.')
+  if (prepared.size > MAX_SCREENSHOT_BYTES) throw new Error(i18n.t('feedback.imageTooLarge'))
   return prepared
 }
 

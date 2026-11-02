@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import type { Dispatch, ReactNode } from 'react'
 import type { PlayableQuizQuestion } from '@/game-engine/quiz/quizRound'
 import { PlayFooter } from '@/game-engine/shared/PlayFooter'
@@ -30,7 +31,7 @@ export function TurnQuizPanel({ state, question, points, dispatch, move, moveDon
     <div className="flex min-w-0 flex-1 flex-col gap-3">
       <span className="flex items-center gap-2 text-xl font-extrabold">
         <span className="size-5 rounded-full" style={{ background: team.color }} />
-        Lượt của {team.name}
+        {i18n.t('play.common.turnOf', { team: team.name })}
       </span>
       <QuestionPanel
         question={question}
@@ -50,12 +51,12 @@ export function TurnQuizPanel({ state, question, points, dispatch, move, moveDon
           clearCorner={false}
           message={
             !state.revealed
-              ? 'Chọn đáp án nào?'
+              ? i18n.t('play.common.pickAnswer')
               : state.earned
                 ? moveDone
-                  ? 'Hay lắm!'
-                  : `Đúng rồi! ${team.name} ${move}.`
-                : 'Chưa đúng, mất lượt.'
+                  ? i18n.t('play.common.great')
+                  : i18n.t('play.common.rightMove', { team: team.name, move })
+                : i18n.t('play.common.wrongTurn')
           }
           revealed={state.revealed}
           onReveal={() => dispatch({ type: 'reveal' })}
@@ -65,7 +66,7 @@ export function TurnQuizPanel({ state, question, points, dispatch, move, moveDon
             dispatch({ type: 'next' })
           }}
           nextDisabled={!state.revealed || (state.earned && !moveDone)}
-          nextLabel="Lượt tiếp theo"
+          nextLabel={i18n.t('play.common.nextTurn')}
         />
       )}
     </div>

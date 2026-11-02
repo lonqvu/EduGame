@@ -1,5 +1,6 @@
 import { App } from 'antd'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { BrandLogo } from '@/components/ui/BrandLogo'
 import { ArrowLeftIcon, CheckIcon, HelpIcon } from '@/components/ui/icons'
@@ -25,6 +26,7 @@ interface AuthLayoutProps {
 
 /** Illustration on the left (wide screens), the card on the right. */
 export function AuthLayout({ showcase, showHelp = false, children }: AuthLayoutProps) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   return (
     <div className="flex min-h-dvh bg-[#F3F9FE]">
@@ -35,11 +37,11 @@ export function AuthLayout({ showcase, showHelp = false, children }: AuthLayoutP
           <div className="flex justify-end xl:pr-[clamp(0px,1.5vw,40px)]">
             <button
               type="button"
-              onClick={() => message.info('Cần hỗ trợ, cô liên hệ quản trị viên của trường nhé.')}
+              onClick={() => message.info(t('auth.helpText'))}
               className="flex cursor-pointer items-center gap-3 border-0 bg-transparent p-1 font-[inherit] text-[16px] font-bold text-[#2B4A8B] hover:text-primary"
             >
               <HelpIcon size={30} className="text-primary" />
-              Cần trợ giúp?
+              {t('auth.help')}
             </button>
           </div>
         )}

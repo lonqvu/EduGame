@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState, type ClipboardEvent, type DragEvent } from 'react'
 import { uploadGameImage } from '@/api/assetApi'
 import { needsLogin } from '@/store/loginPromptStore'
@@ -24,6 +25,7 @@ interface Upload {
  * gets the server URL once the upload is done, so a half-uploaded image is never saved.
  */
 export function ImagePicker({ gameId, value, onChange }: ImagePickerProps) {
+  const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [upload, setUpload] = useState<Upload>()
@@ -43,7 +45,7 @@ export function ImagePicker({ gameId, value, onChange }: ImagePickerProps) {
   )
 
   // Images are uploaded to the teacher's account: a visitor is asked to sign in first.
-  const signInFirst = () => needsLogin(window.location.pathname + window.location.search, 'Tải ảnh lên')
+  const signInFirst = () => needsLogin(window.location.pathname + window.location.search, 'upload')
 
   const pick = async (file: File | undefined) => {
     if (!file || upload || signInFirst()) return
@@ -86,11 +88,11 @@ export function ImagePicker({ gameId, value, onChange }: ImagePickerProps) {
   return (
     <div className="flex flex-col gap-2">
       <span className="font-extrabold">
-        Hình ảnh <span className="font-semibold text-ink-soft">(không bắt buộc)</span>
+        {t('editor.image.title')} <span className="font-semibold text-ink-soft">({t('common.optional')})</span>
       </span>
       <div
         role="group"
-        aria-label="Hình của câu hỏi"
+        aria-label={t('editor.image.label')}
         tabIndex={0}
         onPaste={onPaste}
         onDragOver={(e) => {
@@ -105,10 +107,10 @@ export function ImagePicker({ gameId, value, onChange }: ImagePickerProps) {
       >
         <div className="relative h-[90px] w-[120px] shrink-0 overflow-hidden rounded-[14px]">
           {shown ? (
-            <img src={shown} alt="Hình của câu hỏi" className={`h-full w-full object-cover ${upload ? 'opacity-50' : ''}`} />
+            <img src={shown} alt={t('editor.image.label')} className={`h-full w-full object-cover ${upload ? 'opacity-50' : ''}`} />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-[#FFE3D8] text-center text-sm font-bold text-[#8A3A16]">
-              Chưa có hình
+              {t('editor.image.none')}
             </div>
           )}
           {upload && (
@@ -120,10 +122,10 @@ export function ImagePicker({ gameId, value, onChange }: ImagePickerProps) {
         <div className="flex min-w-0 flex-col gap-2">
           {upload ? (
             <span role="status" className="font-bold text-primary-ink">
-              Đang tải ảnh lên… {percent}%
+              {t('editor.image.uploading', { percent })}
             </span>
           ) : (
-            <span className="text-ink-soft">Kéo ảnh vào đây, dán ảnh (Ctrl+V) hoặc</span>
+            <span className="text-ink-soft">{t('editor.image.drop')}</span>
           )}
           <div className="flex flex-wrap gap-2">
             {upload ? (
@@ -132,7 +134,7 @@ export function ImagePicker({ gameId, value, onChange }: ImagePickerProps) {
                 onClick={() => upload.controller.abort()}
                 className="min-h-12 cursor-pointer self-start rounded-full border-2 border-line bg-white px-5 py-2.5 font-[inherit] font-extrabold text-ink hover:border-danger"
               >
-                Hủy tải
+                {t('editor.image.cancel')}
               </button>
             ) : (
               <button
@@ -140,7 +142,7 @@ export function ImagePicker({ gameId, value, onChange }: ImagePickerProps) {
                 onClick={() => signInFirst() || inputRef.current?.click()}
                 className="min-h-12 cursor-pointer self-start rounded-full border-2 border-line bg-white px-5 py-2.5 font-[inherit] font-extrabold text-ink hover:border-primary"
               >
-                {value ? 'Đổi ảnh' : 'Chọn ảnh từ máy'}
+                {value ? t('editor.image.change') : t('editor.image.pick')}
               </button>
             )}
             {value && !upload && (
@@ -152,17 +154,17 @@ export function ImagePicker({ gameId, value, onChange }: ImagePickerProps) {
                 }}
                 className="min-h-12 cursor-pointer border-0 bg-transparent px-3 font-[inherit] font-bold text-danger hover:underline"
               >
-                Bỏ hình
+                {t('editor.image.remove')}
               </button>
             )}
           </div>
-          <span className="text-[13px] text-ink-soft">PNG, JPG, GIF hoặc WEBP. Ảnh lớn được tự thu nhỏ.</span>
+          <span className="text-[13px] text-ink-soft">{t('editor.image.hint')}</span>
           <input
             ref={inputRef}
             type="file"
             accept={ACCEPTED_IMAGE_TYPES.join(',')}
             hidden
-            aria-label="Chọn ảnh từ máy"
+            aria-label={t('editor.image.pick')}
             onChange={(e) => {
               void pick(e.target.files?.[0])
               // The same file can be picked again after an error.

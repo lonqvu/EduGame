@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BrandLogo } from '@/components/ui/BrandLogo'
 import { BookOpenFilledIcon, FilledStarIcon, UsersFilledIcon } from '@/components/ui/icons'
 
@@ -32,11 +33,12 @@ export interface ShowcaseContent {
   ground: 'foliage' | 'clouds'
 }
 
-const STATS: { icon: ReactNode; badge: string; value: string; label: string }[] = [
-  { icon: <UsersFilledIcon size={28} className="text-[#F06A5B]" />, badge: 'bg-[#FFE4E0]', value: '10.000+', label: 'Giáo viên tin dùng' },
-  { icon: <BookOpenFilledIcon size={26} className="text-primary" />, badge: 'bg-[#E3ECFF]', value: '100+', label: 'Trò chơi tương tác' },
-  { icon: <FilledStarIcon size={28} stroke="#F5B400" fill="#FFC928" />, badge: 'bg-sun-soft', value: '500.000+', label: 'Học sinh tham gia' },
-]
+/** The numbers under the picture (shown with "+", in the current language's digits: 10.000 / 10,000). */
+const STATS = [
+  { icon: <UsersFilledIcon size={28} className="text-[#F06A5B]" />, badge: 'bg-[#FFE4E0]', value: 10_000, label: 'teachers' },
+  { icon: <BookOpenFilledIcon size={26} className="text-primary" />, badge: 'bg-[#E3ECFF]', value: 100, label: 'gamesCount' },
+  { icon: <FilledStarIcon size={28} stroke="#F5B400" fill="#FFC928" />, badge: 'bg-sun-soft', value: 500_000, label: 'students' },
+] as const satisfies readonly { icon: ReactNode; badge: string; value: number; label: string }[]
 
 function fadeMask({ fadeTop, fadeBottom }: ShowcaseContent['image']): CSSProperties {
   const mask = [
@@ -52,10 +54,11 @@ function fadeMask({ fadeTop, fadeBottom }: ShowcaseContent['image']): CSSPropert
  * the text.
  */
 export function AuthShowcase({ content }: { content: ShowcaseContent }) {
+  const { t, i18n } = useTranslation()
   const { title, titleClass, subtitle, features, image, stats, ground } = content
   return (
     <section
-      aria-label="Giới thiệu Lớp Vui"
+      aria-label={t('auth.showcase.label')}
       className="relative hidden min-h-dvh w-[59%] shrink-0 flex-col overflow-hidden bg-[linear-gradient(180deg,#E6F4FE_0%,#F0F8FE_42%,#EAF5FD_72%,#D9EEFB_100%)] xl:flex"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
@@ -106,8 +109,8 @@ export function AuthShowcase({ content }: { content: ShowcaseContent }) {
               <div key={s.label} className="flex items-center gap-[clamp(8px,0.85vw,14px)]">
                 <span className={`flex size-[clamp(46px,3.5vw,58px)] shrink-0 items-center justify-center rounded-full ${s.badge}`}>{s.icon}</span>
                 <span className="flex flex-col gap-1">
-                  <span className="text-[clamp(16px,1.1vw,19px)] leading-none font-black text-[#14213D]">{s.value}</span>
-                  <span className="text-[clamp(12px,0.85vw,14px)] leading-tight font-semibold whitespace-nowrap text-ink-muted">{s.label}</span>
+                  <span className="text-[clamp(16px,1.1vw,19px)] leading-none font-black text-[#14213D]">{s.value.toLocaleString(i18n.language)}+</span>
+                  <span className="text-[clamp(12px,0.85vw,14px)] leading-tight font-semibold whitespace-nowrap text-ink-muted">{t(`auth.showcase.${s.label}`)}</span>
                 </span>
               </div>
             ))}

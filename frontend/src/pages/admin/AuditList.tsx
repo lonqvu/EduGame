@@ -1,11 +1,13 @@
+import { useTranslation } from 'react-i18next'
 import type { AdminAuditEntry } from '@/types/api'
 import { ACTION_LABELS, auditDetail, dateTime } from '@/utils/admin'
 
 /** Lines of the admin log, newest first. `withTarget`: also say who or what it was done to. */
 export function AuditList({ entries, withTarget = false }: { entries: AdminAuditEntry[]; withTarget?: boolean }) {
-  if (!entries.length) return <p className="m-0 text-[14px] text-ink-muted">Chưa có thao tác nào.</p>
+  const { t } = useTranslation()
+  if (!entries.length) return <p className="m-0 text-[14px] text-ink-muted">{t('admin.audit.none')}</p>
   return (
-    <ol aria-label="Nhật ký quản trị" className="m-0 flex list-none flex-col p-0">
+    <ol aria-label={t('admin.audit.list')} className="m-0 flex list-none flex-col p-0">
       {entries.map((e) => {
         const detail = auditDetail(e)
         return (

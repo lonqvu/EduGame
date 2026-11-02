@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import type { ReactNode } from 'react'
 import { CrosswordForm } from '@/editor/CrosswordForm'
 import { OrderSetForm } from '@/editor/OrderSetForm'
@@ -7,6 +8,7 @@ import { parseBulkQuestions } from '@/editor/parseBulkQuestions'
 import { QuestionForm } from '@/editor/QuestionForm'
 import { QuizForm } from '@/editor/QuizForm'
 import { SortSetForm } from '@/editor/SortSetForm'
+import type { Translation } from '@/i18n/locales/vi'
 import type { CrosswordRow, GameItem, GameType, ItemDraft, OrderSet, PairSet, Question, QuizQuestion, SortSet } from '@/types/game'
 import { emptyCrosswordRow, emptyOrderSet, emptyPairSet, emptyQuizQuestion, emptySortSet } from '@/utils/gameItems'
 
@@ -24,8 +26,12 @@ export interface ItemFormProps {
 }
 
 export interface EditorDefinition {
-  /** "Câu hỏi", "Bộ nối cặp"... */
+  /** "Câu hỏi", "Bộ nối cặp"... (heads the form: "Câu hỏi 3"). */
   noun: string
+  /** "câu hỏi", in a sentence. */
+  nounLower: string
+  /** "3 câu hỏi": a number of items. */
+  count: (count: number) => string
   /** "Thêm câu hỏi": the main add button (adds `newItem()`). */
   addLabel: string
   newItem: () => ItemDraft
@@ -39,67 +45,93 @@ export interface EditorDefinition {
     hint: string
     placeholder: string
     parse: (text: string) => ItemDraft[]
-    /** "câu", "bộ" for the "Thêm 3 câu" button. */
-    unit: string
   }
 }
 
-const MATCHING_LABELS: PairSetLabels = {
-  noun: 'Bộ nối cặp',
-  sideA: 'Cột trái',
-  sideB: 'Cột phải',
-  placeholderA: 'Ví dụ: Hà Nội',
-  placeholderB: 'Ví dụ: Hồ Gươm',
-  hint: 'Mỗi dòng là một cặp. Màn chiếu sẽ xáo trộn cột phải, học sinh nối lại cho đúng.',
+type Kind = keyof Translation['editor']['kinds']
+
+/** The labels of an editor, read in the current language when shown (editor.kinds.*). */
+function labelled(kind: Kind, parts: Pick<EditorDefinition, 'newItem' | 'form' | 'extraAdds'> & { parse: (text: string) => ItemDraft[] }): EditorDefinition {
+  const { parse, ...rest } = parts
+  return {
+    ...rest,
+    get noun() {
+      return i18n.t(`editor.kinds.${kind}.noun`)
+    },
+    get nounLower() {
+      return i18n.t(`editor.kinds.${kind}.nounLower`)
+    },
+    count: (count) => i18n.t(`editor.kinds.${kind}.count`, { count }),
+    get addLabel() {
+      return i18n.t(`editor.kinds.${kind}.add`)
+    },
+    get blankLabel() {
+      return i18n.t(`editor.kinds.${kind}.blank`)
+    },
+    paste: {
+      parse,
+      get title() {
+        return i18n.t(`editor.kinds.${kind}.pasteTitle`)
+      },
+      get hint() {
+        return i18n.t(`editor.kinds.${kind}.pasteHint`)
+      },
+      get placeholder() {
+        return i18n.t(`editor.kinds.${kind}.pastePlaceholder`)
+      },
+    },
+  }
 }
 
-const MEMORY_LABELS: PairSetLabels = {
-  noun: 'Bộ thẻ',
-  sideA: 'Thẻ thứ nhất',
-  sideB: 'Thẻ ghép đôi',
-  placeholderA: 'Ví dụ: Con mèo',
-  placeholderB: 'Ví dụ: Meo meo',
-  hint: 'Mỗi dòng là hai thẻ ghép đôi với nhau. Màn chiếu úp tất cả thẻ và xáo trộn, các đội lật hai thẻ mỗi lượt.',
-}
+/** The column names of a pair editor (matching or memory). */
+const pairLabels = (kind: 'matching' | 'memory'): PairSetLabels => ({
+  get noun() {
+    return i18n.t(`editor.kinds.${kind}.noun`)
+  },
+  get nounLower() {
+    return i18n.t(`editor.kinds.${kind}.nounLower`)
+  },
+  get sideA() {
+    return i18n.t(`editor.kinds.${kind}.sideA`)
+  },
+  get sideB() {
+    return i18n.t(`editor.kinds.${kind}.sideB`)
+  },
+  get placeholderA() {
+    return i18n.t(`editor.kinds.${kind}.placeholderA`)
+  },
+  get placeholderB() {
+    return i18n.t(`editor.kinds.${kind}.placeholderB`)
+  },
+  get hint() {
+    return i18n.t(`editor.kinds.${kind}.hint`)
+  },
+})
 
-const PAIRS_PASTE = {
-  hint: 'Mỗi dòng một cặp, hai vế cách nhau bởi dấu “=”. Cứ 12 cặp thành một bộ.',
-  unit: 'bộ',
-  parse: parseBulkPairs,
-}
+const MATCHING_LABELS = pairLabels('matching')
+const MEMORY_LABELS = pairLabels('memory')
 
 /** Quiz questions; Rung chuông vàng and Đua thuyền are played with the same questions. */
-const QUIZ_EDITOR: EditorDefinition = {
-  noun: 'Câu hỏi',
-  addLabel: 'Thêm câu trắc nghiệm',
+const QUIZ_EDITOR = labelled('quiz', {
   newItem: () => emptyQuizQuestion(),
-  extraAdds: [{ label: 'Thêm câu Đúng / Sai', newItem: () => emptyQuizQuestion(true) }],
-  blankLabel: 'Câu hỏi chưa có nội dung',
+  extraAdds: [
+    {
+      get label() {
+        return i18n.t('editor.addTrueFalse')
+      },
+      newItem: () => emptyQuizQuestion(true),
+    },
+  ],
   form: ({ item, ...props }) => <QuizForm question={item as QuizQuestion} {...props} />,
-  paste: {
-    title: 'Dán nhiều câu trắc nghiệm',
-    hint: 'Mỗi dòng một câu. Sau dấu “=” ghi đáp án đúng trước, các đáp án sai sau, cách nhau bởi “|”. Ghi “= Đúng” hoặc “= Sai” để tạo câu Đúng / Sai.',
-    placeholder: 'Thủ đô của Việt Nam? = Hà Nội | Huế | Đà Nẵng\n5 + 3 = ? = 8 | 7 | 9\nMặt trời mọc ở đằng Đông = Đúng',
-    parse: parseBulkQuiz,
-    unit: 'câu',
-  },
-}
+  parse: parseBulkQuiz,
+})
 
 /** Open questions (a clue and its answer): Lật ô and the word games. */
-const OPEN_EDITOR: EditorDefinition = {
-  noun: 'Câu hỏi',
-  addLabel: 'Thêm câu hỏi',
+const OPEN_EDITOR = labelled('open', {
   newItem: () => ({ text: '', answer: '', points: 20 }),
-  blankLabel: 'Câu hỏi chưa có nội dung',
   form: ({ item, ...props }) => <QuestionForm question={item as Question} {...props} />,
-  paste: {
-    title: 'Dán nhiều câu hỏi',
-    hint: 'Mỗi dòng một câu. Đáp án đặt sau dấu “=”.',
-    placeholder: 'Con gì kêu meo meo? = Con mèo\n25 + 13 = ? = 38\nThủ đô của Việt Nam? = Hà Nội',
-    parse: (text) => parseBulkQuestions(text, 20),
-    unit: 'câu',
-  },
-}
+  parse: (text) => parseBulkQuestions(text, 20),
+})
 
 export const EDITOR_DEFINITIONS: Partial<Record<GameType, EditorDefinition>> = {
   GRID_BOARD: OPEN_EDITOR,
@@ -123,62 +155,29 @@ export const EDITOR_DEFINITIONS: Partial<Record<GameType, EditorDefinition>> = {
   BUILD_TOWER: QUIZ_EDITOR,
   BEE_FLOWER: QUIZ_EDITOR,
   BINGO: QUIZ_EDITOR,
-  MATCHING: {
-    noun: MATCHING_LABELS.noun,
-    addLabel: 'Thêm bộ nối cặp',
+  MATCHING: labelled('matching', {
     newItem: emptyPairSet,
-    blankLabel: 'Bộ chưa có cặp nào',
     form: ({ item, ...props }) => <PairSetForm set={item as PairSet} labels={MATCHING_LABELS} {...props} />,
-    paste: { ...PAIRS_PASTE, title: 'Dán nhiều cặp', placeholder: 'Hà Nội = Hồ Gươm\nHuế = Sông Hương\n3 x 4 = 12' },
-  },
-  MEMORY: {
-    noun: MEMORY_LABELS.noun,
-    addLabel: 'Thêm bộ thẻ',
+    parse: parseBulkPairs,
+  }),
+  MEMORY: labelled('memory', {
     newItem: emptyPairSet,
-    blankLabel: 'Bộ chưa có thẻ nào',
     form: ({ item, ...props }) => <PairSetForm set={item as PairSet} labels={MEMORY_LABELS} {...props} />,
-    paste: { ...PAIRS_PASTE, title: 'Dán nhiều cặp thẻ', placeholder: 'Con mèo = Meo meo\nCon chó = Gâu gâu\n5 x 5 = 25' },
-  },
-  CROSSWORD: {
-    noun: 'Hàng ngang',
-    addLabel: 'Thêm hàng ngang',
+    parse: parseBulkPairs,
+  }),
+  CROSSWORD: labelled('crossword', {
     newItem: emptyCrosswordRow,
-    blankLabel: 'Hàng chưa có gợi ý',
     form: ({ item, items, ...props }) => <CrosswordForm row={item as CrosswordRow} rows={items} {...props} />,
-    paste: {
-      title: 'Dán nhiều hàng ngang',
-      hint: 'Mỗi dòng một hàng: câu gợi ý, dấu “=”, rồi đáp án. Đặt chữ nằm ở cột từ khóa trong ngoặc vuông.',
-      placeholder: 'Thứ gì mọc ở đằng Đông? = MẶT T[R]ỜI\nĐồ dùng để kẻ đường thẳng? = CÁI TH[Ư]ỚC',
-      parse: parseBulkCrossword,
-      unit: 'hàng',
-    },
-  },
-  ORDERING: {
-    noun: 'Bài sắp xếp',
-    addLabel: 'Thêm bài sắp xếp',
+    parse: parseBulkCrossword,
+  }),
+  ORDERING: labelled('ordering', {
     newItem: emptyOrderSet,
-    blankLabel: 'Bài chưa có thẻ nào',
     form: ({ item, ...props }) => <OrderSetForm set={item as OrderSet} {...props} />,
-    paste: {
-      title: 'Dán nhiều bài sắp xếp',
-      hint: 'Mỗi dòng một bài: đề bài, dấu “=”, rồi các thẻ theo đúng thứ tự, cách nhau bởi “|”.',
-      placeholder: 'Xếp từ bé đến lớn = 12 | 25 | 38 | 47\nGhép thành câu = Em | rất | yêu | trường',
-      parse: parseBulkOrder,
-      unit: 'bài',
-    },
-  },
-  SORTING: {
-    noun: 'Bộ phân loại',
-    addLabel: 'Thêm bộ phân loại',
+    parse: parseBulkOrder,
+  }),
+  SORTING: labelled('sorting', {
     newItem: emptySortSet,
-    blankLabel: 'Bộ chưa có giỏ nào',
     form: ({ item, ...props }) => <SortSetForm set={item as SortSet} {...props} />,
-    paste: {
-      title: 'Dán bộ phân loại',
-      hint: 'Mỗi dòng một giỏ: tên giỏ, dấu “=”, rồi các thẻ cách nhau bởi dấu phẩy. Để một dòng trống giữa hai bộ.',
-      placeholder: 'Con vật này ăn gì?\nĂn cỏ = Bò, Dê, Ngựa\nĂn thịt = Hổ, Sư tử, Sói',
-      parse: parseBulkSort,
-      unit: 'bộ',
-    },
-  },
+    parse: parseBulkSort,
+  }),
 }

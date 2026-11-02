@@ -1,19 +1,12 @@
+import i18n from 'i18next'
+import { translatedLabels } from '@/i18n/labels'
 import type { ClassroomResponse, ClassroomStatus, StudentResponse } from '@/types/api'
 
 /** Animals a class or a student can have (Classroom.AVATARS on the backend). */
 export const CLASS_AVATARS = ['bear', 'rabbit', 'lion', 'cat', 'fox', 'panda', 'owl', 'frog'] as const
 export type ClassAvatar = (typeof CLASS_AVATARS)[number]
 
-export const AVATAR_NAMES: Record<ClassAvatar, string> = {
-  bear: 'Gấu',
-  rabbit: 'Thỏ',
-  lion: 'Sư tử',
-  cat: 'Mèo',
-  fox: 'Cáo',
-  panda: 'Gấu trúc',
-  owl: 'Cú mèo',
-  frog: 'Ếch',
-}
+export const AVATAR_NAMES = translatedLabels(CLASS_AVATARS, (animal) => `classes.animals.${animal}`)
 
 /** Limits the backend enforces (ClassroomRules). */
 export const MAX_CLASSROOMS = 30
@@ -39,9 +32,9 @@ export function studentAvatarSrc(student: Pick<StudentResponse, 'id' | 'avatar'>
 }
 
 /** "Lớp 1A" ("Lớp" is not repeated when the teacher typed it). */
-export const classTitle = (name: string) => (/^lớp\s/i.test(name) ? name : `Lớp ${name}`)
+export const classTitle = (name: string) => (/^(lớp|class)\s/i.test(name) ? name : i18n.t('classes.title', { name }))
 
-export const STATUS_LABELS: Record<ClassroomStatus, string> = { ACTIVE: 'Đang hoạt động', PAUSED: 'Tạm ngưng' }
+export const STATUS_LABELS = translatedLabels<ClassroomStatus>(['ACTIVE', 'PAUSED'], (status) => `classes.status.${status}`)
 
 export type ClassTab = 'ALL' | ClassroomStatus
 

@@ -1,29 +1,32 @@
 import { create } from 'zustand'
 import { isGuest } from '@/store/authStore'
 
+/** What needs an account; the "Cần đăng nhập" dialog names it (loginPrompt.features.*). */
+export type LoginFeature = 'questionSets' | 'classes' | 'reports' | 'profile' | 'admin' | 'upload' | 'page'
+
 /**
- * Pages only a signed-in teacher has (their data lives on the server), with the name the "Cần đăng nhập" dialog
- * gives them. A visitor plays games, with the sample questions or their own, without an account.
+ * Pages only a signed-in teacher has (their data lives on the server), with the feature the "Cần đăng nhập" dialog
+ * names. A visitor plays games, with the sample questions or their own, without an account.
  */
-const LOGIN_ONLY: { prefix: string; feature: string }[] = [
-  { prefix: '/question-sets', feature: 'Bộ câu hỏi' },
-  { prefix: '/classes', feature: 'Quản lý lớp học' },
-  { prefix: '/reports', feature: 'Báo cáo' },
-  { prefix: '/profile', feature: 'Hồ sơ' },
-  { prefix: '/admin', feature: 'Quản trị' },
+const LOGIN_ONLY: { prefix: string; feature: LoginFeature }[] = [
+  { prefix: '/question-sets', feature: 'questionSets' },
+  { prefix: '/classes', feature: 'classes' },
+  { prefix: '/reports', feature: 'reports' },
+  { prefix: '/profile', feature: 'profile' },
+  { prefix: '/admin', feature: 'admin' },
 ]
 
-/** "Bộ câu hỏi" for /question-sets/abc; undefined for a page anyone opens. */
-export function loginOnlyFeature(pathname: string): string | undefined {
+/** 'questionSets' for /question-sets/abc; undefined for a page anyone opens. */
+export function loginOnlyFeature(pathname: string): LoginFeature | undefined {
   return LOGIN_ONLY.find(({ prefix }) => pathname === prefix || pathname.startsWith(`${prefix}/`))?.feature
 }
 
 interface LoginPromptState {
-  /** What the visitor tried to open ("Quản lý lớp học"), while the dialog is open. */
-  feature: string | null
+  /** What the visitor tried to open, while the dialog is open. */
+  feature: LoginFeature | null
   /** Where to go once signed in. */
   target: string
-  open: (feature: string, target: string) => void
+  open: (feature: LoginFeature, target: string) => void
   close: () => void
 }
 

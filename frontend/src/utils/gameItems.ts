@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import type { CreateGameItemRequest, GameItemResponse } from '@/types/api'
 import { answerLetters } from '@/game-engine/crossword/letters'
 import type {
@@ -66,9 +67,20 @@ const gridCodec: ItemCodec<Question> = {
 
 // --- QUIZ -------------------------------------------------------------------------------------------------------
 
+/** The options of a true / false question; their texts are read in the teacher's language when copied. */
 export const TRUE_FALSE_OPTIONS: ChoiceOption[] = [
-  { id: 'true', text: 'Đúng' },
-  { id: 'false', text: 'Sai' },
+  {
+    id: 'true',
+    get text() {
+      return i18n.t('questionSets.true')
+    },
+  },
+  {
+    id: 'false',
+    get text() {
+      return i18n.t('questionSets.false')
+    },
+  },
 ]
 
 /** Next free option id: a, b, c... */

@@ -1,4 +1,6 @@
-import { gameRegistry, isGameType } from '@/game-engine/registry'
+import i18n from 'i18next'
+import { durationLabel, isGameType, itemsLabel, playersLabel } from '@/game-engine/registry'
+import { gameDescription, gameName } from '@/i18n/gameNames'
 import type {
   CreateGameItemRequest,
   GameItemResponse,
@@ -14,12 +16,20 @@ const QUESTION_ITEM_TYPE = 'OPEN_QUESTION'
 
 export function toGameTemplate(t: GameTemplateResponse): GameTemplate | null {
   if (!isGameType(t.code)) return null
+  const type = t.code
   return {
-    type: t.code,
+    type,
     category: t.categoryCode as GameCategory,
-    name: t.name,
-    description: t.description ?? '',
-    tags: [gameRegistry[t.code].players, gameRegistry[t.code].duration],
+    // Read in the current language when shown (the server's text for a game not translated yet).
+    get name() {
+      return gameName(t.code, t.name)
+    },
+    get description() {
+      return gameDescription(t.code, t.description ?? '')
+    },
+    get tags() {
+      return [playersLabel(type), durationLabel(type)]
+    },
     isNew: t.isNew,
   }
 }
@@ -84,6 +94,6 @@ export function toStudent(s: StudentResponse): Student {
 }
 
 /** "24 câu", "1 bộ thẻ"... */
-export const itemCountLabel = (game: GameSummary) => `${game.itemCount} ${gameRegistry[game.type].itemUnit}`
+export const itemCountLabel = (game: GameSummary) => itemsLabel(game.type, game.itemCount)
 
-export const gradeLabel = (grade?: number) => (grade ? `Lớp ${grade}` : 'Chưa chọn lớp')
+export const gradeLabel = (grade?: number) => (grade ? i18n.t('questionSets.grade', { grade }) : i18n.t('chooser.noGrade'))

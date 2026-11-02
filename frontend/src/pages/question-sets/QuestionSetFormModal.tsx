@@ -1,11 +1,13 @@
 import { App, Form, Input, Modal, Select } from 'antd'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { QuestionSetRequest, QuestionSetSummaryResponse, SubjectCode } from '@/types/api'
 import { apiErrorMessage } from '@/utils/apiError'
 import { MAX_DESCRIPTION, MAX_TITLE, SUBJECTS } from '@/utils/questionSets'
 
 /** 0 = "Mọi khối" (no grade). */
-const GRADES = [{ value: 0, label: 'Mọi khối' }, ...Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `Lớp ${i + 1}` }))]
+/** 0: every grade. */
+const GRADES = Array.from({ length: 13 }, (_, grade) => grade)
 
 interface FormValues {
   title: string
@@ -27,6 +29,7 @@ interface QuestionSetFormModalProps {
 
 /** Create a set, or edit its title, subject, grade and description. */
 export function QuestionSetFormModal({ open, set, defaults, onClose, onSubmit }: QuestionSetFormModalProps) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [form] = Form.useForm<FormValues>()
   const [saving, setSaving] = useState(false)
@@ -62,9 +65,9 @@ export function QuestionSetFormModal({ open, set, defaults, onClose, onSubmit }:
   return (
     <Modal
       open={open}
-      title={set ? 'Sửa thông tin bộ câu hỏi' : 'Tạo bộ câu hỏi mới'}
-      okText={set ? 'Lưu thay đổi' : 'Tạo bộ câu hỏi'}
-      cancelText="Hủy"
+      title={set ? t('questionSets.form.editTitle') : t('questionSets.form.createTitle')}
+      okText={set ? t('common.saveChanges') : t('questionSets.create')}
+      cancelText={t('common.cancel')}
       onOk={() => form.submit()}
       onCancel={onClose}
       confirmLoading={saving}
@@ -74,25 +77,28 @@ export function QuestionSetFormModal({ open, set, defaults, onClose, onSubmit }:
       <Form<FormValues> form={form} layout="vertical" requiredMark={false} onFinish={(v) => void submit(v)} className="pt-2">
         <Form.Item
           name="title"
-          label="Tên bộ câu hỏi"
+          label={t('questionSets.form.name')}
           rules={[
-            { required: true, whitespace: true, message: 'Cô đặt tên cho bộ câu hỏi nhé' },
-            { max: MAX_TITLE, message: `Tên dài tối đa ${MAX_TITLE} ký tự` },
+            { required: true, whitespace: true, message: t('questionSets.form.nameRequired') },
+            { max: MAX_TITLE, message: t('questionSets.form.nameTooLong', { count: MAX_TITLE }) },
           ]}
         >
-          <Input size="large" placeholder="VD: Toán lớp 2 - Phép cộng trong phạm vi 100" maxLength={MAX_TITLE} showCount autoFocus />
+          <Input size="large" placeholder={t('questionSets.form.namePlaceholder')} maxLength={MAX_TITLE} showCount autoFocus />
         </Form.Item>
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-          <Form.Item name="subject" label="Môn học">
+          <Form.Item name="subject" label={t('questionSets.form.subject')}>
             <Select size="large" options={SUBJECTS.map((s) => ({ value: s.code, label: s.label }))} />
           </Form.Item>
-          <Form.Item name="grade" label="Khối lớp">
-            <Select size="large" options={GRADES} />
+          <Form.Item name="grade" label={t('questionSets.form.grade')}>
+            <Select
+              size="large"
+              options={GRADES.map((grade) => ({ value: grade, label: grade ? t('questionSets.grade', { grade }) : t('questionSets.allGrades') }))}
+            />
           </Form.Item>
         </div>
-        <Form.Item name="description" label="Mô tả (không bắt buộc)" className="mb-1">
+        <Form.Item name="description" label={t('questionSets.form.description')} className="mb-1">
           <Input.TextArea
-            placeholder="Bộ câu hỏi dùng để làm gì, cho bài học nào..."
+            placeholder={t('questionSets.form.descriptionPlaceholder')}
             autoSize={{ minRows: 3, maxRows: 6 }}
             maxLength={MAX_DESCRIPTION}
             showCount

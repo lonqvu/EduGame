@@ -1,15 +1,18 @@
 import { App } from 'antd'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 /** "Hoặc đăng nhập bằng" + Google / Microsoft (not available yet). */
-export function SocialLogin({ label, action }: { label: string; action: string }) {
+export function SocialLogin({ action }: { action: 'login' | 'register' }) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
-  const soon = (provider: string) => () => message.info(`${action} bằng ${provider} đang được hoàn thiện.`)
+  const soon = (provider: string) => () =>
+    message.info(action === 'login' ? t('auth.socialSoonLogin', { provider }) : t('auth.socialSoonRegister', { provider }))
   return (
     <>
       <div className="mt-[clamp(16px,3.2vh,30px)] flex items-center gap-4 text-[15px] font-semibold text-ink-muted">
         <span className="h-px flex-1 bg-line" />
-        {label}
+        {action === 'login' ? t('auth.login.social') : t('auth.register.social')}
         <span className="h-px flex-1 bg-line" />
       </div>
       <div className="mt-[clamp(12px,2.3vh,22px)] grid grid-cols-2 gap-3.5">

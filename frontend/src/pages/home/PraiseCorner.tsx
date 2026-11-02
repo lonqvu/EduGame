@@ -1,5 +1,6 @@
 import { Modal } from 'antd'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ArrowRightIcon, ChartIcon, ChevronDownIcon, FilledStarIcon } from '@/components/ui/icons'
 import { kidAvatar } from '@/pages/home/homeAssets'
 import { Art, Panel, PanelHeader } from '@/pages/home/homeUi'
@@ -36,6 +37,7 @@ const Star = ({ size = 18 }: { size?: number }) => (
 
 /** Weekly (or all-time) star ranking: podium for the top 3, then the next five; a nudge when nobody has a star yet. */
 export function PraiseCorner({ students, period, onPeriodChange, onPraise }: PraiseCornerProps) {
+  const { t } = useTranslation()
   const [fullOpen, setFullOpen] = useState(false)
   const [periodOpen, setPeriodOpen] = useState(false)
 
@@ -49,7 +51,7 @@ export function PraiseCorner({ students, period, onPeriodChange, onPraise }: Pra
     <Panel className="flex flex-col px-[18px] pt-[16px] pb-[14px]">
       <PanelHeader
         icon={<Art name="icon-star" className="h-[28px] w-[28px]" />}
-        title="Góc tuyên dương"
+        title={t('home.praise.title')}
         action={
           <div className="relative">
             <button
@@ -59,7 +61,7 @@ export function PraiseCorner({ students, period, onPeriodChange, onPraise }: Pra
               onClick={() => setPeriodOpen((o) => !o)}
               className="flex h-[32px] cursor-pointer items-center gap-2 rounded-[11px] whitespace-nowrap border border-line bg-white px-3 font-[inherit] text-[13px] font-bold text-ink"
             >
-              {period === 'week' ? 'Tuần này' : 'Tất cả'}
+              {period === 'week' ? t('home.praise.week') : t('home.praise.all')}
               <ChevronDownIcon size={15} strokeWidth={2.6} />
             </button>
             {periodOpen && (
@@ -81,7 +83,7 @@ export function PraiseCorner({ students, period, onPeriodChange, onPraise }: Pra
                         p === period ? 'bg-primary-soft text-primary-ink' : 'bg-transparent text-ink hover:bg-surface-soft'
                       }`}
                     >
-                      {p === 'week' ? 'Tuần này' : 'Tất cả'}
+                      {p === 'week' ? t('home.praise.week') : t('home.praise.all')}
                     </button>
                   </li>
                 ))}
@@ -92,7 +94,7 @@ export function PraiseCorner({ students, period, onPeriodChange, onPraise }: Pra
       />
 
       {ranked.length === 0 ? (
-        <p className="m-0 py-8 text-center text-ink-soft">Lớp chưa có học sinh.</p>
+        <p className="m-0 py-8 text-center text-ink-soft">{t('home.praise.noStudents')}</p>
       ) : ranked.every((r) => r.stars === 0) ? (
         // A podium of zeros would rank the class by name: say what to do instead.
         <div className="flex flex-col items-center gap-1 px-2 pt-4 pb-1 text-center">
@@ -101,15 +103,15 @@ export function PraiseCorner({ students, period, onPeriodChange, onPraise }: Pra
               <img key={n} src={kidAvatar(n)} alt="" className="-mx-1.5 size-[46px] rounded-full border-[3px] border-white bg-[#FFF4D6] object-cover" />
             ))}
           </span>
-          <span className="text-[15px] font-extrabold">{period === 'week' ? 'Tuần này chưa có bạn nào được khen' : 'Lớp chưa có bạn nào được khen'}</span>
-          <span className="text-[13.5px] text-ink-soft">Tặng sao khi lớp chơi trò, hoặc khen ngay trong trang lớp học.</span>
+          <span className="text-[15px] font-extrabold">{period === 'week' ? t('home.praise.noneThisWeek') : t('home.praise.noneYet')}</span>
+          <span className="text-[13.5px] text-ink-soft">{t('home.praise.hint')}</span>
           <button
             type="button"
             onClick={onPraise}
             className="mt-3 flex h-10 cursor-pointer items-center gap-2 rounded-full border-0 bg-[#FFF1C2] px-5 font-[inherit] text-[14px] font-black text-[#7A5600] hover:brightness-95"
           >
             <Star size={17} />
-            Khen học sinh
+            {t('home.praise.praise')}
           </button>
         </div>
       ) : (
@@ -154,7 +156,7 @@ export function PraiseCorner({ students, period, onPeriodChange, onPraise }: Pra
             className="mt-[12px] flex h-[41px] cursor-pointer items-center justify-center gap-2.5 rounded-[12px] border border-[#BFD3F7] bg-[#F4F8FE] font-[inherit] text-[14.5px] font-bold text-primary hover:border-primary"
           >
             <ChartIcon size={19} />
-            Xem bảng xếp hạng đầy đủ
+            {t('home.praise.fullRanking')}
             <ArrowRightIcon size={16} strokeWidth={2.4} />
           </button>
         </>
@@ -164,7 +166,7 @@ export function PraiseCorner({ students, period, onPeriodChange, onPraise }: Pra
         open={fullOpen}
         onCancel={() => setFullOpen(false)}
         footer={null}
-        title={<span className="text-xl font-black">Bảng xếp hạng {period === 'week' ? 'tuần này' : 'từ trước tới nay'}</span>}
+        title={<span className="text-xl font-black">{period === 'week' ? t('home.praise.rankingWeek') : t('home.praise.rankingAll')}</span>}
       >
         <ol className="m-0 flex max-h-[60vh] list-none flex-col overflow-y-auto p-0">
           {ranked.map((r) => (

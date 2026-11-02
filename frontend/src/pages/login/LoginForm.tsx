@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { ArrowRightIcon, LockIcon, MailIcon } from '@/components/ui/icons'
 import { AuthCard, Checkbox, Field, FormError, inputClass, linkClass, primaryButtonClass } from '@/pages/login/authUi'
@@ -16,6 +17,7 @@ interface LoginValues {
 
 /** The white sign-in card. */
 export function LoginForm({ onSignedIn }: { onSignedIn: () => void }) {
+  const { t } = useTranslation()
   const login = useAuthStore((s) => s.login)
   const [passwordType, passwordToggle] = usePasswordToggle()
   const [error, setError] = useState<string | null>(null)
@@ -38,24 +40,24 @@ export function LoginForm({ onSignedIn }: { onSignedIn: () => void }) {
   })
 
   return (
-    <AuthCard title="Đăng nhập" subtitle="Chào mừng bạn quay trở lại Lớp Vui!">
+    <AuthCard title={t('auth.login.title')} subtitle={t('auth.login.subtitle')}>
       <form noValidate onSubmit={onSubmit} className="mt-[clamp(16px,3.6vh,34px)] flex flex-col">
-        <Field label="Email" htmlFor="login-username" icon={<MailIcon size={22} />} error={errors.username?.message}>
+        <Field label={t('auth.email')} htmlFor="login-username" icon={<MailIcon size={22} />} error={errors.username?.message}>
           <input
             id="login-username"
             type="text"
             inputMode="email"
             autoComplete="username"
             autoFocus
-            placeholder="Nhập email của bạn"
+            placeholder={t('auth.emailPlaceholder')}
             aria-invalid={errors.username ? true : undefined}
-            {...register('username', { validate: (v) => v.trim() !== '' || 'Vui lòng nhập email' })}
+            {...register('username', { validate: (v) => v.trim() !== '' || t('auth.login.emailRequired') })}
             className={inputClass}
           />
         </Field>
 
         <Field
-          label="Mật khẩu"
+          label={t('auth.password')}
           htmlFor="login-password"
           icon={<LockIcon size={22} />}
           error={errors.password?.message}
@@ -66,36 +68,36 @@ export function LoginForm({ onSignedIn }: { onSignedIn: () => void }) {
             id="login-password"
             type={passwordType}
             autoComplete="current-password"
-            placeholder="Nhập mật khẩu"
+            placeholder={t('auth.passwordPlaceholder')}
             aria-invalid={errors.password ? true : undefined}
-            {...register('password', { required: 'Vui lòng nhập mật khẩu' })}
+            {...register('password', { required: t('auth.login.passwordRequired') })}
             className={`${inputClass} pr-14`}
           />
         </Field>
 
         <div className="mt-[clamp(12px,2.3vh,22px)] flex items-center justify-between gap-3">
           <Checkbox checked={remember} input={<input type="checkbox" {...register('remember')} className="peer sr-only" />}>
-            Ghi nhớ đăng nhập
+            {t('auth.login.remember')}
           </Checkbox>
           <Link to="/forgot-password" className={linkClass}>
-            Quên mật khẩu?
+            {t('auth.login.forgot')}
           </Link>
         </div>
 
         <FormError message={error} />
 
         <button type="submit" disabled={isSubmitting} className={`mt-[clamp(14px,2.6vh,24px)] ${primaryButtonClass}`}>
-          {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+          {isSubmitting ? t('auth.login.submitting') : t('auth.login.submit')}
           {!isSubmitting && <ArrowRightIcon size={22} strokeWidth={2.4} />}
         </button>
       </form>
 
-      <SocialLogin label="Hoặc đăng nhập bằng" action="Đăng nhập" />
+      <SocialLogin action="login" />
 
       <p className="mt-[clamp(14px,3.6vh,36px)] mb-0 flex flex-wrap items-center justify-center gap-x-2 text-[16px] font-semibold text-ink-muted">
-        Chưa có tài khoản?
+        {t('auth.login.noAccount')}
         <Link to="/register" className={`${linkClass} flex items-center gap-2`}>
-          Đăng ký ngay
+          {t('auth.login.signUp')}
           <ArrowRightIcon size={18} strokeWidth={2.4} />
         </Link>
       </p>

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useReducer, useState } from 'react'
 import { CheckIcon, ChevronRightIcon } from '@/components/ui/icons'
@@ -43,7 +44,7 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
   }, [state.lastWrong])
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có bộ phân loại nào đủ 2 giỏ có tên và 2 thẻ đã chọn giỏ." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.sorting')} backTo={backTo} />
   }
 
   const restart = () => {
@@ -53,7 +54,7 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
   }
 
   if (state.finished) {
-    return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="Phân loại đúng nhiều thẻ nhất" streakUnit="thẻ" />
+    return <TeamResults teams={state.teams} onPlayAgain={restart} mostCorrectLabel="sort" streakUnit="card" />
   }
 
   const set = playable[state.setIndex]
@@ -65,7 +66,7 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
   const wrongGroup = state.lastWrong?.groupId
 
   return (
-    <PlayFrame title={game.title} progress={`Bộ ${state.setIndex + 1} / ${playable.length} · Còn ${state.deck.length} thẻ`} backTo={backTo}>
+    <PlayFrame title={game.title} progress={i18n.t('play.sorting.progress', { number: state.setIndex + 1, total: playable.length, left: state.deck.length })} backTo={backTo}>
       <TeamBar teams={state.teams} activeId={complete ? null : team.id} />
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3">
@@ -75,7 +76,7 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
             {complete ? (
               <motion.span key="done" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-3 font-display text-[44px] font-extrabold">
                 <CheckIcon size={44} className="text-success" />
-                Đã phân loại xong!
+                {i18n.t('play.sorting.done')}
               </motion.span>
             ) : (
               card && (
@@ -85,7 +86,7 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
                   animate={state.lastWrong ? { x: [0, -14, 14, -8, 8, 0], opacity: 1, y: 0, rotate: 0 } : { y: 0, opacity: 1, rotate: 0 }}
                   exit={{ y: 120, opacity: 0, scale: 0.6 }}
                   transition={{ duration: 0.4 }}
-                  aria-label="Thẻ đang chờ"
+                  aria-label={i18n.t('play.sorting.waiting')}
                   className={`flex min-w-[320px] items-center justify-center rounded-[28px] border-[5px] bg-white px-10 py-6 font-display text-[52px] leading-none font-extrabold shadow-[0_8px_0_rgba(31,42,68,0.14)] ${
                     state.lastWrong ? 'border-danger' : 'border-white'
                   }`}
@@ -121,7 +122,7 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
               }}
               animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : {}}
               transition={{ duration: 0.45 }}
-              aria-label={`Giỏ ${group.text}`}
+              aria-label={i18n.t('play.sorting.basket', { name: group.text })}
               className="flex h-[188px] cursor-pointer flex-col overflow-hidden rounded-[26px] border-[5px] bg-white p-0 text-left font-[inherit] text-ink disabled:cursor-default"
               style={{ borderColor: wrong ? '#A3361A' : color }}
             >
@@ -153,19 +154,19 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
       <div className="flex items-center justify-between gap-4">
         <span className="flex items-center gap-2.5 text-lg font-extrabold text-ink-soft">
           {complete ? (
-            'Mọi thẻ đã vào đúng giỏ.'
+            i18n.t('play.sorting.allIn')
           ) : state.lastWrong ? (
-            'Chưa đúng giỏ, thẻ quay lại cuối chồng.'
+            i18n.t('play.sorting.wrong')
           ) : (
             <>
               <span className="size-5 rounded-full" style={{ background: team.color }} />
-              {team.name}: thẻ này bỏ vào giỏ nào?
+              {i18n.t('play.sorting.turn', { team: team.name })}
             </>
           )}
         </span>
         <div className="flex shrink-0 gap-3">
           <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} bg-white text-ink`}>
-            Kết thúc
+            {i18n.t('play.common.finish')}
           </button>
           <button
             type="button"
@@ -176,7 +177,7 @@ export function SortingScreen({ game, sets, settings }: SortingScreenProps) {
             }}
             className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
           >
-            {isLast ? 'Xem kết quả' : 'Bộ tiếp theo'}
+            {isLast ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextSet')}
             <ChevronRightIcon size={20} />
           </button>
         </div>

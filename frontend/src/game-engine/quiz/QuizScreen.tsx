@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { useReducer, useState } from 'react'
 import { ChevronRightIcon, EyeIcon } from '@/components/ui/icons'
 import { Countdown, QuizOption } from '@/game-engine/quiz/QuizParts'
@@ -33,7 +34,7 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
   const backTo = editPath(game.id)
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   }
 
   const restart = () => {
@@ -53,7 +54,7 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
   return (
     <PlayFrame
       title={game.title}
-      progress={`Câu ${state.index + 1} / ${playable.length}`}
+      progress={i18n.t('play.common.question', { number: state.index + 1, total: playable.length })}
       extra={
         rules.timeLimitSec > 0 && (
           <Countdown key={`${round}-${state.index}`} seconds={rules.timeLimitSec} paused={state.revealed} />
@@ -64,7 +65,7 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
       <TeamBar
         teams={state.teams}
         activeId={state.answeringTeamId}
-        activeLabel="Đang trả lời"
+        activeLabel={i18n.t('play.common.answering')}
         onPick={state.revealed ? undefined : (teamId) => dispatch({ type: 'pickTeam', teamId })}
         disabledIds={state.revealed ? [] : state.triedTeams}
       />
@@ -112,10 +113,10 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
       <div className="flex items-center justify-between gap-4">
         <span className="text-lg font-extrabold text-ink-soft">
           {state.revealed
-            ? 'Đáp án đúng đã hiện.'
+            ? i18n.t('play.common.answerShown')
             : answering
-              ? `${answering.name} chọn đáp án nào? Cô bấm vào đáp án đội nói.`
-              : 'Đội nào giành được quyền trả lời? Cô bấm vào tên đội.'}
+              ? i18n.t('play.common.whichAnswer', { team: answering.name })
+              : i18n.t('play.common.whoBuzzed')}
         </span>
         <div className="flex shrink-0 gap-3">
           {!state.revealed && (
@@ -128,11 +129,11 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
               className={`${playButtonClass} bg-sun-soft text-ink`}
             >
               <EyeIcon size={22} />
-              Hiện đáp án
+              {i18n.t('play.common.showAnswer')}
             </button>
           )}
           <button type="button" onClick={() => dispatch({ type: 'finish' })} className={`${playButtonClass} bg-white text-ink`}>
-            Kết thúc
+            {i18n.t('play.common.finish')}
           </button>
           <button
             type="button"
@@ -143,7 +144,7 @@ export function QuizScreen({ game, questions, settings }: QuizScreenProps) {
             }}
             className={`${playButtonClass} bg-primary text-white hover:brightness-110`}
           >
-            {isLast ? 'Xem kết quả' : 'Câu tiếp theo'}
+            {isLast ? i18n.t('play.common.seeResults') : i18n.t('play.common.nextQuestion')}
             <ChevronRightIcon size={20} />
           </button>
         </div>

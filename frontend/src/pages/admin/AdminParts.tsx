@@ -1,25 +1,28 @@
 import { Tag } from 'antd'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { BackLink } from '@/components/ui/BackLink'
 import type { UserRole, UserStatus } from '@/types/api'
 import { ROLE_LABELS, USER_STATUS_LABELS } from '@/utils/admin'
 
+/** The tabs; their names in admin.nav.*. */
 const TABS = [
-  { to: '/admin', label: 'Tổng quan', end: true },
-  { to: '/admin/teachers', label: 'Giáo viên', end: false },
-  { to: '/admin/feedback', label: 'Góp ý', end: false },
-  { to: '/admin/audit-log', label: 'Nhật ký', end: false },
-]
+  { to: '/admin', label: 'overview', end: true },
+  { to: '/admin/teachers', label: 'teachers', end: false },
+  { to: '/admin/feedback', label: 'feedback', end: false },
+  { to: '/admin/audit-log', label: 'audit', end: false },
+] as const
 
 /** Title and the tabs of "Quản trị". `back`: the page this one is inside, e.g. a teacher's in "Giáo viên". */
 export function AdminHeader({ title, text, back }: { title: string; text: string; back?: { to: string; label: string } }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-4">
       {back && <BackLink to={back.to} label={back.label} />}
       <PageHeader title={title} text={text} />
-      <nav aria-label="Mục quản trị" className="flex gap-1 overflow-x-auto border-b border-line">
+      <nav aria-label={t('admin.nav.label')} className="flex gap-1 overflow-x-auto border-b border-line">
         {TABS.map((tab) => (
           <NavLink
             key={tab.to}
@@ -31,7 +34,7 @@ export function AdminHeader({ title, text, back }: { title: string; text: string
               }`
             }
           >
-            {tab.label}
+            {t(`admin.nav.${tab.label}`)}
           </NavLink>
         ))}
       </nav>

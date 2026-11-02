@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { httpClient } from '@/api/httpClient'
 import { listTemplates } from '@/api/templateApi'
 import type {
@@ -159,7 +160,7 @@ export function listGames(): Promise<GameSummaryResponse[]> {
 }
 
 export async function createGame(request: CreateGameRequest): Promise<GameResponse> {
-  return copy(await newGame(request.templateCode, request.title?.trim() || 'Trò chơi mới', false, undefined, request.grade))
+  return copy(await newGame(request.templateCode, request.title?.trim() || i18n.t('common.newGame'), false, undefined, request.grade))
 }
 
 /** The sample game of this type in this tab, made from the built-in sample content the first time. */

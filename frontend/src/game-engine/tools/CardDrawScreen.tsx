@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { drawCard, MAX_CARDS, parseCards } from '@/game-engine/tools/moreTools2'
@@ -6,13 +7,14 @@ import { useSound } from '@/sound/useSound'
 
 /** The cards are kept on this computer for the next lesson (a convenience, not a record). */
 const STORAGE_KEY = 'edugame.cardDraw'
-const SAMPLE = 'Kể về gia đình em\nGiới thiệu một con vật em yêu thích\nKể về một ngày ở trường\nNói về món ăn em thích nhất\nKể về một người bạn thân'
+/** The cards a first visit starts with, in the teacher's language. */
+const sample = () => i18n.t('play.tools.cards.sample')
 
 function loadText(): string {
   try {
-    return localStorage.getItem(STORAGE_KEY) ?? SAMPLE
+    return localStorage.getItem(STORAGE_KEY) ?? sample()
   } catch {
-    return SAMPLE
+    return sample()
   }
 }
 
@@ -49,29 +51,29 @@ export function CardDrawScreen() {
 
   return (
     <ToolFrame
-      title="Bốc thăm"
-      subtitle={`${cards.length} lá thăm · còn ${left} lá`}
+      title={i18n.t('play.tools.cards.title')}
+      subtitle={i18n.t('play.tools.cards.subtitle', { count: cards.length, left })}
       actions={
         <>
           <button type="button" onClick={() => setEditing((e) => !e)} className={`${toolButtonClass} h-12 bg-white text-ink`}>
-            {editing ? 'Xong' : '✎ Sửa lá thăm'}
+            {editing ? i18n.t('play.tools.cards.done') : i18n.t('play.tools.cards.edit')}
           </button>
           <button type="button" disabled={drawn.length === 0} onClick={() => setDrawn([])} className={`${toolButtonClass} h-12 bg-white text-ink`}>
-            Xáo lại
+            {i18n.t('play.tools.cards.shuffle')}
           </button>
         </>
       }
     >
       {editing ? (
         <label className="flex flex-1 flex-col gap-2">
-          <span className="text-lg font-bold text-ink-soft">Mỗi dòng một lá thăm (tối đa {MAX_CARDS} lá).</span>
+          <span className="text-lg font-bold text-ink-soft">{i18n.t('play.tools.cards.hint', { max: MAX_CARDS })}</span>
           <textarea
             value={text}
             onChange={(e) => {
               setText(e.target.value)
               setDrawn([])
             }}
-            aria-label="Các lá thăm"
+            aria-label={i18n.t('play.tools.cards.label')}
             className="flex-1 resize-none rounded-[24px] border-2 border-line bg-white p-5 font-[inherit] text-[22px] leading-relaxed text-ink"
           />
         </label>
@@ -98,15 +100,15 @@ export function CardDrawScreen() {
               </AnimatePresence>
             </div>
             {left === 0 && cards.length > 0 ? (
-              <span className="text-xl font-extrabold text-ink-soft">Đã bốc hết lá thăm. Bấm "Xáo lại" để bốc lại từ đầu.</span>
+              <span className="text-xl font-extrabold text-ink-soft">{i18n.t('play.tools.cards.empty')}</span>
             ) : (
               <button type="button" onClick={draw} disabled={flipping || cards.length === 0} className={`${toolButtonClass} h-16 w-[300px] bg-primary text-[22px] text-white hover:brightness-110`}>
-                🎴 Bốc thăm
+                {i18n.t('play.tools.cards.draw')}
               </button>
             )}
           </div>
           {drawn.length > 0 && (
-            <ol aria-label="Các lá đã bốc" className="m-0 flex w-[340px] list-none flex-col gap-2 self-stretch overflow-y-auto rounded-[28px] bg-white p-5">
+            <ol aria-label={i18n.t('play.tools.cards.drawn')} className="m-0 flex w-[340px] list-none flex-col gap-2 self-stretch overflow-y-auto rounded-[28px] bg-white p-5">
               {drawn.map((card, i) => (
                 <li key={card} className={`rounded-2xl px-4 py-2.5 text-lg font-bold ${i === drawn.length - 1 ? 'bg-sun-soft' : 'bg-surface-soft text-ink-soft'}`}>
                   {i + 1}. {card}

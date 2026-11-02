@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
 import { Countdown } from '@/game-engine/quiz/QuizParts'
@@ -41,7 +42,7 @@ export function LuckyStarScreen({ game, questions, settings }: LuckyStarScreenPr
   }, [luckyOpen, sound])
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   }
   if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} />
 
@@ -54,7 +55,7 @@ export function LuckyStarScreen({ game, questions, settings }: LuckyStarScreenPr
   return (
     <PlayFrame
       title={game.title}
-      progress={`Đã mở ${opened} / ${stars.length} ngôi sao`}
+      progress={i18n.t('play.stars.opened', { opened, total: stars.length })}
       extra={
         current?.kind === 'question' &&
         rules.timeLimitSec > 0 &&
@@ -68,8 +69,8 @@ export function LuckyStarScreen({ game, questions, settings }: LuckyStarScreenPr
           question={playable[current.question]}
           rules={rules}
           dispatch={dispatch}
-          heading={`Ngôi sao số ${state.current! + 1} · ${rules.points} điểm`}
-          closeLabel={lastOne ? 'Xem kết quả' : 'Quay lại bảng sao'}
+          heading={i18n.t('play.stars.star', { number: state.current! + 1, points: rules.points })}
+          closeLabel={lastOne ? i18n.t('play.common.seeResults') : i18n.t('play.stars.backToBoard')}
         />
       ) : (
         <>
@@ -89,7 +90,7 @@ export function LuckyStarScreen({ game, questions, settings }: LuckyStarScreenPr
                     const cell = stars[i]
                     dispatch({ type: 'open', cell: i, points: rules.points, lucky: cell.kind === 'lucky' })
                   }}
-                  aria-label={state.done[i] ? `Ngôi sao số ${i + 1}, đã mở` : `Ngôi sao số ${i + 1}`}
+                  aria-label={state.done[i] ? i18n.t('play.stars.starOpened', { number: i + 1 }) : i18n.t('play.stars.starLabel', { number: i + 1 })}
                   className="relative flex h-[86px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 font-[inherit] disabled:cursor-default"
                 >
                   <Star color={state.done[i] ? '#56608A' : STAR_COLORS[i % STAR_COLORS.length]} number={i + 1} />
@@ -108,23 +109,23 @@ export function LuckyStarScreen({ game, questions, settings }: LuckyStarScreenPr
                   <motion.span initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', bounce: 0.6 }} className="text-[110px] leading-none">
                     🌟
                   </motion.span>
-                  <span className="font-display text-[54px] font-extrabold">Ngôi sao may mắn!</span>
+                  <span className="font-display text-[54px] font-extrabold">{i18n.t('play.stars.lucky')}</span>
                   <span className="text-[30px] font-extrabold text-sun">
-                    {team.name} được +{state.stake} điểm
+                    {i18n.t('play.stars.luckyPoints', { team: team.name, points: state.stake })}
                   </span>
                   <button
                     type="button"
                     onClick={() => dispatch({ type: 'close' })}
                     className={`${playButtonClass} mt-2 bg-sun text-ink`}
                   >
-                    {lastOne ? 'Xem kết quả' : 'Tiếp tục'}
+                    {lastOne ? i18n.t('play.common.seeResults') : i18n.t('play.common.continue')}
                   </button>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-          <TeamBar teams={state.teams} activeId={team.id} activeLabel="Đến lượt chọn sao" />
-          <BoardFooter message={luckyOpen ? 'Thật may mắn!' : `${team.name} chọn một ngôi sao nhé!`} onFinish={() => dispatch({ type: 'finish' })} />
+          <TeamBar teams={state.teams} activeId={team.id} activeLabel={i18n.t('play.stars.yourTurn')} />
+          <BoardFooter message={luckyOpen ? i18n.t('play.stars.soLucky') : i18n.t('play.stars.choose', { team: team.name })} onFinish={() => dispatch({ type: 'finish' })} />
         </>
       )}
     </PlayFrame>

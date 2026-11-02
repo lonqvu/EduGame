@@ -1,5 +1,8 @@
 import { Segmented } from 'antd'
+import i18n from 'i18next'
+import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
+import { gameName } from '@/i18n/gameNames'
 import { getAdminDashboard } from '@/api/adminApi'
 import { GamepadIcon, MessageIcon, UserIcon, UsersIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
@@ -9,21 +12,35 @@ import { ActivityChart, BarList, StatTile } from '@/pages/reports/ReportParts'
 import { count, DASHBOARD_PERIODS } from '@/utils/admin'
 import { chartBuckets, periodLabel } from '@/utils/reports'
 
-const PLAY_LABELS = { title: 'Lượt chơi', main: 'lượt chơi', second: 'giáo viên mới', secondTitle: 'Giáo viên mới' }
+const PLAY_LABELS = {
+  get title() {
+    return i18n.t('admin.overview.plays')
+  },
+  get main() {
+    return i18n.t('admin.overview.chartMain')
+  },
+  get second() {
+    return i18n.t('admin.overview.chartSecond')
+  },
+  get secondTitle() {
+    return i18n.t('admin.overview.chartSecondTitle')
+  },
+}
 
 /** /admin — "Tổng quan": how many teachers use Lớp Vui, what they make and play. The period is in the URL (?days=7). */
 export function AdminOverviewPage() {
+  const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
   const days = DASHBOARD_PERIODS.find((p) => String(p.days) === params.get('days'))?.days ?? 30
   const { data, loading, error, reload } = useRemote(String(days), (signal) => getAdminDashboard(days, signal))
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminHeader title="Tổng quan" text="Giáo viên dùng Lớp Vui thế nào: tài khoản, nội dung đã tạo và lượt chơi." />
+      <AdminHeader title={t('admin.overview.title')} text={t('admin.overview.text')} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Segmented<number>
-          aria-label="Khoảng thời gian"
+          aria-label={t('admin.overview.period')}
           value={days}
           onChange={(value) => setParams(value === 30 ? {} : { days: String(value) }, { replace: true })}
           options={DASHBOARD_PERIODS.map((p) => ({ value: p.days, label: p.label }))}
@@ -41,31 +58,31 @@ export function AdminOverviewPage() {
         <div aria-busy={loading} className={`flex flex-col gap-5 transition-opacity ${loading ? 'opacity-60' : ''}`}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatTile
-              label="Giáo viên"
+              label={t('admin.overview.teachers')}
               value={count(data.teachers.total)}
-              detail={`+${count(data.teachers.joined)} tài khoản mới trong kỳ`}
+              detail={t('admin.overview.joined', { number: count(data.teachers.joined) })}
               icon={<UsersIcon size={19} />}
               tint="bg-[#E3ECFF] text-primary"
             />
             <StatTile
-              label="Đang hoạt động"
+              label={t('admin.overview.active')}
               value={count(data.teachers.active)}
-              detail="Đã vào Lớp Vui trong kỳ"
+              detail={t('admin.overview.activeText')}
               icon={<UserIcon size={19} />}
               tint="bg-[#E3F6EC] text-success"
             />
             <StatTile
-              label="Lượt chơi"
+              label={t('admin.overview.plays')}
               value={count(data.plays)}
-              detail="Trò chơi đã mở cho lớp"
+              detail={t('admin.overview.playsText')}
               icon={<GamepadIcon size={19} />}
               tint="bg-[#FFF1D6] text-[#B7860B]"
             />
             <Link to="/admin/feedback" className="rounded-[18px] text-ink hover:text-ink focus-visible:ring-2 focus-visible:ring-primary">
               <StatTile
-                label="Góp ý chưa đọc"
+                label={t('admin.overview.unread')}
                 value={count(data.newFeedback)}
-                detail="Xem góp ý →"
+                detail={t('admin.overview.readFeedback')}
                 icon={<MessageIcon size={19} />}
                 tint="bg-[#FFE4EA] text-[#D23C6E]"
               />
@@ -73,41 +90,44 @@ export function AdminOverviewPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-            <AdminCard title="Lượt chơi theo ngày">
+            <AdminCard title={t('admin.overview.playsByDay')}>
               <ActivityChart
                 {...chartBuckets(data.daily.map((d) => ({ date: d.date, activities: d.plays, completed: d.signUps })))}
                 labels={PLAY_LABELS}
               />
             </AdminCard>
-            <AdminCard title="Trò được chơi nhiều">
+            <AdminCard title={t('admin.overview.topGames')}>
               {data.topTemplates.length ? (
                 <BarList
-                  unit="lượt"
-                  rows={data.topTemplates.map((t) => ({ key: t.templateCode, label: t.templateName, value: t.plays, title: t.templateName }))}
+                  unit={t('admin.overview.playsUnit')}
+                  rows={data.topTemplates.map((tpl) => {
+                    const name = gameName(tpl.templateCode, tpl.templateName)
+                    return { key: tpl.templateCode, label: name, value: tpl.plays, title: name }
+                  })}
                 />
               ) : (
-                <p className="m-0 text-[14px] text-ink-muted">Chưa có lượt chơi nào trong kỳ.</p>
+                <p className="m-0 text-[14px] text-ink-muted">{t('admin.overview.noPlays')}</p>
               )}
             </AdminCard>
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <AdminCard title="Nội dung đang có">
+            <AdminCard title={t('admin.overview.content')}>
               <Figures
                 rows={[
-                  ['Lớp học', data.content.classrooms],
-                  ['Học sinh', data.content.students],
-                  ['Trò chơi', data.content.games],
-                  ['Bộ câu hỏi', data.content.questionSets],
+                  [t('admin.overview.classrooms'), data.content.classrooms],
+                  [t('admin.overview.students'), data.content.students],
+                  [t('admin.overview.games'), data.content.games],
+                  [t('admin.overview.questionSets'), data.content.questionSets],
                 ]}
               />
             </AdminCard>
-            <AdminCard title="Tài khoản" action={<Link to="/admin/teachers" className="text-[14px] font-bold">Xem giáo viên →</Link>}>
+            <AdminCard title={t('admin.overview.accounts')} action={<Link to="/admin/teachers" className="text-[14px] font-bold">{t('admin.overview.seeTeachers')}</Link>}>
               <Figures
                 rows={[
-                  ['Quản trị viên', data.teachers.admins],
-                  ['Đang bị khoá', data.teachers.locked],
-                  ['Mới trong kỳ', data.teachers.joined],
+                  [t('admin.overview.admins'), data.teachers.admins],
+                  [t('admin.overview.locked'), data.teachers.locked],
+                  [t('admin.overview.newInPeriod'), data.teachers.joined],
                 ]}
               />
             </AdminCard>

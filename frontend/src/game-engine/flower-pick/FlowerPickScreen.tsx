@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { Countdown } from '@/game-engine/quiz/QuizParts'
 import { flowerSpots, MAX_FLOWERS } from '@/game-engine/flower-pick/flowers'
@@ -37,7 +38,7 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
   const backTo = editPath(game.id)
 
   if (playable.length === 0) {
-    return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+    return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   }
   if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} />
 
@@ -47,7 +48,7 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
   return (
     <PlayFrame
       title={game.title}
-      progress={`Đã hái ${picked} / ${state.done.length} bông`}
+      progress={i18n.t('play.flowers.picked', { picked, total: state.done.length })}
       extra={
         state.current !== null &&
         rules.timeLimitSec > 0 &&
@@ -61,8 +62,8 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
           question={playable[state.current]}
           rules={rules}
           dispatch={dispatch}
-          heading={`Bông hoa số ${state.current + 1} · ${rules.points} điểm`}
-          closeLabel={picked + 1 >= state.done.length ? 'Xem kết quả' : 'Quay lại cây hoa'}
+          heading={i18n.t('play.flowers.flower', { number: state.current + 1, points: rules.points })}
+          closeLabel={picked + 1 >= state.done.length ? i18n.t('play.common.seeResults') : i18n.t('play.flowers.backToTree')}
         />
       ) : (
         <>
@@ -89,7 +90,7 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
                     sound.play('pop')
                     dispatch({ type: 'open', cell: i, points: rules.points })
                   }}
-                  aria-label={`Bông hoa số ${i + 1}`}
+                  aria-label={i18n.t('play.flowers.flowerLabel', { number: i + 1 })}
                   className="absolute flex cursor-pointer items-center justify-center border-0 bg-transparent p-0 font-[inherit]"
                   style={{ left: spot.x * TREE_WIDTH - 40, top: spot.y * TREE_HEIGHT - 40, width: 80, height: 80 }}
                 >
@@ -98,8 +99,8 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
               ),
             )}
           </div>
-          <TeamBar teams={state.teams} activeId={team.id} activeLabel="Đến lượt hái hoa" />
-          <BoardFooter message={`${team.name} chọn một bông hoa nhé!`} onFinish={() => dispatch({ type: 'finish' })} />
+          <TeamBar teams={state.teams} activeId={team.id} activeLabel={i18n.t('play.flowers.yourTurn')} />
+          <BoardFooter message={i18n.t('play.flowers.choose', { team: team.name })} onFinish={() => dispatch({ type: 'finish' })} />
         </>
       )}
     </PlayFrame>

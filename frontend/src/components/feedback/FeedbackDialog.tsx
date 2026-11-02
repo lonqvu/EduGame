@@ -1,5 +1,6 @@
 import { App, Checkbox, Input, Modal } from 'antd'
 import { useEffect, useMemo, useRef, useState, type ClipboardEvent, type DragEvent } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router'
 import { sendFeedback } from '@/api/feedbackApi'
 import { CameraIcon, CheckIcon, ImageIcon, TrashIcon } from '@/components/ui/icons'
@@ -15,6 +16,7 @@ import { captureScreen } from '@/utils/screenshot'
  * go with it. What is typed stays when the dialog closes, until it is sent.
  */
 export function FeedbackDialog() {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const open = useFeedbackStore((s) => s.open)
   const draft = useFeedbackStore((s) => s.draft)
@@ -49,7 +51,7 @@ export function FeedbackDialog() {
     try {
       change({ screenshot: await prepareScreenshot(file) })
     } catch (e) {
-      message.error(e instanceof Error && e.message ? e.message : 'Không đọc được ảnh này, cô chọn ảnh khác nhé.')
+      message.error(e instanceof Error && e.message ? e.message : t('feedback.imageUnreadable'))
     } finally {
       setPreparing(null)
     }
@@ -60,7 +62,7 @@ export function FeedbackDialog() {
     try {
       change({ screenshot: await prepareScreenshot(await captureScreen()) })
     } catch {
-      message.error('Chưa chụp được màn hình này. Cô dán ảnh chụp (Ctrl+V) hoặc chọn ảnh từ máy nhé.')
+      message.error(t('feedback.captureFailed'))
     } finally {
       setPreparing(null)
     }
@@ -100,15 +102,15 @@ export function FeedbackDialog() {
 
   const footer = sent ? (
     <button type="button" onClick={close} className={PRIMARY_BUTTON}>
-      Xong
+      {t('common.done')}
     </button>
   ) : (
     <div className="flex flex-wrap items-center justify-end gap-2.5">
       <button type="button" onClick={close} disabled={sending} className={SECONDARY_BUTTON}>
-        Để sau
+        {t('common.later')}
       </button>
       <button type="button" onClick={() => void submit()} disabled={!canSend} aria-busy={sending} className={PRIMARY_BUTTON}>
-        {sending ? 'Đang gửi…' : 'Gửi góp ý'}
+        {sending ? t('feedback.sending') : t('feedback.send')}
       </button>
     </div>
   )
@@ -116,7 +118,7 @@ export function FeedbackDialog() {
   return (
     <Modal
       open={open}
-      title="Góp ý cho Lớp Vui"
+      title={t('feedback.title')}
       onCancel={close}
       closable={!sending}
       mask={{ closable: !sending }}
@@ -130,18 +132,17 @@ export function FeedbackDialog() {
           <span className="flex size-16 items-center justify-center rounded-full bg-[#E3F6EC] text-success">
             <CheckIcon size={34} strokeWidth={2.6} />
           </span>
-          <h3 className="m-0 mt-4 text-[22px] font-black text-ink">Cảm ơn cô đã góp ý!</h3>
+          <h3 className="m-0 mt-4 text-[22px] font-black text-ink">{t('feedback.thanksTitle')}</h3>
           <p className="m-0 mt-2 max-w-[400px] text-[15px] leading-[1.55] text-ink-soft">
-            Đội Lớp Vui đọc mọi góp ý để làm Lớp Vui tốt hơn mỗi ngày
-            {sent.willReply ? '. Khi cần, đội sẽ trả lời cô qua email.' : '.'}
+            {sent.willReply ? t('feedback.thanksWillReply') : t('feedback.thanks')}
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-4 pt-1" onPaste={onPaste} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
-          <p className="m-0 text-[14.5px] text-ink-soft">Cô gặp lỗi, có ý tưởng hay muốn khen? Đội Lớp Vui đọc mọi góp ý.</p>
+          <p className="m-0 text-[14.5px] text-ink-soft">{t('feedback.intro')}</p>
 
           <fieldset className="m-0 border-0 p-0">
-            <legend className="mb-2 p-0 text-[14.5px] font-bold text-ink">Cô muốn</legend>
+            <legend className="mb-2 p-0 text-[14.5px] font-bold text-ink">{t('feedback.kindLegend')}</legend>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {FEEDBACK_KINDS.map((k) => (
                 <label key={k.kind} className={`${CHIP} ${draft.kind === k.kind ? CHIP_ON : CHIP_OFF}`}>
@@ -162,7 +163,7 @@ export function FeedbackDialog() {
 
           <fieldset className="m-0 border-0 p-0">
             <legend className="mb-2 p-0 text-[14.5px] font-bold text-ink">
-              Cô thấy Lớp Vui thế nào? <span className="font-semibold text-ink-muted">(không bắt buộc)</span>
+              {t('feedback.ratingLegend')} <span className="font-semibold text-ink-muted">({t('common.optional')})</span>
             </legend>
             <div className="flex flex-wrap items-center gap-2">
               {RATINGS.map((r) => (
@@ -197,7 +198,7 @@ export function FeedbackDialog() {
 
           <div className="flex flex-col gap-2">
             <label htmlFor="feedback-message" className="text-[14.5px] font-bold text-ink">
-              Nội dung
+              {t('feedback.message')}
             </label>
             <Input.TextArea
               id="feedback-message"
@@ -220,32 +221,32 @@ export function FeedbackDialog() {
 
           <div className="flex flex-col gap-2">
             <span className="text-[14.5px] font-bold text-ink">
-              Ảnh màn hình <span className="font-semibold text-ink-muted">(không bắt buộc)</span>
+              {t('feedback.screenshot')} <span className="font-semibold text-ink-muted">({t('common.optional')})</span>
             </span>
             {preview && draft.screenshot ? (
               <div className="flex items-center gap-3 rounded-[14px] border border-line p-2">
                 <a href={preview} target="_blank" rel="noreferrer" className="shrink-0">
-                  <img src={preview} alt="Ảnh màn hình đính kèm" className="block h-[72px] w-[128px] rounded-[10px] border border-line-soft object-cover object-top" />
+                  <img src={preview} alt={t('feedback.screenshotAlt')} className="block h-[72px] w-[128px] rounded-[10px] border border-line-soft object-cover object-top" />
                 </a>
                 <span className="min-w-0 flex-1 text-[14px] text-ink-soft">
-                  Đã đính kèm ảnh ({Math.max(1, Math.round(draft.screenshot.size / 1024))} KB)
+                  {t('feedback.attached', { size: Math.max(1, Math.round(draft.screenshot.size / 1024)) })}
                 </span>
                 <button type="button" onClick={() => change({ screenshot: null })} disabled={sending} className={SMALL_BUTTON}>
                   <TrashIcon size={16} />
-                  Bỏ ảnh
+                  {t('feedback.removeScreenshot')}
                 </button>
               </div>
             ) : (
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" onClick={() => void capture()} disabled={busy} aria-busy={preparing === 'capture'} className={SMALL_BUTTON}>
                   <CameraIcon size={17} />
-                  {preparing === 'capture' ? 'Đang chụp…' : 'Chụp màn hình trang này'}
+                  {preparing === 'capture' ? t('feedback.capturing') : t('feedback.capture')}
                 </button>
                 <button type="button" onClick={() => fileInput.current?.click()} disabled={busy} aria-busy={preparing === 'file'} className={SMALL_BUTTON}>
                   <ImageIcon size={17} />
-                  {preparing === 'file' ? 'Đang đọc ảnh…' : 'Chọn ảnh'}
+                  {preparing === 'file' ? t('feedback.readingImage') : t('feedback.pickImage')}
                 </button>
-                <span className="text-[13px] text-ink-muted">hoặc dán ảnh chụp (Ctrl+V)</span>
+                <span className="text-[13px] text-ink-muted">{t('feedback.orPaste')}</span>
               </div>
             )}
             <input
@@ -267,13 +268,13 @@ export function FeedbackDialog() {
           {email ? (
             <Checkbox checked={draft.contactOk} onChange={(e) => change({ contactOk: e.target.checked })}>
               <span className="text-[14.5px]">
-                Đội Lớp Vui có thể trả lời cô qua email <b>{email}</b>
+                <Trans i18nKey="feedback.contactOk" values={{ email }} components={{ b: <b /> }} />
               </span>
             </Checkbox>
           ) : (
-            profile && <p className="m-0 text-[13.5px] text-ink-muted">Tài khoản chưa có email nên đội Lớp Vui chưa trả lời lại cô được.</p>
+            profile && <p className="m-0 text-[13.5px] text-ink-muted">{t('feedback.noEmail')}</p>
           )}
-          <p className="m-0 -mt-2 text-[13px] text-ink-muted">Kèm theo trang cô đang mở và loại trình duyệt, để đội dễ tìm lỗi.</p>
+          <p className="m-0 -mt-2 text-[13px] text-ink-muted">{t('feedback.context')}</p>
         </div>
       )}
     </Modal>

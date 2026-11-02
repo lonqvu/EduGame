@@ -1,4 +1,5 @@
 import { useRef, type ClipboardEvent, type KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const LENGTH = 6
 
@@ -16,6 +17,7 @@ interface CodeInputProps {
  * (or "123 456") fills them all. Phones offer the code from the mail ({@code autocomplete="one-time-code"}).
  */
 export function CodeInput({ value, onChange, onComplete, invalid, disabled }: CodeInputProps) {
+  const { t } = useTranslation()
   const boxes = useRef<(HTMLInputElement | null)[]>([])
   const digits = Array.from({ length: LENGTH }, (_, i) => value[i] ?? '')
 
@@ -57,7 +59,7 @@ export function CodeInput({ value, onChange, onComplete, invalid, disabled }: Co
   }
 
   return (
-    <div role="group" aria-label="Mã xác nhận 6 số" className="flex justify-between gap-[clamp(6px,1.2vw,12px)]">
+    <div role="group" aria-label={t('auth.code.group')} className="flex justify-between gap-[clamp(6px,1.2vw,12px)]">
       {digits.map((digit, i) => (
         <input
           key={i}
@@ -75,7 +77,7 @@ export function CodeInput({ value, onChange, onComplete, invalid, disabled }: Co
           autoFocus={i === 0}
           maxLength={LENGTH}
           disabled={disabled}
-          aria-label={`Số thứ ${i + 1}`}
+          aria-label={t('auth.code.digit', { number: i + 1 })}
           aria-invalid={invalid ? true : undefined}
           className="aspect-[5/6] w-full max-w-[64px] min-w-0 rounded-[12px] border-2 border-line bg-white text-center font-[inherit] text-[clamp(24px,2.2vw,30px)] font-extrabold text-ink outline-none transition-colors focus:border-primary focus:shadow-[0_0_0_3px_rgba(53,99,233,0.12)] disabled:opacity-60 aria-invalid:border-danger"
         />

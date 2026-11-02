@@ -1,0 +1,35 @@
+import type { Strings } from '@/i18n/locales/types'
+import type { errors as vi } from '@/i18n/locales/vi/errors'
+
+export const errors: Strings<typeof vi> = {
+  generic: 'Something went wrong. Please try again.',
+  NETWORK_ERROR: 'Couldn’t reach the server. Check your internet connection and try again.',
+  INVALID_CREDENTIALS: 'The email or password is incorrect. Please check and try again.',
+  TOO_MANY_LOGIN_ATTEMPTS:
+    'Too many incorrect attempts. For your security, try again in {{minutes}} minutes or use “Forgot password?”.',
+  INVALID_CODE: 'That code isn’t right. Please check your email again.',
+  CODE_EXPIRED: 'This code has expired or was already used. Click “Resend code” to get a new one.',
+  RESEND_TOO_SOON: 'A code was just sent. Please wait a moment and try again.',
+  TOO_MANY_CODES: 'Too many codes have been sent to this email. Please try again in an hour.',
+  EMAIL_TAKEN: 'This email already has an account. Sign in, or use “Forgot password?”.',
+  CLASSROOM_NAME_TAKEN: 'You already have a class with this name in this school year. Please choose another name.',
+  TOO_MANY_CLASSROOMS: 'You have 30 classes, which is the maximum. Delete an old class to create a new one.',
+  TOO_MANY_STUDENTS: 'A class can have up to 60 students. Please remove some names from the list.',
+  CLASSROOM_PAUSED: 'This class is paused. Reactivate it to play with your students.',
+  INVALID_SCHOOL_YEAR: 'The school year isn’t valid. Example: 2026-2027.',
+  INVALID_STUDENT_ORDER: 'The class list has just changed. Reload the page and reorder again.',
+  WRONG_PASSWORD: 'Your current password is incorrect. Please check and try again.',
+  SAME_PASSWORD: 'Your new password must be different from your current one.',
+  INVALID_PHONE: 'The phone number isn’t valid. Example: 0987 654 321.',
+  INVALID_IMAGE: 'Couldn’t read this image. Please choose another JPG or PNG image.',
+  IMAGE_TOO_SMALL: 'This image is too small. Please choose a sharper one (at least 64 × 64 pixels).',
+  IMAGE_TOO_LARGE: 'This image is too large. Please choose a smaller one.',
+  INVALID_AVATAR: 'This profile picture isn’t valid. Please choose again.',
+  FILE_TOO_LARGE: 'The image is too large (5 MB max). Please choose a smaller one.',
+  UNSUPPORTED_IMAGE: 'This file isn’t a PNG, JPG, GIF or WEBP image.',
+  EMPTY_FILE: 'This image file is empty.',
+  TOO_MANY_ASSETS: 'This game already has too many uploaded images. Create a new game to add more.',
+  TOO_MANY_FEEDBACK: 'You’ve sent a lot of feedback in the past hour. Please try again in a few minutes — the Lớp Vui team is reading it.',
+  sessionExpired: 'Your session has ended. Please sign in again.',
+  notFound: 'Couldn’t find this (it may have been deleted).',
+}

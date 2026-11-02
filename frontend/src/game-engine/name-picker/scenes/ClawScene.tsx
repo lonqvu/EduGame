@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { BLEED_W, BLEED_X, SceneSvg, Twinkle } from '@/game-engine/name-picker/effects'
@@ -48,7 +49,7 @@ export function ClawScene({ slots, winnerSlot, phase, onFinish }: PickSceneProps
 
   const winner = slots[winnerSlot]
   const taken = holding || flying || done
-  const screen = running ? 'ĐANG GẮP' : done ? 'TRÚNG!' : 'SẴN SÀNG'
+  const screen = running ? i18n.t('play.picker.clawGrabbing') : done ? i18n.t('play.picker.clawGot') : i18n.t('play.picker.clawReady')
 
   return (
     <>
@@ -207,7 +208,7 @@ function MachineBackground() {
       <rect x="140" y="96" width="540" height="560" rx="34" fill="#E9719A" />
       <rect x="150" y="86" width="520" height="100" rx="30" fill="#FF8FB1" />
       <text x="410" y="138" textAnchor="middle" dominantBaseline="middle" fontFamily="'Baloo 2', Nunito, sans-serif" fontWeight={800} fontSize="40" fill="#FFFFFF" stroke="#C2456F" strokeWidth="2" paintOrder="stroke">
-        Máy gắp tên
+        {i18n.t('play.picker.clawMachine')}
       </text>
       <motion.g fill="#FFD15C" {...blink(0)}>
         {lights.map((x, i) => (i % 2 === 0 ? <circle key={`t${x}`} cx={x} cy="100" r="8" /> : <circle key={`b${x}`} cx={x} cy="174" r="8" />))}

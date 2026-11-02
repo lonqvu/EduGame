@@ -1,0 +1,35 @@
+/** What the teacher reads when the server says no (utils/apiError), by error code. */
+export const errors = {
+  generic: 'Có lỗi xảy ra, cô thử lại nhé.',
+  NETWORK_ERROR: 'Không kết nối được máy chủ. Cô kiểm tra mạng rồi thử lại nhé.',
+  INVALID_CREDENTIALS: 'Email hoặc mật khẩu chưa đúng, cô kiểm tra lại nhé.',
+  /** {{minutes}}: how long before trying again. */
+  TOO_MANY_LOGIN_ATTEMPTS: 'Cô đã nhập sai nhiều lần. Vì an toàn, cô thử lại sau {{minutes}} phút hoặc dùng “Quên mật khẩu?” nhé.',
+  INVALID_CODE: 'Mã xác nhận chưa đúng, cô kiểm tra lại email nhé.',
+  CODE_EXPIRED: 'Mã đã hết hạn hoặc đã dùng. Cô bấm “Gửi lại mã” để nhận mã mới nhé.',
+  RESEND_TOO_SOON: 'Mã vừa được gửi. Cô đợi một chút rồi thử lại nhé.',
+  TOO_MANY_CODES: 'Đã gửi quá nhiều mã tới email này. Cô thử lại sau 1 giờ nhé.',
+  EMAIL_TAKEN: 'Email này đã có tài khoản. Cô đăng nhập hoặc dùng “Quên mật khẩu?” nhé.',
+  CLASSROOM_NAME_TAKEN: 'Cô đã có lớp trùng tên trong năm học này. Cô đặt tên khác nhé.',
+  TOO_MANY_CLASSROOMS: 'Cô đã có 30 lớp, là số lớp tối đa. Cô xóa bớt lớp cũ rồi tạo lớp mới nhé.',
+  TOO_MANY_STUDENTS: 'Mỗi lớp có tối đa 60 học sinh. Cô bớt tên trong danh sách nhé.',
+  CLASSROOM_PAUSED: 'Lớp đang tạm ngưng. Cô kích hoạt lại lớp để chơi cùng các em nhé.',
+  INVALID_SCHOOL_YEAR: 'Năm học chưa đúng, ví dụ: 2026-2027.',
+  INVALID_STUDENT_ORDER: 'Danh sách lớp vừa thay đổi. Cô tải lại trang rồi sắp xếp lại nhé.',
+  WRONG_PASSWORD: 'Mật khẩu hiện tại chưa đúng, cô kiểm tra lại nhé.',
+  SAME_PASSWORD: 'Mật khẩu mới cần khác mật khẩu hiện tại.',
+  INVALID_PHONE: 'Số điện thoại chưa đúng, ví dụ: 0987 654 321.',
+  INVALID_IMAGE: 'Không đọc được ảnh này, cô chọn ảnh JPG hoặc PNG khác nhé.',
+  IMAGE_TOO_SMALL: 'Ảnh nhỏ quá, cô chọn ảnh rõ nét hơn nhé (ít nhất 64 × 64 điểm ảnh).',
+  IMAGE_TOO_LARGE: 'Ảnh lớn quá, cô chọn ảnh nhỏ hơn nhé.',
+  INVALID_AVATAR: 'Ảnh đại diện không hợp lệ, cô chọn lại nhé.',
+  FILE_TOO_LARGE: 'Ảnh quá lớn (tối đa 5 MB). Cô chọn ảnh nhỏ hơn nhé.',
+  UNSUPPORTED_IMAGE: 'File này không phải ảnh PNG, JPG, GIF hoặc WEBP.',
+  EMPTY_FILE: 'File ảnh này bị trống.',
+  TOO_MANY_ASSETS: 'Trò chơi này đã có quá nhiều ảnh tải lên. Cô tạo trò mới để thêm ảnh nhé.',
+  TOO_MANY_FEEDBACK: 'Cô đã gửi nhiều góp ý trong một giờ qua. Cô thử lại sau ít phút nhé, đội Lớp Vui đang đọc.',
+  /** HTTP 401: signed out meanwhile. */
+  sessionExpired: 'Phiên làm việc đã hết, cô đăng nhập lại nhé.',
+  /** HTTP 404. */
+  notFound: 'Không tìm thấy dữ liệu (có thể đã bị xoá).',
+}

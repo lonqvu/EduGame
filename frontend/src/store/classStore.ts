@@ -82,7 +82,11 @@ export const useClassStore = create<ClassState>()((set, get) => ({
 
   load: () => {
     // A visitor has no classes (they need an account): the game screens play without one.
-    if (isGuest()) return Promise.resolve()
+    // Ready with no students, so the name-picking tools ask for names instead of waiting forever.
+    if (isGuest()) {
+      if (get().status !== 'ready') set({ status: 'ready' })
+      return Promise.resolve()
+    }
     inflight ??= (async () => {
       if (get().status !== 'ready') set({ status: 'loading' })
       try {

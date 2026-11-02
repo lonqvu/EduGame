@@ -1,5 +1,6 @@
 import { Select, Switch } from 'antd'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CheckIcon } from '@/components/ui/icons'
 
 /** One white block of the settings page, reachable by its anchor (/settings#display). */
@@ -87,16 +88,17 @@ export function SettingSelect<T extends string | number>({
 
 /** "Đã lưu" / "Đang lưu…" next to the title: every change saves by itself. */
 export function SaveState({ saving }: { saving: boolean }) {
+  const { t } = useTranslation()
   return (
     <span role="status" className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[13px] font-bold text-ink-soft shadow-[0_1px_2px_rgba(31,42,68,0.06)]">
       {saving ? (
-        'Đang lưu…'
+        t('common.saving')
       ) : (
         <>
           <span className="flex size-4 items-center justify-center rounded-full bg-success text-white">
             <CheckIcon size={10} strokeWidth={3} />
           </span>
-          Đã lưu
+          {t('common.saved')}
         </>
       )}
     </span>

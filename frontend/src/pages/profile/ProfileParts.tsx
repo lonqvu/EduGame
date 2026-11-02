@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   BookOpenFilledIcon,
   CheckIcon,
@@ -35,6 +36,7 @@ const Sparkle = ({ className }: { className: string }) => (
 
 /** The teacher: picture, name, role, contact, account status, and "Chỉnh sửa hồ sơ". */
 export function ProfileCard({ profile, onEdit }: { profile: ProfileResponse; onEdit: () => void }) {
+  const { t } = useTranslation()
   return (
     <section className="relative overflow-hidden rounded-[20px] bg-[linear-gradient(120deg,#EAF2FF_0%,#F4F8FF_55%,#FFF7E0_100%)] p-5 sm:p-7">
       <Sparkle className="top-5 right-[30%] size-4 text-[#FFD15C]" />
@@ -54,16 +56,16 @@ export function ProfileCard({ profile, onEdit }: { profile: ProfileResponse; onE
             <span className="rounded-full bg-primary-soft px-2.5 py-[3px] text-[12.5px] font-bold text-primary-ink">{roleLabel(profile.role)}</span>
           </div>
           <dl className="m-0 flex flex-col gap-1.5 text-[14.5px] text-ink-soft">
-            <ContactRow icon={<MailIcon size={18} />} label="Email" value={profile.email || 'Chưa có email'} />
-            <ContactRow icon={<PhoneIcon size={18} />} label="Số điện thoại" value={formatPhone(profile.phone) || 'Chưa có số điện thoại'} />
+            <ContactRow icon={<MailIcon size={18} />} label={t('profile.card.email')} value={profile.email || t('profile.card.noEmail')} />
+            <ContactRow icon={<PhoneIcon size={18} />} label={t('profile.card.phone')} value={formatPhone(profile.phone) || t('profile.card.noPhone')} />
           </dl>
           <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-[#E3F6EA] px-3 py-1 text-[13px] font-bold text-success">
             <span className="flex size-4 items-center justify-center rounded-full bg-success text-white">
               <CheckIcon size={10} strokeWidth={3} />
             </span>
-            Tài khoản đang hoạt động
+            {t('profile.card.active')}
           </span>
-          {profile.memberSince && <span className="text-[13px] text-ink-muted">Tham gia Lớp Vui từ: {joinedLabel(profile.memberSince)}</span>}
+          {profile.memberSince && <span className="text-[13px] text-ink-muted">{t('profile.card.memberSince', { date: joinedLabel(profile.memberSince) })}</span>}
         </div>
         <button
           type="button"
@@ -71,7 +73,7 @@ export function ProfileCard({ profile, onEdit }: { profile: ProfileResponse; onE
           className="flex h-[44px] shrink-0 cursor-pointer items-center gap-2 self-center rounded-[12px] border-0 bg-primary px-5 font-[inherit] text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(53,99,233,0.25)] hover:brightness-110 sm:self-end"
         >
           <PencilIcon size={18} />
-          Chỉnh sửa hồ sơ
+          {t('profile.card.edit')}
         </button>
       </div>
     </section>
@@ -90,25 +92,27 @@ function ContactRow({ icon, label, value }: { icon: ReactNode; label: string; va
   )
 }
 
+/** The figures, by key of profile.overview (its name, and `…Unit` under the number). */
 const TILES = [
-  { key: 'classrooms', label: 'Lớp đang quản lý', unit: 'lớp', icon: <UsersFilledIcon size={22} />, bg: 'bg-[#EAF1FE]', badge: 'bg-[#D5E3FD] text-primary' },
-  { key: 'students', label: 'Tổng số học sinh', unit: 'học sinh', icon: <UsersFilledIcon size={22} />, bg: 'bg-[#E6F7EE]', badge: 'bg-[#CDEFDC] text-success' },
-  { key: 'questionSets', label: 'Bộ câu hỏi đã tạo', unit: 'bộ câu hỏi', icon: <FileTextIcon size={22} />, bg: 'bg-[#FFF5DA]', badge: 'bg-[#FFE7A6] text-sun-ink' },
-  { key: 'activities', label: 'Hoạt động đã tổ chức', unit: 'hoạt động', icon: <GamepadFilledIcon size={22} />, bg: 'bg-[#F1EBFF]', badge: 'bg-[#E1D5FF] text-[#7448D6]' },
+  { key: 'classrooms', icon: <UsersFilledIcon size={22} />, bg: 'bg-[#EAF1FE]', badge: 'bg-[#D5E3FD] text-primary' },
+  { key: 'students', icon: <UsersFilledIcon size={22} />, bg: 'bg-[#E6F7EE]', badge: 'bg-[#CDEFDC] text-success' },
+  { key: 'questionSets', icon: <FileTextIcon size={22} />, bg: 'bg-[#FFF5DA]', badge: 'bg-[#FFE7A6] text-sun-ink' },
+  { key: 'activities', icon: <GamepadFilledIcon size={22} />, bg: 'bg-[#F1EBFF]', badge: 'bg-[#E1D5FF] text-[#7448D6]' },
 ] as const
 
 /** The four figures of "Tổng quan hoạt động". */
 export function ActivityOverview({ stats }: { stats: ProfileResponse['stats'] }) {
+  const { t } = useTranslation()
   return (
-    <ProfileSection icon={<BookOpenFilledIcon size={17} />} title="Tổng quan hoạt động">
+    <ProfileSection icon={<BookOpenFilledIcon size={17} />} title={t('profile.overview.title')}>
       <dl className="m-0 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {TILES.map((t) => (
-          <div key={t.key} className={`flex flex-col gap-2 rounded-[16px] p-4 ${t.bg}`}>
-            <span className={`flex size-10 items-center justify-center rounded-full ${t.badge}`}>{t.icon}</span>
-            <dt className="text-[13.5px] font-semibold text-ink-soft">{t.label}</dt>
+        {TILES.map((tile) => (
+          <div key={tile.key} className={`flex flex-col gap-2 rounded-[16px] p-4 ${tile.bg}`}>
+            <span className={`flex size-10 items-center justify-center rounded-full ${tile.badge}`}>{tile.icon}</span>
+            <dt className="text-[13.5px] font-semibold text-ink-soft">{t(`profile.overview.${tile.key}`)}</dt>
             <dd className="m-0 flex flex-col">
-              <span className="text-[28px] leading-none font-black">{countLabel(stats[t.key])}</span>
-              <span className="mt-1 text-[13px] text-ink-muted">{t.unit}</span>
+              <span className="text-[28px] leading-none font-black">{countLabel(stats[tile.key])}</span>
+              <span className="mt-1 text-[13px] text-ink-muted">{t(`profile.overview.${tile.key}Unit`, { count: stats[tile.key] })}</span>
             </dd>
           </div>
         ))}
@@ -131,6 +135,7 @@ export interface SettingRow {
 
 /** "Cài đặt tài khoản": one row per setting, each opening it. */
 export function SettingsList({ rows }: { rows: SettingRow[] }) {
+  const { t } = useTranslation()
   return (
     <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
       {rows.map((row) => (
@@ -144,7 +149,7 @@ export function SettingsList({ rows }: { rows: SettingRow[] }) {
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="flex flex-wrap items-center gap-2 text-[15.5px] font-extrabold">
                 {row.title}
-                {row.soon && <span className="rounded-full bg-chip px-2 py-0.5 text-[11.5px] font-bold text-ink-muted">Sắp có</span>}
+                {row.soon && <span className="rounded-full bg-chip px-2 py-0.5 text-[11.5px] font-bold text-ink-muted">{t('profile.soon')}</span>}
               </span>
               <span className="text-[13.5px] text-ink-muted">{row.text}</span>
             </span>
@@ -157,6 +162,7 @@ export function SettingsList({ rows }: { rows: SettingRow[] }) {
 }
 
 export function LogoutButton({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation()
   return (
     <button
       type="button"
@@ -164,7 +170,7 @@ export function LogoutButton({ onClick }: { onClick: () => void }) {
       className="flex h-[50px] w-full cursor-pointer items-center justify-center gap-2.5 rounded-[14px] border border-line-soft bg-white font-[inherit] text-[15.5px] font-bold text-danger hover:bg-[#FFF5F3]"
     >
       <LogoutIcon size={20} />
-      Đăng xuất
+      {t('profile.signOut')}
     </button>
   )
 }

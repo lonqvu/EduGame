@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import type { ReactNode } from 'react'
 import { playButtonClass } from '@/game-engine/shared/PlayFrame'
 
@@ -10,7 +11,7 @@ export function BoardFooter({ message, onFinish, children }: { message: ReactNod
       <div className="flex shrink-0 gap-3">
         {children}
         <button type="button" onClick={onFinish} className={`${playButtonClass} bg-white text-ink`}>
-          Kết thúc
+          {i18n.t('play.common.finish')}
         </button>
       </div>
     </div>

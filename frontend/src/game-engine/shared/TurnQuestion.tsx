@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import type { Dispatch } from 'react'
 import type { PlayableQuizQuestion } from '@/game-engine/quiz/quizRound'
 import type { PlaySettings } from '@/game-engine/shared/gameSettings'
@@ -47,17 +48,17 @@ export function TurnQuestion({ state, question, rules, dispatch, heading, closeL
       <TeamBar
         teams={state.teams}
         activeId={state.answeringTeamId}
-        activeLabel="Đang trả lời"
+        activeLabel={i18n.t('play.common.answering')}
         disabledIds={state.triedTeams}
         onPick={stealing ? (teamId) => dispatch({ type: 'pickTeam', teamId }) : undefined}
       />
       <PlayFooter
         message={
           state.revealed
-            ? 'Đáp án đúng đã hiện.'
+            ? i18n.t('play.common.answerShown')
             : answering
-              ? `${answering.name} chọn đáp án nào? Cô bấm vào đáp án đội nói.`
-              : 'Đội nào giành quyền trả lời? Cô bấm tên đội.'
+              ? i18n.t('play.common.whichAnswer', { team: answering.name })
+              : i18n.t('play.common.whoBuzzed')
         }
         revealed={state.revealed}
         onReveal={() => dispatch({ type: 'reveal' })}

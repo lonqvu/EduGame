@@ -1,7 +1,8 @@
+import i18n from 'i18next'
 import type { UserSettings } from '@/types/api'
 
 export const DEFAULT_SETTINGS: UserSettings = {
-  display: { reduceMotion: false, fullscreenOnStart: false },
+  display: { reduceMotion: false, fullscreenOnStart: false, language: 'vi' },
   games: {},
   notifications: { newSignInEmail: true, passwordChangedEmail: true },
   sound: { enabled: true, volume: 80, music: true },
@@ -14,19 +15,24 @@ export type GameDefaultKey = keyof GameDefaults
 export const AUTO = 'auto'
 export type Choice = number | typeof AUTO
 
-const yesNo = [
-  { value: AUTO, label: 'Theo từng trò' },
-  { value: 1, label: 'Có' },
-  { value: 0, label: 'Không' },
-] as const
+/** A choice whose label is read in the current language when shown. */
+const choice = (value: Choice, label: () => string) => ({
+  value,
+  get label() {
+    return label()
+  },
+})
+
+const auto = choice(AUTO, () => i18n.t('settings.games.auto'))
+const yesNo = [auto, choice(1, () => i18n.t('common.yes')), choice(0, () => i18n.t('common.no'))]
 
 /** The choices of each default for new games, as the Select shows them (booleans as 1 / 0). */
 export const GAME_DEFAULT_OPTIONS: Record<GameDefaultKey, readonly { value: Choice; label: string }[]> = {
-  teams: [{ value: AUTO, label: 'Theo từng trò' }, ...[2, 3, 4].map((n) => ({ value: n, label: `${n} đội` }))],
+  teams: [auto, ...[2, 3, 4].map((count) => choice(count, () => i18n.t('settings.games.teamCount', { count })))],
   timeLimitSec: [
-    { value: AUTO, label: 'Theo từng trò' },
-    { value: 0, label: 'Không giới hạn' },
-    ...[10, 15, 20, 30, 45, 60, 90].map((n) => ({ value: n, label: `${n} giây` })),
+    auto,
+    choice(0, () => i18n.t('settings.games.noLimit')),
+    ...[10, 15, 20, 30, 45, 60, 90].map((count) => choice(count, () => i18n.t('settings.games.seconds', { count }))),
   ],
   allowSteal: yesNo,
   shuffleItems: yesNo,

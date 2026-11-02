@@ -1,5 +1,6 @@
 import { App, Button, Dropdown, Input } from 'antd'
 import { useMemo, useRef, useState, type ReactNode } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { FileTextIcon, FilledStarIcon, MoreVerticalIcon, PlusIcon, SearchIcon, SortAzIcon } from '@/components/ui/icons'
 import { CLASS_ASSETS } from '@/pages/classes/classUi'
 import type { StudentResponse } from '@/types/api'
@@ -34,6 +35,7 @@ interface StudentsCardProps {
  * or several picked at once; renaming and removing are in each card's menu. A table shows the roll call instead.
  */
 export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, onSortByName, onAward }: StudentsCardProps) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [search, setSearch] = useState('')
   const [view, setView] = useState<View>(readView)
@@ -62,7 +64,7 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
     const key = ++burstKey.current
     setBursts((b) => ({ ...b, ...Object.fromEntries(ids.map((id) => [id, { points, key }])) }))
     setTimeout(() => setBursts((b) => Object.fromEntries(Object.entries(b).filter(([, v]) => v.key !== key))), 900)
-    onAward(ids, points).catch((error: unknown) => message.error(`Chưa lưu được sao. ${apiErrorMessage(error)}`))
+    onAward(ids, points).catch((error: unknown) => message.error(t('classes.students.starsFailed', { reason: apiErrorMessage(error) })))
   }
 
   const tap = (s: StudentResponse) => {
@@ -75,8 +77,8 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
       { key: 'plus2', label: '+2 ⭐', onClick: () => award([s.id], 2) },
       { key: 'minus1', label: '−1 ⭐', disabled: s.weeklyStars <= 0 && s.totalStars <= 0, onClick: () => award([s.id], -1) },
       { type: 'divider' as const },
-      { key: 'rename', label: 'Đổi tên', onClick: () => onRename(s) },
-      { key: 'remove', label: 'Xóa khỏi lớp', danger: true, onClick: () => onRemove(s) },
+      { key: 'rename', label: t('classes.students.rename'), onClick: () => onRename(s) },
+      { key: 'remove', label: t('classes.detail.remove'), danger: true, onClick: () => onRemove(s) },
     ],
   })
 
@@ -84,7 +86,7 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
     <section aria-labelledby="students-title" className="@container rounded-[20px] bg-white p-4 sm:p-5">
       <header className="flex flex-wrap items-center gap-x-2.5 gap-y-3">
         <h2 id="students-title" className="m-0 mr-auto text-[19px] font-black">
-          Học sinh <span className="font-bold text-ink-muted">({students.length})</span>
+          {t('classes.students.title')} <span className="font-bold text-ink-muted">({students.length})</span>
         </h2>
         {students.length > 0 && (
           <>
@@ -93,11 +95,11 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               prefix={<SearchIcon size={18} className="text-ink-muted" />}
-              placeholder="Tìm học sinh..."
-              aria-label="Tìm học sinh"
+              placeholder={t('classes.students.search')}
+              aria-label={t('classes.students.search')}
               className="order-last h-10 w-full rounded-full @min-[760px]:order-none @min-[760px]:w-[190px]"
             />
-            <div role="radiogroup" aria-label="Cách xem" className="hidden rounded-full bg-chip p-1 @min-[560px]:flex">
+            <div role="radiogroup" aria-label={t('classes.students.view')} className="hidden rounded-full bg-chip p-1 @min-[560px]:flex">
               {(['cards', 'table'] as const).map((v) => (
                 <button
                   key={v}
@@ -109,7 +111,7 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
                     view === v ? 'bg-white text-ink shadow-sm' : 'bg-transparent text-ink-muted'
                   }`}
                 >
-                  {v === 'cards' ? '▦ Thẻ' : '☰ Bảng'}
+                  {v === 'cards' ? t('classes.students.cards') : t('classes.students.table')}
                 </button>
               ))}
             </div>
@@ -118,7 +120,7 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
               aria-pressed={!!picked}
               className={`h-10 rounded-full font-bold ${picked ? 'border-primary text-primary-ink' : ''}`}
             >
-              {picked ? 'Xong' : '☑ Khen nhiều bạn'}
+              {picked ? t('common.done') : t('classes.students.praiseMany')}
             </Button>
           </>
         )}
@@ -126,54 +128,54 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
           <Button
             icon={<SortAzIcon size={18} />}
             onClick={onSortByName}
-            aria-label="Xếp theo tên"
-            title="Xếp lại danh sách theo tên"
+            aria-label={t('classes.students.sortLabel')}
+            title={t('classes.students.sortTitle')}
             className="size-10 rounded-full"
           />
         )}
         <Button icon={<FileTextIcon size={17} />} onClick={onImport} disabled={full} className="h-10 rounded-full font-bold">
-          Nhập từ file
+          {t('classes.students.import')}
         </Button>
         <Button
           type="primary"
           icon={<PlusIcon size={16} />}
           onClick={onAdd}
           disabled={full}
-          title={full ? `Lớp đã đủ ${MAX_STUDENTS} học sinh` : undefined}
+          title={full ? t('classes.students.full', { count: MAX_STUDENTS }) : undefined}
           className="h-10 rounded-full font-extrabold"
         >
-          Thêm học sinh
+          {t('classes.students.add')}
         </Button>
       </header>
 
       {students.length > 0 && (
         <p className="m-0 mt-2 text-[13px] text-ink-muted">
-          {picked ? 'Chạm vào các bạn cần khen, rồi chọn số sao ở thanh bên dưới.' : 'Chạm vào một bạn để tặng 1 sao. Muốn tặng 2 sao hoặc bớt sao, cô mở menu của bạn đó.'}
+          {picked ? t('classes.students.hintPicking') : t('classes.students.hint')}
         </p>
       )}
 
       {students.length === 0 ? (
         <div className="mt-4 flex flex-col items-center gap-2 rounded-2xl border border-dashed border-line px-6 py-9 text-center">
           <img src={`${CLASS_ASSETS}/teacher.svg`} alt="" className="size-[110px]" />
-          <p className="m-0 text-[17px] font-black">Lớp chưa có học sinh</p>
+          <p className="m-0 text-[17px] font-black">{t('classes.students.emptyTitle')}</p>
           <p className="m-0 max-w-[400px] text-[14.5px] text-ink-muted">
-            Thêm tên các em (gõ, dán hoặc nhập từ file danh sách lớp) để gọi tên, chia nhóm và thưởng sao trong các trò chơi.
+            {t('classes.students.emptyText')}
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-2.5">
             <Button shape="round" icon={<FileTextIcon size={16} />} onClick={onImport}>
-              Nhập từ file Excel / CSV
+              {t('classes.students.importLong')}
             </Button>
             <Button type="primary" shape="round" icon={<PlusIcon size={16} />} onClick={onAdd}>
-              Thêm học sinh
+              {t('classes.students.add')}
             </Button>
           </div>
         </div>
       ) : shown.length === 0 ? (
         <p className="mt-4 mb-0 rounded-2xl bg-surface-soft px-4 py-6 text-center text-[15px] text-ink-muted">
-          Không có học sinh nào tên “{search.trim()}”.
+          {t('classes.students.noMatch', { search: search.trim() })}
         </p>
       ) : view === 'cards' ? (
-        <ul aria-label="Danh sách học sinh" className="m-0 mt-4 grid list-none grid-cols-3 gap-2.5 p-0 @min-[560px]:grid-cols-4 @min-[800px]:grid-cols-5 @min-[1000px]:grid-cols-6">
+        <ul aria-label={t('classes.students.list')} className="m-0 mt-4 grid list-none grid-cols-3 gap-2.5 p-0 @min-[560px]:grid-cols-4 @min-[800px]:grid-cols-5 @min-[1000px]:grid-cols-6">
           {shown.map((s) => (
             <li key={s.id} className="relative">
               <StudentTile
@@ -186,7 +188,7 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
               <Dropdown trigger={['click']} placement="bottomRight" menu={menu(s)}>
                 <button
                   type="button"
-                  aria-label={`Tùy chọn cho ${s.displayName}`}
+                  aria-label={t('classes.students.optionsFor', { name: s.displayName })}
                   className="absolute top-1.5 right-1.5 flex size-7 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-[#A0A8BA] hover:bg-surface-soft hover:text-ink"
                 >
                   <MoreVerticalIcon size={16} />
@@ -196,13 +198,13 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
           ))}
         </ul>
       ) : (
-        <ul aria-label="Danh sách học sinh" className="m-0 mt-3 list-none p-0">
+        <ul aria-label={t('classes.students.list')} className="m-0 mt-3 list-none p-0">
           {shown.map((s) => (
             <li key={s.id} className="flex items-center gap-3 border-b border-line-soft px-2 py-2 last:border-b-0">
               <span className="w-7 text-[15px] font-bold text-ink-muted tabular-nums">{s.rollNumber ?? '–'}</span>
               <img src={studentAvatarSrc(s)} alt="" className="size-9 shrink-0 rounded-full bg-surface-soft" />
               <span className="min-w-0 flex-1 truncate text-[15.5px] font-bold">{s.displayName}</span>
-              <span className="flex w-[110px] items-center justify-center gap-1.5 font-extrabold tabular-nums" title="Sao tuần này">
+              <span className="flex w-[110px] items-center justify-center gap-1.5 font-extrabold tabular-nums" title={t('classes.students.weekStars')}>
                 <FilledStarIcon size={16} /> {s.weeklyStars}
                 <span className="font-semibold text-ink-muted">/ {s.totalStars}</span>
               </span>
@@ -218,7 +220,7 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
               <Dropdown trigger={['click']} placement="bottomRight" menu={menu(s)}>
                 <button
                   type="button"
-                  aria-label={`Tùy chọn cho ${s.displayName}`}
+                  aria-label={t('classes.students.optionsFor', { name: s.displayName })}
                   className="flex size-8 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-ink-muted hover:bg-surface-soft"
                 >
                   <MoreVerticalIcon size={17} />
@@ -232,11 +234,11 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
       {picked && (
         <div
           role="toolbar"
-          aria-label="Khen các bạn đã chọn"
+          aria-label={t('classes.students.praiseBar')}
           className="sticky bottom-3 z-10 mt-4 flex flex-wrap items-center gap-2 rounded-[16px] bg-[#1A2440] px-4 py-2.5 text-white shadow-[0_10px_30px_rgba(26,36,64,0.3)]"
         >
           <span className="mr-auto text-[14.5px]">
-            ☑ Đã chọn <b>{picked.length} bạn</b>
+            <Trans i18nKey="classes.students.picked" count={picked.length} values={{ count: picked.length }} components={{ b: <b /> }} />
           </span>
           <PickButton disabled={!picked.length} onClick={() => award(picked, 1)}>
             +1 ⭐
@@ -249,7 +251,7 @@ export function StudentsCard({ students, onAdd, onImport, onRename, onRemove, on
             onClick={() => setPicked(picked.length === shown.length ? [] : shown.map((s) => s.id))}
             className="h-9 cursor-pointer rounded-full border-0 bg-white/15 px-3.5 font-[inherit] text-[13.5px] font-extrabold text-white"
           >
-            {picked.length === shown.length ? 'Bỏ chọn' : 'Chọn cả lớp'}
+            {picked.length === shown.length ? t('classes.students.unpickAll') : t('classes.students.pickAll')}
           </button>
         </div>
       )}
@@ -267,11 +269,12 @@ interface StudentTileProps {
 }
 
 function StudentTile({ student: s, picking, picked, burst, onTap }: StudentTileProps) {
+  const { t } = useTranslation()
   return (
     <button
       type="button"
       onClick={onTap}
-      aria-label={picking ? `Chọn ${s.displayName}` : `Khen ${s.displayName}`}
+      aria-label={picking ? t('classes.students.pick', { name: s.displayName }) : t('classes.students.praise', { name: s.displayName })}
       aria-pressed={picking ? picked : undefined}
       className={`group relative flex w-full cursor-pointer flex-col items-center gap-1 rounded-[18px] border-2 bg-white px-1.5 pt-3 pb-2.5 font-[inherit] text-ink transition active:scale-[0.97] ${
         picked ? 'border-primary bg-primary-soft/40' : burst ? 'border-[#FFC94D] shadow-[0_0_0_4px_#FFF1C2]' : 'border-[#EDF1F7] hover:border-[#C9D9F5]'

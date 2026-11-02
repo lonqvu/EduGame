@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { arrangeSeats, SEAT_COLUMNS, swapSeats } from '@/game-engine/tools/moreTools2'
@@ -23,11 +24,11 @@ export function SeatingScreen() {
 
   return (
     <ToolFrame
-      title="Sơ đồ chỗ ngồi"
-      subtitle={[className, `${students.length} bạn`, 'Bấm hai bạn để đổi chỗ'].filter(Boolean).join(' · ')}
+      title={i18n.t('play.tools.seating.title')}
+      subtitle={[className, i18n.t('play.tools.seating.students', { count: students.length }), i18n.t('play.tools.seating.swap')].filter(Boolean).join(' · ')}
       actions={
         <>
-          <span className="text-lg font-bold text-ink-soft">Chỗ mỗi hàng</span>
+          <span className="text-lg font-bold text-ink-soft">{i18n.t('play.tools.seating.perRow')}</span>
           {SEAT_COLUMNS.map((n) => (
             <button
               key={n}
@@ -50,16 +51,16 @@ export function SeatingScreen() {
             }}
             className={`${toolButtonClass} h-12 bg-primary text-white`}
           >
-            🔀 Xếp ngẫu nhiên
+            {i18n.t('play.tools.seating.shuffle')}
           </button>
         </>
       }
     >
       <div className="flex flex-1 flex-col items-center gap-3 overflow-y-auto">
         <div className="w-[60%] rounded-xl bg-[#2E5E4E] py-2 text-center text-lg font-extrabold text-white" aria-hidden="true">
-          Bảng
+          {i18n.t('play.tools.seating.board')}
         </div>
-        <ol aria-label="Sơ đồ chỗ ngồi" className="m-0 grid w-full list-none gap-y-3 p-0" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+        <ol aria-label={i18n.t('play.tools.seating.title')} className="m-0 grid w-full list-none gap-y-3 p-0" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
           {plan.map((student, i) => {
             const isPicked = picked === i
             // Two seats a desk: a gap after every second seat.
@@ -82,7 +83,7 @@ export function SeatingScreen() {
                     setPicked(null)
                   }}
                   aria-pressed={isPicked}
-                  aria-label={`Chỗ ${i + 1}: ${student.name}`}
+                  aria-label={i18n.t('play.tools.seating.seat', { number: i + 1, name: student.name })}
                   className={`flex w-full cursor-pointer items-center justify-center truncate border-0 px-2 font-[inherit] font-extrabold ${seat} ${
                     i % 2 === 0 ? 'rounded-l-2xl' : 'rounded-r-2xl'
                   } ${isPicked ? 'bg-sun text-ink' : 'bg-white text-ink hover:bg-primary-soft'}`}

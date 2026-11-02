@@ -1,13 +1,24 @@
+import i18n from 'i18next'
 /** A segment of the wheel: points for the question, double the team's score, or the turn lost. */
 export type WheelSegment = { label: string; kind: 'points'; points: number } | { label: string; kind: 'double' } | { label: string; kind: 'lose' }
 
 export const WHEEL_SEGMENTS: WheelSegment[] = [
   { label: '10', kind: 'points', points: 10 },
   { label: '20', kind: 'points', points: 20 },
-  { label: 'Mất lượt', kind: 'lose' },
+  {
+    get label() {
+      return i18n.t('play.wheel.lose')
+    },
+    kind: 'lose',
+  },
   { label: '30', kind: 'points', points: 30 },
   { label: '50', kind: 'points', points: 50 },
-  { label: 'Nhân đôi', kind: 'double' },
+  {
+    get label() {
+      return i18n.t('play.wheel.double')
+    },
+    kind: 'double',
+  },
   { label: '20', kind: 'points', points: 20 },
   { label: '100', kind: 'points', points: 100 },
 ]

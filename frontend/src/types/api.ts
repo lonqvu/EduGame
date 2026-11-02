@@ -367,6 +367,8 @@ export interface UserSettings {
     reduceMotion: boolean
     /** "Bắt đầu trò chơi" also enters full screen. */
     fullscreenOnStart: boolean
+    /** Of the app's screens; none (an older server): Vietnamese. */
+    language?: 'vi' | 'en'
   }
   games: {
     teams?: number | null

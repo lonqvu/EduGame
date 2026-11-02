@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { ImagePicker } from '@/editor/ImagePicker'
@@ -24,6 +25,7 @@ export const fieldClass =
 
 /** Edit form of one question. Mount with `key={question.id}` so it resets when switching questions. */
 export function QuestionForm({ gameId, question, number, isLast, onChange, onDelete, onNext }: QuestionFormProps) {
+  const { t } = useTranslation()
   const { register, control, subscribe } = useForm<QuestionValues>({
     defaultValues: { text: question.text, answer: question.answer, imageUrl: question.imageUrl, points: question.points },
   })
@@ -47,16 +49,16 @@ export function QuestionForm({ gameId, question, number, isLast, onChange, onDel
       onSubmit={(e) => e.preventDefault()}
       className="flex flex-col gap-[22px] rounded-[28px] bg-white p-5 sm:p-7"
     >
-      <h2 className="m-0 font-display text-[26px] font-extrabold">Câu hỏi {number}</h2>
+      <h2 className="m-0 font-display text-[26px] font-extrabold">{t('editor.kinds.open.noun')} {number}</h2>
 
       <div className="flex flex-col gap-2">
         <label htmlFor="q-text" className="font-extrabold">
-          Nội dung câu hỏi
+          {t('editor.form.question')}
         </label>
         <textarea
           id="q-text"
           rows={2}
-          placeholder="Ví dụ: Con gì kêu meo meo?"
+          placeholder={t('editor.form.openPlaceholder')}
           {...register('text')}
           className={`${fieldClass} resize-y px-[18px] py-4 text-2xl`}
         />
@@ -70,14 +72,14 @@ export function QuestionForm({ gameId, question, number, isLast, onChange, onDel
 
       <div className="flex flex-col gap-2">
         <label htmlFor="q-answer" className="font-extrabold">
-          Đáp án đúng
+          {t('editor.form.answer')}
         </label>
         <input id="q-answer" type="text" {...register('answer')} className={`${fieldClass} px-[18px] py-3.5 text-xl`} />
-        <span className="text-base text-ink-soft">Chỉ hiện trên màn chiếu khi cô bấm “Hiện đáp án”.</span>
+        <span className="text-base text-ink-soft">{t('editor.form.answerHint')}</span>
       </div>
 
       <fieldset className="m-0 flex flex-col gap-2.5 border-0 p-0">
-        <legend className="mb-2.5 p-0 font-extrabold">Điểm của câu này</legend>
+        <legend className="mb-2.5 p-0 font-extrabold">{t('editor.form.points')}</legend>
         <Controller
           control={control}
           name="points"
@@ -110,14 +112,14 @@ export function QuestionForm({ gameId, question, number, isLast, onChange, onDel
           onClick={onDelete}
           className="min-h-12 cursor-pointer border-0 bg-transparent px-2 font-[inherit] font-bold text-danger hover:underline"
         >
-          Xóa câu này
+          {t('editor.form.deleteQuestion')}
         </button>
         <button
           type="button"
           onClick={onNext}
           className="min-h-[52px] cursor-pointer rounded-full border-0 bg-sun px-7 py-3 font-[inherit] font-extrabold text-ink hover:brightness-95"
         >
-          {isLast ? 'Thêm câu tiếp theo' : 'Câu tiếp theo'}
+          {isLast ? t('editor.form.addNextQuestion') : t('editor.form.nextQuestion')}
         </button>
       </div>
     </form>

@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { Countdown } from '@/game-engine/quiz/QuizParts'
@@ -34,7 +35,7 @@ export function TreasureChestScreen({ game, questions, settings }: TreasureChest
   const sound = useSound()
   const backTo = editPath(game.id)
 
-  if (!question) return <NothingToPlay message="Chưa có câu hỏi nào đủ nội dung và đáp án đúng để chơi." backTo={backTo} />
+  if (!question) return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   if (state.finished) {
     return (
       <TeamResults
@@ -44,7 +45,7 @@ export function TreasureChestScreen({ game, questions, settings }: TreasureChest
           setOpened(null)
           restart()
         }}
-        mostCorrectLabel="Mở nhiều rương nhất"
+        mostCorrectLabel="chests"
       />
     )
   }
@@ -56,14 +57,14 @@ export function TreasureChestScreen({ game, questions, settings }: TreasureChest
   return (
     <PlayFrame
       title={game.title}
-      progress={`Câu ${state.asked + 1}`}
+      progress={i18n.t('play.common.questionOnly', { number: state.asked + 1 })}
       extra={rules.timeLimitSec > 0 && !state.revealed && <Countdown key={`${round}-${state.asked}`} seconds={rules.timeLimitSec} paused={state.revealed} />}
       backTo={backTo}
     >
-      <TeamBar teams={state.teams} activeId={team.id} activeLabel="Đến lượt" />
+      <TeamBar teams={state.teams} activeId={team.id} activeLabel={i18n.t('play.common.yourTurn')} />
       <div className="flex min-h-0 flex-1 gap-6">
         <div className="flex w-[520px] shrink-0 flex-col items-center justify-center gap-5 rounded-[28px] bg-[linear-gradient(160deg,#2B3A86,#1A2360)] p-6 text-white">
-          <span className="text-xl font-extrabold">{canOpen ? `${team.name} chọn một rương!` : openIndex !== null ? 'Rương đã mở!' : 'Trả lời đúng để mở rương'}</span>
+          <span className="text-xl font-extrabold">{canOpen ? i18n.t('play.chests.choose', { team: team.name }) : openIndex !== null ? i18n.t('play.chests.opened') : i18n.t('play.chests.answerFirst')}</span>
           <div className="grid w-full grid-cols-3 gap-4">
             {chests.map((treasure, i) => {
               const isOpen = openIndex !== null
@@ -82,7 +83,7 @@ export function TreasureChestScreen({ game, questions, settings }: TreasureChest
                     sound.play(treasure.kind === 'empty' ? 'wrong' : 'fanfare')
                     dispatch({ type: 'setScores', scores })
                   }}
-                  aria-label={isOpen ? `Rương ${i + 1}: ${treasureLabel(treasure)}` : `Rương ${i + 1}`}
+                  aria-label={isOpen ? i18n.t('play.chests.chestOpen', { number: i + 1, treasure: treasureLabel(treasure) }) : i18n.t('play.chests.chest', { number: i + 1 })}
                   className={`flex h-[190px] cursor-pointer flex-col items-center justify-center gap-2 rounded-3xl border-0 font-[inherit] text-white disabled:cursor-default ${
                     chosen ? 'bg-[#FFD15C] text-ink' : isOpen ? 'bg-white/10 opacity-60' : 'bg-white/10'
                   }`}
@@ -115,7 +116,7 @@ export function TreasureChestScreen({ game, questions, settings }: TreasureChest
             if (action.type === 'next') setChests(dealChests())
             dispatch(action)
           }}
-          move="chọn một rương báu"
+          move={i18n.t('play.chests.move')}
           moveDone={openIndex !== null}
         />
       </div>
