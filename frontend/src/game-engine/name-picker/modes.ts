@@ -1,4 +1,5 @@
 import i18n from 'i18next'
+import { MAX_FISH } from '@/game-engine/name-picker/pondLayout'
 export type PickMode = 'horse' | 'balloon' | 'claw' | 'fishing' | 'rocket'
 
 /** Where the start / result panel sits so it never covers the scene's action. */
@@ -52,7 +53,8 @@ export const PICK_MODES: Record<PickMode, PickModeConfig> = {
   horse: picker('horse', 5, 'bottom', 'bottom'),
   balloon: picker('balloon', 7, 'top', 'bottom'),
   claw: picker('claw', 11, 'right', 'right'),
-  fishing: picker('fishing', 7, 'right', 'right'),
+  // One fish per student, up to a big class.
+  fishing: picker('fishing', MAX_FISH, 'right', 'right'),
   rocket: picker('rocket', 4, 'left', 'left'),
 }
 

@@ -24,7 +24,7 @@ export interface ChooserEntry {
 }
 
 /** Name pickers whose card art is a painted picture (card-pick-*.webp) rather than the generated vector. */
-const PAINTED_PICK_CARDS: ReadonlySet<PickMode> = new Set(['horse', 'rocket'])
+const PAINTED_PICK_CARDS: ReadonlySet<PickMode> = new Set(['horse', 'rocket', 'fishing'])
 
 /** The cards of a template: NAME_RACE is shown as its name pickers, every other template as itself. */
 export function entriesOf(template: GameTemplate): ChooserEntry[] {

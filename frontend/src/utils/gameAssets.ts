@@ -8,9 +8,13 @@ const ICONS: ReadonlySet<GameType> = new Set(['GRID_BOARD', 'QUIZ', 'MATCHING', 
 /** Games whose card art is a painted picture (card-*.webp) rather than the generated vector. */
 const RASTER_CARDS: ReadonlySet<GameType> = new Set(['BEE_FLOWER'])
 
-/** 2:1 card art of a game, e.g. QUIZ → /assets/games/card-quiz.svg. */
+/**
+ * 2:1 card art of a game, e.g. QUIZ → /assets/games/card-quiz.svg.
+ * `?v=2`: browsers that opened the site before card-bee-flower.webp was deployed were told, for a year, that the page
+ * was that picture; a new address makes them fetch the picture.
+ */
 export const gameCardArt = (type: GameType) =>
-  `/assets/games/card-${toFileName(type)}.${RASTER_CARDS.has(type) ? 'webp' : 'svg'}`
+  `/assets/games/card-${toFileName(type)}.${RASTER_CARDS.has(type) ? 'webp?v=2' : 'svg'}`
 
 /** Game illustration, e.g. SPIN_WHEEL → /assets/icons/games/spin-wheel.svg, GOLDEN_BELL → its card art. */
 export const gameIcon = (type: GameType) =>
