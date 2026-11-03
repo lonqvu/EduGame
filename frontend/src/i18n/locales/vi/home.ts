@@ -43,6 +43,12 @@ export const home = {
     optionsFor: 'Tùy chọn cho {{title}}',
   },
 
+  /** The games put forward on the home page, playable at once with their sample questions. */
+  featured: {
+    title: 'Trò chơi nổi bật',
+    all: 'Xem tất cả',
+  },
+
   tools: {
     title: 'Công cụ lớp học',
     all: 'Tất cả',

@@ -1,8 +1,7 @@
 import type { ComponentType } from 'react'
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, Navigate } from 'react-router'
 import { AppLoading, AppShell } from '@/components/layout/AppShell'
 import { MainLayout } from '@/components/layout/MainLayout'
-import { RequireAdmin } from '@/components/layout/RequireAdmin'
 import { AuthGate, RequireAuth } from '@/components/layout/RequireAuth'
 
 /**
@@ -45,21 +44,23 @@ export const router = createBrowserRouter([
                   { path: 'profile', lazy: page(() => import('@/pages/ProfilePage'), 'ProfilePage') },
                   { path: 'reports', lazy: page(() => import('@/pages/ReportsPage'), 'ReportsPage') },
                   { path: 'classes/:code', lazy: page(() => import('@/pages/ClassroomDetailPage'), 'ClassroomDetailPage') },
-                  {
-                    // "Quản trị": accounts with the role ADMIN only.
-                    path: 'admin',
-                    element: <RequireAdmin />,
-                    children: [
-                      { index: true, lazy: page(() => import('@/pages/admin/AdminOverviewPage'), 'AdminOverviewPage') },
-                      { path: 'teachers', lazy: page(() => import('@/pages/admin/AdminTeachersPage'), 'AdminTeachersPage') },
-                      { path: 'teachers/:code', lazy: page(() => import('@/pages/admin/AdminTeacherPage'), 'AdminTeacherPage') },
-                      { path: 'feedback', lazy: page(() => import('@/pages/admin/AdminFeedbackPage'), 'AdminFeedbackPage') },
-                      { path: 'audit-log', lazy: page(() => import('@/pages/admin/AdminAuditLogPage'), 'AdminAuditLogPage') },
-                    ],
-                  },
                 ],
               },
               { path: '*', lazy: page(() => import('@/pages/NotFoundPage'), 'NotFoundPage') },
+            ],
+          },
+          {
+            // "Quản trị": the Lớp Vui team's own area, in a frame and look of its own (src/admin); ADMIN accounts only.
+            path: 'admin',
+            lazy: page(() => import('@/admin/AdminApp'), 'AdminApp'),
+            children: [
+              { index: true, lazy: page(() => import('@/admin/OverviewPage'), 'OverviewPage') },
+              { path: 'reports', lazy: page(() => import('@/admin/ReportsPage'), 'ReportsPage') },
+              { path: 'accounts', lazy: page(() => import('@/admin/AccountsPage'), 'AccountsPage') },
+              { path: 'accounts/:code', lazy: page(() => import('@/admin/AccountPage'), 'AccountPage') },
+              { path: 'feedback', lazy: page(() => import('@/admin/FeedbackPage'), 'FeedbackPage') },
+              { path: 'audit-log', lazy: page(() => import('@/admin/AuditPage'), 'AuditPage') },
+              { path: '*', element: <Navigate to="/admin" replace /> },
             ],
           },
           // Projector screens (full window, 16:9). /play/:gameId picks the screen by game type; tiles / results are Lật ô.

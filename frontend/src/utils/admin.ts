@@ -27,7 +27,7 @@ const period = <D extends number>(days: D) => ({
   },
 })
 
-export const DASHBOARD_PERIODS = [period(7), period(30), period(90)] as const
+export const DASHBOARD_PERIODS = [period(7), period(30), period(90), period(365)] as const
 
 const number = (value: unknown) => (typeof value === 'number' ? value : null)
 const text = (value: unknown) => (typeof value === 'string' && value ? value : null)

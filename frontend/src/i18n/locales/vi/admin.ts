@@ -1,4 +1,4 @@
-/** "Quản trị", for the Lớp Vui team (pages/admin, utils/admin). */
+/** "Quản trị", for the Lớp Vui team (src/admin, utils/admin). */
 export const admin = {
   nav: {
     label: 'Mục quản trị',
@@ -6,6 +6,8 @@ export const admin = {
     teachers: 'Giáo viên',
     feedback: 'Góp ý',
     audit: 'Nhật ký',
+    reports: 'Báo cáo',
+    accounts: 'Tài khoản',
   },
   status: {
     ACTIVE: 'Đang hoạt động',
@@ -48,6 +50,27 @@ export const admin = {
     LAST_ADMIN: 'Lớp Vui cần ít nhất một quản trị viên.',
   },
   noneYet: 'Chưa dùng',
+
+  /** The frame of the admin area (src/admin): its own look, apart from the teachers' app. */
+  shell: {
+    brand: 'Lớp Vui',
+    area: 'Quản trị',
+    backToApp: 'Về Lớp Vui',
+    signOut: 'Đăng xuất',
+    menu: 'Menu quản trị',
+  },
+  reports: {
+    title: 'Báo cáo',
+    text: 'Số liệu theo từng ngày: tài khoản mới và lượt chơi. Tải file CSV để mở bằng Excel.',
+    date: 'Ngày',
+    signUps: 'Tài khoản mới',
+    plays: 'Lượt chơi',
+    total: 'Tổng cộng',
+    csv: 'Tải file CSV',
+    byDay: 'Theo ngày',
+    topGames: 'Trò được chơi nhiều nhất',
+    game: 'Trò chơi',
+  },
 
   overview: {
     title: 'Tổng quan',
@@ -155,6 +178,10 @@ export const admin = {
     revoke: 'Bỏ quyền quản trị',
     grant: 'Cấp quyền quản trị',
     history: 'Lịch sử quản trị',
+    devices: 'Thiết bị đã đăng nhập',
+    noDevices: 'Chưa đăng nhập trên thiết bị nào.',
+    joined: 'Tham gia',
+    back: 'Danh sách tài khoản',
     lockConfirm: 'Khoá tài khoản {{name}}?',
     lockConfirmText: 'Giáo viên bị đăng xuất ngay và không đăng nhập được cho tới khi được mở khoá.',
     reason: 'Lý do (ghi vào nhật ký)',
@@ -185,6 +212,13 @@ export const admin = {
     screenshot: 'Xem ảnh màn hình',
     screenshotTitle: 'Ảnh màn hình · {{code}}',
     screenshotAlt: 'Ảnh màn hình góp ý {{code}}',
+    columns: {
+      kind: 'Loại',
+      from: 'Người gửi',
+      message: 'Nội dung',
+      date: 'Ngày gửi',
+      status: 'Trạng thái',
+    },
   },
 
   audit: {
@@ -196,5 +230,12 @@ export const admin = {
     rows_other: '{{count}} dòng',
     none: 'Chưa có thao tác nào.',
     list: 'Nhật ký quản trị',
+    columns: {
+      time: 'Thời gian',
+      actor: 'Người thực hiện',
+      action: 'Thao tác',
+      target: 'Đối tượng',
+      detail: 'Chi tiết',
+    },
   },
 }

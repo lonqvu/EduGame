@@ -8,6 +8,8 @@ export const admin: Strings<typeof vi> = {
     teachers: 'Teachers',
     feedback: 'Feedback',
     audit: 'Audit log',
+    reports: 'Reports',
+    accounts: 'Accounts',
   },
   status: {
     ACTIVE: 'Active',
@@ -49,6 +51,26 @@ export const admin: Strings<typeof vi> = {
     LAST_ADMIN: 'Lớp Vui needs at least one administrator.',
   },
   noneYet: 'Never used',
+
+  shell: {
+    brand: 'Lớp Vui',
+    area: 'Admin',
+    backToApp: 'Back to Lớp Vui',
+    signOut: 'Sign out',
+    menu: 'Admin menu',
+  },
+  reports: {
+    title: 'Reports',
+    text: 'Day-by-day figures: new accounts and games played. Download a CSV file to open in Excel.',
+    date: 'Date',
+    signUps: 'New accounts',
+    plays: 'Games played',
+    total: 'Total',
+    csv: 'Download CSV',
+    byDay: 'By day',
+    topGames: 'Most played games',
+    game: 'Game',
+  },
 
   overview: {
     title: 'Overview',
@@ -155,6 +177,10 @@ export const admin: Strings<typeof vi> = {
     revoke: 'Remove admin access',
     grant: 'Grant admin access',
     history: 'Admin history',
+    devices: 'Signed-in devices',
+    noDevices: 'Not signed in on any device.',
+    joined: 'Joined',
+    back: 'All accounts',
     lockConfirm: 'Lock {{name}}’s account?',
     lockConfirmText: 'The teacher is signed out right away and can’t sign in until the account is unlocked.',
     reason: 'Reason (recorded in the log)',
@@ -184,6 +210,13 @@ export const admin: Strings<typeof vi> = {
     screenshot: 'View screenshot',
     screenshotTitle: 'Screenshot · {{code}}',
     screenshotAlt: 'Screenshot of feedback {{code}}',
+    columns: {
+      kind: 'Type',
+      from: 'From',
+      message: 'Message',
+      date: 'Sent',
+      status: 'Status',
+    },
   },
 
   audit: {
@@ -195,5 +228,12 @@ export const admin: Strings<typeof vi> = {
     rows_other: '{{count}} entries',
     none: 'No actions yet.',
     list: 'Admin log',
+    columns: {
+      time: 'Time',
+      actor: 'Done by',
+      action: 'Action',
+      target: 'Target',
+      detail: 'Details',
+    },
   },
 }

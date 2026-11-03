@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { TopBar } from '@/components/layout/TopBar'
 import { gameRegistry, itemsLabel } from '@/game-engine/registry'
+import { FeaturedGames } from '@/pages/home/FeaturedGames'
 import { HomeHero } from '@/pages/home/HomeHero'
 import { PraiseCorner, type StarPeriod } from '@/pages/home/PraiseCorner'
 import { QuickTiles } from '@/pages/home/QuickTiles'
@@ -66,6 +67,8 @@ export function HomePage() {
   }, [loadTeacher, loadTemplates, loadGames, loadClass, loadQuestionSets])
 
   const recent = allRecent ? games : games.slice(0, RECENT_LIMIT)
+  // Nothing played yet (a visitor, a new account): the featured games come first.
+  const noGamesYet = gamesStatus === 'ready' && games.length === 0
 
   const templateName = (game: GameSummary) => templates.find((t) => t.type === game.type)?.name ?? ''
   /** "Lớp 3A" when the game is for the class being taught, else "Lớp 3". */
@@ -128,16 +131,21 @@ export function HomePage() {
             onCreate={() => needsLogin('/question-sets') || navigate('/question-sets', { state: OPEN_CREATE_SET })}
             onOpenClass={() => needsLogin(classPage) || navigate(classPage)}
           />
-          <RecentActivity
-            games={recent}
-            status={gamesStatus}
-            expanded={allRecent}
-            onToggleExpanded={() => setAllRecent((v) => !v)}
-            templateName={templateName}
-            meta={meta}
-            onRetry={() => void loadGames()}
-            onArchive={confirmArchive}
-          />
+          {noGamesYet && <FeaturedGames />}
+          {/* A visitor with nothing played yet has no "recent" list: the featured games are where to start. */}
+          {!(guest && noGamesYet) && (
+            <RecentActivity
+              games={recent}
+              status={gamesStatus}
+              expanded={allRecent}
+              onToggleExpanded={() => setAllRecent((v) => !v)}
+              templateName={templateName}
+              meta={meta}
+              onRetry={() => void loadGames()}
+              onArchive={confirmArchive}
+            />
+          )}
+          {!noGamesYet && <FeaturedGames />}
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">

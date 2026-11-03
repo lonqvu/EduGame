@@ -42,6 +42,11 @@ export const home: Strings<typeof vi> = {
     optionsFor: 'Options for {{title}}',
   },
 
+  featured: {
+    title: 'Featured games',
+    all: 'See all',
+  },
+
   tools: {
     title: 'Classroom tools',
     all: 'All',
