@@ -4,11 +4,16 @@ import { CheckIcon, ChevronDownIcon, GlobeIcon } from '@/components/ui/icons'
 import { LANGUAGES, shownLanguage, type Language } from '@/i18n'
 import { useSettingsStore } from '@/store/settingsStore'
 
+const LOOKS = { pill: 'bg-white px-3', icon: 'w-10 bg-surface-soft', row: 'w-full bg-surface-soft px-4' }
+
 /**
  * "🌐 VI ▾" next to the account chip: the language of the screens, each named in its own language. Saved with the
  * settings (in this browser for a visitor). Hidden while only Vietnamese is offered.
+ *
+ * `look`: "pill" beside the account (white), "icon" the globe alone (grey, on the white bar of tablets), "row" the
+ * whole name (grey, in the menu drawer of phones).
  */
-export function LanguageSwitch() {
+export function LanguageSwitch({ look = 'pill', className = '' }: { look?: 'pill' | 'icon' | 'row'; className?: string }) {
   const { t } = useTranslation()
   const saved = useSettingsStore((s) => s.settings.display.language)
   const update = useSettingsStore((s) => s.update)
@@ -21,7 +26,7 @@ export function LanguageSwitch() {
   return (
     <Dropdown
       trigger={['click']}
-      placement="bottomRight"
+      placement={look === 'row' ? 'topLeft' : 'bottomRight'}
       menu={{
         selectable: true,
         selectedKeys: [current],
@@ -44,11 +49,12 @@ export function LanguageSwitch() {
       <button
         type="button"
         aria-label={t('topBar.language', { name: t(`languages.${current}`) })}
-        className="flex h-10 cursor-pointer items-center gap-1.5 rounded-full border-0 bg-white px-3 font-[inherit] text-[14px] font-extrabold text-[#3F4B68] hover:text-primary"
+        className={`flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-[inherit] text-[14px] font-extrabold text-[#3F4B68] hover:text-primary ${LOOKS[look]} ${className}`}
       >
         <GlobeIcon size={18} />
-        {current.toUpperCase()}
-        <ChevronDownIcon size={14} strokeWidth={2.6} />
+        {look === 'pill' && current.toUpperCase()}
+        {look === 'row' && <span className="flex-1 text-left">{t(`languages.${current}`)}</span>}
+        {look !== 'icon' && <ChevronDownIcon size={14} strokeWidth={2.6} />}
       </button>
     </Dropdown>
   )

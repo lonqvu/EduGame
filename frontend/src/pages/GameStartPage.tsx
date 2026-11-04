@@ -96,8 +96,8 @@ export function GameStartPage() {
             </p>
           </div>
         </div>
-        {/* Above the title on phones, so the title keeps the full width. */}
-        <div className="order-first ml-auto sm:order-none">
+        {/* On small screens the account is in the bar at the top of the screen (MainLayout). */}
+        <div className="hidden lg:block">
           <TopBar />
         </div>
       </header>
