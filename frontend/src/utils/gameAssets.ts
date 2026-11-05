@@ -6,7 +6,7 @@ const toFileName = (type: GameType) => type.toLowerCase().replace(/_/g, '-')
 const ICONS: ReadonlySet<GameType> = new Set(['GRID_BOARD', 'QUIZ', 'MATCHING', 'MEMORY', 'SPIN_WHEEL', 'NAME_RACE'])
 
 /** Games whose card art is a painted picture (card-*.webp) rather than the generated vector. */
-const RASTER_CARDS: ReadonlySet<GameType> = new Set(['BEE_FLOWER'])
+const RASTER_CARDS: ReadonlySet<GameType> = new Set(['BEE_FLOWER', 'MOUNTAIN_CLIMB'])
 
 /**
  * 2:1 card art of a game, e.g. QUIZ → /assets/games/card-quiz.svg.
