@@ -16,9 +16,20 @@ import { streakRate } from '@/sound/streak'
 
 const MOUNTAIN_WIDTH = 470
 const MOUNTAIN_HEIGHT = 600
-/** Where the trails start (above the team buttons) and the summit. */
-const BASE_Y = 500
-const SUMMIT_Y = 92
+const ART = '/assets/games/mountain-climb'
+/**
+ * The painted mountain (mountain.webp, drawn 470 × 600): its peak is at (237, 75). The trails start low on its slopes,
+ * above the team buttons, and meet just under the snow, a little apart so the climbers do not hide each other.
+ */
+const PEAK_X = 237
+const BASE_Y = 470
+const SUMMIT_Y = 138
+/** How far apart the trails end at the top, as a share of how far apart they start. */
+const SUMMIT_SPREAD = 0.3
+/** Climbers are drawn this tall; the pictures are about 0.62 as wide as high. */
+const CLIMBER_H = 66
+/** Team colours that have a climber picture (grid-board/teams). */
+const CLIMBER_COLORS: Record<string, string> = { '#F28C28': 'orange', '#3563E9': 'blue', '#2E9E6A': 'green', '#8B5CF6': 'purple' }
 
 interface MountainClimbScreenProps {
   game: GameSummary
@@ -115,56 +126,54 @@ interface MountainProps {
   onPick: (teamId: string) => void
 }
 
-/** The mountain: one trail per team from its button at the foot to the summit, its climber one stage per right answer. */
+/**
+ * The mountain: one trail per team from its button at the foot up the slope to just under the summit, its climber one
+ * stage per right answer. The trails lean in towards the peak, as paths up a mountain do.
+ */
 function Mountain({ teams, steps, answeringId, triedIds, onPick }: MountainProps) {
   const column = MOUNTAIN_WIDTH / teams.length
-  const stage = (BASE_Y - SUMMIT_Y) / steps
+  /** Where a team's trail is at stage `s` (0 at the foot, `steps` at the top). */
+  const at = (i: number, s: number) => {
+    const baseX = column * (i + 0.5)
+    const topX = PEAK_X + (baseX - PEAK_X) * SUMMIT_SPREAD
+    const t = s / steps
+    return { x: baseX + (topX - baseX) * t, y: BASE_Y + (SUMMIT_Y - BASE_Y) * t }
+  }
   return (
     <div className="relative shrink-0 overflow-hidden rounded-[28px]" style={{ width: MOUNTAIN_WIDTH, height: MOUNTAIN_HEIGHT }}>
+      <img src={`${ART}/mountain.webp`} alt="" className="absolute inset-0 size-full object-cover" />
       <svg width={MOUNTAIN_WIDTH} height={MOUNTAIN_HEIGHT} className="absolute inset-0" aria-hidden="true">
-        <defs>
-          <linearGradient id="mc-sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#BFE3FF" />
-            <stop offset="1" stopColor="#E8F5FF" />
-          </linearGradient>
-        </defs>
-        <rect width={MOUNTAIN_WIDTH} height={MOUNTAIN_HEIGHT} fill="url(#mc-sky)" />
-        <circle cx={MOUNTAIN_WIDTH - 60} cy={60} r={30} fill="#FFD43B" />
-        <path d={`M-40 ${BASE_Y + 20} L${MOUNTAIN_WIDTH / 2} ${SUMMIT_Y - 40} L${MOUNTAIN_WIDTH + 40} ${BASE_Y + 20} Z`} fill="#7FB77E" />
-        <path d={`M-40 ${BASE_Y + 20} L${MOUNTAIN_WIDTH / 2} ${SUMMIT_Y - 40} L${MOUNTAIN_WIDTH / 2 + 30} ${BASE_Y + 20} Z`} fill="#6AA56B" />
-        <path
-          d={`M${MOUNTAIN_WIDTH / 2 - 52} ${SUMMIT_Y + 18} L${MOUNTAIN_WIDTH / 2} ${SUMMIT_Y - 40} L${MOUNTAIN_WIDTH / 2 + 52} ${SUMMIT_Y + 18} L${MOUNTAIN_WIDTH / 2 + 22} ${SUMMIT_Y + 4} L${MOUNTAIN_WIDTH / 2} ${SUMMIT_Y + 20} L${MOUNTAIN_WIDTH / 2 - 24} ${SUMMIT_Y + 4} Z`}
-          fill="#FFFFFF"
-        />
-        <rect y={BASE_Y + 20} width={MOUNTAIN_WIDTH} height={MOUNTAIN_HEIGHT - BASE_Y} fill="#5C9A5D" />
         {teams.map((team, i) => {
-          const x = column * (i + 0.5)
+          const foot = at(i, 0)
+          const top = at(i, steps)
           return (
             <g key={team.id}>
-              <line x1={x} x2={x} y1={BASE_Y} y2={SUMMIT_Y} stroke="#FFFFFF" strokeOpacity={0.7} strokeWidth={4} strokeDasharray="2 12" strokeLinecap="round" />
-              {Array.from({ length: steps + 1 }, (_, s) => (
-                <circle key={s} cx={x} cy={BASE_Y - s * stage} r={s === steps ? 9 : 6} fill={s === steps ? '#FFD43B' : '#FFFFFF'} stroke={team.color} strokeWidth={3} />
-              ))}
+              <line x1={foot.x} y1={foot.y} x2={top.x} y2={top.y} stroke="#FFFFFF" strokeOpacity={0.85} strokeWidth={5} strokeDasharray="2 12" strokeLinecap="round" />
+              {Array.from({ length: steps + 1 }, (_, s) => {
+                const p = at(i, s)
+                return <circle key={s} cx={p.x} cy={p.y} r={s === steps ? 9 : 6} fill={s === steps ? '#FFD43B' : '#FFFFFF'} stroke={team.color} strokeWidth={3} />
+              })}
             </g>
           )
         })}
       </svg>
 
       {teams.map((team, i) => {
-        const x = column * (i + 0.5)
         const step = boatStep(team, steps)
+        const p = at(i, step)
         const active = team.id === answeringId
         const done = triedIds.includes(team.id)
+        // The climbers face right: those whose trail goes up to the left turn around.
+        const facesLeft = column * (i + 0.5) > PEAK_X + 1
         return (
           <div key={team.id}>
             <motion.div
-              className="absolute"
+              className="absolute top-0 left-0"
               initial={false}
-              animate={{ x: x - 22, y: BASE_Y - step * stage - 52 }}
+              animate={{ x: p.x, y: p.y }}
               transition={{ type: 'spring', bounce: 0.3, duration: 1 }}
-              style={{ left: 0, top: 0 }}
             >
-              <Climber color={team.color} flag={step >= steps} />
+              <Climber color={team.color} summit={step >= steps} facesLeft={facesLeft} />
             </motion.div>
             <button
               type="button"
@@ -188,20 +197,32 @@ function Mountain({ teams, steps, answeringId, triedIds, onPick }: MountainProps
   )
 }
 
-function Climber({ color, flag }: { color: string; flag: boolean }) {
+/**
+ * A team's climber, standing with its feet on the trail (the box's origin is where the feet are): climbing on the way,
+ * arms up with the team's flag planted beside it on the summit.
+ */
+function Climber({ color, summit, facesLeft }: { color: string; summit: boolean; facesLeft: boolean }) {
+  const name = CLIMBER_COLORS[color] ?? 'blue'
+  const width = Math.round(CLIMBER_H * (summit ? 0.92 : 0.62))
   return (
-    <svg width={44} height={56} viewBox="0 0 44 56" aria-hidden="true">
-      {flag && (
-        <>
-          <rect x="34" y="0" width="3" height="40" fill="#6B4E2E" />
-          <path d="M37 2 L44 8 L37 14 Z" fill={color} />
-        </>
+    <div className="pointer-events-none absolute" style={{ left: -width / 2, top: -CLIMBER_H + 4, width, height: CLIMBER_H }}>
+      {summit && (
+        <svg width="34" height="62" viewBox="0 0 34 62" className="absolute -top-3 -right-5" aria-hidden="true">
+          <rect x="3" y="2" width="4" height="60" rx="2" fill="#6B4E2E" />
+          <motion.path d="M7 4 L32 12 L7 22 Z" fill={color} stroke="#FFFFFF" strokeWidth="1.5" animate={{ scaleX: [1, 0.85] }} style={{ originX: 0 }} transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }} />
+        </svg>
       )}
-      <circle cx="20" cy="12" r="9" fill="#FFD9B8" />
-      <path d="M11 10 Q20 0 29 10 Z" fill={color} />
-      <rect x="11" y="21" width="18" height="18" rx="6" fill={color} />
-      <rect x="6" y="22" width="9" height="13" rx="4" fill="#8B5E34" />
-      <path d="M14 38 L10 54 M26 38 L30 54" stroke="#3F4B68" strokeWidth="5" strokeLinecap="round" />
-    </svg>
+      <motion.img
+        key={summit ? 'victory' : 'climber'}
+        src={`${ART}/${summit ? 'victory' : 'climber'}-${name}.webp`}
+        alt=""
+        draggable={false}
+        className="block size-full select-none object-contain drop-shadow-[0_3px_2px_rgba(31,42,68,0.25)]"
+        style={{ scaleX: facesLeft && !summit ? -1 : 1 }}
+        initial={summit ? { scale: 0.6, y: 10 } : false}
+        animate={summit ? { scale: 1, y: [0, -6] } : { y: [0, -2] }}
+        transition={summit ? { scale: { type: 'spring', bounce: 0.5 }, y: { duration: 0.45, repeat: Infinity, repeatType: 'reverse' } } : { duration: 0.6, repeat: Infinity, repeatType: 'reverse' }}
+      />
+    </div>
   )
 }
