@@ -26,8 +26,8 @@ export function PageHeader({ title, text, badge, actions }: PageHeaderProps) {
         {text && <p className="m-0 mt-1 text-[14.5px] text-ink-soft">{text}</p>}
       </div>
       {actions}
-      {/* Above the title on phones, so the title keeps the full width. */}
-      <div className="order-first ml-auto sm:order-none">
+      {/* On small screens the account is in the bar at the top of the screen (MainLayout). */}
+      <div className="hidden lg:block">
         <TopBar />
       </div>
     </header>
