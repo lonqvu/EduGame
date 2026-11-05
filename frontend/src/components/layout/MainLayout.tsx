@@ -3,6 +3,8 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Outlet, useLocation } from 'react-router'
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
+import { LanguageSwitch } from '@/components/layout/LanguageSwitch'
+import { TopBar } from '@/components/layout/TopBar'
 import {
   ChartIcon,
   FileTextIcon,
@@ -82,8 +84,12 @@ export function MainLayout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center justify-between gap-3 bg-white px-4 py-3 lg:hidden">
+        <div className="flex items-center gap-2 bg-white px-4 py-3 lg:hidden">
           <Logo />
+          {/* The account, or "Đăng nhập", in this bar on small screens; the pages show it beside their title on wide ones. */}
+          <div className="ml-auto">
+            <TopBar compact />
+          </div>
           <button
             type="button"
             aria-label={t('nav.openMenu')}
@@ -117,6 +123,8 @@ export function MainLayout() {
         styles={{ body: { padding: '14px 10px 24px', display: 'flex', flexDirection: 'column' } }}
       >
         <Sidebar onNavigate={() => setMenuOpen(false)} />
+        {/* On phones the bar at the top has no room for it. */}
+        <LanguageSwitch look="row" className="mt-3 sm:hidden" />
       </Drawer>
 
       <FeedbackDialog />

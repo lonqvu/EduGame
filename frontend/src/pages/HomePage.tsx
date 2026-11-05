@@ -110,7 +110,8 @@ export function HomePage() {
   // column (tools for the lesson, praise, question sets); one column on small screens, in that order.
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
+      {/* On small screens the account is in the bar at the top of the screen (MainLayout). */}
+      <div className="hidden justify-end lg:flex">
         <TopBar />
       </div>
 
