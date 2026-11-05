@@ -3,18 +3,16 @@ import { motion } from 'motion/react'
 import { useState, useEffect } from 'react'
 import { BLEED, BLEED_W, BLEED_X, Countdown, Crown, SceneSvg } from '@/game-engine/name-picker/effects'
 import { horseRacePlan, RACE_STRETCHES } from '@/game-engine/name-picker/horseRace'
+import { HORSE_H, HORSE_W, raceLayout, TRACK } from '@/game-engine/name-picker/raceLayout'
 import { fontFor, LOOP, type PickSceneProps } from '@/game-engine/name-picker/sceneTypes'
 import { useSceneTimeline } from '@/game-engine/name-picker/useSceneTimeline'
 import { useSound } from '@/sound/useSound'
 
 const ART = '/assets/games/horse-race'
-/** One horse per lane, each its own coat and saddle so a class can tell them apart. */
+/** Horses take these coats in turn, each with its own saddle, so a class can tell them apart. */
 const COATS = ['golden', 'brown', 'white', 'chestnut', 'black']
-const LANE_TOP = 172
-const LANE_GAP = 82
-const START_LEFT = 56
-/** Horse nose crosses the finish line (x = 1118). */
-const WIN_X = 960
+/** The race plan runs to this; each horse's own run is scaled to the distance from its place to the finish. */
+const PLAN_X = 1000
 const COUNT_MS = 750
 const GO_AT = COUNT_MS * 3
 const RACE_S = 7
@@ -42,7 +40,11 @@ export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickScene
   const done = phase === 'done'
   const [go, setGo] = useState(false)
   // Every horse speeds up and slows down at random along the way; the winner crosses the line at the very end.
-  const [plan] = useState(() => horseRacePlan(slots.length, winnerSlot, WIN_X))
+  // One horse per student; smaller horses, a few deep in each lane, when the class is big.
+  const [field] = useState(() => raceLayout(slots.length))
+  const [plan] = useState(() =>
+    horseRacePlan(slots.length, winnerSlot, PLAN_X).map((xs, i) => xs.map((x) => Math.round((x * (field.spots[i]?.distance ?? PLAN_X)) / PLAN_X))),
+  )
 
   useSceneTimeline(running, [
     [GO_AT, () => setGo(true)],
@@ -58,19 +60,25 @@ export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickScene
 
   return (
     <>
-      <HorseBackground />
-      {slots.map((student, i) => {
+      <HorseBackground lanes={field.lanes} />
+      {/* Lane by lane from the back of the track, so the horses nearer the front are drawn over the ones behind. */}
+      {slots
+        .map((student, i) => ({ student, i, spot: field.spots[i] }))
+        .filter((h) => h.spot)
+        .sort((a, b) => a.spot.lane - b.spot.lane || a.spot.left - b.spot.left)
+        .map(({ student, i, spot }) => {
         const isWinner = done && i === winnerSlot
         const gallop = running && go
         return (
           <motion.div
             key={student.id}
-            className="absolute h-[96px] w-[112px]"
-            style={{ left: START_LEFT, top: LANE_TOP + i * LANE_GAP }}
+            className="absolute"
+            style={{ left: spot.left, top: spot.top, width: HORSE_W * field.scale, height: HORSE_H * field.scale }}
             initial={{ x: 0 }}
             animate={{ x: moving ? plan[i] : 0 }}
             transition={{ duration: RACE_S, times: STRETCH_TIMES, ease: 'linear' }}
           >
+          <div className="absolute top-0 left-0" style={{ width: HORSE_W, height: HORSE_H, transform: `scale(${field.scale})`, transformOrigin: '0 0' }}>
             {gallop && <Dust />}
             <motion.div
               className="absolute inset-0"
@@ -85,10 +93,11 @@ export function HorseRaceScene({ slots, winnerSlot, phase, onFinish }: PickScene
               }
               transition={isWinner ? { duration: 0.45, ...LOOP } : gallop ? { duration: 0.28, ...LOOP } : { duration: 0.8, ...LOOP }}
             >
-              <Horse name={student.name} coat={COATS[i % COATS.length]} />
+              <Horse name={student.name} coat={COATS[i % COATS.length]} scale={field.scale} />
             </motion.div>
             {isWinner && <Crown width={46} left={64} top={-22} />}
             {isWinner && <WinnerStars />}
+          </div>
           </motion.div>
         )
       })}
@@ -117,13 +126,14 @@ function Dust() {
   )
 }
 
-function Horse({ name, coat }: { name: string; coat: string }) {
+/** The painted horse with the student's name on its side, the name kept readable however small the horse. */
+function Horse({ name, coat, scale }: { name: string; coat: string; scale: number }) {
   return (
     <div className="absolute inset-0" aria-hidden="true">
       <img src={`${ART}/horse-${coat}.webp`} alt="" draggable={false} className="block h-full w-full select-none" />
       <span
-        className="absolute top-[47%] left-[6%] -translate-y-1/2 whitespace-nowrap rounded-lg bg-white px-2 py-0.5 font-extrabold leading-tight text-[#1F2A44] shadow-[0_2px_0_rgba(31,42,68,0.18)]"
-        style={{ fontSize: fontFor(name, 17, 14) }}
+        className="absolute top-[47%] left-[4%] max-w-[110%] -translate-y-1/2 truncate rounded-lg bg-white px-2 py-0.5 font-extrabold leading-tight text-[#1F2A44] shadow-[0_2px_0_rgba(31,42,68,0.18)]"
+        style={{ fontSize: Math.max(fontFor(name, 17, 14), 12 / scale) }}
       >
         {name}
       </span>
@@ -170,7 +180,7 @@ function Flower({ x, y, size = 30, delay = 0 }: { x: number; y: number; size?: n
   )
 }
 
-function HorseBackground() {
+function HorseBackground({ lanes }: { lanes: number }) {
   const wave = { transformBox: 'fill-box' as const, originX: 0.5, originY: 0 }
   return (
     <SceneSvg>
@@ -200,8 +210,8 @@ function HorseBackground() {
       <rect x={BLEED_X} y="176" width={BLEED_W} height="410" fill="#E9CFA6" />
       <rect x={BLEED_X} y="170" width={BLEED_W} height="8" fill="#FFFFFF" />
       <rect x={BLEED_X} y="584" width={BLEED_W} height="8" fill="#FFFFFF" />
-      {[258, 340, 422, 504].map((y) => (
-        <line key={y} x1={BLEED_X} y1={y} x2={1280 + BLEED} y2={y} stroke="#FFFFFF" strokeWidth="3" strokeDasharray="18 14" opacity="0.8" />
+      {Array.from({ length: lanes - 1 }, (_, k) => TRACK.top + ((TRACK.bottom - TRACK.top) * (k + 1)) / lanes).map((y) => (
+        <line key={y} x1={BLEED_X} y1={y} x2={1280 + BLEED} y2={y} stroke="#FFFFFF" strokeWidth={lanes > 8 ? 2 : 3} strokeDasharray="18 14" opacity="0.8" />
       ))}
       <rect x="1118" y="176" width="24" height="410" fill="url(#hrChk)" />
       <rect x="1112" y="120" width="8" height="64" fill="#FFFFFF" />

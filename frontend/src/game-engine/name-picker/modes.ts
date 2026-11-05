@@ -1,4 +1,6 @@
 import i18n from 'i18next'
+import { MAX_ROCKETS } from '@/game-engine/name-picker/launchLayout'
+import { MAX_HORSES } from '@/game-engine/name-picker/raceLayout'
 import { MAX_FISH } from '@/game-engine/name-picker/pondLayout'
 export type PickMode = 'horse' | 'balloon' | 'claw' | 'fishing' | 'rocket'
 
@@ -50,12 +52,14 @@ function picker(mode: PickMode, slots: number, idleAt: PanelPlacement, resultAt:
 }
 
 export const PICK_MODES: Record<PickMode, PickModeConfig> = {
-  horse: picker('horse', 5, 'bottom', 'bottom'),
+  // One horse per student, up to a big class.
+  horse: picker('horse', MAX_HORSES, 'bottom', 'bottom'),
   balloon: picker('balloon', 7, 'top', 'bottom'),
   claw: picker('claw', 11, 'right', 'right'),
   // One fish per student, up to a big class.
   fishing: picker('fishing', MAX_FISH, 'right', 'right'),
-  rocket: picker('rocket', 4, 'left', 'left'),
+  // One rocket per student, up to a big class.
+  rocket: picker('rocket', MAX_ROCKETS, 'left', 'left'),
 }
 
 /** Every name-picking tool, for the "Đổi trò" menu (the wheel lives on its own route). */
