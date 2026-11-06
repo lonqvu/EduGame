@@ -11,7 +11,9 @@ COPY . .
 ARG VITE_API_BASE_URL=/api
 # "2026-10-19 bb92f59", shown in "Góp ý"; there is no git inside the build.
 ARG VITE_APP_VERSION=
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL VITE_APP_VERSION=$VITE_APP_VERSION
+# English in the language switch (src/i18n/index.ts): on in production too.
+ARG VITE_ENGLISH=true
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL VITE_APP_VERSION=$VITE_APP_VERSION VITE_ENGLISH=$VITE_ENGLISH
 RUN npm run build
 
 FROM caddy:2.10-alpine
