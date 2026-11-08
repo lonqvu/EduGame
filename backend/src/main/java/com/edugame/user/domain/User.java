@@ -31,8 +31,13 @@ public class User extends AuditableEntity {
     @Column(name = "username", nullable = false, length = 50)
     private String username;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
+    /** {@code null}: no password yet (signed up with Google), only Google sign-in works. */
+    @Column(name = "password_hash", length = 255)
     private String passwordHash;
+
+    /** {@code sub} of the linked Google account's ID tokens; {@code null} when none is linked. */
+    @Column(name = "google_sub", length = 255)
+    private String googleSub;
 
     @Column(name = "display_name", nullable = false, length = 100)
     private String displayName;
@@ -93,5 +98,25 @@ public class User extends AuditableEntity {
         user.role = UserRole.TEACHER;
         user.emailVerifiedAt = verifiedAt;
         return user;
+    }
+
+    /** A teacher who signed up with Google: the address is verified by Google, there is no password yet. */
+    public static User googleTeacher(String code, String username, String displayName, String email,
+                                     String googleSub, Instant verifiedAt) {
+        User user = verifiedTeacher(code, username, null, displayName, email, verifiedAt);
+        user.googleSub = googleSub;
+        return user;
+    }
+
+    /** Links a Google account whose verified email is this user's: that also proves the address. */
+    public void linkGoogle(String sub, Instant verifiedAt) {
+        googleSub = sub;
+        if (emailVerifiedAt == null) {
+            emailVerifiedAt = verifiedAt;
+        }
+    }
+
+    public boolean hasPassword() {
+        return passwordHash != null;
     }
 }

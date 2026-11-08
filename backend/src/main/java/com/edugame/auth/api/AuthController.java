@@ -1,6 +1,7 @@
 package com.edugame.auth.api;
 
 import com.edugame.auth.dto.CodeSentResponse;
+import com.edugame.auth.dto.GoogleLoginRequest;
 import com.edugame.auth.dto.LoginRequest;
 import com.edugame.auth.dto.RegisterRequest;
 import com.edugame.auth.dto.ResendCodeRequest;
@@ -8,6 +9,7 @@ import com.edugame.auth.dto.ResetPasswordRequest;
 import com.edugame.auth.dto.TokenResponse;
 import com.edugame.auth.dto.VerifyEmailRequest;
 import com.edugame.auth.service.AuthService;
+import com.edugame.auth.service.GoogleSignInService;
 import com.edugame.auth.service.PasswordResetService;
 import com.edugame.auth.service.RegistrationService;
 import com.edugame.common.exception.BusinessException;
@@ -39,6 +41,7 @@ public class AuthController {
     private final AuthService authService;
     private final RegistrationService registrationService;
     private final PasswordResetService passwordResetService;
+    private final GoogleSignInService googleSignInService;
     private final RefreshTokenCookie refreshTokenCookie;
 
     @Operation(summary = "Sign in with username (or email) and password",
@@ -50,6 +53,18 @@ public class AuthController {
                                                @RequestHeader(value = HttpHeaders.USER_AGENT, required = false)
                                                String userAgent, HttpServletRequest servletRequest) {
         return withCookie(authService.login(request, userAgent, servletRequest.getRemoteAddr()), servletRequest);
+    }
+
+    @Operation(summary = "Sign in (or sign up) with a Google ID token",
+            description = "The credential comes from Google Identity Services in the browser. Links the account "
+                    + "with the same verified email, or creates a teacher. Same answer as login. 401 "
+                    + "INVALID_GOOGLE_TOKEN, 403 ACCOUNT_DISABLED, 409 EMAIL_TAKEN, 503 GOOGLE_SIGN_IN_DISABLED.")
+    @SecurityRequirements
+    @PostMapping("/google")
+    public ResponseEntity<TokenResponse> google(@Valid @RequestBody GoogleLoginRequest request,
+                                                @RequestHeader(value = HttpHeaders.USER_AGENT, required = false)
+                                                String userAgent, HttpServletRequest servletRequest) {
+        return withCookie(googleSignInService.signIn(request, userAgent), servletRequest);
     }
 
     @Operation(summary = "New access token from the refresh token cookie",

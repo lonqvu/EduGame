@@ -101,7 +101,12 @@ export function ProfilePage() {
           <LogoutButton onClick={confirmLogout} />
 
           <EditProfileModal open={dialog === 'edit'} profile={profile} onClose={() => setDialog(null)} />
-          <SecurityModal open={dialog === 'security'} onClose={() => setDialog(null)} />
+          <SecurityModal
+            open={dialog === 'security'}
+            hasPassword={profile.hasPassword}
+            onPasswordSet={() => void load()}
+            onClose={() => setDialog(null)}
+          />
           <HelpModal open={dialog === 'help'} onClose={() => setDialog(null)} />
         </>
       )}

@@ -1,13 +1,45 @@
 import { App } from 'antd'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { GoogleButton } from '@/pages/login/GoogleButton'
+import { useAuthStore } from '@/store/authStore'
+import { apiErrorMessage } from '@/utils/apiError'
+import { GOOGLE_CLIENT_ID } from '@/utils/googleIdentity'
 
-/** "Hoặc đăng nhập bằng" + Google / Microsoft (not available yet). */
-export function SocialLogin({ action }: { action: 'login' | 'register' }) {
+/**
+ * "Hoặc đăng nhập bằng" + Google / Microsoft (Microsoft not available yet). Google signs in at once: a new address
+ * becomes a teacher account, an address that has one is linked to it.
+ *
+ * @param remember "Ghi nhớ đăng nhập" of the form (sign-up: kept, as for a new account on its own device)
+ * @param onError  shows the message in the form (`null` clears it)
+ */
+export function SocialLogin({ action, remember = true, onSignedIn, onError }: {
+  action: 'login' | 'register'
+  remember?: boolean
+  onSignedIn: () => void
+  onError: (message: string | null) => void
+}) {
   const { t } = useTranslation()
   const { message } = App.useApp()
+  const loginWithGoogle = useAuthStore((s) => s.loginWithGoogle)
+  const [googleBroken, setGoogleBroken] = useState(false)
+  const [signingIn, setSigningIn] = useState(false)
   const soon = (provider: string) => () =>
     message.info(action === 'login' ? t('auth.socialSoonLogin', { provider }) : t('auth.socialSoonRegister', { provider }))
+
+  const signInWithGoogle = async (credential: string) => {
+    if (signingIn) return
+    setSigningIn(true)
+    onError(null)
+    try {
+      await loginWithGoogle(credential, remember)
+      onSignedIn()
+    } catch (e) {
+      onError(apiErrorMessage(e))
+      setSigningIn(false)
+    }
+  }
+
   return (
     <>
       <div className="mt-[clamp(16px,3.2vh,30px)] flex items-center gap-4 text-[15px] font-semibold text-ink-muted">
@@ -16,7 +48,20 @@ export function SocialLogin({ action }: { action: 'login' | 'register' }) {
         <span className="h-px flex-1 bg-line" />
       </div>
       <div className="mt-[clamp(12px,2.3vh,22px)] grid grid-cols-2 gap-3.5">
-        <SocialButton label="Google" icon={<GoogleLogo />} onClick={soon('Google')} />
+        {GOOGLE_CLIENT_ID && !googleBroken ? (
+          <GoogleButton
+            action={action}
+            disabled={signingIn}
+            onCredentialReceived={(credential) => void signInWithGoogle(credential)}
+            onUnavailable={() => setGoogleBroken(true)}
+          />
+        ) : (
+          <SocialButton
+            label="Google"
+            icon={<GoogleLogo />}
+            onClick={GOOGLE_CLIENT_ID ? () => message.error(t('auth.googleUnavailable')) : soon('Google')}
+          />
+        )}
         <SocialButton label="Microsoft" icon={<MicrosoftLogo />} onClick={soon('Microsoft')} />
       </div>
     </>

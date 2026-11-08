@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { login as loginRequest, logout as logoutRequest, resetPassword, verifyEmail } from '@/api/authApi'
+import { loginWithGoogle, login as loginRequest, logout as logoutRequest, resetPassword, verifyEmail } from '@/api/authApi'
 import { forgetGuestGames } from '@/api/guestGameApi'
 import { endSession, refreshSession, startSession } from '@/api/session'
 import { forgetCachedDisplay } from '@/utils/settings'
@@ -18,6 +18,8 @@ interface AuthState {
   /** Resumes the session of the refresh token cookie, once per page load. */
   restore: () => Promise<void>
   login: (username: string, password: string, remember: boolean) => Promise<void>
+  /** "Đăng nhập với Google": signs in (or up) with the ID token from Google's button. */
+  loginWithGoogle: (credential: string, remember: boolean) => Promise<void>
   /** Confirms the sign-up code: the new teacher is signed in. */
   completeSignUp: (email: string, code: string) => Promise<void>
   /** Sets the new password with the mailed code: other sessions end, this one is signed in. */
@@ -38,6 +40,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     startSession(await loginRequest({ username: username.trim(), password, remember }))
     signedIn(set)
   },
+  loginWithGoogle: async (credential, remember) => {
+    startSession(await loginWithGoogle(credential, remember))
+    signedIn(set)
+  },
   completeSignUp: async (email, code) => {
     startSession(await verifyEmail({ email, code }))
     signedIn(set)
@@ -54,6 +60,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
     endSession()
     forgetCachedDisplay()
+    // Google must not sign the next person at this computer straight back in.
+    window.google?.accounts?.id?.disableAutoSelect()
     window.location.assign('/login')
   },
 }))

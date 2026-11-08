@@ -21,7 +21,21 @@ public record AppProperties(Cors cors, Auth auth, Mail mail, ZoneId timeZone) {
      * @param defaultUserCode development aid: {@code users.code} a request acts as when it carries no access
      *                        token; blank means such requests are anonymous
      */
-    public record Auth(String defaultUserCode, Jwt jwt, Refresh refresh, Verification verification, Login login) {
+    public record Auth(String defaultUserCode, Jwt jwt, Refresh refresh, Verification verification, Login login,
+                       Google google) {
+    }
+
+    /**
+     * "Đăng nhập với Google" (Google Identity Services ID tokens).
+     *
+     * @param clientId OAuth client id of the web app ({@code ...apps.googleusercontent.com}), the audience every ID
+     *                 token must name; blank turns Google sign-in off
+     */
+    public record Google(String clientId) {
+
+        public boolean enabled() {
+            return clientId != null && !clientId.isBlank();
+        }
     }
 
     /**

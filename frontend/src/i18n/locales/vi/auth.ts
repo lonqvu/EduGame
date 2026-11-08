@@ -88,6 +88,8 @@ export const auth = {
   /** Signing in or up with Google / Microsoft, not built yet. {{provider}}: its name. */
   socialSoonLogin: 'Đăng nhập bằng {{provider}} đang được hoàn thiện.',
   socialSoonRegister: 'Đăng ký bằng {{provider}} đang được hoàn thiện.',
+  /** Google's sign-in button could not load (offline, blocked by the browser). */
+  googleUnavailable: 'Chưa mở được đăng nhập Google. Cô kiểm tra mạng hoặc tắt chặn quảng cáo rồi tải lại trang nhé.',
   /** A legal page not written yet; {{name}}: its title. */
   documentSoon: 'Trang “{{name}}” đang được hoàn thiện.',
 

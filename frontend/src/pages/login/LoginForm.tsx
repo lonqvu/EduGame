@@ -92,7 +92,7 @@ export function LoginForm({ onSignedIn }: { onSignedIn: () => void }) {
         </button>
       </form>
 
-      <SocialLogin action="login" />
+      <SocialLogin action="login" remember={remember} onSignedIn={onSignedIn} onError={setError} />
 
       <p className="mt-[clamp(14px,3.6vh,36px)] mb-0 flex flex-wrap items-center justify-center gap-x-2 text-[16px] font-semibold text-ink-muted">
         {t('auth.login.noAccount')}

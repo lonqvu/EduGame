@@ -85,6 +85,7 @@ export const auth: Strings<typeof vi> = {
 
   socialSoonLogin: 'Signing in with {{provider}} is coming soon.',
   socialSoonRegister: 'Signing up with {{provider}} is coming soon.',
+  googleUnavailable: 'Couldn’t open Google sign-in. Check your connection or turn off your ad blocker, then reload the page.',
   documentSoon: 'The “{{name}}” page is coming soon.',
 
   forgot: {

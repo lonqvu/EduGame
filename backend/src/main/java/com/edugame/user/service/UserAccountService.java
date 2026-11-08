@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Accounts for Spring Security: lookup at sign-in, re-hashing of outdated password hashes and the sign-in time.
  * <p>
  * A {@code DELETED} account is reported as not found, so it can neither sign in nor be told apart from an
- * unknown username.
+ * unknown username. So is an account without a password (signed up with Google).
  */
 @Service
 @RequiredArgsConstructor
@@ -38,6 +38,8 @@ public class UserAccountService implements UserDetailsService, UserDetailsPasswo
                 : userRepository.findByUsername(trimmed);
         return found
                 .filter(user -> user.getStatus() != UserStatus.DELETED)
+                // Signed up with Google and no password set yet: no password can match.
+                .filter(User::hasPassword)
                 .map(UserAccountService::toAccount)
                 .orElseThrow(() -> new UsernameNotFoundException("Unknown user"));
     }
