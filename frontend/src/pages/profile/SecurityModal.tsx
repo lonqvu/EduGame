@@ -20,7 +20,14 @@ const othersLabel = (count: number) =>
  * "Bảo mật tài khoản": a new password (every other device is signed out, this one stays) and signing out of the
  * other devices on its own, e.g. after using a shared school computer.
  */
-export function SecurityModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function SecurityModal({ open, hasPassword, onPasswordSet, onClose }: {
+  open: boolean
+  /** false: signed up with Google, the first password is set without a current one. */
+  hasPassword: boolean
+  /** A password was set or changed (the profile reloads: `hasPassword` may have changed). */
+  onPasswordSet: () => void
+  onClose: () => void
+}) {
   const { t } = useTranslation()
   const { message, modal } = App.useApp()
   const [form] = Form.useForm<PasswordValues>()
@@ -34,8 +41,9 @@ export function SecurityModal({ open, onClose }: { open: boolean; onClose: () =>
   const submit = async ({ currentPassword, newPassword }: PasswordValues) => {
     setSaving(true)
     try {
-      const { otherSessions } = await changePassword(currentPassword, newPassword)
+      const { otherSessions } = await changePassword(hasPassword ? currentPassword : undefined, newPassword)
       message.success(t('profile.security.changed', { others: othersLabel(otherSessions) }))
+      onPasswordSet()
       onClose()
     } catch (error) {
       message.error(apiErrorMessage(error))
@@ -68,12 +76,15 @@ export function SecurityModal({ open, onClose }: { open: boolean; onClose: () =>
         <section className="flex flex-col gap-3">
           <h3 className="m-0 flex items-center gap-2 text-[16px] font-black">
             <LockIcon size={19} className="text-primary" />
-            {t('profile.security.changePassword')}
+            {hasPassword ? t('profile.security.changePassword') : t('profile.security.setPassword')}
           </h3>
+          {!hasPassword && <p className="m-0 text-[14px] text-ink-muted">{t('profile.security.setPasswordText')}</p>}
           <Form<PasswordValues> form={form} layout="vertical" requiredMark={false} onFinish={(v) => void submit(v)}>
-            <Form.Item name="currentPassword" label={t('profile.security.currentPassword')} rules={[{ required: true, message: t('profile.security.currentRequired') }]}>
-              <Input.Password size="large" autoComplete="current-password" />
-            </Form.Item>
+            {hasPassword && (
+              <Form.Item name="currentPassword" label={t('profile.security.currentPassword')} rules={[{ required: true, message: t('profile.security.currentRequired') }]}>
+                <Input.Password size="large" autoComplete="current-password" />
+              </Form.Item>
+            )}
             <Form.Item
               name="newPassword"
               label={t('profile.security.newPassword')}
@@ -108,7 +119,7 @@ export function SecurityModal({ open, onClose }: { open: boolean; onClose: () =>
             </Form.Item>
             <p className="m-0 mb-3 text-[13px] text-ink-muted">{t('profile.security.afterChange')}</p>
             <Button type="primary" size="large" htmlType="submit" loading={saving} className="rounded-[12px] font-bold">
-              {t('profile.security.changePassword')}
+              {hasPassword ? t('profile.security.changePassword') : t('profile.security.setPassword')}
             </Button>
           </Form>
         </section>

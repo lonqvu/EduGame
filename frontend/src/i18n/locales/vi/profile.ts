@@ -94,6 +94,9 @@ export const profile = {
   security: {
     title: 'Bảo mật tài khoản',
     changePassword: 'Đổi mật khẩu',
+    /** Signed up with Google: no password yet. */
+    setPassword: 'Đặt mật khẩu',
+    setPasswordText: 'Cô đang đăng nhập bằng Google. Đặt thêm mật khẩu để có thể đăng nhập bằng email khi cần.',
     currentPassword: 'Mật khẩu hiện tại',
     currentRequired: 'Cô nhập mật khẩu hiện tại nhé',
     newPassword: 'Mật khẩu mới',

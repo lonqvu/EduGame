@@ -27,19 +27,26 @@ public class PasswordChangeService {
     private final SignInAlerts signInAlerts;
 
     /**
-     * Sets a new password once the current one is right; returns how many other sessions ended.
+     * Sets a new password once the current one is right (no current one needed when the account has none yet);
+     * returns how many other sessions ended.
      *
      * @param currentSid the session making the request; {@code null} (no token, development) ends them all
      */
     @Transactional
     public int change(ChangePasswordRequest request, UUID currentSid) {
         User user = currentUserService.getCurrentUser();
-        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
-            // Not 401: the teacher is signed in, only the password typed is wrong.
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "WRONG_PASSWORD", "The current password is wrong");
-        }
-        if (passwordEncoder.matches(request.newPassword(), user.getPasswordHash())) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "SAME_PASSWORD", "The new password is the current one");
+        // Signed up with Google and no password yet: the first one is set without a current one.
+        if (user.hasPassword()) {
+            String current = request.currentPassword();
+            if (current == null || current.isEmpty() || !passwordEncoder.matches(current, user.getPasswordHash())) {
+                // Not 401: the teacher is signed in, only the password typed is wrong.
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "WRONG_PASSWORD",
+                        "The current password is wrong");
+            }
+            if (passwordEncoder.matches(request.newPassword(), user.getPasswordHash())) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "SAME_PASSWORD",
+                        "The new password is the current one");
+            }
         }
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         signInAlerts.passwordChanged(user.getId());

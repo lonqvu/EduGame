@@ -90,6 +90,8 @@ export const profile: Strings<typeof vi> = {
   security: {
     title: 'Account security',
     changePassword: 'Change password',
+    setPassword: 'Set a password',
+    setPasswordText: 'You sign in with Google. Set a password too, so you can also sign in with your email.',
     currentPassword: 'Current password',
     currentRequired: 'Please enter your current password',
     newPassword: 'New password',

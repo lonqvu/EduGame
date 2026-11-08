@@ -35,6 +35,6 @@ class JwtConfigTest {
 
     private static AppProperties properties(String secret) {
         return new AppProperties(null, new AppProperties.Auth(null,
-                new AppProperties.Jwt(secret, "edu-game", Duration.ofMinutes(15)), null, null, null), null, null);
+                new AppProperties.Jwt(secret, "edu-game", Duration.ofMinutes(15)), null, null, null, null), null, null);
     }
 }

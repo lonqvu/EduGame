@@ -80,6 +80,6 @@ public class ProfileService {
                 : null;
         return new ProfileResponse(user.getCode(), user.getUsername(), user.getDisplayName(), user.getEmail(),
                 user.getPhone(), user.getAvatar(), avatarUrl, user.getRole(), user.getEmailVerifiedAt() != null,
-                user.getCreatedAt(), stats);
+                user.hasPassword(), user.getGoogleSub() != null, user.getCreatedAt(), stats);
     }
 }

@@ -81,6 +81,10 @@ export interface ProfileResponse extends UserResponse {
   /** Address of the uploaded picture, '/api/v1/avatars/...' (with avatar 'upload'). */
   avatarUrl?: string
   emailVerified: boolean
+  /** false: signed up with Google and no password yet (setting one needs no current password). */
+  hasPassword: boolean
+  /** A Google account is linked: "Đăng nhập với Google" works. */
+  google: boolean
   /** ISO time the account was made. */
   memberSince: string
   stats: { classrooms: number; students: number; questionSets: number; activities: number }

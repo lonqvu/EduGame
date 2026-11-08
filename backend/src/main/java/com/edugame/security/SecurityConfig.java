@@ -56,7 +56,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Refresh and logout authenticate with the refresh token cookie instead; sign-up with the
                         // emailed code; password reset too.
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/refresh",
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/google",
+                                "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout", "/api/v1/auth/register", "/api/v1/auth/register/resend",
                                 "/api/v1/auth/register/verify", "/api/v1/auth/password/forgot",
                                 "/api/v1/auth/password/reset").permitAll()

@@ -39,6 +39,7 @@ export function RegisterPage() {
             setValues(submitted)
             setSent(response)
           }}
+          onSignedIn={() => navigate('/', { replace: true })}
         />
       )}
     </AuthLayout>

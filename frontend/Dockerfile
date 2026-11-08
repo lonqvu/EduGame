@@ -13,7 +13,10 @@ ARG VITE_API_BASE_URL=/api
 ARG VITE_APP_VERSION=
 # English in the language switch (src/i18n/index.ts): on in production too.
 ARG VITE_ENGLISH=true
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL VITE_APP_VERSION=$VITE_APP_VERSION VITE_ENGLISH=$VITE_ENGLISH
+# "Đăng nhập với Google": OAuth client id (not a secret); empty: the button says "coming soon".
+ARG VITE_GOOGLE_CLIENT_ID=
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL VITE_APP_VERSION=$VITE_APP_VERSION VITE_ENGLISH=$VITE_ENGLISH \
+    VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 RUN npm run build
 
 FROM caddy:2.10-alpine

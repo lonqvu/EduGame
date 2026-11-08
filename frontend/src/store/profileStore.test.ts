@@ -11,6 +11,8 @@ const backend = vi.hoisted(() => {
       phone: '0987654321',
       role: 'TEACHER',
       emailVerified: true,
+      hasPassword: true,
+      google: false,
       memberSince: '2025-08-15T03:00:00Z',
       stats: { classrooms: 3, students: 45, questionSets: 12, activities: 8 },
     } as ProfileResponse,

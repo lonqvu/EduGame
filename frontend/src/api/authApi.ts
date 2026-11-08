@@ -14,6 +14,15 @@ export async function login(request: LoginRequest): Promise<TokenResponse> {
   return data
 }
 
+/**
+ * "Đăng nhập với Google" with the ID token Google gave the browser: links the account with the same email, or
+ * creates a teacher. Same answer as login (sets the refresh token cookie).
+ */
+export async function loginWithGoogle(credential: string, remember: boolean): Promise<TokenResponse> {
+  const { data } = await authClient.post<TokenResponse>('/v1/auth/google', { credential, remember })
+  return data
+}
+
 /** Ends the session of the refresh token cookie (its access tokens stop working) and clears the cookie. */
 export async function logout(): Promise<void> {
   await authClient.post('/v1/auth/logout')

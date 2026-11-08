@@ -10,7 +10,9 @@ import com.edugame.user.domain.UserRole;
  * @param phone         digits only; {@code null} when not given
  * @param avatar        one of {@link ProfileRules#AVATARS}, or {@link ProfileRules#UPLOADED}; {@code null}: the default
  * @param avatarUrl     address of the uploaded picture ("/api/v1/avatars/..."); {@code null} with a drawing
- * @param emailVerified the teacher confirmed the email (sign-up or password reset code)
+ * @param emailVerified the teacher confirmed the email (sign-up or password reset code, or Google)
+ * @param hasPassword   {@code false}: signed up with Google, no password yet (changing it needs no current one)
+ * @param google        a Google account is linked ("Đăng nhập với Google" works)
  * @param memberSince   when the account was made
  */
 public record ProfileResponse(
@@ -23,6 +25,8 @@ public record ProfileResponse(
         String avatarUrl,
         UserRole role,
         boolean emailVerified,
+        boolean hasPassword,
+        boolean google,
         Instant memberSince,
         Stats stats) {
 

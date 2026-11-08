@@ -50,9 +50,11 @@ function SignInLink() {
 }
 
 /** Step 1: name, email, password twice, terms. Mails the code. */
-export function SignUpForm({ initial, onCodeSent }: {
+export function SignUpForm({ initial, onCodeSent, onSignedIn }: {
   initial: SignUpValues
   onCodeSent: (values: SignUpValues, sent: CodeSentResponse) => void
+  /** Signed up with Google instead: no code step. */
+  onSignedIn: () => void
 }) {
   const { t } = useTranslation()
   const { message } = App.useApp()
@@ -198,7 +200,7 @@ export function SignUpForm({ initial, onCodeSent }: {
         </button>
       </form>
 
-      <SocialLogin action="register" />
+      <SocialLogin action="register" onSignedIn={onSignedIn} onError={setError} />
     </AuthCard>
   )
 }

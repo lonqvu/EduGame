@@ -17,7 +17,8 @@ export async function updateProfile(request: UpdateProfileRequest): Promise<Prof
 }
 
 /** Every other session of the teacher is signed out; this one stays. */
-export async function changePassword(currentPassword: string, newPassword: string): Promise<SignedOutResponse> {
+/** @param currentPassword omitted when the account has none yet (signed up with Google) */
+export async function changePassword(currentPassword: string | undefined, newPassword: string): Promise<SignedOutResponse> {
   const { data } = await httpClient.post<SignedOutResponse>('/v1/me/password', { currentPassword, newPassword })
   return data
 }
