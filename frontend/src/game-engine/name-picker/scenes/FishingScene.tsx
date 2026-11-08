@@ -19,7 +19,7 @@ const TIP = { x: BEAR.left + 405 * BEAR_SCALE, y: BEAR.top + 46 * BEAR_SCALE }
 /** Top of the water in the pond picture. */
 const WATER_Y = 350
 /** Where the bobber floats: by the dock before the cast, far out once cast, and where the catch is reeled up to. */
-const BOBBER_REST = { x: TIP.x + 14, y: WATER_Y + 14 }
+const BOBBER_REST = { x: TIP.x + 56, y: WATER_Y + 20 }
 const BOBBER_CAST = { x: 800, y: WATER_Y + 18 }
 const REELED = { x: TIP.x + 30, y: TIP.y + 34 }
 /** How far the hook hangs under the bobber: a little at rest, deep where the fish are once it has sunk. */
@@ -156,7 +156,8 @@ export function FishingScene({ slots, winnerSlot, phase, onFinish }: PickScenePr
           src={`${ART}/bear-hug.webp`}
           alt=""
           className="pointer-events-none absolute"
-          style={{ left: BEAR.left + 20, top: 290, width: 160 }}
+          // Sitting on the deck, back from its front edge and its posts.
+          style={{ left: 190, top: 250, width: 150 }}
           initial={{ scale: 0.6, y: 20 }}
           animate={{ scale: 1, y: [0, -14] }}
           transition={{ scale: { type: 'spring', bounce: 0.5 }, y: { duration: 0.45, ...LOOP } }}
@@ -373,7 +374,7 @@ function FishName({ name, w, labelW }: { name: string; w: number; labelW: number
   )
 }
 
-/** The painted pond, mirrored into the side bleed so wide screens have no bare edges; a frog on the right bank. */
+/** The painted pond (its frog on the right bank is part of the picture), mirrored into the side bleed so wide screens have no bare edges. */
 function PondBackground() {
   return (
     <>
@@ -398,14 +399,6 @@ function PondBackground() {
           ))}
         </g>
       </SceneSvg>
-      <motion.img
-        src={`${ART}/frog.webp`}
-        alt=""
-        className="pointer-events-none absolute w-[78px]"
-        style={{ left: 1196, top: 392, originX: 0.5, originY: 1 }}
-        animate={{ y: [0, -6], scaleY: [1, 0.96] }}
-        transition={{ duration: 1, ...LOOP }}
-      />
     </>
   )
 }
