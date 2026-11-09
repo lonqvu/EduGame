@@ -106,7 +106,7 @@ jobs:
           push: true
           build-args: |
             VITE_APP_VERSION=${{ steps.meta.outputs.version }}
-            VITE_GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}
+            VITE_GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID || secrets.GOOGLE_CLIENT_ID }}
           tags: |
             ${{ steps.meta.outputs.prefix }}/web:${{ steps.meta.outputs.tag }}
             ${{ steps.meta.outputs.prefix }}/web:latest
