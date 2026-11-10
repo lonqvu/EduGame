@@ -2,7 +2,10 @@ import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EyeIcon, EyeOffIcon } from '@/components/ui/icons'
 
-/** Eye button at the end of a password field; returns the input type to use and the button. */
+/**
+ * Eye button at the end of a password field; returns the input type to use and the button. Tab skips it, from the
+ * password to the next field, as in most sign-in forms; a click or a tap still shows the password.
+ */
 export function usePasswordToggle(): [type: 'text' | 'password', button: ReactNode] {
   const { t } = useTranslation()
   const [visible, setVisible] = useState(false)
@@ -10,6 +13,7 @@ export function usePasswordToggle(): [type: 'text' | 'password', button: ReactNo
     <button
       type="button"
       onClick={() => setVisible((v) => !v)}
+      tabIndex={-1}
       aria-label={visible ? t('auth.hidePassword') : t('auth.showPassword')}
       aria-pressed={visible}
       className="absolute top-1/2 right-2.5 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-ink-soft hover:bg-surface-soft"
