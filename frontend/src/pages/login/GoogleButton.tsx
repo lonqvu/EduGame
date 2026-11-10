@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { GOOGLE_CLIENT_ID, loadGoogleScript } from '@/utils/googleIdentity'
 
@@ -6,16 +6,20 @@ import { GOOGLE_CLIENT_ID, loadGoogleScript } from '@/utils/googleIdentity'
 let onCredential: ((credential: string) => void) | null = null
 
 /**
- * Google's own "Sign in with Google" button (its look is required by Google's terms). Clicking it opens Google's
- * popup; the ID token it returns is handed to `onCredential`.
+ * "Đăng nhập bằng Google", as wide and as tall as the form's own button. Google draws its button at most 40 px tall
+ * and 400 px wide, smaller than the form's: ours is shown (in Google's branding: logo, white, grey border) and
+ * Google's lies over it, invisible, so a click still opens Google's popup; the ID token it returns is handed to
+ * `onCredentialReceived`.
  *
- * @param onUnavailable the script could not load (offline, blocked): the caller shows its own button instead
+ * @param children      what is shown: the button drawn by the caller
+ * @param onUnavailable the script could not load (offline, blocked): the caller's button then handles clicks itself
  */
-export function GoogleButton({ action, disabled, onCredentialReceived, onUnavailable }: {
+export function GoogleButton({ action, disabled, onCredentialReceived, onUnavailable, children }: {
   action: 'login' | 'register'
   disabled?: boolean
   onCredentialReceived: (credential: string) => void
   onUnavailable: () => void
+  children: ReactNode
 }) {
   const { i18n } = useTranslation()
   const container = useRef<HTMLDivElement>(null)
@@ -51,7 +55,8 @@ export function GoogleButton({ action, disabled, onCredentialReceived, onUnavail
           shape: 'rectangular',
           text: action === 'login' ? 'signin_with' : 'signup_with',
           logo_alignment: 'center',
-          width: Math.max(200, Math.min(400, Math.floor(parent.offsetWidth))),
+          // As wide as Google allows; the transform of the layer stretches it over the whole button.
+          width: 400,
           locale: i18n.language,
         })
         setReady(true)
@@ -66,13 +71,12 @@ export function GoogleButton({ action, disabled, onCredentialReceived, onUnavail
   }, [action, i18n.language])
 
   return (
-    <div
-      className={`flex h-[clamp(46px,6vh,58px)] items-center justify-center overflow-hidden ${
-        disabled ? 'pointer-events-none opacity-60' : ''
-      }`}
-      aria-busy={!ready || disabled}
-    >
-      <div ref={container} className="w-full [&>div]:mx-auto" />
+    <div className={`group relative ${disabled ? 'pointer-events-none opacity-60' : ''}`} aria-busy={!ready || disabled}>
+      {children}
+      {/* Google's button, invisible, stretched over ours: it takes the click. */}
+      <div aria-hidden={!ready} className="absolute inset-0 overflow-hidden opacity-0">
+        <div ref={container} className="absolute top-1/2 left-1/2 h-10 w-[400px] origin-center -translate-1/2 scale-x-[2] scale-y-[1.6]" />
+      </div>
     </div>
   )
 }
