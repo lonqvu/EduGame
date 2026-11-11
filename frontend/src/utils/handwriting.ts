@@ -1,8 +1,12 @@
 /**
  * "Phiếu luyện viết ô li": the rows of a handwriting sheet, on A4 pages ruled like a Vietnamese exercise book (vở ô
- * li): a thin line every li, a bold one every 4 li (a big square), a column line every big square. A writing row is 8
- * li tall: the letters stand on its baseline 5 li down, a small letter is 2 li tall, b, h, k, l go up to the top of
- * the row and g, y down to its bottom. `size` picks how big a li is printed (small, medium, large).
+ * li): a thin line every li (2 mm in a real book), a bold one every 4 li (the edge of a big square), a column line
+ * every big square, a red margin on the left.
+ *
+ * As the Ministry's letter models ask, letters stand on a bold line: small letters (a, o, m…) are 2 li tall, b, h, k,
+ * l 5 li, and g, y 2 li above it and 3 li below. A writing row is 8 li, two big squares: from 5 li above its baseline
+ * to 3 li below, so the baseline of every row is a bold line and rows follow each other without overlapping.
+ * `size` picks how big a li is printed (small, medium, large).
  */
 
 /** How big the li are: 1 small, 2 medium, 4 large. */
@@ -44,9 +48,15 @@ export const PAGE_HEIGHT = 1123
 export const PAGE_MARGIN = 52
 /** A li in px, by size. */
 export const LI_PX: Record<LetterSize, number> = { 1: 5, 2: 7.5, 4: 11 }
-/** Li in a writing row, and where its baseline is. */
+/** Li in a writing row, and where its baseline is (a bold line). */
 export const ROW_LI = 8
 export const BASELINE_LI = 5
+/** Ruling above the first row and below the last one, so the ruled area starts and ends on a bold line. */
+export const RULE_ABOVE_LI = 3
+export const RULE_BELOW_LI = 1
+/** The writing starts after the red margin (one big square) and 1 li, and stops 1 li before the last column. */
+export const WRITING_START_LI = 5
+const WRITING_END_LI = 1
 /** Room above the rows: the name line and the title on the first page, a small top on the others. */
 export const FIRST_PAGE_HEAD = 76
 export const OTHER_PAGE_HEAD = 16
@@ -79,12 +89,12 @@ export function areaWidth(size: LetterSize): number {
   return Math.floor((PAGE_WIDTH - 2 * PAGE_MARGIN) / square) * square
 }
 
-/** Height of a writing row, with the 1 li gap below it. */
+/** Height of a writing row. */
 export const rowHeight = (size: LetterSize) => LI_PX[size] * ROW_LI
 
 /** Rows a page holds. */
 export function rowsPerPage(size: LetterSize, first: boolean): number {
-  const room = PAGE_HEIGHT - 2 * PAGE_MARGIN - (first ? FIRST_PAGE_HEAD : OTHER_PAGE_HEAD)
+  const room = PAGE_HEIGHT - 2 * PAGE_MARGIN - (first ? FIRST_PAGE_HEAD : OTHER_PAGE_HEAD) - (RULE_ABOVE_LI + RULE_BELOW_LI) * LI_PX[size]
   return Math.max(1, Math.floor(room / rowHeight(size)))
 }
 
@@ -103,7 +113,7 @@ export function copiesThatFit(width: number, used: number, rowWidth: number, gap
  * next ones have light copies on their first half, the rest left to write; without `trace` only the sample is written.
  */
 export function layoutSheet(samples: string[], options: SheetOptions, measure: (text: string) => number): SheetPage[] {
-  const width = areaWidth(options.size)
+  const width = areaWidth(options.size) - (WRITING_START_LI + WRITING_END_LI) * LI_PX[options.size]
   const gap = LI_PX[options.size] * 4
   const pages: SheetPage[] = []
   let page: SheetPage = { rows: [] }
@@ -129,3 +139,6 @@ export function layoutSheet(samples: string[], options: SheetOptions, measure: (
   if (page.rows.length > 0 || pages.length === 0) pages.push(page)
   return pages
 }
+
+/** A ruled line `k` li below the first row's top is bold when it is a baseline or a big square's edge. */
+export const isBoldLine = (k: number) => (((k - BASELINE_LI) % 4) + 4) % 4 === 0

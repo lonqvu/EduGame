@@ -14,8 +14,12 @@ import {
   PAGE_MARGIN,
   PAGE_WIDTH,
   parseSamples,
+  isBoldLine,
   ROW_LI,
+  RULE_ABOVE_LI,
+  RULE_BELOW_LI,
   rowHeight,
+  WRITING_START_LI,
   rowsPerPage,
   type LetterSize,
   type LetterStyle,
@@ -24,20 +28,47 @@ import {
   type SheetPage,
 } from '@/utils/handwriting'
 
-/** The handwriting fonts, from Google Fonts with their Vietnamese letters, and how tall their small letters are (em). */
-const FONTS: Record<LetterStyle, { family: string; xHeight: number }> = {
-  cursive: { family: 'Dancing Script', xHeight: 0.24 },
-  print: { family: 'Patrick Hand', xHeight: 0.4 },
+/**
+ * The handwriting fonts, from Google Fonts with their Vietnamese letters, and how tall a "b" is and how deep a "g"
+ * goes (em), for when the browser cannot measure them.
+ */
+const FONTS: Record<LetterStyle, { family: string; ascent: number; descent: number }> = {
+  cursive: { family: 'Dancing Script', ascent: 0.72, descent: 0.3 },
+  print: { family: 'Patrick Hand', ascent: 0.7, descent: 0.22 },
 }
 const FONTS_URL = 'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500&family=Patrick+Hand&display=swap&subset=vietnamese'
 
 const RULES: Record<SheetOptions['color'], { thin: string; bold: string }> = {
-  purple: { thin: '#E2D6F7', bold: '#B79AE6' },
-  grey: { thin: '#E3E7EE', bold: '#AEB6C5' },
+  purple: { thin: '#DCCBF5', bold: '#9F7FDB' },
+  grey: { thin: '#E0E4EB', bold: '#98A1B2' },
+}
+/** The red margin line of an exercise book. */
+const MARGIN_RED = '#E8858B'
+
+/** A 2D context to measure letters with, none where the browser has no canvas (tests). */
+function context2d(): CanvasRenderingContext2D | null {
+  return typeof document !== 'undefined' ? (document.createElement('canvas').getContext?.('2d') ?? null) : null
 }
 
-/** The font size that makes small letters 2 li tall. */
-const fontSize = (options: SheetOptions) => (2 * LI_PX[options.size]) / FONTS[options.style].xHeight
+/**
+ * The font size that makes a "b" 5 li tall from the baseline, as the letter models have it, and keeps a "g" within 3
+ * li below it: measured on the font itself once loaded.
+ */
+function fontSize(options: SheetOptions): number {
+  const li = LI_PX[options.size]
+  const font = FONTS[options.style]
+  const context = context2d()
+  let ascent = font.ascent
+  let descent = font.descent
+  if (context) {
+    context.font = `100px "${font.family}"`
+    const b = context.measureText('bhkl')
+    const g = context.measureText('gy')
+    if (b.actualBoundingBoxAscent > 0) ascent = b.actualBoundingBoxAscent / 100
+    if (g.actualBoundingBoxDescent > 0) descent = g.actualBoundingBoxDescent / 100
+  }
+  return Math.min((5 * li) / ascent, (3 * li) / descent)
+}
 
 /** Loads the two fonts once (only this page needs them); true once they can be measured and drawn. */
 function useHandwritingFonts(): boolean {
@@ -68,7 +99,7 @@ function useHandwritingFonts(): boolean {
 /** Width of a sample in px, measured with its font (an estimate where the browser cannot measure). */
 function measurer(options: SheetOptions): (text: string) => number {
   const size = fontSize(options)
-  const context = typeof document !== 'undefined' ? document.createElement('canvas').getContext?.('2d') : null
+  const context = context2d()
   if (!context) return (text) => text.length * size * 0.5
   context.font = `${size}px "${FONTS[options.style].family}"`
   return (text) => context.measureText(text).width
@@ -206,9 +237,11 @@ function SheetSvg({ page, first, options, samples }: { page: SheetPage; first: b
   const li = LI_PX[options.size]
   const width = areaWidth(options.size)
   const left = (PAGE_WIDTH - width) / 2
-  const top = PAGE_MARGIN + (first ? FIRST_PAGE_HEAD : OTHER_PAGE_HEAD)
+  // Top of the first writing row; the ruling starts 3 li above it, on a bold line.
+  const top = PAGE_MARGIN + (first ? FIRST_PAGE_HEAD : OTHER_PAGE_HEAD) + RULE_ABOVE_LI * LI_PX[options.size]
   const rows = rowsPerPage(options.size, first)
-  const height = rows * rowHeight(options.size)
+  const ruleTop = top - RULE_ABOVE_LI * li
+  const ruleBottom = top + (rows * ROW_LI + RULE_BELOW_LI) * li
   const rule = RULES[options.color]
   const size = fontSize(options)
   const family = FONTS[options.style].family
@@ -216,19 +249,21 @@ function SheetSvg({ page, first, options, samples }: { page: SheetPage; first: b
   const gap = li * 4
 
   const lines: ReactNode[] = []
-  for (let k = 0; k <= rows * ROW_LI; k++) {
+  for (let k = -RULE_ABOVE_LI; k <= rows * ROW_LI + RULE_BELOW_LI; k++) {
     const y = top + k * li
-    const bold = k % 4 === 0
-    lines.push(<line key={`h${k}`} x1={left} x2={left + width} y1={y} y2={y} stroke={bold ? rule.bold : rule.thin} strokeWidth={bold ? 1.2 : 0.8} />)
+    const bold = isBoldLine(k)
+    lines.push(<line key={`h${k}`} x1={left} x2={left + width} y1={y} y2={y} stroke={bold ? rule.bold : rule.thin} strokeWidth={bold ? 1.1 : 0.6} />)
   }
   for (let x = left; x <= left + width + 0.5; x += li * 4) {
-    lines.push(<line key={`v${x}`} x1={x} x2={x} y1={top} y2={top + height} stroke={rule.bold} strokeWidth={0.6} opacity={0.7} />)
+    lines.push(<line key={`v${x}`} x1={x} x2={x} y1={ruleTop} y2={ruleBottom} stroke={rule.bold} strokeWidth={0.6} />)
   }
+  // The red margin, one big square in: the letters start after it.
+  lines.push(<line key="margin" x1={left + gap} x2={left + gap} y1={ruleTop} y2={ruleBottom} stroke={MARGIN_RED} strokeWidth={1.2} />)
 
   const letters = page.rows.flatMap((row, r) => {
     const baseline = top + r * rowHeight(options.size) + BASELINE_LI * li
     const w = measure(row.text)
-    const x0 = left + li
+    const x0 = left + WRITING_START_LI * li
     const out: ReactNode[] = []
     if (row.sample) {
       out.push(

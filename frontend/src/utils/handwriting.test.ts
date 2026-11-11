@@ -1,14 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import {
   areaWidth,
+  BASELINE_LI,
   copiesThatFit,
   DEFAULT_SHEET,
+  isBoldLine,
   layoutSheet,
   LI_PX,
   PAGE_MARGIN,
   PAGE_WIDTH,
   parseSamples,
+  ROW_LI,
   rowsPerPage,
+  RULE_ABOVE_LI,
+  RULE_BELOW_LI,
 } from '@/utils/handwriting'
 
 /** Every letter 20 px wide. */
@@ -18,6 +23,15 @@ describe('handwriting sheet', () => {
   it('takes one sample a line, trimmed, without empty lines', () => {
     expect(parseSamples(' b \n\n  bé  \nMẹ   đi  chợ\n')).toEqual(['b', 'bé', 'Mẹ đi chợ'])
     expect(parseSamples(Array.from({ length: 60 }, () => 'a').join('\n'))).toHaveLength(40)
+  })
+
+  it('puts every baseline on a bold line, a big square apart from the next bold one', () => {
+    for (let row = 0; row < 5; row++) expect(isBoldLine(row * ROW_LI + BASELINE_LI)).toBe(true)
+    expect(isBoldLine(BASELINE_LI - 4)).toBe(true)
+    expect(isBoldLine(BASELINE_LI - 2)).toBe(false)
+    // The ruling starts and ends on a bold line.
+    expect(isBoldLine(-RULE_ABOVE_LI)).toBe(true)
+    expect(isBoldLine(ROW_LI * 3 + RULE_BELOW_LI)).toBe(true)
   })
 
   it('rules whole big squares inside the margins', () => {
