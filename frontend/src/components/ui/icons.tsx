@@ -128,6 +128,16 @@ export const PencilIcon = (p: IconProps) => (
   </StrokeIcon>
 )
 
+/** A toolbox: "Tiện ích". */
+export const ToolboxIcon = (p: IconProps) => (
+  <StrokeIcon strokeWidth={1.9} {...p}>
+    <rect x="3" y="8" width="18" height="12" rx="2.5" />
+    <path d="M8.5 8V6a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2" />
+    <path d="M3 13h18" />
+    <path d="M10 13v2h4v-2" />
+  </StrokeIcon>
+)
+
 export const TrashIcon = (p: IconProps) => (
   <StrokeIcon strokeWidth={2} {...p}>
     <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />

@@ -15,6 +15,7 @@ import { registry } from '@/i18n/locales/en/registry'
 import { reports } from '@/i18n/locales/en/reports'
 import { settings } from '@/i18n/locales/en/settings'
 import { start } from '@/i18n/locales/en/start'
+import { utilities } from '@/i18n/locales/en/utilities'
 import type { Strings } from '@/i18n/locales/types'
 import type { Translation } from '@/i18n/locales/vi'
 
@@ -40,4 +41,5 @@ export const en: Strings<Translation> = {
   reports,
   settings,
   start,
+  utilities,
 }

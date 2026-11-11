@@ -3,7 +3,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router'
 import * as questionSetApi from '@/api/questionSetApi'
-import { BackLink } from '@/components/ui/BackLink'
+import { BackBar } from '@/components/layout/PageHeader'
 import { MoreVerticalIcon, PencilIcon, PlayIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { isGameType, playPath } from '@/game-engine/registry'
@@ -82,7 +82,7 @@ export function QuestionSetPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <BackLink to="/question-sets" label={t('questionSets.detail.back')} />
+      <BackBar to="/question-sets" label={t('questionSets.detail.back')} />
 
       <section className="@container rounded-[22px] bg-white p-4 sm:p-5">
         <div className="flex flex-col gap-4 @min-[760px]:flex-row @min-[760px]:items-center">

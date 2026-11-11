@@ -2,7 +2,7 @@ import { App, Button, Dropdown } from 'antd'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useParams } from 'react-router'
-import { BackLink } from '@/components/ui/BackLink'
+import { BackBar } from '@/components/layout/PageHeader'
 import { CheckIcon, GamepadIcon, MoreVerticalIcon, PencilIcon, PlayIcon } from '@/components/ui/icons'
 import { LoadError, PageLoading } from '@/components/ui/LoadState'
 import { ClassFormModal } from '@/pages/classes/ClassFormModal'
@@ -145,7 +145,7 @@ export function ClassroomDetailPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <BackLink to="/classes" label={t('classes.detail.back')} />
+      <BackBar to="/classes" label={t('classes.detail.back')} />
 
       <section className="@container flex flex-wrap items-center gap-x-5 gap-y-4 rounded-[22px] bg-white p-5 sm:p-6">
         <AnimalAvatar avatar={classAvatar(classroom)} size={76} className="rounded-[22px]" />

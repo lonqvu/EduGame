@@ -7,6 +7,9 @@ export const app = {
     questionSets: 'Bộ câu hỏi',
     classes: 'Lớp học',
     reports: 'Báo cáo',
+    utilities: 'Tiện ích',
+    /** Beside a menu item just added. */
+    isNew: 'Mới',
     admin: 'Quản trị',
     feedback: 'Góp ý',
     /** Accessible name of the "Góp ý" button. */

@@ -15,6 +15,7 @@ import { registry } from '@/i18n/locales/vi/registry'
 import { reports } from '@/i18n/locales/vi/reports'
 import { settings } from '@/i18n/locales/vi/settings'
 import { start } from '@/i18n/locales/vi/start'
+import { utilities } from '@/i18n/locales/vi/utilities'
 
 /**
  * Vietnamese, the source language: every key starts here (one file per area in vi/), en.ts follows its shape
@@ -40,6 +41,7 @@ export const vi = {
   reports,
   settings,
   start,
+  utilities,
 }
 
 export type Translation = typeof vi

@@ -32,6 +32,9 @@ export const router = createBrowserRouter([
               { path: 'games/new', lazy: page(() => import('@/pages/ChooseGamePage'), 'ChooseGamePage') },
               { path: 'games/:gameId/edit', lazy: page(() => import('@/pages/GameEditorPage'), 'GameEditorPage') },
               { path: 'games/:gameId/start', lazy: page(() => import('@/pages/GameStartPage'), 'GameStartPage') },
+              // "Tiện ích": everything happens in the browser, visitors use them too.
+              { path: 'utilities', lazy: page(() => import('@/pages/UtilitiesPage'), 'UtilitiesPage') },
+              { path: 'utilities/handwriting', lazy: page(() => import('@/pages/utilities/HandwritingSheetPage'), 'HandwritingSheetPage') },
               // A visitor's settings are kept in their browser; the email ones need an account.
               { path: 'settings', lazy: page(() => import('@/pages/SettingsPage'), 'SettingsPage') },
               {

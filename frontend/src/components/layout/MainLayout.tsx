@@ -16,6 +16,7 @@ import {
   MessageIcon,
   SettingsIcon,
   ShieldIcon,
+  ToolboxIcon,
   UsersIcon,
 } from '@/components/ui/icons'
 import { BrandLogo } from '@/components/ui/BrandLogo'
@@ -39,6 +40,8 @@ interface NavItem {
   action?: () => void
   /** Key of its accessible name, when the label is not enough. */
   ariaLabel?: NavKey
+  /** Just added: "Mới" beside it. */
+  isNew?: boolean
 }
 
 const MAIN_NAV: NavItem[] = [
@@ -47,6 +50,7 @@ const MAIN_NAV: NavItem[] = [
   { label: 'nav.questionSets', icon: <FileTextIcon size={22} />, to: '/question-sets', match: (p) => p.startsWith('/question-sets') },
   { label: 'nav.classes', icon: <UsersIcon size={22} strokeWidth={1.8} />, to: '/classes', match: (p) => p.startsWith('/classes') },
   { label: 'nav.reports', icon: <ChartIcon size={22} />, to: '/reports', match: (p) => p.startsWith('/reports') },
+  { label: 'nav.utilities', icon: <ToolboxIcon size={22} />, to: '/utilities', match: (p) => p.startsWith('/utilities'), isNew: true },
 ]
 
 /** Only for accounts with the role ADMIN (the API refuses everyone else too). */
@@ -72,7 +76,12 @@ export function MainLayout() {
   // Pages laid out edge to edge, as in their designs; the others keep a centered column. Both start at the same place, so the
   // title does not jump when the menu goes from one to the other.
   const fullWidth =
-    pathname === '/' || pathname === '/games/new' || pathname === '/reports' || pathname.startsWith('/classes') || pathname.startsWith('/question-sets')
+    pathname === '/' ||
+    pathname === '/games/new' ||
+    pathname === '/reports' ||
+    pathname.startsWith('/utilities') ||
+    pathname.startsWith('/classes') ||
+    pathname.startsWith('/question-sets')
 
   return (
     <div className="flex min-h-full bg-page text-ink">
@@ -163,8 +172,11 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
         {nav.to ? (
           <Link to={nav.to} onClick={onNavigate} aria-current={active ? 'page' : undefined} className={className}>
             <span className={active ? 'text-primary' : 'text-ink-soft'}>{nav.icon}</span>
-            {t(nav.label)}
+            <span className="whitespace-nowrap">{t(nav.label)}</span>
             {guest && loginOnlyFeature(nav.to) && <LockIcon size={15} className="ml-auto text-ink-muted" />}
+            {nav.isNew && (
+              <span className="ml-auto shrink-0 rounded-full bg-[#2E9E6A] px-1.5 py-px text-[10.5px] font-black text-white">{t('nav.isNew')}</span>
+            )}
           </Link>
         ) : (
           <button

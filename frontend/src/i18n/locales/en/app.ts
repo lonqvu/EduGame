@@ -8,6 +8,8 @@ export const app: Strings<typeof vi> = {
     questionSets: 'Question sets',
     classes: 'Classes',
     reports: 'Reports',
+    utilities: 'Utilities',
+    isNew: 'New',
     admin: 'Admin',
     feedback: 'Feedback',
     feedbackLabel: 'Send feedback to Lớp Vui',

@@ -114,3 +114,33 @@ html[data-reduce-motion] *::after {
     margin-bottom: 1.75em;
   }
 }
+
+/* "Phiếu luyện viết ô li": printing shows the sheets alone, one A4 page each, at full size. */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  body:has(.print-sheets) * {
+    visibility: hidden;
+  }
+  body:has(.print-sheets) .print-sheets,
+  body:has(.print-sheets) .print-sheets * {
+    visibility: visible;
+  }
+  .print-sheets {
+    position: absolute;
+    top: 0;
+    left: 0;
+    gap: 0 !important;
+  }
+  .print-sheets figure {
+    max-width: none !important;
+    width: 210mm !important;
+    break-after: page;
+  }
+  .print-sheets svg {
+    width: 210mm !important;
+    height: 297mm !important;
+  }
+}
