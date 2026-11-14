@@ -33,6 +33,15 @@ export const utilities = {
     back: 'Tiện ích',
     samples: 'Chữ cần luyện (mỗi dòng 1 mẫu)',
     samplesPlaceholder: 'b\nbé\nbà\nMẹ đi chợ',
+    paper: 'Mẫu giấy',
+    /** The papers of the sheet (utils/handwriting PaperKind). */
+    papers: { oli: 'Vở 4 ô li', grid: 'Ô li vuông', guides: '4 đường kẻ', lined: 'Kẻ ngang' },
+    paperHints: {
+      oli: 'Kẻ dọc mỗi ô lớn',
+      grid: 'Kẻ dọc mỗi li',
+      guides: 'Rõ vùng cao, thân, nét xuống',
+      lined: 'Chỉ dòng kẻ chân chữ',
+    },
     style: 'Kiểu chữ',
     cursive: 'Viết thường',
     print: 'Chữ in',

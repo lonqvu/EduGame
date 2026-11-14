@@ -1,5 +1,5 @@
 import { App, Switch } from 'antd'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PageHeader } from '@/components/layout/PageHeader'
 import {
@@ -14,7 +14,9 @@ import {
   PAGE_MARGIN,
   PAGE_WIDTH,
   parseSamples,
-  isBoldLine,
+  COLUMN_LI,
+  horizontalLines,
+  type PaperKind,
   ROW_LI,
   RULE_ABOVE_LI,
   RULE_BELOW_LI,
@@ -22,6 +24,11 @@ import {
   WRITING_START_LI,
   rowsPerPage,
   type LetterSize,
+  sampleStride,
+  H_LI,
+  zoneScale,
+  type GlyphReach,
+  type ZoneScale,
   type LetterStyle,
   type RowsPerSample,
   type SheetOptions,
@@ -29,19 +36,19 @@ import {
 } from '@/utils/handwriting'
 
 /**
- * The handwriting fonts, from Google Fonts with their Vietnamese letters, and how tall a "b" is and how deep a "g"
- * goes (em), for when the browser cannot measure them.
+ * The handwriting fonts, from Google Fonts with their Vietnamese letters, and how tall an "a" and a "b" are and how
+ * deep a "g" goes (em), for when the browser cannot measure them.
+ *
+ * Cursive is Playwrite VN (TypeTogether): drawn after the Ministry's school cursive in use since 2002, upright and
+ * with even strokes, as children learn it.
  */
-const FONTS: Record<LetterStyle, { family: string; ascent: number; descent: number }> = {
-  cursive: { family: 'Dancing Script', ascent: 0.72, descent: 0.3 },
-  print: { family: 'Patrick Hand', ascent: 0.7, descent: 0.22 },
+const FONTS: Record<LetterStyle, { family: string; xHeight: number; ascent: number; descent: number }> = {
+  cursive: { family: 'Playwrite VN', xHeight: 0.42, ascent: 1.05, descent: 0.63 },
+  print: { family: 'Patrick Hand', xHeight: 0.33, ascent: 0.7, descent: 0.22 },
 }
-const FONTS_URL = 'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500&family=Patrick+Hand&display=swap&subset=vietnamese'
+const FONTS_URL = 'https://fonts.googleapis.com/css2?family=Playwrite+VN&family=Patrick+Hand&display=swap'
 
-const RULES: Record<SheetOptions['color'], { thin: string; bold: string }> = {
-  purple: { thin: '#DCCBF5', bold: '#9F7FDB' },
-  grey: { thin: '#E0E4EB', bold: '#98A1B2' },
-}
+const RULES: Record<SheetOptions['color'], { thin: string; bold: string; zone: string }> = {  purple: { thin: '#DCCBF5', bold: '#9F7FDB', zone: '#F6F1FD' },  grey: { thin: '#E0E4EB', bold: '#98A1B2', zone: '#F3F5F8' },}
 /** The red margin line of an exercise book. */
 const MARGIN_RED = '#E8858B'
 
@@ -50,41 +57,92 @@ function context2d(): CanvasRenderingContext2D | null {
   return typeof document !== 'undefined' ? (document.createElement('canvas').getContext?.('2d') ?? null) : null
 }
 
+/** The height of a, o, e… in em, measured on the font (the stored value where the browser cannot measure). */
+function xHeightEm(style: LetterStyle): number {
+  const font = FONTS[style]
+  const context = context2d()
+  if (!context) return font.xHeight
+  context.font = `100px "${font.family}"`
+  // The median of letters with a flat or round top, so one overshooting letter does not set it.
+  const tops = ['a', 'c', 'e', 'm', 'n', 'o', 'u', 'v', 'x'].map((c) => context.measureText(c).actualBoundingBoxAscent).sort((a, b) => a - b)
+  const median = tops[Math.floor(tops.length / 2)]
+  return median > 0 ? median / 100 : font.xHeight
+}
+
 /**
- * The font size that makes a "b" 5 li tall from the baseline, as the letter models have it, and keeps a "g" within 3
- * li below it: measured on the font itself once loaded.
+ * Cursive: the font size that makes a, o, e… exactly H (2 li); the other letters are then brought to the model's
+ * heights one by one (`ModelText`). Print, an extra display that is not the model: the same size, capped so ascenders
+ * and descenders stay within the row.
  */
 function fontSize(options: SheetOptions): number {
   const li = LI_PX[options.size]
+  const size = (H_LI * li) / xHeightEm(options.style)
+  if (options.style === 'cursive') return size
   const font = FONTS[options.style]
-  const context = context2d()
-  let ascent = font.ascent
-  let descent = font.descent
-  if (context) {
-    context.font = `100px "${font.family}"`
-    const b = context.measureText('bhkl')
-    const g = context.measureText('gy')
-    if (b.actualBoundingBoxAscent > 0) ascent = b.actualBoundingBoxAscent / 100
-    if (g.actualBoundingBoxDescent > 0) descent = g.actualBoundingBoxDescent / 100
-  }
-  return Math.min((5 * li) / ascent, (3 * li) / descent)
+  return Math.min(size, (5 * li) / font.ascent, (3 * li) / font.descent)
 }
 
-/** Loads the two fonts once (only this page needs them); true once they can be measured and drawn. */
+/** Whether a face of `family` has been downloaded and can be measured. */
+function fontLoaded(family: string): boolean {
+  const fonts = typeof document !== 'undefined' ? document.fonts : undefined
+  if (!fonts) return false
+  let loaded = false
+  fonts.forEach((face) => {
+    if (face.family.replace(/["']/g, '') === family && face.status === 'loaded') loaded = true
+  })
+  return loaded
+}
+
+/** How far each letter of a font reaches above and below the baseline, in H; measured once per letter. */
+const reachCache = new Map<string, GlyphReach>()
+function glyphReach(style: LetterStyle): (s: string) => GlyphReach {
+  const family = FONTS[style].family
+  const h = xHeightEm(style) * 100
+  const context = context2d()
+  return (s) => {
+    const key = `${family}|${s}`
+    let r = reachCache.get(key)
+    if (!r) {
+      if (!context) return { up: 1, down: 0 }
+      context.font = `100px "${family}"`
+      const m = context.measureText(s)
+      r = { up: m.actualBoundingBoxAscent / h, down: m.actualBoundingBoxDescent / h }
+      // Not cached before the font is in, or the fallback font's letters would be remembered. (`fonts.check` will not
+      // do: it is true for a family the page does not know yet.)
+      if (fontLoaded(family)) reachCache.set(key, r)
+    }
+    return r
+  }
+}
+
+/** The Google Fonts stylesheet, added once; resolves when its @font-face rules are known (or it failed). */
+let stylesheetLoaded: Promise<void> | null = null
+function loadFontsStylesheet(): Promise<void> {
+  stylesheetLoaded ??= new Promise<void>((resolve) => {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = FONTS_URL
+    link.onload = () => resolve()
+    link.onerror = () => resolve()
+    document.head.appendChild(link)
+  })
+  return stylesheetLoaded
+}
+
+/**
+ * Loads the two fonts once (only this page needs them); true once they can be measured and drawn. The stylesheet
+ * must be in first: before it, `document.fonts.load` knows no such font and resolves at once, and the samples would
+ * be measured with a fallback font (copies then overlap once the real one shows).
+ */
 function useHandwritingFonts(): boolean {
   const [ready, setReady] = useState(false)
   useEffect(() => {
-    if (!document.querySelector(`link[href="${FONTS_URL}"]`)) {
-      const link = document.createElement('link')
-      link.rel = 'stylesheet'
-      link.href = FONTS_URL
-      document.head.appendChild(link)
-    }
     let cancelled = false
     const fonts = document.fonts
     if (!fonts) return
     // Letters with Vietnamese marks, so the Vietnamese part of each font loads too ("bé Mẹ").
-    void Promise.all(Object.values(FONTS).map((f) => fonts.load(`40px "${f.family}"`, 'b\u00e9 M\u1eb9')))
+    void loadFontsStylesheet()
+      .then(() => Promise.all(Object.values(FONTS).map((f) => fonts.load(`40px "${f.family}"`, 'b\u00e9 M\u1eb9'))))
       .catch(() => undefined)
       .then(() => {
         if (!cancelled) setReady(true)
@@ -96,13 +154,113 @@ function useHandwritingFonts(): boolean {
   return ready
 }
 
-/** Width of a sample in px, measured with its font (an estimate where the browser cannot measure). */
-function measurer(options: SheetOptions): (text: string) => number {
+/** How much room a sample takes, in px. */
+interface Ink {
+  /** From the leftmost to the rightmost ink. */
+  width: number
+  /** How far the ink starts left of the pen position (a cursive "M" begins with a lead-in stroke). */
+  lead: number
+}
+
+/**
+ * The ink of a sample, measured with its font (an estimate where the browser cannot measure). Cursive strokes reach
+ * past the letters' advance (the lead-in of "M", the horn of "ơ"), so the ink box is used, not the advance.
+ */
+function measurer(options: SheetOptions): (text: string) => Ink {
   const size = fontSize(options)
   const context = context2d()
-  if (!context) return (text) => text.length * size * 0.5
+  if (!context) return (text) => ({ width: text.length * size * 0.5, lead: 0 })
   context.font = `${size}px "${FONTS[options.style].family}"`
-  return (text) => context.measureText(text).width
+  return (text) => {
+    const m = context.measureText(text)
+    const lead = Math.max(0, m.actualBoundingBoxLeft || 0)
+    const right = Math.max(m.width, m.actualBoundingBoxRight || 0)
+    return { width: lead + right, lead }
+  }
+}
+
+/** How a sample is painted: dark or light letters, or a dashed outline. */
+type Paint = { fill: string } | { fill: 'none'; stroke: string; strokeWidth: number; strokeDasharray: string }
+
+/**
+ * A sample in cursive, each letter at the model's heights (`zoneScale`). The text is drawn whole, so the font keeps
+ * its joins between letters; then, letter by letter (clipped to its advance), the part above H is redrawn stretched
+ * or squeezed from the H line and the part below the baseline from the baseline. The body between the two lines is
+ * left as the font draws it, and the joins run there, so they stay unbroken. Print text is drawn as it is.
+ */
+function ModelText({ text, x, baseline, size, h, style, paint }: {
+  text: string
+  x: number
+  baseline: number
+  size: number
+  /** H in px. */
+  h: number
+  style: LetterStyle
+  paint: Paint
+}) {
+  const id = `mt${useId().replace(/[^a-zA-Z0-9]/g, '')}`
+  const context = context2d()
+  const chars = Array.from(text)
+  const scales: ZoneScale[] = style === 'cursive' ? chars.map((c) => zoneScale(c, glyphReach(style))) : []
+  const plain = <text x={x} y={baseline} {...paint}>{text}</text>
+  if (!context || scales.every((s) => s.up === 1 && s.down === 1 && s.uniform === 1)) return plain
+
+  context.font = `${size}px "${FONTS[style].family}"`
+  // Pen position of each letter, and of the end.
+  const xs = [x]
+  let prefix = ''
+  for (const c of chars) {
+    prefix += c
+    xs.push(x + context.measureText(prefix).width)
+  }
+  const yH = baseline - h
+  const top = baseline - 5 * h
+  const bottom = baseline + 3 * h
+  // Seams overlap a little, so no hairline shows between the layers.
+  const seam = 0.5
+  const layers = new Map<string, { transform?: string; rects: { x: number; y: number; w: number; h: number }[] }>()
+  const add = (key: string, transform: string | undefined, x1: number, y1: number, x2: number, y2: number) => {
+    const layer = layers.get(key) ?? { transform, rects: [] }
+    layer.rects.push({ x: x1, y: y1, w: x2 - x1, h: y2 - y1 })
+    layers.set(key, layer)
+  }
+  const about = (y: number, k: number) => `translate(0 ${y}) scale(1 ${k}) translate(0 ${-y})`
+  chars.forEach((_, i) => {
+    // The first and last letters' ranges reach past the ends: lead-in and exit strokes.
+    const x1 = i === 0 ? xs[0] - size : xs[i]
+    const x2 = i === chars.length - 1 ? xs[i + 1] + size : xs[i + 1]
+    const s = scales[i]
+    if (s.uniform !== 1) {
+      const k = s.uniform.toFixed(3)
+      add(`u${k}`, about(baseline, s.uniform), x1, top, x2, bottom)
+      return
+    }
+    add('mid', undefined, x1, yH - seam, x2, baseline + seam)
+    add(`a${s.up.toFixed(3)}`, s.up === 1 ? undefined : about(yH, s.up), x1, top, x2, yH + seam)
+    add(`d${s.down.toFixed(3)}`, s.down === 1 ? undefined : about(baseline, s.down), x1, baseline - seam, x2, bottom)
+  })
+
+  const entries = [...layers.entries()].map(([key, layer], n) => ({ key, layer, clip: `${id}-${n}` }))
+  return (
+    <g>
+      <defs>
+        {entries.map(({ key, layer, clip }) => (
+          <clipPath key={key} id={clip} clipPathUnits="userSpaceOnUse">
+            {layer.rects.map((r, i) => (
+              <rect key={i} x={r.x} y={r.y} width={r.w} height={r.h} />
+            ))}
+          </clipPath>
+        ))}
+      </defs>
+      {entries.map(({ key, layer, clip }) => (
+        <g key={key} clipPath={`url(#${clip})`}>
+          <text x={x} y={baseline} transform={layer.transform} {...paint}>
+            {text}
+          </text>
+        </g>
+      ))}
+    </g>
+  )
 }
 
 /**
@@ -120,7 +278,10 @@ export function HandwritingSheetPage() {
 
   const samples = parseSamples(text)
   const pages = useMemo(
-    () => layoutSheet(samples, options, measurer(options)),
+    () => {
+      const measure = measurer(options)
+      return layoutSheet(samples, options, (text) => measure(text).width)
+    },
     // The fonts change the widths once loaded.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [samples.join('\n'), options, fontsReady],
@@ -151,6 +312,7 @@ export function HandwritingSheetPage() {
               className="resize-y rounded-[12px] border-2 border-[#DCE5F5] px-3 py-2.5 font-[inherit] text-[15px] leading-relaxed text-ink outline-none focus:border-primary"
             />
           </label>
+          <PaperPicker value={options.paper} onChange={(paper) => set({ paper })} />
           <Choice
             label={t('utilities.handwriting.style')}
             value={options.style}
@@ -249,42 +411,52 @@ function SheetSvg({ page, first, options, samples }: { page: SheetPage; first: b
   const gap = li * 4
 
   const lines: ReactNode[] = []
-  for (let k = -RULE_ABOVE_LI; k <= rows * ROW_LI + RULE_BELOW_LI; k++) {
-    const y = top + k * li
-    const bold = isBoldLine(k)
-    lines.push(<line key={`h${k}`} x1={left} x2={left + width} y1={y} y2={y} stroke={bold ? rule.bold : rule.thin} strokeWidth={bold ? 1.1 : 0.6} />)
+  if (options.paper === 'guides') {
+    // The H zone of every row, shaded: where the body of every letter goes.
+    for (let r = 0; r < rows; r++) {
+      const base = top + (r * ROW_LI + BASELINE_LI) * li
+      lines.push(<rect key={`z${r}`} x={left} y={base - H_LI * li} width={width} height={H_LI * li} fill={rule.zone} />)
+    }
   }
-  for (let x = left; x <= left + width + 0.5; x += li * 4) {
-    lines.push(<line key={`v${x}`} x1={x} x2={x} y1={ruleTop} y2={ruleBottom} stroke={rule.bold} strokeWidth={0.6} />)
+  for (const { li: k, weight } of horizontalLines(options.paper, rows)) {
+    const y = top + k * li
+    const style =
+      weight === 'bold'
+        ? { stroke: rule.bold, strokeWidth: 1.1 }
+        : weight === 'guide'
+          ? { stroke: rule.bold, strokeWidth: 0.8, strokeDasharray: '4 3' }
+          : { stroke: rule.thin, strokeWidth: 0.6 }
+    lines.push(<line key={`h${k}`} x1={left} x2={left + width} y1={y} y2={y} {...style} />)
+  }
+  const every = COLUMN_LI[options.paper]
+  if (every > 0) {
+    for (let n = 0; left + n * every * li <= left + width + 0.5; n++) {
+      const x = left + n * every * li
+      // On small squares, the big squares' edges stay a little darker.
+      const edge = (n * every) % 4 === 0
+      lines.push(
+        <line key={`v${n}`} x1={x} x2={x} y1={ruleTop} y2={ruleBottom} stroke={edge ? rule.bold : rule.thin} strokeWidth={edge ? 0.6 : 0.5} />,
+      )
+    }
   }
   // The red margin, one big square in: the letters start after it.
   lines.push(<line key="margin" x1={left + gap} x2={left + gap} y1={ruleTop} y2={ruleBottom} stroke={MARGIN_RED} strokeWidth={1.2} />)
 
   const letters = page.rows.flatMap((row, r) => {
     const baseline = top + r * rowHeight(options.size) + BASELINE_LI * li
-    const w = measure(row.text)
-    const x0 = left + WRITING_START_LI * li
+    const ink = measure(row.text)
+    const w = ink.width
+    // The pen position, so the ink (lead-in stroke included) starts 1 li after the column line.
+    const x0 = left + WRITING_START_LI * li + ink.lead
     const out: ReactNode[] = []
-    if (row.sample) {
-      out.push(
-        <text key={`s${r}`} x={x0} y={baseline} fill="#1A2440">
-          {row.text}
-        </text>,
-      )
-    }
-    for (let i = 0; i < row.copies; i++) {
-      const x = x0 + (row.sample ? i + 1 : i) * (w + gap)
-      out.push(
-        <text
-          key={`c${r}-${i}`}
-          x={x}
-          y={baseline}
-          {...(options.dashed ? { fill: 'none', stroke: '#9AA3B5', strokeWidth: 1.1, strokeDasharray: '3 2.5' } : { fill: '#C3CAD8' })}
-        >
-          {row.text}
-        </text>,
-      )
-    }
+    const draw = (key: string, x: number, paint: Paint) => (
+      <ModelText key={key} text={row.text} x={x} baseline={baseline} size={size} h={H_LI * li} style={options.style} paint={paint} />
+    )
+    if (row.sample) out.push(draw(`s${r}`, x0, { fill: '#1A2440' }))
+    // Every copy starts a whole number of big squares after the previous one, the same place after a column line.
+    const stride = sampleStride(w, options.size)
+    const copy: Paint = options.dashed ? { fill: 'none', stroke: '#9AA3B5', strokeWidth: 1.1, strokeDasharray: '3 2.5' } : { fill: '#C3CAD8' }
+    for (let i = 0; i < row.copies; i++) out.push(draw(`c${r}-${i}`, x0 + (row.sample ? i + 1 : i) * stride, copy))
     return out
   })
 
@@ -320,6 +492,78 @@ function SheetSvg({ page, first, options, samples }: { page: SheetPage; first: b
       <text x={left + width} y={PAGE_HEIGHT - PAGE_MARGIN / 2} fontSize={11} fill="#9AA3B5" textAnchor="end" fontFamily="Nunito, sans-serif">
         {t('utilities.handwriting.footer')}
       </text>
+    </svg>
+  )
+}
+
+const PAPERS: PaperKind[] = ['oli', 'grid', 'guides', 'lined']
+
+/** "Mẫu giấy": the four papers, each with a small drawing of its ruling. */
+function PaperPicker({ value, onChange }: { value: PaperKind; onChange: (paper: PaperKind) => void }) {
+  const { t } = useTranslation()
+  const label = t('utilities.handwriting.paper')
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[13px] font-black text-[#5B6580]">{label}</span>
+      <div role="radiogroup" aria-label={label} className="grid grid-cols-2 gap-2">
+        {PAPERS.map((paper) => (
+          <button
+            key={paper}
+            type="button"
+            role="radio"
+            aria-checked={value === paper}
+            onClick={() => onChange(paper)}
+            className={`flex cursor-pointer items-center gap-2.5 rounded-[12px] border-2 bg-white p-2 text-left font-[inherit] ${
+              value === paper ? 'border-primary' : 'border-[#DCE5F5] hover:border-[#B9C7E4]'
+            }`}
+          >
+            <PaperThumb paper={paper} />
+            <span className="flex min-w-0 flex-col">
+              <span className="text-[13.5px] font-extrabold text-ink">{t(`utilities.handwriting.papers.${paper}`)}</span>
+              <span className="text-[11.5px] leading-tight text-ink-muted">{t(`utilities.handwriting.paperHints.${paper}`)}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** A 40 × 40 sample of a paper's ruling: two rows of 8 li, 2.5 px a li. */
+function PaperThumb({ paper }: { paper: PaperKind }) {
+  const li = 2.5
+  const rule = RULES.purple
+  const top = 0
+  const out: ReactNode[] = []
+  if (paper === 'guides') {
+    for (let r = 0; r < 2; r++) out.push(<rect key={`z${r}`} x={0} y={(r * ROW_LI + BASELINE_LI - H_LI) * li} width={40} height={H_LI * li} fill={rule.zone} />)
+  }
+  for (const { li: k, weight } of horizontalLines(paper, 2)) {
+    const y = top + k * li
+    if (y < 0 || y > 40) continue
+    out.push(
+      <line
+        key={`h${k}`}
+        x1={0}
+        x2={40}
+        y1={y}
+        y2={y}
+        stroke={weight === 'thin' ? rule.thin : rule.bold}
+        strokeWidth={weight === 'bold' ? 1 : 0.6}
+        strokeDasharray={weight === 'guide' ? '2 1.5' : undefined}
+      />,
+    )
+  }
+  const every = COLUMN_LI[paper]
+  if (every > 0) {
+    for (let x = 0; x <= 40; x += every * li) {
+      const edge = Math.round(x / li) % 4 === 0
+      out.push(<line key={`v${x}`} x1={x} x2={x} y1={0} y2={40} stroke={edge ? rule.bold : rule.thin} strokeWidth={0.5} />)
+    }
+  }
+  return (
+    <svg viewBox="0 0 40 40" width={40} height={40} aria-hidden className="shrink-0 rounded-[6px] border border-[#E6EBF4] bg-white">
+      {out}
     </svg>
   )
 }
