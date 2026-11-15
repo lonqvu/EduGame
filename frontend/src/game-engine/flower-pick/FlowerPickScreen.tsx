@@ -51,8 +51,8 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
       <div className="relative z-20 shrink-0">
         <ArtHeader
           backTo={backTo}
-          home={`${ART}/icon-home.webp`}
-          sound={`${ART}/icon-sound.webp`}
+          home={`${ART}/icon-home.svg`}
+          sound={`${ART}/icon-sound.svg`}
           title={game.title}
           right={
             <>
