@@ -83,7 +83,7 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
         <>
           <main className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-visible py-1">
             <div
-              className="relative h-full max-h-full w-full max-w-[920px] shrink min-w-0"
+              className="relative h-full max-h-full w-auto max-w-full shrink min-w-0"
               style={{ aspectRatio: TREE_ASPECT }}
             >
               <img
