@@ -15,7 +15,7 @@ import type { GameSummary, QuizQuestion } from '@/types/game'
 import { useSound } from '@/sound/useSound'
 
 const ART = '/assets/games/flower-pick'
-const FLOWER_ART = Array.from({ length: 10 }, (_, i) => `${ART}/flower-${String(i + 1).padStart(2, '0')}.webp`)
+const FLOWER_ART = `${ART}/flower.svg`
 const TREE_ASPECT = 646 / 346
 const CANOPY = { left: 0.1, top: 0.03, width: 0.8, height: 0.7 }
 const INK = '#2B2348'
@@ -60,7 +60,7 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
                 <Countdown key={`${round}-${state.current}`} seconds={rules.timeLimitSec} paused={state.revealed} />
               )}
               <span className="flex items-center gap-2 rounded-full border-[3px] border-[#F2B705] bg-[linear-gradient(#FFFBEA,#FFEDB0)] py-1 pr-5 pl-1.5 text-[19px] font-extrabold shadow-[0_3px_0_#D69A00]">
-                <img src={`${ART}/white-flower.webp`} alt="" aria-hidden="true" className="h-9 w-auto" />
+                <img src={`${ART}/flower.svg`} alt="" aria-hidden="true" className="h-9 w-auto" />
                 {i18n.t('play.flowers.picked', { picked, total: state.done.length })}
               </span>
             </>
@@ -87,7 +87,7 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
               style={{ aspectRatio: TREE_ASPECT }}
             >
               <img
-                src={`${ART}/tree-map.webp`}
+                src={`${ART}/tree-map.svg`}
                 alt=""
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 size-full object-contain"
@@ -112,7 +112,7 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
           <footer className="relative z-20 grid shrink-0 grid-cols-[150px_minmax(0,1fr)] items-end gap-4 pt-1">
             <div className="flex h-[142px] items-end justify-center overflow-hidden">
               <img
-                src={`${ART}/host-girl.webp`}
+                src={`${ART}/host-girl.svg`}
                 alt=""
                 aria-hidden="true"
                 className="h-full max-h-[142px] w-full object-contain object-bottom drop-shadow-[0_4px_3px_rgba(58,75,36,0.2)]"
@@ -159,7 +159,7 @@ function ResponsiveFlower({ index, x, y, onClick }: { index: number; x: number; 
 function Flower({ index }: { index: number }) {
   return (
     <span className="relative block">
-      <img src={FLOWER_ART[index % FLOWER_ART.length]} alt="" aria-hidden="true" className="block w-full" />
+      <img src={FLOWER_ART} alt="" aria-hidden="true" className="block w-full" />
       <span
         className="absolute top-[51%] left-1/2 flex size-[42%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[rgb(254,245,177)] font-display text-[clamp(10px,1.65vw,21px)] leading-none font-extrabold text-[#4A2A12]"
         aria-hidden="true"
@@ -173,11 +173,11 @@ function Flower({ index }: { index: number }) {
 function Scenery() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-      <img src={`${ART}/leaves.webp`} alt="" className="absolute top-[20%] left-2 w-[min(100px,8%)] opacity-90" />
-      <img src={`${ART}/purple-flower.webp`} alt="" className="absolute top-[45%] left-[2%] w-[min(90px,7%)] opacity-90" />
-      <img src={`${ART}/orange-flower.webp`} alt="" className="absolute top-[20%] right-4 w-[min(90px,7%)] opacity-90" />
-      <img src={`${ART}/bush.webp`} alt="" className="absolute right-2 bottom-[18%] w-[min(140px,11%)]" />
-      <img src={`${ART}/rocks.webp`} alt="" className="absolute right-[5%] bottom-[17%] w-[min(100px,8%)]" />
+      <img src={`${ART}/flower-pick-decor.svg`} alt="" className="absolute top-[20%] left-2 w-[min(100px,8%)] opacity-90" />
+      <img src={`${ART}/flower-pick-decor.svg`} alt="" className="absolute top-[45%] left-[2%] w-[min(90px,7%)] opacity-90" />
+      <img src={`${ART}/flower-pick-decor.svg`} alt="" className="absolute top-[20%] right-4 w-[min(90px,7%)] opacity-90" />
+      <img src={`${ART}/flower-pick-decor.svg`} alt="" className="absolute right-2 bottom-[18%] w-[min(140px,11%)]" />
+      <img src={`${ART}/flower-pick-decor.svg`} alt="" className="absolute right-[5%] bottom-[17%] w-[min(100px,8%)]" />
     </div>
   )
 }
