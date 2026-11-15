@@ -14,16 +14,12 @@ import { editPath } from '@/game-engine/registry'
 import type { GameSummary, QuizQuestion } from '@/types/game'
 import { useSound } from '@/sound/useSound'
 
-/** The game's art: a big tree on a meadow, flowers in five colours, the girl who hosts the game. */
 const ART = '/assets/games/flower-pick'
-/** Ten flowers (two of each colour, numbered 1–10 in the art: the number is written over it, for up to 20). */
 const FLOWER_ART = Array.from({ length: 10 }, (_, i) => `${ART}/flower-${String(i + 1).padStart(2, '0')}.webp`)
-/** tree-map.webp is 646 × 346; keep its native proportions at every screen size. */
 const TREE_ASPECT = 646 / 346
-/** Where the flowers hang: the canopy's box in the tree picture (fractions). */
 const CANOPY = { left: 0.1, top: 0.03, width: 0.8, height: 0.7 }
 const INK = '#2B2348'
-const SKY = 'bg-[linear-gradient(#8ED8F8_0%,#D2F1FF_54%,#B5E58A_63%,#7CC94A_80%,#5DAE34_100%)]'
+const SKY = 'bg-[linear-gradient(#83D5F7_0%,#D9F3FF_49%,#BDEB9A_62%,#83D15A_82%,#5BA83B_100%)]'
 const creamButton = `${playButtonClass} border-[3px] border-[#C9B79A] bg-[linear-gradient(#FFFFFF,#EDE3D2)] text-[#2B3A67] shadow-[0_4px_0_#B9A586] hover:brightness-105`
 
 interface FlowerPickScreenProps {
@@ -32,10 +28,6 @@ interface FlowerPickScreenProps {
   settings: Record<string, unknown>
 }
 
-/**
- * Projector of "Hái hoa dân chủ": a tree with one numbered flower per question. The tree uses the available
- * projector width and height instead of a fixed 890px box, so its branches, flowers and scenery stay in frame.
- */
 export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreenProps) {
   const rules = readPlaySettings(settings, PLAY_DEFAULTS.FLOWER_PICK)
   const { playable, layout: spots, round, state, dispatch, restart } = useTurnBoard(questions, rules, (dealt) => {
@@ -45,39 +37,39 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
   const sound = useSound()
   const backTo = editPath(game.id)
 
-  if (playable.length === 0) {
-    return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
-  }
+  if (playable.length === 0) return <NothingToPlay message={i18n.t('play.nothing.quiz')} backTo={backTo} />
   if (state.finished) return <TeamResults teams={state.teams} onPlayAgain={restart} />
 
   const picked = state.done.filter(Boolean).length
   const team = turnTeam(state)
 
   return (
-    <div className="relative isolate flex h-full min-h-0 flex-col gap-3 overflow-hidden px-7 py-4" style={{ color: INK }}>
-      <StageBackdrop band={SKY} above="#8ED8F8" below="#5DAE34" />
+    <div className="relative isolate flex h-full min-h-0 flex-col overflow-hidden px-6 py-3" style={{ color: INK }}>
+      <StageBackdrop band={SKY} above="#83D5F7" below="#5BA83B" />
       {state.current === null && <Scenery />}
 
-      <ArtHeader
-        backTo={backTo}
-        home={`${ART}/icon-home.webp`}
-        sound={`${ART}/icon-sound.webp`}
-        title={game.title}
-        right={
-          <>
-            {state.current !== null && rules.timeLimitSec > 0 && !state.revealed && (
-              <Countdown key={`${round}-${state.current}`} seconds={rules.timeLimitSec} paused={state.revealed} />
-            )}
-            <span className="flex items-center gap-2 rounded-full border-[3px] border-[#F2B705] bg-[linear-gradient(#FFFBEA,#FFEDB0)] py-1 pr-5 pl-1.5 text-[19px] font-extrabold shadow-[0_3px_0_#D69A00]">
-              <img src={`${ART}/white-flower.webp`} alt="" aria-hidden="true" className="h-9 w-auto" />
-              {i18n.t('play.flowers.picked', { picked, total: state.done.length })}
-            </span>
-          </>
-        }
-      />
+      <div className="relative z-20 shrink-0">
+        <ArtHeader
+          backTo={backTo}
+          home={`${ART}/icon-home.webp`}
+          sound={`${ART}/icon-sound.webp`}
+          title={game.title}
+          right={
+            <>
+              {state.current !== null && rules.timeLimitSec > 0 && !state.revealed && (
+                <Countdown key={`${round}-${state.current}`} seconds={rules.timeLimitSec} paused={state.revealed} />
+              )}
+              <span className="flex items-center gap-2 rounded-full border-[3px] border-[#F2B705] bg-[linear-gradient(#FFFBEA,#FFEDB0)] py-1 pr-5 pl-1.5 text-[19px] font-extrabold shadow-[0_3px_0_#D69A00]">
+                <img src={`${ART}/white-flower.webp`} alt="" aria-hidden="true" className="h-9 w-auto" />
+                {i18n.t('play.flowers.picked', { picked, total: state.done.length })}
+              </span>
+            </>
+          }
+        />
+      </div>
 
       {state.current !== null ? (
-        <div className="relative flex min-h-0 flex-1 flex-col gap-3 rounded-[28px] bg-white/70 p-5">
+        <div className="relative z-10 mt-3 flex min-h-0 flex-1 flex-col rounded-[28px] border-2 border-white/80 bg-white/75 p-5 shadow-[0_10px_30px_rgba(43,35,72,0.12)]">
           <TurnQuestion
             state={state}
             question={playable[state.current]}
@@ -89,12 +81,17 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
         </div>
       ) : (
         <>
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2">
+          <main className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-visible py-1">
             <div
-              className="relative min-h-0 w-full max-w-[890px] flex-1"
-              style={{ aspectRatio: TREE_ASPECT, maxHeight: '100%' }}
+              className="relative h-full max-h-full w-full max-w-[920px] shrink min-w-0"
+              style={{ aspectRatio: TREE_ASPECT }}
             >
-              <img src={`${ART}/tree-map.webp`} alt="" aria-hidden="true" className="absolute inset-0 size-full object-contain" />
+              <img
+                src={`${ART}/tree-map.webp`}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 size-full object-contain"
+              />
               {spots.map((spot, i) =>
                 state.done[i] ? null : (
                   <ResponsiveFlower
@@ -110,27 +107,37 @@ export function FlowerPickScreen({ game, questions, settings }: FlowerPickScreen
                 ),
               )}
             </div>
-          </div>
-          <div className="relative mt-auto flex shrink-0 flex-col gap-3 pl-[200px]">
-            <ArtTeamCards teams={state.teams} activeId={team.id} activeLabel={i18n.t('play.flowers.yourTurn')} />
-            <div className="flex items-center justify-between gap-4">
-              <span className="relative rounded-[20px] border-[3px] border-[#E8C98F] bg-[#FFF8E6] px-5 py-2 text-[19px] font-extrabold shadow-[0_3px_0_#D9B676]">
-                <span aria-hidden="true" className="absolute top-1/2 -left-[11px] size-4 -translate-y-1/2 rotate-45 border-b-[3px] border-l-[3px] border-[#E8C98F] bg-[#FFF8E6]" />
-                {i18n.t('play.flowers.choose', { team: team.name })}
-              </span>
-              <button type="button" onClick={() => dispatch({ type: 'finish' })} className={creamButton}>
-                {i18n.t('play.common.finish')}
-              </button>
+          </main>
+
+          <footer className="relative z-20 grid shrink-0 grid-cols-[150px_minmax(0,1fr)] items-end gap-4 pt-1">
+            <div className="flex h-[142px] items-end justify-center overflow-hidden">
+              <img
+                src={`${ART}/host-girl.webp`}
+                alt=""
+                aria-hidden="true"
+                className="h-full max-h-[142px] w-full object-contain object-bottom drop-shadow-[0_4px_3px_rgba(58,75,36,0.2)]"
+              />
             </div>
-          </div>
-          <img src={`${ART}/host-girl.webp`} alt="" aria-hidden="true" className="pointer-events-none absolute bottom-0 left-4 z-0 h-[min(200px,28%)] max-w-[16%] object-contain object-bottom" />
+            <div className="flex min-w-0 flex-col gap-2 pb-1">
+              <div className="rounded-[22px] border-2 border-white/80 bg-white/55 p-2 shadow-[0_5px_14px_rgba(43,35,72,0.1)]">
+                <ArtTeamCards teams={state.teams} activeId={team.id} activeLabel={i18n.t('play.flowers.yourTurn')} />
+              </div>
+              <div className="flex min-w-0 items-center justify-between gap-3">
+                <span className="relative min-w-0 truncate rounded-[18px] border-[3px] border-[#E8C98F] bg-[linear-gradient(#FFFDF5,#FFF2D4)] px-5 py-2 text-[18px] font-extrabold shadow-[0_3px_0_#D9B676]">
+                  {i18n.t('play.flowers.choose', { team: team.name })}
+                </span>
+                <button type="button" onClick={() => dispatch({ type: 'finish' })} className={creamButton}>
+                  {i18n.t('play.common.finish')}
+                </button>
+              </div>
+            </div>
+          </footer>
         </>
       )}
     </div>
   )
 }
 
-/** Flower size follows the actual rendered tree width; coordinates are percentages, not fixed canvas pixels. */
 function ResponsiveFlower({ index, x, y, onClick }: { index: number; x: number; y: number; onClick: () => void }) {
   return (
     <motion.button
@@ -149,7 +156,6 @@ function ResponsiveFlower({ index, x, y, onClick }: { index: number; x: number; 
   )
 }
 
-/** A flower of the art, by its place on the tree, its number written on its heart. */
 function Flower({ index }: { index: number }) {
   return (
     <span className="relative block">
@@ -164,15 +170,14 @@ function Flower({ index }: { index: number }) {
   )
 }
 
-/** Decorative plants stay behind the interactive content and scale/clip within the 1280×720 stage. */
 function Scenery() {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-      <img src={`${ART}/leaves.webp`} alt="" className="absolute top-[21%] left-3 w-[min(100px,8%)]" />
-      <img src={`${ART}/purple-flower.webp`} alt="" className="absolute top-[42%] left-[2.7%] w-[min(90px,7%)]" />
-      <img src={`${ART}/orange-flower.webp`} alt="" className="absolute top-[21%] right-5 w-[min(90px,7%)]" />
-      <img src={`${ART}/bush.webp`} alt="" className="absolute top-[43%] right-2 w-[min(140px,11%)]" />
-      <img src={`${ART}/rocks.webp`} alt="" className="absolute bottom-[18%] right-[5%] w-[min(100px,8%)]" />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      <img src={`${ART}/leaves.webp`} alt="" className="absolute top-[20%] left-2 w-[min(100px,8%)] opacity-90" />
+      <img src={`${ART}/purple-flower.webp`} alt="" className="absolute top-[45%] left-[2%] w-[min(90px,7%)] opacity-90" />
+      <img src={`${ART}/orange-flower.webp`} alt="" className="absolute top-[20%] right-4 w-[min(90px,7%)] opacity-90" />
+      <img src={`${ART}/bush.webp`} alt="" className="absolute right-2 bottom-[18%] w-[min(140px,11%)]" />
+      <img src={`${ART}/rocks.webp`} alt="" className="absolute right-[5%] bottom-[17%] w-[min(100px,8%)]" />
     </div>
   )
 }
