@@ -14,9 +14,12 @@ import {
   PAGE_MARGIN,
   PAGE_WIDTH,
   parseSamples,
-  COLUMN_LI,
+  columnLines,
   horizontalLines,
+  PAPER_KINDS,
+  PAPERS,
   type PaperKind,
+  type RuleColor,
   ROW_LI,
   RULE_ABOVE_LI,
   RULE_BELOW_LI,
@@ -48,7 +51,14 @@ const FONTS: Record<LetterStyle, { family: string; xHeight: number; ascent: numb
 }
 const FONTS_URL = 'https://fonts.googleapis.com/css2?family=Playwrite+VN&family=Patrick+Hand&display=swap'
 
-const RULES: Record<SheetOptions['color'], { thin: string; bold: string; zone: string }> = {  purple: { thin: '#DCCBF5', bold: '#9F7FDB', zone: '#F6F1FD' },  grey: { thin: '#E0E4EB', bold: '#98A1B2', zone: '#F3F5F8' },}
+/** Ruling colours, after the school papers: thin lines, bold lines. */
+const RULES: Record<RuleColor, { thin: string; bold: string }> = {
+  purple: { thin: '#DCCBF5', bold: '#9F7FDB' },
+  blue: { thin: '#B5DDE6', bold: '#2F7A8C' },
+  pink: { thin: '#E6C8F2', bold: '#D0607F' },
+  black: { thin: '#C9CDD5', bold: '#4A505C' },
+}
+const COLORS: RuleColor[] = ['purple', 'blue', 'pink', 'black']
 /** The red margin line of an exercise book. */
 const MARGIN_RED = '#E8858B'
 
@@ -312,7 +322,14 @@ export function HandwritingSheetPage() {
               className="resize-y rounded-[12px] border-2 border-[#DCE5F5] px-3 py-2.5 font-[inherit] text-[15px] leading-relaxed text-ink outline-none focus:border-primary"
             />
           </label>
-          <PaperPicker value={options.paper} onChange={(paper) => set({ paper })} />
+          <PaperPicker value={options.paper} color={options.color} onChange={(paper) => set({ paper })} />
+          <Choice
+            label={t('utilities.handwriting.color')}
+            value={options.color}
+            options={COLORS.map((color) => ({ value: color, label: t(`utilities.handwriting.colors.${color}`) }))}
+            onChange={(color) => set({ color })}
+          />
+          <Toggle label={t('utilities.handwriting.frame')} checked={options.frame} onChange={(frame) => set({ frame })} />
           <Choice
             label={t('utilities.handwriting.style')}
             value={options.style}
@@ -342,15 +359,6 @@ export function HandwritingSheetPage() {
             <Toggle label={t('utilities.handwriting.dashed')} checked={options.dashed} disabled={!options.trace} onChange={(dashed) => set({ dashed })} />
             <Toggle label={t('utilities.handwriting.nameLine')} checked={options.nameLine} onChange={(nameLine) => set({ nameLine })} />
           </div>
-          <Choice
-            label={t('utilities.handwriting.color')}
-            value={options.color}
-            options={[
-              { value: 'purple', label: t('utilities.handwriting.purple') },
-              { value: 'grey', label: t('utilities.handwriting.grey') },
-            ]}
-            onChange={(color) => set({ color })}
-          />
           <div className="flex gap-2">
             <button
               type="button"
@@ -410,39 +418,42 @@ function SheetSvg({ page, first, options, samples }: { page: SheetPage; first: b
   const measure = measurer(options)
   const gap = li * 4
 
-  const lines: ReactNode[] = []
-  if (options.paper === 'guides') {
-    // The H zone of every row, shaded: where the body of every letter goes.
-    for (let r = 0; r < rows; r++) {
-      const base = top + (r * ROW_LI + BASELINE_LI) * li
-      lines.push(<rect key={`z${r}`} x={left} y={base - H_LI * li} width={width} height={H_LI * li} fill={rule.zone} />)
-    }
-  }
-  for (const { li: k, weight } of horizontalLines(options.paper, rows)) {
+  const paper = PAPERS[options.paper]
+  const clipId = `area${useId().replace(/[^a-zA-Z0-9]/g, '')}`
+  // Thin lines dotted on the dotted paper.
+  const thin = { stroke: rule.thin, strokeWidth: paper.dotted ? 0.8 : 0.6, strokeDasharray: paper.dotted ? '1 1.6' : undefined }
+  const columns = columnLines(options.paper, width, ruleBottom - ruleTop, li).map(([xTop, xBottom, edge], n) => (
+    <line
+      key={`v${n}`}
+      x1={left + xTop}
+      x2={left + xBottom}
+      y1={ruleTop}
+      y2={ruleBottom}
+      {...(edge ? { stroke: rule.bold, strokeWidth: 0.7 } : thin)}
+    />
+  ))
+  const lines: ReactNode[] = [
+    // Slanted columns run past the area's sides; it clips them.
+    <clipPath key="clip" id={clipId}>
+      <rect x={left} y={ruleTop} width={width} height={ruleBottom - ruleTop} />
+    </clipPath>,
+    <g key="columns" clipPath={`url(#${clipId})`}>
+      {columns}
+    </g>,
+  ]
+  for (const { li: k, weight } of horizontalLines(rows)) {
     const y = top + k * li
-    const style =
-      weight === 'bold'
-        ? { stroke: rule.bold, strokeWidth: 1.1 }
-        : weight === 'guide'
-          ? { stroke: rule.bold, strokeWidth: 0.8, strokeDasharray: '4 3' }
-          : { stroke: rule.thin, strokeWidth: 0.6 }
-    lines.push(<line key={`h${k}`} x1={left} x2={left + width} y1={y} y2={y} {...style} />)
+    lines.push(<line key={`h${k}`} x1={left} x2={left + width} y1={y} y2={y} {...(weight === 'bold' ? { stroke: rule.bold, strokeWidth: 1.1 } : thin)} />)
   }
-  const every = COLUMN_LI[options.paper]
-  if (every > 0) {
-    for (let n = 0; left + n * every * li <= left + width + 0.5; n++) {
-      const x = left + n * every * li
-      // On small squares, the big squares' edges stay a little darker.
-      const edge = (n * every) % 4 === 0
-      lines.push(
-        <line key={`v${n}`} x1={x} x2={x} y1={ruleTop} y2={ruleBottom} stroke={edge ? rule.bold : rule.thin} strokeWidth={edge ? 0.6 : 0.5} />,
-      )
-    }
-  }
-  // The red margin, one big square in: the letters start after it.
-  lines.push(<line key="margin" x1={left + gap} x2={left + gap} y1={ruleTop} y2={ruleBottom} stroke={MARGIN_RED} strokeWidth={1.2} />)
+  // The area's sides, and the red margin one big square in: the letters start after it.
+  lines.push(
+    <rect key="edge" x={left} y={ruleTop} width={width} height={ruleBottom - ruleTop} fill="none" stroke={rule.bold} strokeWidth={0.8} />,
+    <line key="margin" x1={left + gap} x2={left + gap} y1={ruleTop} y2={ruleBottom} stroke={MARGIN_RED} strokeWidth={1.2} />,
+  )
+  // On slanted paper the letters lean with the columns, about their baseline.
+  const skew = paper.slant ? (baseline: number) => `translate(0 ${baseline}) skewX(${-paper.slant}) translate(0 ${-baseline})` : undefined
 
-  const letters = page.rows.flatMap((row, r) => {
+  const letters = page.rows.flatMap((row, r): ReactNode[] => {
     const baseline = top + r * rowHeight(options.size) + BASELINE_LI * li
     const ink = measure(row.text)
     const w = ink.width
@@ -457,7 +468,7 @@ function SheetSvg({ page, first, options, samples }: { page: SheetPage; first: b
     const stride = sampleStride(w, options.size)
     const copy: Paint = options.dashed ? { fill: 'none', stroke: '#9AA3B5', strokeWidth: 1.1, strokeDasharray: '3 2.5' } : { fill: '#C3CAD8' }
     for (let i = 0; i < row.copies; i++) out.push(draw(`c${r}-${i}`, x0 + (row.sample ? i + 1 : i) * stride, copy))
-    return out
+    return skew ? [<g key={`r${r}`} transform={skew(baseline)}>{out}</g>] : out
   })
 
   return (
@@ -468,6 +479,7 @@ function SheetSvg({ page, first, options, samples }: { page: SheetPage; first: b
       aria-label={t('utilities.handwriting.heading', { samples: samples.join(', ') })}
     >
       <rect width={PAGE_WIDTH} height={PAGE_HEIGHT} fill="#fff" />
+      {options.frame && <PageFrame color={rule.bold} />}
       {first && (
         <g fontFamily="Nunito, sans-serif" fill="#3D4766">
           {options.nameLine && (
@@ -496,17 +508,44 @@ function SheetSvg({ page, first, options, samples }: { page: SheetPage; first: b
   )
 }
 
-const PAPERS: PaperKind[] = ['oli', 'grid', 'guides', 'lined']
+/**
+ * A frame around the page, as on the decorated school papers: a double line with its corners cut in a quarter circle,
+ * and a small diamond in each corner.
+ */
+function PageFrame({ color }: { color: string }) {
+  const outline = (inset: number, r: number) => {
+    const [x0, y0, x1, y1] = [inset, inset, PAGE_WIDTH - inset, PAGE_HEIGHT - inset]
+    return (
+      `M${x0 + r} ${y0}H${x1 - r}A${r} ${r} 0 0 0 ${x1} ${y0 + r}V${y1 - r}A${r} ${r} 0 0 0 ${x1 - r} ${y1}` +
+      `H${x0 + r}A${r} ${r} 0 0 0 ${x0} ${y1 - r}V${y0 + r}A${r} ${r} 0 0 0 ${x0 + r} ${y0}Z`
+    )
+  }
+  const corners = [
+    [12, 12],
+    [PAGE_WIDTH - 12, 12],
+    [12, PAGE_HEIGHT - 12],
+    [PAGE_WIDTH - 12, PAGE_HEIGHT - 12],
+  ]
+  return (
+    <g fill="none" stroke={color}>
+      <path d={outline(12, 22)} strokeWidth={1.8} />
+      <path d={outline(18, 16)} strokeWidth={0.7} />
+      {corners.map(([x, y]) => (
+        <path key={`${x}-${y}`} d={`M${x} ${y - 5}L${x + 5} ${y}L${x} ${y + 5}L${x - 5} ${y}Z`} fill={color} stroke="none" />
+      ))}
+    </g>
+  )
+}
 
-/** "Mẫu giấy": the four papers, each with a small drawing of its ruling. */
-function PaperPicker({ value, onChange }: { value: PaperKind; onChange: (paper: PaperKind) => void }) {
+/** "Mẫu giấy": the papers, each with a small drawing of its ruling. */
+function PaperPicker({ value, color, onChange }: { value: PaperKind; color: RuleColor; onChange: (paper: PaperKind) => void }) {
   const { t } = useTranslation()
   const label = t('utilities.handwriting.paper')
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-[13px] font-black text-[#5B6580]">{label}</span>
       <div role="radiogroup" aria-label={label} className="grid grid-cols-2 gap-2">
-        {PAPERS.map((paper) => (
+        {PAPER_KINDS.map((paper) => (
           <button
             key={paper}
             type="button"
@@ -517,7 +556,7 @@ function PaperPicker({ value, onChange }: { value: PaperKind; onChange: (paper: 
               value === paper ? 'border-primary' : 'border-[#DCE5F5] hover:border-[#B9C7E4]'
             }`}
           >
-            <PaperThumb paper={paper} />
+            <PaperThumb paper={paper} color={color} />
             <span className="flex min-w-0 flex-col">
               <span className="text-[13.5px] font-extrabold text-ink">{t(`utilities.handwriting.papers.${paper}`)}</span>
               <span className="text-[11.5px] leading-tight text-ink-muted">{t(`utilities.handwriting.paperHints.${paper}`)}</span>
@@ -529,40 +568,23 @@ function PaperPicker({ value, onChange }: { value: PaperKind; onChange: (paper: 
   )
 }
 
-/** A 40 × 40 sample of a paper's ruling: two rows of 8 li, 2.5 px a li. */
-function PaperThumb({ paper }: { paper: PaperKind }) {
-  const li = 2.5
-  const rule = RULES.purple
-  const top = 0
+/** A 40 × 40 sample of a paper's ruling, 3 px a li, in the colour chosen. */
+function PaperThumb({ paper, color }: { paper: PaperKind; color: RuleColor }) {
+  const li = 3
+  const rule = RULES[color]
+  const { dotted } = PAPERS[paper]
+  const thin = { stroke: rule.thin, strokeWidth: dotted ? 0.8 : 0.5, strokeDasharray: dotted ? '0.6 1' : undefined }
   const out: ReactNode[] = []
-  if (paper === 'guides') {
-    for (let r = 0; r < 2; r++) out.push(<rect key={`z${r}`} x={0} y={(r * ROW_LI + BASELINE_LI - H_LI) * li} width={40} height={H_LI * li} fill={rule.zone} />)
+  for (let k = 0; k * li <= 40; k++) {
+    // Bold every 4 li, as on the page (a baseline every other bold line).
+    const bold = k % 4 === 1
+    out.push(<line key={`h${k}`} x1={0} x2={40} y1={k * li} y2={k * li} {...(bold ? { stroke: rule.bold, strokeWidth: 0.9 } : thin)} />)
   }
-  for (const { li: k, weight } of horizontalLines(paper, 2)) {
-    const y = top + k * li
-    if (y < 0 || y > 40) continue
-    out.push(
-      <line
-        key={`h${k}`}
-        x1={0}
-        x2={40}
-        y1={y}
-        y2={y}
-        stroke={weight === 'thin' ? rule.thin : rule.bold}
-        strokeWidth={weight === 'bold' ? 1 : 0.6}
-        strokeDasharray={weight === 'guide' ? '2 1.5' : undefined}
-      />,
-    )
-  }
-  const every = COLUMN_LI[paper]
-  if (every > 0) {
-    for (let x = 0; x <= 40; x += every * li) {
-      const edge = Math.round(x / li) % 4 === 0
-      out.push(<line key={`v${x}`} x1={x} x2={x} y1={0} y2={40} stroke={edge ? rule.bold : rule.thin} strokeWidth={0.5} />)
-    }
-  }
+  columnLines(paper, 40, 40, li).forEach(([xTop, xBottom, edge], n) =>
+    out.push(<line key={`v${n}`} x1={xTop} x2={xBottom} y1={0} y2={40} {...(edge ? { stroke: rule.bold, strokeWidth: 0.6 } : thin)} />),
+  )
   return (
-    <svg viewBox="0 0 40 40" width={40} height={40} aria-hidden className="shrink-0 rounded-[6px] border border-[#E6EBF4] bg-white">
+    <svg viewBox="0 0 40 40" width={40} height={40} aria-hidden className="shrink-0 overflow-hidden rounded-[6px] border border-[#E6EBF4] bg-white">
       {out}
     </svg>
   )

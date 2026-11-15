@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SpeakerIcon, SpeakerOffIcon } from '@/components/ui/icons'
 import { SoundToggleSlot } from '@/sound/soundContext'
@@ -7,9 +7,18 @@ import { useSettingsStore } from '@/store/settingsStore'
 
 /**
  * The speaker button of a projector screen: mutes and unmutes (also the M key), saved in "Cài đặt". Put in the header
- * next to "‹"; `className` gives its colors, e.g. "bg-white text-ink". Outside a projector stage it shows nothing.
+ * next to "‹"; `className` gives its colors, e.g. "bg-white text-ink". `icon` draws a game's own button art instead
+ * of the speaker, for sound on and off. Outside a projector stage it shows nothing.
  */
-export function SoundToggle({ className = 'bg-white text-ink hover:text-primary-ink', floating = false }: { className?: string; floating?: boolean }) {
+export function SoundToggle({
+  className = 'bg-white text-ink hover:text-primary-ink',
+  floating = false,
+  icon,
+}: {
+  className?: string
+  floating?: boolean
+  icon?: (enabled: boolean) => ReactNode
+}) {
   const { t } = useTranslation()
   const register = useContext(SoundToggleSlot)
   const enabled = useSettingsStore((s) => s.settings.sound.enabled)
@@ -33,7 +42,7 @@ export function SoundToggle({ className = 'bg-white text-ink hover:text-primary-
         floating ? 'absolute bottom-3 left-3 z-50 bg-white/80 text-ink shadow-md backdrop-blur hover:bg-white' : className
       }`}
     >
-      {enabled ? <SpeakerIcon size={22} /> : <SpeakerOffIcon size={22} />}
+      {icon ? icon(enabled) : enabled ? <SpeakerIcon size={22} /> : <SpeakerOffIcon size={22} />}
     </button>
   )
 }

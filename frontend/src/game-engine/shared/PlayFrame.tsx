@@ -36,17 +36,21 @@ export function PlayFrame({ title, progress, extra, backTo, children }: PlayFram
   )
 }
 
-/** "‹" of a game screen: back to the game's introduction, or to the editor where there is none. */
-export function GameBackButton({ backTo, className }: { backTo: string; className: string }) {
+/**
+ * "‹" of a game screen: back to the game's introduction, or to the editor where there is none. `icon` replaces the
+ * chevron (a game's own button art).
+ */
+export function GameBackButton({ backTo, className, icon }: { backTo: string; className: string; icon?: ReactNode }) {
   const leave = useLeaveGame()
   const look = `flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 ${className}`
+  const content = icon ?? <ChevronLeftIcon size={22} />
   return leave ? (
     <button type="button" onClick={leave} aria-label={i18n.t('play.common.backToIntro')} className={look}>
-      <ChevronLeftIcon size={22} />
+      {content}
     </button>
   ) : (
     <Link to={backTo} aria-label={i18n.t('play.common.backToEditor')} className={look}>
-      <ChevronLeftIcon size={22} />
+      {content}
     </Link>
   )
 }

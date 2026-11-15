@@ -16,11 +16,11 @@ import {
   RULE_BELOW_LI,
   sampleStride,
   zoneScale,
-  COLUMN_LI,
-  H_LI,
+  columnLines,
   horizontalLines,
+  PAPERS,
+  SLANT_DEG,
   type GlyphReach,
-  type PaperKind,
 } from '@/utils/handwriting'
 
 /** Every letter 20 px wide. */
@@ -42,31 +42,39 @@ describe('handwriting sheet', () => {
   })
 
   describe('papers', () => {
-    const at = (paper: PaperKind, weight: string) => horizontalLines(paper, 2).filter((l) => l.weight === weight).map((l) => l.li)
+    it('rules a line every li, bold on the baselines and every 4 li', () => {
+      const lines = horizontalLines(2)
+      expect(lines).toHaveLength(2 * ROW_LI + RULE_ABOVE_LI + RULE_BELOW_LI + 1)
+      const bold = lines.filter((l) => l.weight === 'bold').map((l) => l.li)
+      expect(bold).toEqual(expect.arrayContaining([BASELINE_LI, ROW_LI + BASELINE_LI]))
+      expect(bold.every((k, i) => i === 0 || k - bold[i - 1] === 4)).toBe(true)
+    })
 
-    it('vở 4 ô li and small squares: a line every li, bold on the baselines', () => {
-      for (const paper of ['oli', 'grid'] as const) {
-        const lines = horizontalLines(paper, 2)
-        expect(lines).toHaveLength(2 * ROW_LI + RULE_ABOVE_LI + RULE_BELOW_LI + 1)
-        expect(at(paper, 'bold')).toEqual(expect.arrayContaining([BASELINE_LI, ROW_LI + BASELINE_LI]))
+    it('standard and dotted: a column every li, bold every big square', () => {
+      for (const paper of ['standard', 'dotted'] as const) {
+        const cols = columnLines(paper, 40, 100, 5)
+        expect(cols.map(([top]) => top)).toEqual([0, 5, 10, 15, 20, 25, 30, 35, 40])
+        expect(cols.filter(([, , bold]) => bold).map(([top]) => top)).toEqual([0, 20, 40])
       }
-      expect(COLUMN_LI.oli).toBe(4)
-      expect(COLUMN_LI.grid).toBe(1)
+      expect(PAPERS.dotted.dotted).toBe(true)
     })
 
-    it('guide lines: the model zones of each row, 2.5H up and 1.5H down from the baseline', () => {
-      expect(at('guides', 'bold')).toEqual([BASELINE_LI, ROW_LI + BASELINE_LI])
-      expect(at('guides', 'guide')).toEqual([BASELINE_LI - H_LI, ROW_LI + BASELINE_LI - H_LI])
-      // Tall letters' top; the last row's tail line (1.5H down) closes the page.
-      expect(at('guides', 'thin')).toEqual([BASELINE_LI - 2.5 * H_LI, ROW_LI + BASELINE_LI - 2.5 * H_LI, ROW_LI + BASELINE_LI + 1.5 * H_LI])
-      expect(COLUMN_LI.guides).toBe(0)
-    })
-
-    it('lined: only the baselines', () => {
-      expect(horizontalLines('lined', 2)).toEqual([
-        { li: BASELINE_LI, weight: 'bold' },
-        { li: ROW_LI + BASELINE_LI, weight: 'bold' },
+    it('exercise book: columns only at the big squares', () => {
+      expect(columnLines('columns', 40, 100, 5)).toEqual([
+        [0, 0, true],
+        [20, 20, true],
+        [40, 40, true],
       ])
+    })
+
+    it('slanted: columns lean 15° right and cover the whole area', () => {
+      const height = 100
+      const shift = height * Math.tan((SLANT_DEG * Math.PI) / 180)
+      const cols = columnLines('slanted', 40, height, 5)
+      for (const [top, bottom] of cols) expect(top - bottom).toBeCloseTo(shift)
+      // The bottom left corner and the top right corner are both crossed.
+      expect(Math.min(...cols.map(([top]) => top))).toBeLessThanOrEqual(5)
+      expect(Math.max(...cols.map(([, bottom]) => bottom))).toBeGreaterThanOrEqual(35)
     })
   })
 

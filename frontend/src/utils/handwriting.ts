@@ -17,51 +17,76 @@ export type RowsPerSample = 1 | 2 | 3 | 'page'
 
 export type LetterStyle = 'cursive' | 'print'
 
-export type RuleColor = 'purple' | 'grey'
+/** The ruling colours of the usual school papers: purple, blue-green, pink-red, black. */
+export type RuleColor = 'purple' | 'blue' | 'pink' | 'black'
 
 /**
- * The paper the rows are ruled on (Quyết định 31 sets the letter model, not the paper; these are the usual school
- * papers):
- * - `oli`: vở 4 ô li, a line every li, a bold one every 4 li, a column line every big square (4 li);
- * - `grid`: the same with a column line every li too (small squares), for placing letters and their widths;
- * - `guides`: 4 lines a row, the letter model's zones: top of tall letters (2.5H), H, baseline, bottom of g, y (1.5H
- *   down), the H zone shaded;
- * - `lined`: only the baselines, for older pupils.
+ * The paper the rows are ruled on, after the "mẫu giấy 4 ô li" schools hand out (Quyết định 31 sets the letter model,
+ * not the paper). All of them have a line every li and a bold one every 4 li; they differ in their column lines:
+ * - `standard` (4 ô li chuẩn): a column line every li, a bold one every big square;
+ * - `columns` (4 ô li ngang): column lines only at the big squares, as in an exercise book;
+ * - `dotted` (4 ô li nét chấm): like `standard`, the thin lines dotted so the letters stand out;
+ * - `slanted` (4 ô li nghiêng): the column lines lean `SLANT_DEG` to the right, for slanted handwriting; the model
+ *   letters lean with them.
+ * The big and small papers ("4 ô li to", "4 ô li nhỏ") are the letter size.
  */
-export type PaperKind = 'oli' | 'grid' | 'guides' | 'lined'
+export type PaperKind = 'standard' | 'columns' | 'dotted' | 'slanted'
 
-/** A horizontal ruled line, `li` below the top of the first row. */
-export interface RuledLine {
-  li: number
-  /** bold: a baseline or a big square's edge; guide: the H line of `guides`. */
-  weight: 'bold' | 'thin' | 'guide'
+export const PAPER_KINDS: PaperKind[] = ['standard', 'columns', 'dotted', 'slanted']
+
+export interface PaperRuling {
+  /** Li between column lines. */
+  columnLi: number
+  /** Thin lines dotted. */
+  dotted: boolean
+  /** How far the column lines (and the letters) lean right, in degrees from upright. */
+  slant: number
 }
 
-/** The horizontal lines of a page of `rows` rows. */
-export function horizontalLines(paper: PaperKind, rows: number): RuledLine[] {
+/** The slant of slanted handwriting: 15° from upright. */
+export const SLANT_DEG = 15
+
+export const PAPERS: Record<PaperKind, PaperRuling> = {
+  standard: { columnLi: 1, dotted: false, slant: 0 },
+  columns: { columnLi: 4, dotted: false, slant: 0 },
+  dotted: { columnLi: 1, dotted: true, slant: 0 },
+  slanted: { columnLi: 1, dotted: false, slant: SLANT_DEG },
+}
+
+/** A horizontal ruled line, `li` below the top of the first row; bold: a baseline or a big square's edge. */
+export interface RuledLine {
+  li: number
+  weight: 'bold' | 'thin'
+}
+
+/** The horizontal lines of a page of `rows` rows: one every li, from a bold line above the first row to one below the last. */
+export function horizontalLines(rows: number): RuledLine[] {
   const lines: RuledLine[] = []
-  if (paper === 'oli' || paper === 'grid') {
-    for (let k = -RULE_ABOVE_LI; k <= rows * ROW_LI + RULE_BELOW_LI; k++) lines.push({ li: k, weight: isBoldLine(k) ? 'bold' : 'thin' })
-    return lines
-  }
-  for (let r = 0; r < rows; r++) {
-    const base = r * ROW_LI + BASELINE_LI
-    if (paper === 'lined') {
-      lines.push({ li: base, weight: 'bold' })
-      continue
-    }
-    // Top of tall letters and capitals (2.5H), H, the baseline; the bottom of g, y (1.5H down) is the next row's top.
-    lines.push({ li: base - 2.5 * H_LI, weight: 'thin' }, { li: base - H_LI, weight: 'guide' }, { li: base, weight: 'bold' })
-  }
-  if (paper === 'guides' && rows > 0) lines.push({ li: (rows - 1) * ROW_LI + BASELINE_LI + 1.5 * H_LI, weight: 'thin' })
+  for (let k = -RULE_ABOVE_LI; k <= rows * ROW_LI + RULE_BELOW_LI; k++) lines.push({ li: k, weight: isBoldLine(k) ? 'bold' : 'thin' })
   return lines
 }
 
-/** Li between column lines; 0: none (the red margin is always drawn). */
-export const COLUMN_LI: Record<PaperKind, number> = { oli: 4, grid: 1, guides: 0, lined: 0 }
+/**
+ * The column lines of a ruled area `width` × `height` px with li `li` px, as [x at the top, x at the bottom, bold]
+ * from its left edge: every `columnLi` li, leaning `slant` degrees; slanted ones start left of the area so that its
+ * bottom left corner is covered too (the page clips them to the area).
+ */
+export function columnLines(paper: PaperKind, width: number, height: number, li: number): [number, number, boolean][] {
+  const { columnLi, slant } = PAPERS[paper]
+  const shift = height * Math.tan((slant * Math.PI) / 180)
+  const step = columnLi * li
+  const out: [number, number, boolean][] = []
+  for (let n = shift > 0 ? -Math.ceil(shift / step) : 0; n * step <= width + 0.5; n++) {
+    const bottom = n * step
+    out.push([bottom + shift, bottom, (((n * columnLi) % 4) + 4) % 4 === 0])
+  }
+  return out
+}
 
 export interface SheetOptions {
   paper: PaperKind
+  /** A decorative frame around the page. */
+  frame: boolean
   size: LetterSize
   rowsPerSample: RowsPerSample
   /** Light copies to trace over after the sample. */
@@ -75,7 +100,8 @@ export interface SheetOptions {
 }
 
 export const DEFAULT_SHEET: SheetOptions = {
-  paper: 'oli',
+  paper: 'standard',
+  frame: false,
   size: 2,
   rowsPerSample: 2,
   trace: true,
