@@ -50,7 +50,7 @@ services:
       - caddy-config:/config
     networks:
       - default
-      # App ban hang (CuaHangKiemDien) cung VPS: Caddy nay chuyen nskiemdien.name.vn toi nskiemdien-web tren mang nay.
+      # App ban hang (CuaHangKiemDien) cung VPS: Caddy nay chuyen nskiemdien.io.vn toi nskiemdien-web tren mang nay.
       # Mang do app ban hang tao (docker-compose.vps.yml) -> app ban hang phai chay truoc khi deploy edugame.
       - nskiemdien-edge
     depends_on:
