@@ -29,3 +29,16 @@
 		file_server
 	}
 }
+
+# App ban hang Nhom Sat Kiem Dien (repo CuaHangKiemDien) chay cung VPS: Caddy nay giu cong 80/443 nen cap HTTPS ho.
+# nskiemdien-web = frontend cua app do, tren mang Docker nskiemdien-edge (xem deploy/docker-compose.prod.yml).
+nskiemdien.name.vn {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		-Server
+	}
+	reverse_proxy nskiemdien-web:80
+}
